@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+/src/Scratch Engine/.vs
+/src/Scratch Engine/Debug
+/src/Scratch Engine/Scratch Engine/Debug
