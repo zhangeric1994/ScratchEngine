@@ -15,15 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
-      <Filter>头文件</Filter>
-    </ClCompile>
     <ClCompile Include="Core\Game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\DXCore.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Game.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\DXCore.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

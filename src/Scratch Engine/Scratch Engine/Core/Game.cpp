@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(HINSTANCE hInstance)
+Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance,	name, 1280, 720, true)
 {
 }
 
@@ -8,17 +8,14 @@ Game::~Game()
 {
 }
 
-HRESULT Game::InitializeWindow()
+void Game::Init()
 {
-	return E_NOTIMPL;
 }
 
-HRESULT Game::InitializeDirectX()
+void Game::Update(float deltaTime, float totalTime)
 {
-	return E_NOTIMPL;
 }
 
-int Game::Run()
+void Game::Draw(float deltaTime, float totalTime)
 {
-	return 0;
 }

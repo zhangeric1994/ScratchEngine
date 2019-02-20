@@ -39,20 +39,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Create the Game object using
 	// the app handle we got from WinMain
-	Game game(hInstance);
+	Game game(hInstance, (char*) "DirectX Game");
 
 	// Result variable for function calls below
 	HRESULT hr = S_OK;
 
 	// Attempt to create the window for our program, and
 	// exit early if something failed
-	hr = game.InitializeWindow();
+	hr = game.InitWindow();
 	if (FAILED(hr))
 		return hr;
 
 	// Attempt to initialize DirectX, and exit
 	// early if something failed
-	hr = game.InitializeDirectX();
+	hr = game.InitDirectX();
 	if (FAILED(hr))
 		return hr;
 

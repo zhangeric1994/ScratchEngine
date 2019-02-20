@@ -1,18 +1,17 @@
 #pragma once
 
-#include <Windows.h>
+#include "DXCore.h"
 
-class Game
+class Game : public DXCore
 {
 private:
 	Game();
 
 public:
-	Game(HINSTANCE hInstance);
+	Game(HINSTANCE hInstance, char* name);
 	~Game();
 
-	HRESULT InitializeWindow();
-	HRESULT InitializeDirectX();
-
-	int Run();
+	void Init();
+	void Update(float deltaTime, float totalTime);
+	void Draw(float deltaTime, float totalTime);
 };
