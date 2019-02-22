@@ -39,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Create the Game object using
 	// the app handle we got from WinMain
-	Game game(hInstance, (char*) "DirectX Game");
+	Game game(hInstance, (char*) "Scratch Engine");
 
 	// Result variable for function calls below
 	HRESULT hr = S_OK;
