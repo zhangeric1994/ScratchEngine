@@ -122,6 +122,8 @@
   <ItemGroup>
     <ClInclude Include="Core\DXCore.h" />
     <ClInclude Include="Core\Game.h" />
+    <ClInclude Include="Message.h" />
+    <ClInclude Include="IMessageReceiver.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
