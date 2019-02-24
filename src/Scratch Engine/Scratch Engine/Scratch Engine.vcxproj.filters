@@ -8,6 +8,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Core\Memory">
+      <UniqueIdentifier>{79bddee6-d763-417b-9b14-612d8ba9ef25}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\DXCore.cpp">
@@ -19,6 +22,9 @@
     <ClCompile Include="Core\Game.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Memory\Pool.cpp">
+      <Filter>Core\Memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\DXCore.h">
@@ -26,6 +32,15 @@
     </ClInclude>
     <ClInclude Include="Core\Game.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory\Defs.h">
+      <Filter>Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory\Pool.h">
+      <Filter>Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory\Block.h">
+      <Filter>Core\Memory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
