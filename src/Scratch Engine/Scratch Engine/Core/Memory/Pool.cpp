@@ -153,7 +153,7 @@ void ScratchEngine::Memory::Pool::Add(Block * block)
 	/* Update the tail of the block */
 	*reinterpret_cast<Block**>(reinterpret_cast<uptr>(block) + block->size - __block_tail_size) = block;
 
-	AddToTree(root, block);
+	root = AddToTree(root, block);
 }
 
 void ScratchEngine::Memory::Pool::Remove(Block * block)

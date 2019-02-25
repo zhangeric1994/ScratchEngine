@@ -129,6 +129,7 @@
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\Memory\Block.h" />
     <ClInclude Include="Core\Memory\Pool.h" />
+    <ClInclude Include="Core\Memory\SimpleBlock.h" />
     <ClInclude Include="Core\Memory\SimplePool.h" />
     <ClInclude Include="Core\Typedefs.h" />
   </ItemGroup>

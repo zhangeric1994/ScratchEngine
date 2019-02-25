@@ -207,7 +207,7 @@ namespace ScratchEngine
 
 			tree->height = 1 + __max(__height(tree->left), __height(tree->right));
 
-			u32 balanceFactor = __balance_factor(tree);
+			i64 balanceFactor = __balance_factor(tree);
 
 			if (balanceFactor > 1 && __balance_factor(tree->left) >= 0)
 				return RightRotate(tree);

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <queue>
+
+#include "SimpleBlock.h"
 #include "../Typedefs.h"
 
 namespace ScratchEngine
@@ -9,15 +12,21 @@ namespace ScratchEngine
 		class SimplePool
 		{
 		private:
+			void* memory;
+
 			size_t size;
 			size_t objectSize;
 			size_t capcity;
 			size_t count;
 
-			void* memory;
+			SimpleBlock* freeList;
 
 		public:
 			SimplePool(size_t objectSize, size_t capacity);
+			~SimplePool();
+
+			void* Get();
+			void Recycle(void* object);
 		};
 	}
 }

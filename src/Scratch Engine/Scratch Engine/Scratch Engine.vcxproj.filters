@@ -48,5 +48,8 @@
     <ClInclude Include="Core\Memory\SimplePool.h">
       <Filter>Core\Memory</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Memory\SimpleBlock.h">
+      <Filter>Core\Memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

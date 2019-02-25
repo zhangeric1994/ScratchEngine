@@ -2,6 +2,7 @@
 #include "stdafx.h"
 
 #include "../../src/Scratch Engine/Scratch Engine/Core/Memory/Pool.cpp"
+#include "../../src/Scratch Engine/Scratch Engine/Core/Memory/SimplePool.cpp"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace ScratchEngine::Memory;
@@ -50,6 +51,28 @@ namespace ScratchEngineTest
 			Assert::AreEqual((size_t)0, pool.size);
 			Assert::AreEqual((u32)1, pool.numBlocks);
 			Assert::AreEqual((u32)0, pool.numAllocated);
+		}
+
+		TEST_METHOD(SpeedTest0)
+		{
+			for (int i = 0; i < 1000000; i++)
+				free(new Block());
+		}
+
+		TEST_METHOD(SpeedTest1)
+		{
+			Pool pool(1024);
+
+			for (int i = 0; i < 1000000; i++)
+				pool.Free(pool.Allocate(sizeof(Block)));
+		}
+
+		TEST_METHOD(SpeedTest2)
+		{
+			SimplePool pool(sizeof(Block), 1024);
+
+			for (int i = 0; i < 1000000; i++)
+				pool.Recycle(pool.Get());
 		}
 	};
 }
