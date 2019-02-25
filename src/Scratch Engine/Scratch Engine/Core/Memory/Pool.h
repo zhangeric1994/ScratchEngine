@@ -1,8 +1,9 @@
 #pragma once
 
-#include <stdlib.h> 
+#include <iostream>
+#include <stdlib.h>
 
-#include "Defs.h"
+#include "../Typedefs.h"
 #include "Block.h"
 
 using namespace std;
@@ -14,21 +15,26 @@ namespace ScratchEngine
 		struct Pool
 		{
 			void* memory;
-			u32 capacity;
+			size_t capacity;
 			size_t size;
 			u32 numBlocks;
 			u32 numAllocated;
 			Block* root;
 
+			Pool();
 			Pool(size_t size);
 			~Pool();
 
 			void* Allocate(size_t size);
 			void Free(void* p);
+
+			__forceinline void Add(Block* block);
+			__forceinline void Remove(Block* block);
+			
 		};
 
-#define __height(node) (node == nullptr ? 0 : node->height)
-#define __balance_factor(node) (node == nullptr ? 0 : __height(node->left) - __height(node->right))
+#define __height(node) (node ? node->height : 0)
+#define __balance_factor(node) (node ? (__height(node->left) - __height(node->right)) : 0)
 
 		__forceinline Block* RightRotate(Block* node)
 		{
@@ -36,16 +42,19 @@ namespace ScratchEngine
 			Block* rightNode = leftNode->right;
 
 			/* Rotate */
+
 			leftNode->right = node;
 			node->parent = leftNode;
 			node->left = rightNode;
 			rightNode->parent = node;
 
 			/* Update heights */
+
 			node->height = __max(__height(node->left), __height(node->right)) + 1;
 			leftNode->height = __max(__height(leftNode->left), __height(leftNode->right)) + 1;
 
 			/* Return the new tree root */
+
 			return leftNode;
 		}
 
@@ -55,27 +64,33 @@ namespace ScratchEngine
 			Block* leftNode = rightNode->left;
 
 			/* Rotate */
+
 			rightNode->left = node;
 			node->parent = rightNode;
 			node->right = leftNode;
 			leftNode->parent = node;
 
 			/* Update heights */
+
 			node->height = __max(__height(node->left), __height(node->right)) + 1;
 			rightNode->height = __max(__height(rightNode->left), __height(rightNode->right)) + 1;
 
 			/* Return the new tree root */
+
 			return rightNode;
 		}
 
 		Block* AddToTree(Block* tree, Block* node)
 		{
 			/* Perform the normal BST insertion */
+
 			if (!tree)
 			{
+				node->height = 1;
 				node->left = nullptr;
 				node->right = nullptr;
-				node->height = 1;
+				node->next = node;
+				node->previous = node;
 
 				return node;
 			}
@@ -85,7 +100,7 @@ namespace ScratchEngine
 			if (size < tree->size)
 			{
 				tree->left = AddToTree(tree->left, node);
-				tree->left->parent == tree;
+				tree->left->parent = tree;
 			}
 			else if (size > tree->size)
 			{
@@ -94,10 +109,10 @@ namespace ScratchEngine
 			}
 			else
 			{
+				node->height = 0;
 				node->parent = nullptr;
 				node->left = nullptr;
 				node->right = nullptr;
-				node->height = 0;
 
 				node->next = tree->next;
 				node->previous = tree;
@@ -109,11 +124,13 @@ namespace ScratchEngine
 			}
 
 			/* Update height */
+
 			tree->height = 1 + __max(__height(tree->left), __height(tree->right));
 
 			/* Rebalance the tree if needed */
-			u32 balanceFactor = __balance_factor(tree);
 
+			i64 balanceFactor = __balance_factor(tree);
+			
 			if (balanceFactor > 1 && size < tree->left->size)
 				return RightRotate(tree);
 
@@ -135,6 +152,7 @@ namespace ScratchEngine
 			}
 
 			/* Return the original tree if no rebalancing is performed */
+
 			return tree;
 		}
 
@@ -212,74 +230,6 @@ namespace ScratchEngine
 			}
 
 			return tree;
-		}
-
-		__forceinline void AddToPool(Pool* pool, Block* block)
-		{
-			/* Try to merge with the block right after */
-			Block* blockAfter = *reinterpret_cast<Block**>(reinterpret_cast<byte*>(block) + block->size);
-			if (blockAfter->status == FREED)
-			{
-				RemoveFromPool(pool, blockAfter);
-				block->size += blockAfter->size;
-			}
-
-			/* Try to merge with the block right before */
-			Block* blockBefore = *reinterpret_cast<Block**>(reinterpret_cast<byte*>(block) - sizeof(Block*));
-			if (block->status == FREED)
-			{
-				RemoveFromPool(pool, blockBefore);
-				blockBefore->size += block->size;
-				block = blockBefore;
-			}
-
-			/* Update the tail of the block */
-			*reinterpret_cast<Block**>(reinterpret_cast<byte*>(block) + block->size - sizeof(Block*)) = block;
-
-			AddToTree(pool->root, block);
-		}
-
-		__forceinline void RemoveFromPool(Pool* pool, Block* block)
-		{
-			Block* nextBlock = block->next;
-			Block* parentBlock = block->parent;
-
-			/* Adjust the tree if the block is a node */
-			if (parentBlock)
-			{
-				if (block->next != block) // The block can be substituted by another one so that the node need not to be removed from the tree
-				{
-					if (parentBlock != block) // The block is not the root of the tree
-					{
-						if (nextBlock->size < parentBlock->size)
-							parentBlock->left = nextBlock;
-						else
-							parentBlock->right = nextBlock;
-
-						nextBlock->parent = parentBlock;
-					}
-					else
-						pool->root = nextBlock;
-
-					nextBlock->left = block->left;
-					nextBlock->right = block->right;
-
-					if (block->left)
-						block->left->parent = nextBlock;
-					if (block->right)
-						block->right->parent = nextBlock;
-				}
-				else
-				{
-					pool->root = RemoveFromTree(pool->root, block);
-					if (pool->root)
-						pool->root->parent = pool->root;
-				}
-			}
-
-			/* Remove the block from its linked list */
-			nextBlock->previous = block->previous;
-			block->previous->next = nextBlock;
 		}
 	}
 }

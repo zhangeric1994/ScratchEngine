@@ -9,6 +9,3 @@
 
 // Headers for CppUnitTest
 #include "CppUnitTest.h"
-
-
-#include "../../src/Scratch Engine/Scratch Engine/Core/Memory/Pool.h"

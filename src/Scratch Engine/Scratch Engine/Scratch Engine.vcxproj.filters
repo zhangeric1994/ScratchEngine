@@ -25,6 +25,9 @@
     <ClCompile Include="Core\Memory\Pool.cpp">
       <Filter>Core\Memory</Filter>
     </ClCompile>
+    <ClCompile Include="Core\Memory\SimplePool.cpp">
+      <Filter>Core\Memory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\DXCore.h">
@@ -33,13 +36,16 @@
     <ClInclude Include="Core\Game.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Memory\Defs.h">
-      <Filter>Core\Memory</Filter>
+    <ClInclude Include="Core\Typedefs.h">
+      <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Memory\Pool.h">
       <Filter>Core\Memory</Filter>
     </ClInclude>
     <ClInclude Include="Core\Memory\Block.h">
+      <Filter>Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Memory\SimplePool.h">
       <Filter>Core\Memory</Filter>
     </ClInclude>
   </ItemGroup>

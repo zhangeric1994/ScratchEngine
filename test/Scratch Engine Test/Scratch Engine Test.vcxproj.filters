@@ -24,7 +24,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\Memory\PoolTest.cpp">
+    <ClCompile Include="PoolTest.cpp">
       <Filter>Core\Memory</Filter>
     </ClCompile>
   </ItemGroup>

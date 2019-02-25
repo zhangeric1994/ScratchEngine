@@ -121,14 +121,16 @@
     <ClCompile Include="Core\DXCore.cpp" />
     <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="Core\Memory\Pool.cpp" />
+    <ClCompile Include="Core\Memory\SimplePool.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\DXCore.h" />
     <ClInclude Include="Core\Game.h" />
-    <ClInclude Include="Core\Memory\Defs.h" />
     <ClInclude Include="Core\Memory\Block.h" />
     <ClInclude Include="Core\Memory\Pool.h" />
+    <ClInclude Include="Core\Memory\SimplePool.h" />
+    <ClInclude Include="Core\Typedefs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -34,8 +34,5 @@ namespace ScratchEngine
 		typedef const char* pcstr;
 
 		typedef void(*Callback)(void* pUserData);
-
-#define __data_offset (sizeof(BlockStatus) + sizeof(size_t))
-#define __min_block_size (sizeof(Block) + sizeof(Block*))
 	}
 }
