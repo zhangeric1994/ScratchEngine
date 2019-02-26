@@ -1,8 +1,8 @@
 #include "Physics.h"
-
+float dt = 0.01f;
 Physics::Physics(size_t _MaxColliderNum)
 {
-	ColliderHandler = new std::vector<const SphereCollider>;
+	ColliderHandler = new std::vector<Collider>;
 }
 
 Physics::~Physics()
@@ -10,7 +10,7 @@ Physics::~Physics()
 
 }
 
-void Physics::addCollider(const Collider obj)
+void Physics::addCollider(Collider obj)
 {
 	ColliderHandler->push_back(obj);
 }
@@ -19,11 +19,11 @@ void Physics::CollisionsDetection(int start, int end)
 {
 	for (int i = start; i < end; i++)
 	{
-		const Collider a = ColliderHandler->at(i);
+		Collider a = ColliderHandler->at(i);
 		for (int j = 0; j < ColliderHandler->size(); j++)
 		{
 			//calculate squared distance from centers
-			const Collider b = ColliderHandler->at(j);
+			Collider b = ColliderHandler->at(j);
 			float squared_distance = (a.Position.x - b.Position.x) * (a.Position.x - b.Position.x) +
 				(a.Position.y - b.Position.y) * (a.Position.y - b.Position.y) + (a.Position.z -b.Position.z) * (a.Position.z - b.Position.z);
 			//calculate the sum of the radii squared
@@ -33,37 +33,37 @@ void Physics::CollisionsDetection(int start, int end)
 				//calculate force
 				float force = pow(abs(squared_distance - radius_sum_squared) * 10.0f, 2.0f) * 10.0f;
 				//create normalized vectors to apply the forces in the correct direction
-				XMVECTOR f1 = XMVectorSet(Spheres[j].Position.x - Spheres[i].Position.x, Spheres[j].Position.y - Spheres[i].Position.y, Spheres[j].Position.z - Spheres[i].Position.z, 0.0f);
-				XMVECTOR f2 = XMVectorSet(Spheres[i].Position.x - Spheres[j].Position.x, Spheres[i].Position.y - Spheres[j].Position.y, Spheres[i].Position.z - Spheres[j].Position.z, 0.0f);
+				XMVECTOR f1 = XMVectorSet(b.Position.x - a.Position.x, b.Position.y - a.Position.y, b.Position.z - a.Position.z, 0.0f);
+				XMVECTOR f2 = XMVectorSet(a.Position.x - b.Position.x, a.Position.y - b.Position.y, a.Position.z - b.Position.z, 0.0f);
 				XMFLOAT3 force1;
 				XMFLOAT3 force2;
 				XMStoreFloat3(&force1, XMVector3Normalize(f1) * force);
 				XMStoreFloat3(&force1, XMVector3Normalize(f2) * force);
 
 				//apply the forces
-				Spheres[i].ApplyForce(force1, dt);
-				Spheres[j].ApplyForce(force2, dt);
+				a.ApplyForce(force1, dt);
+				b.ApplyForce(force2, dt);
 
 				float dampening_cooldown_time = 0.16f; //time between dampening updates
 				float dampening_constant = 0.9f;
 
 				//dampen the spheres' velocities
-				if (Spheres[i].dampen_time > dampening_cooldown_time)
+				if (a.dampen_time > dampening_cooldown_time)
 				{
-					Spheres[i].Velocity.x *= dampening_constant;
-					Spheres[i].Velocity.y *= dampening_constant;
-					Spheres[i].Velocity.z *= dampening_constant;
+					a.Velocity.x *= dampening_constant;
+					a.Velocity.y *= dampening_constant;
+					a.Velocity.z *= dampening_constant;
 
-					Spheres[i].dampen_time = 0.0f;
+					a.dampen_time = 0.0f;
 				}
 
-				if (Spheres[j].dampen_time > dampening_cooldown_time)
+				if (b.dampen_time > dampening_cooldown_time)
 				{
-					Spheres[j].Velocity.x *= dampening_constant;
-					Spheres[j].Velocity.y *= dampening_constant;
-					Spheres[j].Velocity.z *= dampening_constant;
-
-					Spheres[j].dampen_time = 0.0f;
+					b.Velocity.x *= dampening_constant;
+					b.Velocity.y *= dampening_constant;
+					b.Velocity.z *= dampening_constant;
+					
+					b.dampen_time = 0.0f;
 				}
 			}
 		}

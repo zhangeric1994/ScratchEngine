@@ -15,9 +15,9 @@ public:
 	~Physics();
 
 
-	void addCollider(Collider const obj);
+	void addCollider(Collider obj);
 	void CollisionsDetection(int start, int end);
 private:
 	size_t MaxColliderNum;
-	std::vector<Collider const>* ColliderHandler;
+	std::vector<Collider>* ColliderHandler;
 };

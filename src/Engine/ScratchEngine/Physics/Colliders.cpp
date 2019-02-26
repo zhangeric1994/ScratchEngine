@@ -9,3 +9,10 @@ SphereCollider::SphereCollider(XMFLOAT3 position, XMFLOAT4 color, float radius, 
 	// assign the collider
 	Physics::addCollider(this);
 }
+
+void Collider::ApplyForce(XMFLOAT3 force, float dt)
+{
+	Velocity.x += force.x / Mass * dt;
+	Velocity.y += force.y / Mass * dt;
+	Velocity.z += force.z / Mass * dt;
+}
