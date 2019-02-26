@@ -10,7 +10,7 @@ Physics::~Physics()
 
 }
 
-void Physics::addCollider(const SphereCollider obj)
+void Physics::addCollider(const Collider obj)
 {
 	ColliderHandler->push_back(obj);
 }
@@ -19,13 +19,15 @@ void Physics::CollisionsDetection(int start, int end)
 {
 	for (int i = start; i < end; i++)
 	{
+		const Collider a = ColliderHandler->at(i);
 		for (int j = 0; j < ColliderHandler->size(); j++)
 		{
 			//calculate squared distance from centers
-			float squared_distance = (Spheres[i].Position.x - Spheres[j].Position.x) * (Spheres[i].Position.x - Spheres[j].Position.x) +
-				(Spheres[i].Position.y - Spheres[j].Position.y) * (Spheres[i].Position.y - Spheres[j].Position.y) + (Spheres[i].Position.z - Spheres[j].Position.z) * (Spheres[i].Position.z - Spheres[j].Position.z);
+			const Collider b = ColliderHandler->at(j);
+			float squared_distance = (a.Position.x - b.Position.x) * (a.Position.x - b.Position.x) +
+				(a.Position.y - b.Position.y) * (a.Position.y - b.Position.y) + (a.Position.z -b.Position.z) * (a.Position.z - b.Position.z);
 			//calculate the sum of the radii squared
-			float radius_sum_squared = (Spheres[i].Radius + Spheres[j].Radius) * (Spheres[i].Radius + Spheres[j].Radius);
+			float radius_sum_squared = (a.Radius + b.Radius) * (a.Radius + b.Radius);
 			if (squared_distance < radius_sum_squared && i != j)
 			{
 				//calculate force

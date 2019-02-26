@@ -10,7 +10,6 @@ public:
 	void ApplyForce(XMFLOAT3 force, float dt);
 	XMFLOAT3 Position;
 	XMFLOAT3 Velocity;
-
 	float Mass;
 	float dampen_time;
 };
