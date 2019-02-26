@@ -33,7 +33,7 @@
     <ClInclude Include="IMessageReceiver.h">
       <Filter>Core\Message</Filter>
     </ClInclude>
-    <ClInclude Include="Message.h">
+    <ClInclude Include="Core\Message\Message.h">
       <Filter>Core\Message</Filter>
     </ClInclude>
   </ItemGroup>

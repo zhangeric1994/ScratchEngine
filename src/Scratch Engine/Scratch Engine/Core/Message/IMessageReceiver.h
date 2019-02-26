@@ -1,27 +1,15 @@
 #pragma once
 
+#include "Message.h"
+
 namespace ScratchEngine
 {
-	class IMessageReceiver
+	class __declspec(dllexport) IMessageReceiver
 	{
-	protected:
-		/// <summary> This function is called when the object is created </summary>
-		virtual void Initialize() {};
+	public:
+		void SendMessage(Message message);
 
-		/// <summary> This function is called once per frame </summary>
-		virtual void Update(float deltaTime, float totalTime) {};
-
-		/// <summary> This function is called when the object is destroyed </summary>
-		virtual void Clean() {};
-
-		virtual void HandleKeyDown(int keyCode) {};
-		virtual void HandleKeyUp(int keyCode) {};
-		virtual void HandleMouseDown() {};
-		virtual void HandleMouseUp() {};
-		virtual void HandleMouseScroll() {};
-
-		void SendMessage();
-
+	private:
 		virtual void GetParent() = 0;
 		virtual void GetChildren() = 0;
 	};
