@@ -2,8 +2,9 @@
 
 #include <queue>
 
-#include "SimpleBlock.h"
 #include "../Utility/Typedefs.h"
+
+#include "SimpleBlock.h"
 
 namespace ScratchEngine
 {

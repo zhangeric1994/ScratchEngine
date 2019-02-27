@@ -152,6 +152,8 @@
     <ClInclude Include="Memory\Pool.h" />
     <ClInclude Include="Memory\SimpleBlock.h" />
     <ClInclude Include="Memory\SimplePool.h" />
+    <ClInclude Include="Message\IMessageReceiver.h" />
+    <ClInclude Include="Message\Message.h" />
     <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utility\Typedefs.h" />
@@ -160,6 +162,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Memory\Pool.cpp" />
     <ClCompile Include="Memory\SimplePool.cpp" />
+    <ClCompile Include="Message\IMessageReceiver.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
