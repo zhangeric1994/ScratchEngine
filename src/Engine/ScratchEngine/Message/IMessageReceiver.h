@@ -1,8 +1,11 @@
 #pragma once
 
 #include <limits.h>
+#include <vector>
 
 #include "Message.h"
+
+using namespace std;
 
 namespace ScratchEngine
 {
@@ -17,6 +20,7 @@ namespace ScratchEngine
 
 	private:
 		virtual IMessageReceiver* GetParent() const = 0;
-		virtual IMessageReceiver* GetChildren() const = 0;
+		virtual void GetSiblings(vector<IMessageReceiver*>& out) const = 0;
+		virtual void GetChildren(vector<IMessageReceiver*>& out) const = 0;
 	};
 }
