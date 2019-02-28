@@ -42,6 +42,21 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_SCRATCHENGINEEDITOR));
 
+	char* name = (char*)"DX11 Game";
+	ScratchEngine::Render::Game game(hInstance, name);
+
+	HRESULT hr = S_OK;
+
+	// Attempt to create the window for our program, and
+	// exit early if something failed
+	hr = game.InitWindow();
+	if (FAILED(hr)) return hr;
+
+	// Attempt to initialize DirectX, and exit
+	// early if something failed
+	hr = game.InitDirectX();
+	if (FAILED(hr)) return hr;
+
     MSG msg;
 
     // Main message loop:
@@ -54,6 +69,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         }
     }
 
+	
+	return game.Run();
     return (int) msg.wParam;
 }
 
