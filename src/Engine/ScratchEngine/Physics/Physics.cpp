@@ -28,6 +28,7 @@ void Physics::CollisionsDetection(int start, int end)
 				(a.Position.y - b.Position.y) * (a.Position.y - b.Position.y) + (a.Position.z -b.Position.z) * (a.Position.z - b.Position.z);
 			//calculate the sum of the radii squared
 			float radius_sum_squared = (a.Radius + b.Radius) * (a.Radius + b.Radius);
+			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
 			if (squared_distance < radius_sum_squared && i != j)
 			{
 				//calculate force
@@ -41,8 +42,8 @@ void Physics::CollisionsDetection(int start, int end)
 				XMStoreFloat3(&force1, XMVector3Normalize(f2) * force);
 
 				//apply the forces
-				a.ApplyForce(force1, dt);
-				b.ApplyForce(force2, dt);
+				a.ApplyForce(force1);
+				b.ApplyForce(force2);
 
 				float dampening_cooldown_time = 0.16f; //time between dampening updates
 				float dampening_constant = 0.9f;

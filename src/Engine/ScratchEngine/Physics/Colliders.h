@@ -7,12 +7,14 @@ class Collider
 {
 public:
 	void Update(float dt);
-	void ApplyForce(XMFLOAT3 force, float dt);
+	void ApplyForce(XMFLOAT3 force);
+	void BoundPostionWithObj();
 	XMFLOAT3 Position;
 	XMFLOAT3 Velocity;
 	float Radius;
 	float Mass;
 	float dampen_time;
+	// should add game entity reference in here
 };
 
 

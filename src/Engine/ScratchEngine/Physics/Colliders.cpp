@@ -1,18 +1,23 @@
 #include "Colliders.h"
 #include "Physics.h"
 
-SphereCollider::SphereCollider(XMFLOAT3 position, XMFLOAT4 color, float radius, float mass)
+void Collider::Update(float dt)
 {
-	XMFLOAT3 topVertex(0.0f, +radius, 0.0f);
-	XMFLOAT3 bottomVertex(0.0f, -radius, 0.0f);
-
-	// assign the collider
-	Physics::addCollider(this);
+	if (Velocity.x * Velocity.y * Velocity.z != 0) {
+		Position.x += Velocity.x * dt;
+		Position.y += Velocity.y * dt;
+		Position.z += Velocity.z * dt;
+	}
 }
 
-void Collider::ApplyForce(XMFLOAT3 force, float dt)
+void Collider::ApplyForce(XMFLOAT3 force)
 {
-	Velocity.x += force.x / Mass * dt;
-	Velocity.y += force.y / Mass * dt;
-	Velocity.z += force.z / Mass * dt;
+	Velocity.x += force.x / Mass;
+	Velocity.y += force.y / Mass;
+	Velocity.z += force.z / Mass;
+}
+
+void Collider::BoundPostionWithObj()
+{
+	// gameEnenty.Position = Position
 }
