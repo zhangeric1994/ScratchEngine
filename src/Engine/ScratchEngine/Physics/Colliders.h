@@ -6,11 +6,13 @@ using namespace DirectX;
 class Collider 
 {
 public:
+	Collider(XMFLOAT3 position, float radius, float mass, bool _gravity);
 	void Update(float dt);
 	void ApplyForce(XMFLOAT3 force);
 	void BoundPostionWithObj();
 	XMFLOAT3 Position;
 	XMFLOAT3 Velocity;
+	bool UseGravity;
 	float Radius;
 	float Mass;
 	float dampen_time;
