@@ -1,4 +1,4 @@
-﻿#include "Render/Game.h"
+﻿#include "Game.h"
 
 using namespace DirectX;
 

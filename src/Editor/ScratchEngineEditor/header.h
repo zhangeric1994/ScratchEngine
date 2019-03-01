@@ -19,5 +19,4 @@
 
 // reference additional headers your program requires here
 #include "Physics/Physics.h"
-#include "Game.h"
-#include "DXCore.h"
+#include "Render/Game.h"
