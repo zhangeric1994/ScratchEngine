@@ -43,7 +43,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -171,12 +171,16 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DXCore.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScratchEngineEditor.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DXCore.cpp" />
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="ScratchEngineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
