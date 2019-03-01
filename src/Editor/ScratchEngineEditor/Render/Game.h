@@ -34,6 +34,8 @@ private:
 	void CreateMatrces();
 	void CreateBasicGeometry();
 
+	POINT prevMousePos;
+
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
 

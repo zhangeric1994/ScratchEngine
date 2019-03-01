@@ -31,12 +31,6 @@
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{64006520-6566-4737-aacb-6e557cc41184}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Render">
-      <UniqueIdentifier>{3d0826ca-d4f0-4738-b74b-274f8f1acafb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Render">
-      <UniqueIdentifier>{813b8dbf-e4ff-4d49-9ea7-711aecdddaba}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -63,12 +57,6 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DXCore.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Game.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,12 +76,6 @@
     </ClCompile>
     <ClCompile Include="Physics\Physics.cpp">
       <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\DXCore.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Game.cpp">
-      <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

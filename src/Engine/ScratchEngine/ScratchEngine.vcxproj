@@ -153,8 +153,6 @@
     <ClInclude Include="Memory\SimpleBlock.h" />
     <ClInclude Include="Memory\SimplePool.h" />
     <ClInclude Include="Physics\Physics.h" />
-    <ClInclude Include="Render\DXCore.h" />
-    <ClInclude Include="Render\Game.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utility\Typedefs.h" />
@@ -164,8 +162,6 @@
     <ClCompile Include="Memory\Pool.cpp" />
     <ClCompile Include="Memory\SimplePool.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
-    <ClCompile Include="Render\DXCore.cpp" />
-    <ClCompile Include="Render\Game.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
   <ItemGroup>

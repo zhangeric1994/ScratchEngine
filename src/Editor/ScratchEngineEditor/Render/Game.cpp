@@ -1,4 +1,5 @@
 ﻿#include "Game.h"
+#include <string>
 
 using namespace DirectX;
 
@@ -6,7 +7,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	vertexShader = 0;
 	pixelShader = 0;
 
-	mesh = NULL;
+	mesh = 0;
 
 	entityVector.resize(1);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
@@ -34,17 +35,85 @@ Game::~Game() {
 }
 
 void Game::Init() {
+	LoadShaders();
+	CreateMatrces();
+	CreateBasicGeometry();
+}
+
+void Game::LoadShaders() {
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	
+	std::string spath = std::string(buffer).substr(0, pos).c_str();
+	std::wstring wpath = std::wstring(spath.begin(), spath.end());
+	std::wstring wVertex = wpath + std::wstring(L"/VertexShader.cso");
+	std::wstring wPixel = wpath + std::wstring(L"/PixelShader.cso");
+	const wchar_t* vertex = wVertex.c_str();
+	const wchar_t* pixel = wPixel.c_str();
+
+	
+	vertexShader = new SimpleVertexShader(device, context);
+
+	vertexShader->LoadShaderFile(vertex);
+
+	pixelShader = new SimplePixelShader(device, context);
+	pixelShader->LoadShaderFile(pixel);
+}
+
+void Game::CreateMatrces() {
+	XMMATRIX W = XMMatrixIdentity();
+	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
+	
+	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
+	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
+	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
+	XMMATRIX V = XMMatrixLookToLH(
+		pos,     // The position of the "camera"
+		dir,     // Direction the camera is looking
+		up);     // "Up" direction in 3D space (prevents roll)
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V));
+
+	XMMATRIX projection = camera->UpdateProjection((float)width / height);
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); // Transpose for HLSL!
+}
+
+void Game::CreateBasicGeometry() {
+	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
+
+	char* filename = (char*)"../Assets/Models/cone.obj";
+	//char* filename = (char*)"D://GitRepo/scratch-engine/src/Editor/Assets/Models/cone.obj";
+
+	mesh = new Mesh(device, filename);
+
+	entityVector[0] = new Entity(mesh, simpleMaterial);
+
+
+	/*char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+	std::string path = std::string(buffer).substr(0, pos);*/
 
 }
 
-void Game::Update(float deltaTime, float totalTime) {
+void Game::OnResize() {
+	// Handle base-level DX resize stuff
+	DXCore::OnResize();
 
+	XMMATRIX projection = camera->UpdateProjection((float)width / height);
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); // Transpose for HLSL!
+}
+
+void Game::Update(float deltaTime, float totalTime) {
+	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
+
+	XMMATRIX view = camera->Update();
+	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 }
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.3f, 0.3f, 0.3f, 0.0f };
-
+	const float color[4] = { 0.6f, 0.6f, 0.6f, 0.6f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -56,15 +125,19 @@ void Game::Draw(float deltaTime, float totalTime) {
 		0);
 
 	//-------------------------------------
+	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
+		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
+		entityVector[countOfEntity]->CopyAllBufferData();
+		entityVector[countOfEntity]->SetShader();
 
-
-
-
-
-
+		//set vertex buffer and index buffer inside entity class
+		entityVector[countOfEntity]->Draw(context);
+	}
 
 
 	//-------------------------------------
+
+
 	//End of rendering one frame
 	swapChain->Present(0, 0);
 }
