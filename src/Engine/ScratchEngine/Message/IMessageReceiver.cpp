@@ -13,7 +13,9 @@ void ScratchEngine::IMessageReceiver::SendMessage(const Message & message) const
 
 void ScratchEngine::IMessageReceiver::SendMessageUp(const Message & message, u32 level) const
 {
-	if (level > 0)
+	if (level == 0)
+		SendMessage(message);
+	else
 	{
 		HandleMessage(message);
 
@@ -31,7 +33,9 @@ void ScratchEngine::IMessageReceiver::SendMessageUp(const Message & message, u32
 
 void ScratchEngine::IMessageReceiver::SendMessageDown(const Message & message, u32 level) const
 {
-	if (level > 0)
+	if (level == 0)
+		SendMessage(message);
+	else
 	{
 		HandleMessage(message);
 
