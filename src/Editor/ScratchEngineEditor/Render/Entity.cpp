@@ -62,11 +62,13 @@ void Entity::Draw(ID3D11DeviceContext* context) {
 
 	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 	context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	context->DrawIndexed(
 		mesh->GetIndexCount(),
 		0,    
 		0);  
+	
 }
 
 void Entity::PrepareMatrix(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix) {
