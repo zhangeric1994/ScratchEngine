@@ -172,6 +172,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="header.h" />
+    <ClInclude Include="LoadSceneFile.h" />
     <ClInclude Include="Render\Camera.h" />
     <ClInclude Include="Render\DXCore.h" />
     <ClInclude Include="Render\Entity.h" />

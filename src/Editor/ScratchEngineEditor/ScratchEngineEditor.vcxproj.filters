@@ -63,6 +63,9 @@
     <ClInclude Include="Render\Game.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="LoadSceneFile.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngineEditor.cpp">

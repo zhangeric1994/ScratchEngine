@@ -20,6 +20,10 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
 	directionalLight.Direction = XMFLOAT3(1, -1, 0);
+
+	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
+	pointLight.DiffuseColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	pointLight.Position = XMFLOAT3(0, 2.0f, -5.0f);
 }
 
 Game::~Game() {

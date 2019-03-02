@@ -53,6 +53,8 @@ private:
 
 	DirectionalLight directionalLight;
 
+	PointLight pointLight;
+
 
 
 };
