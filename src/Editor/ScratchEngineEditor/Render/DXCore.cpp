@@ -68,11 +68,13 @@ DXCore::DXCore(
 DXCore::~DXCore()
 {
 	// Release all DirectX resources
+	if (context) { context->ClearState(); }
+
 	if (depthStencilView) { depthStencilView->Release(); }
 	if (backBufferRTV) { backBufferRTV->Release();}
 
 	if (swapChain) { swapChain->Release();}
-	if (context) { context->Release();}
+	if (context) { context->Release(); }
 
 	//#if defined(DEBUG) || defined(_DEBUG)
 	ID3D11Debug *d3dDebug;
@@ -83,7 +85,7 @@ DXCore::~DXCore()
 	if (d3dDebug != nullptr)			d3dDebug->Release();
 	//#endif
 
-	if (device) { device->Release();}
+	if (device) { device->Release(); }
 }
 
 // --------------------------------------------------------

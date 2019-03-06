@@ -23,7 +23,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
 	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	pointLight.Position = XMFLOAT3(0, 0.0f, -1.0f);
+	pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
 }
 
 Game::~Game() {
@@ -79,25 +79,17 @@ void Game::CreateMatrces() {
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V));
 
 	XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); // Transpose for HLSL!
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); 
 }
 
 void Game::CreateBasicGeometry() {
 	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
 
-	char* filename = (char*)"../Assets/Models/cone.obj";
-	//char* filename = (char*)"D://GitRepo/scratch-engine/src/Editor/Assets/Models/cone.obj";
+	char* filename = (char*)"../Assets/Models/sphere.obj";
 
 	mesh = new Mesh(device, filename);
 
 	entityVector[0] = new Entity(mesh, simpleMaterial);
-
-
-	/*char buffer[MAX_PATH];
-	GetModuleFileName(NULL, buffer, MAX_PATH);
-	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-	std::string path = std::string(buffer).substr(0, pos);*/
-
 }
 
 void Game::OnResize() {
@@ -105,7 +97,7 @@ void Game::OnResize() {
 	DXCore::OnResize();
 
 	XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); // Transpose for HLSL!
+	XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); 
 }
 
 void Game::Update(float deltaTime, float totalTime) {
@@ -141,9 +133,7 @@ void Game::Draw(float deltaTime, float totalTime) {
 		entityVector[countOfEntity]->Draw(context);
 	}
 
-
 	//-------------------------------------
-
 
 	//End of rendering one frame
 	swapChain->Present(0, 0);

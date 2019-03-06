@@ -81,9 +81,5 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 	//return surfaceColor * lightColor1 + surfaceColor * lightColor2;
-	//return float4(1, 0, 0, 1);
-
 	return pointLightColor;
-	//return light.AmbientColor;
-	//return pointLightColor;
 }
