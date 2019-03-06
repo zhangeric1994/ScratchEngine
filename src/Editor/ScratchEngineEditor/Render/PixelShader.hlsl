@@ -41,6 +41,7 @@ struct VertexToPixel
 	//  v    v                v
 	float4 position		: SV_POSITION;
 	float3 normal		: NORMAL;
+	float3 worldPos		: POSITION;
 	float2 uv			: TEXCOORD;
 };
 
@@ -51,9 +52,7 @@ float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
 	return finalColor;
 }
 
-float4 calculatePointLight(float3 normal,float4 position4, PointLight pointLight) {
-	//float3 position = float3(position4.x, position4.y, position4.z);
-
+float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
 	float3 nDirection = -normalize(position - pointLight.Position);
 	float NdotL = saturate(dot(normal, nDirection));
 	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
@@ -73,7 +72,7 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	/*float4 lightColor1 = calculateDirectionalLight(input.normal, light);
 	float4 lightColor2 = calculateDirectionalLight(input.normal, light2);*/
 
-	float4 pointLightColor = calculatePointLight(input.normal, input.position, pointLight);
+	float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
 	//float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
