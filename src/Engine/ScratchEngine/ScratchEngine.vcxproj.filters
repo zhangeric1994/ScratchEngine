@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Message">
       <UniqueIdentifier>{e4af0cac-be35-440d-b887-ed20070d9575}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Event">
+      <UniqueIdentifier>{d95959f3-3b99-483c-81ea-94100eb1c314}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Event">
+      <UniqueIdentifier>{7d478929-36ff-41e1-983a-b88ad5259d20}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -68,6 +74,9 @@
     </ClInclude>
     <ClInclude Include="Message\Message.h">
       <Filter>Header Files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="Event\Event.h">
+      <Filter>Header Files\Event</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

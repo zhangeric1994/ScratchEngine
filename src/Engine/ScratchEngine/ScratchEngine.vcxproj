@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Event\Event.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Memory\Block.h" />
     <ClInclude Include="Memory\Pool.h" />
