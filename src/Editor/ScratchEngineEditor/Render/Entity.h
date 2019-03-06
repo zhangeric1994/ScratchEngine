@@ -22,7 +22,8 @@ public:
 	void PrepareMatrix(XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 	void CopyAllBufferData();
 	void SetShader();
-	void SetLight(DirectionalLight directionalLight, char* bufferName);
+	void SetLight(DirectionalLight directionalLight, std::string bufferName);
+	void SetPointLight(PointLight pLight, const char* bufferName);
 	void SetTexture(char* textureName, char* samplerName);
 
 	bool isUpdated();

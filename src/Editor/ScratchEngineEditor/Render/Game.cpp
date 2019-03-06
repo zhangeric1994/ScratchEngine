@@ -22,8 +22,8 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	directionalLight.Direction = XMFLOAT3(1, -1, 0);
 
 	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	pointLight.DiffuseColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	pointLight.Position = XMFLOAT3(0, 2.0f, -5.0f);
+	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
+	pointLight.Position = XMFLOAT3(0, 0.0f, -1.0f);
 }
 
 Game::~Game() {
@@ -129,8 +129,11 @@ void Game::Draw(float deltaTime, float totalTime) {
 		0);
 
 	//-------------------------------------
+
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
+		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		entityVector[countOfEntity]->SetLight(directionalLight, "light");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
 

@@ -88,8 +88,12 @@ void Entity::SetShader() {
 	material->getPixelShader()->SetShader();
 }
 
-void Entity::SetLight(DirectionalLight directionalLight, char* bufferName) {
+void Entity::SetLight(DirectionalLight directionalLight, std::string bufferName) {
 	material->getPixelShader()->SetData(bufferName, &directionalLight, sizeof(DirectionalLight));
+}
+
+void Entity::SetPointLight(PointLight pLight, const char* bufferName) {
+	material->getPixelShader()->SetData(bufferName, &pLight, sizeof(pLight));
 }
 
 void Entity::SetTexture(char* textureName, char* samplerName) {

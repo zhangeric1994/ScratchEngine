@@ -11,18 +11,18 @@ struct PointLight {
 	float3 Position;
 };
 
-cbuffer pointLightData : register(b0) {
+cbuffer colorData : register(b0) {
+	DirectionalLight light;
+};
+
+cbuffer colorData2 : register(b1) {
+	DirectionalLight light2;
+}
+
+cbuffer pointLightData : register(b2) {
 	PointLight pointLight;
 }
 
-//cbuffer colorData : register(b0) {
-//	DirectionalLight light;
-//};
-//
-//cbuffer colorData2 : register(b1) {
-//	DirectionalLight light2;
-//}
-//
 //Texture2D diffuseTexture : register(t0);
 //
 //SamplerState basicSampler : register(s0);
@@ -47,7 +47,7 @@ struct VertexToPixel
 
 float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
 	float3 nDirection = -normalize(light.Direction);
-	float NdotL = saturate(dot(normal, nDirection));
+	float  NdotL = saturate(dot(normal, nDirection));
 	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
 	return finalColor;
 }
@@ -69,8 +69,8 @@ float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET{
-	/*float4 lightColor1 = calculateDirectionalLight(input.normal, light);
-	float4 lightColor2 = calculateDirectionalLight(input.normal, light2);*/
+	float4 lightColor1 = calculateDirectionalLight(input.normal, light);
+	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 
 	float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
@@ -81,5 +81,9 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 	//return surfaceColor * lightColor1 + surfaceColor * lightColor2;
+	//return float4(1, 0, 0, 1);
+
 	return pointLightColor;
+	//return light.AmbientColor;
+	//return pointLightColor;
 }
