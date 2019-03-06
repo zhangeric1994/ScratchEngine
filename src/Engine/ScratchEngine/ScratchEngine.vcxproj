@@ -155,6 +155,9 @@
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
     <ClInclude Include="Physics\Physics.h" />
+    <ClInclude Include="Scene\Component.h" />
+    <ClInclude Include="Scene\GameObject.h" />
+    <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utility\Typedefs.h" />
   </ItemGroup>
@@ -164,6 +167,8 @@
     <ClCompile Include="Memory\SimplePool.cpp" />
     <ClCompile Include="Message\IMessageReceiver.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
+    <ClCompile Include="Scene\GameObject.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

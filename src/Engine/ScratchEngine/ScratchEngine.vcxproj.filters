@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Message">
       <UniqueIdentifier>{e4af0cac-be35-440d-b887-ed20070d9575}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Scene">
+      <UniqueIdentifier>{27be1762-fee6-409e-8eea-192a13baa76b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scene">
+      <UniqueIdentifier>{6cc4f91c-5a88-40f1-b2c8-327e4032b1e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -69,6 +75,15 @@
     <ClInclude Include="Message\Message.h">
       <Filter>Header Files\Message</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\GameObject.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Scene.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Component.h">
+      <Filter>Header Files\Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -88,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="Message\IMessageReceiver.cpp">
       <Filter>Source Files\Message</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\GameObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Scene.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
