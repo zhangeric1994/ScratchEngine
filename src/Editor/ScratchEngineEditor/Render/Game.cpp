@@ -27,9 +27,8 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 }
 
 Game::~Game() {
-	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-		delete entityVector[countOfEntity];
-	}
+
+	for (auto& m : entityVector) delete m;
 
 	delete vertexShader;
 	delete pixelShader;
