@@ -22,11 +22,11 @@ namespace ScratchEngine
 	typedef float f32;
 	typedef double f64;
 
-	typedef u32 Bool;     // Defines: True and False
+	typedef u32 Bool;		// Defines: True and False
 	typedef void* Handle;
 	typedef u32 Error;
 
-	typedef u32 Id;      // Local id, GUIDs are too slow and unnecessary for our purposes.
+	typedef u32 Id;			// Local id, GUIDs are too slow and unnecessary for our purposes.
 
 	typedef char* pstr;
 	typedef const char* pcstr;

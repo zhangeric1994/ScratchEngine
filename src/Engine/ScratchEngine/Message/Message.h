@@ -19,13 +19,8 @@ namespace ScratchEngine
 		MESSAGE_COLLISION_EXIT = 0x44,
 	};
 
-	class MessageData
-	{
-	};
-
 	struct Message
 	{
 		MessageType type;
-		MessageData* data;
 	};
 }
