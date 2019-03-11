@@ -22,6 +22,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{8fe3aa8f-86ef-4296-b4e7-e08eb00e7aba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Physics">
+      <UniqueIdentifier>{cae9350b-d563-4f61-8b9e-c2f9c713949c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Physics">
+      <UniqueIdentifier>{2b101ac2-277a-473e-870f-3f9bb0d6b70b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -37,9 +43,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Camera.h">
-      <Filter>Header Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Entity.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
     <ClInclude Include="Render\Lights.h">
@@ -66,6 +69,15 @@
     <ClInclude Include="LoadSceneFile.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Entity.h">
+      <Filter>Header Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Colliders.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Physics.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngineEditor.cpp">
@@ -91,6 +103,12 @@
     </ClCompile>
     <ClCompile Include="Render\SimpleShader.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Colliders.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Physics.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

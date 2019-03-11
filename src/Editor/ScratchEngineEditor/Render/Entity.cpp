@@ -30,19 +30,21 @@ void Entity::SetScale(float _x, float _y, float _z) {
 }
 
 void Entity::SetWorldMatrix() {
-	//translation
-	XMMATRIX translationMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&individualPositon));
+	if (isChanged) {
+		//translation
+		XMMATRIX translationMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&individualPositon));
 
-	//rotation
-	XMVECTOR rotationQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&quaternion));
-	XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotationQuaternion);
+		//rotation
+		XMVECTOR rotationQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&quaternion));
+		XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotationQuaternion);
 
-	//scale
-	XMMATRIX scaleMatrix = XMMatrixScalingFromVector(XMLoadFloat3(&scaleVector));
+		//scale
+		XMMATRIX scaleMatrix = XMMatrixScalingFromVector(XMLoadFloat3(&scaleVector));
 
-	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(scaleMatrix * rotationMatrix * translationMatrix));
+		XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(scaleMatrix * rotationMatrix * translationMatrix));
 
-	isChanged = false;
+		isChanged = false;
+	}
 }
 
 XMFLOAT4X4 Entity::GetWorldMatrix() {

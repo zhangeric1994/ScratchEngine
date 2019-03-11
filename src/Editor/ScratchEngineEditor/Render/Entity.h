@@ -28,7 +28,6 @@ public:
 
 	bool isUpdated();
 
-private:
 	XMFLOAT4X4 worldMatrix;
 
 	XMFLOAT3 individualPositon;
@@ -39,5 +38,6 @@ private:
 
 	Material* material;
 
+private:
 	bool isChanged;
 };

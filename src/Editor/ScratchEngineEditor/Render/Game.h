@@ -10,6 +10,7 @@
 #include "Material.h"
 #include "Lights.h"
 #include "Vertex.h"
+#include "Physics.h"
 
 class Game
 	: public DXCore
@@ -44,6 +45,8 @@ private:
 	XMFLOAT4X4 projectionMatrix;
 
 	Mesh* mesh;
+
+	Physics* physics;
 
 	std::vector<Entity*> entityVector;
 

@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include <DirectXMath.h>
 #include <stdio.h>
@@ -15,9 +14,10 @@ public:
 	~Physics();
 
 
-	void addCollider(Collider obj);
-	void CollisionsDetection(int start, int end);
+	int NumCoolidersHandled;
+	Collider* addCollider(Entity* obj, float _radius, float _mass, bool _gravity, bool _static);
+	void CollisionsDetection(int start, int end, float deltaTime);
 private:
 	size_t MaxColliderNum;
-	std::vector<Collider>* ColliderHandler;
+	std::vector<Collider*>* ColliderHandler;
 };

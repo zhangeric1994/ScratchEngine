@@ -110,7 +110,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\scratch-engine\src\Editor\ScratchEngineEditor\Physics;E:\scratch-engine\src\Editor\ScratchEngineEditor\Render;..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -173,6 +173,8 @@
   <ItemGroup>
     <ClInclude Include="header.h" />
     <ClInclude Include="LoadSceneFile.h" />
+    <ClInclude Include="Physics\Colliders.h" />
+    <ClInclude Include="Physics\Physics.h" />
     <ClInclude Include="Render\Camera.h" />
     <ClInclude Include="Render\DXCore.h" />
     <ClInclude Include="Render\Entity.h" />
@@ -187,6 +189,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Physics\Colliders.cpp" />
+    <ClCompile Include="Physics\Physics.cpp" />
     <ClCompile Include="Render\Camera.cpp" />
     <ClCompile Include="Render\DXCore.cpp" />
     <ClCompile Include="Render\Entity.cpp" />

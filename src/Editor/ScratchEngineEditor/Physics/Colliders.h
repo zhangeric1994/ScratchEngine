@@ -1,21 +1,21 @@
 #pragma once
-
 #include <DirectXMath.h>
-
+#include "Entity.h"
 using namespace DirectX;
 class Collider 
 {
 public:
-	Collider(XMFLOAT3 position, float radius, float mass, bool _gravity);
+	Collider(Entity* _item,float _radius, float _mass, bool _gravity,bool _static);
 	void Update(float dt);
 	void ApplyForce(XMFLOAT3 force);
-	void BoundPostionWithObj();
+	Entity* Item;
 	XMFLOAT3 Position;
 	XMFLOAT3 Velocity;
 	bool UseGravity;
+	bool Static;
 	float Radius;
 	float Mass;
-	float dampen_time;
+	float DampenTime;
 	// should add game entity reference in here
 };
 

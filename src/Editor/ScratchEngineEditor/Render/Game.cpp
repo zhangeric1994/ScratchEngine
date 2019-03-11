@@ -9,12 +9,12 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	mesh = 0;
 
-	entityVector.resize(1);
+	entityVector.resize(2);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
 	camera = new Camera();
-
+	physics = new Physics(200);
 	simpleMaterial = NULL;
 
 	directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
@@ -83,12 +83,18 @@ void Game::CreateMatrces() {
 
 void Game::CreateBasicGeometry() {
 	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
-
 	char* filename = (char*)"../Assets/Models/sphere.obj";
-
 	mesh = new Mesh(device, filename);
-
-	entityVector[0] = new Entity(mesh, simpleMaterial);
+	Entity* temp = new Entity(mesh, simpleMaterial);
+	Entity* temp1 = new Entity(mesh, simpleMaterial);
+	entityVector[0] = temp;
+	entityVector[1] = temp1;
+	temp->SetTranslation(-2, 0, 0);
+	temp1->SetTranslation(2, 0, 0);
+	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
+	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
+	collider->ApplyForce({ 0.9,0,0 });
+	collider1->ApplyForce({ -0.9,0,0 });
 }
 
 void Game::OnResize() {
@@ -103,6 +109,7 @@ void Game::Update(float deltaTime, float totalTime) {
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 	XMMATRIX view = camera->Update();
+	
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 }
 
@@ -118,10 +125,11 @@ void Game::Draw(float deltaTime, float totalTime) {
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-
+	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime);
 	//-------------------------------------
 
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
+		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
 		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");

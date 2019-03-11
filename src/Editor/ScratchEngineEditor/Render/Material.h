@@ -1,6 +1,5 @@
 #pragma once
 #include "SimpleShader.h"
-#include <WICTextureLoader.h>
 
 class Material {
 public:
