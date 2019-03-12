@@ -1,19 +1,26 @@
 #include "Physics.h"
+using namespace Colliders;
 Physics::Physics(size_t _MaxColliderNum)
 {
-	ColliderHandler = new std::vector<Collider*>;
 	NumCoolidersHandled = 0;
 }
 
 Physics::~Physics()
 {
-	delete ColliderHandler;
 }
 
-Collider* Physics::addCollider(Entity* obj, float _radius, float _mass, bool _gravity = false, bool _static = false)
+SphereCollider * Physics::addSphereCollider(Entity * obj, float _radius, float _mass, bool _gravity, bool _static)
 {
-	Collider* temp = new Collider(obj, _radius, _mass, _gravity, _static);
-	ColliderHandler->push_back(temp);
+	SphereCollider* temp = new SphereCollider(obj, _radius, _mass, _gravity, _static);
+	ColliderHandler.push_back(temp);
+	NumCoolidersHandled++;
+	return temp;
+}
+
+BoxCollider * Physics::addBoxCollider(Entity * obj,XMFLOAT3 size, float _mass, bool _gravity, bool _static)
+{
+	BoxCollider* temp = new BoxCollider(obj, size, _mass, _gravity, _static);
+	ColliderHandler.push_back(temp);
 	NumCoolidersHandled++;
 	return temp;
 }
@@ -22,20 +29,16 @@ void Physics::CollisionsDetection(int start, int end,float deltaTime)
 {
 	for (int i = start; i < end; i++)
 	{
-		Collider* a = ColliderHandler->at(i);
-		for (int j = i; j < ColliderHandler->size(); j++)
+		auto a = ColliderHandler.at(i);
+		for (int j = i; j < ColliderHandler.size(); j++)
 		{
 			//calculate squared distance from centers
-			Collider* b = ColliderHandler->at(j);
-			float squared_distance = (a->Position.x - b->Position.x) * (a->Position.x - b->Position.x) +
-				(a->Position.y - b->Position.y) * (a->Position.y - b->Position.y) + (a->Position.z -b->Position.z) * (a->Position.z - b->Position.z);
-			//calculate the sum of the radii squared
-			float radius_sum_squared = (a->Radius + b->Radius) * (a->Radius + b->Radius);
+			auto b = ColliderHandler.at(j); 
 			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
-			if (squared_distance < radius_sum_squared && i != j)
+			if (Colliders::CollisionCheck(a, b) && i != j)
 			{
 				//calculate force
-				float force = pow(abs(squared_distance - radius_sum_squared) * 10.0f, 2.0f);
+				float force = 0.8f;
 				//create normalized vectors to apply the forces in the correct direction
 				XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
 				XMVECTOR f2 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);

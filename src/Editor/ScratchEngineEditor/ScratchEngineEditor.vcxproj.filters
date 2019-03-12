@@ -72,10 +72,10 @@
     <ClInclude Include="Render\Entity.h">
       <Filter>Header Files\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Colliders.h">
+    <ClInclude Include="Physics\Physics.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\Physics.h">
+    <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
@@ -104,10 +104,10 @@
     <ClCompile Include="Render\SimpleShader.cpp">
       <Filter>Source Files\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Colliders.cpp">
+    <ClCompile Include="Physics\Physics.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Physics.cpp">
+    <ClCompile Include="Physics\Collider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>

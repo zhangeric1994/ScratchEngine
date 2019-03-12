@@ -91,10 +91,10 @@ void Game::CreateBasicGeometry() {
 	entityVector[1] = temp1;
 	temp->SetTranslation(-2, 0, 0);
 	temp1->SetTranslation(2, 0, 0);
-	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
-	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
-	collider->ApplyForce({ 0.9,0,0 });
-	collider1->ApplyForce({ -0.9,0,0 });
+	Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, false, false);
+	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 1.0f, false, false);
+	collider->ApplyForce({ 0.9f,0,0 });
+	collider1->ApplyForce({ -0.9f,0,0 });
 }
 
 void Game::OnResize() {
