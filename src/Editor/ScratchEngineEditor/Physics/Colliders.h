@@ -1,6 +1,6 @@
 #pragma once
 #include <DirectXMath.h>
-#include "Entity.h"
+#include "../Render/Entity.h"
 using namespace DirectX;
 class Collider 
 {

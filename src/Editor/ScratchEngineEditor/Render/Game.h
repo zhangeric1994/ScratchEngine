@@ -10,7 +10,7 @@
 #include "Material.h"
 #include "Lights.h"
 #include "Vertex.h"
-#include "Physics.h"
+#include "../Physics/Physics.h"
 
 class Game
 	: public DXCore
