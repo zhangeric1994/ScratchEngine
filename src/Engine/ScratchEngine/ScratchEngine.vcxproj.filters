@@ -37,10 +37,10 @@
     <Filter Include="Source Files\Message">
       <UniqueIdentifier>{e4af0cac-be35-440d-b887-ed20070d9575}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Scene">
+    <Filter Include="Header Files\Core">
       <UniqueIdentifier>{27be1762-fee6-409e-8eea-192a13baa76b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Scene">
+    <Filter Include="Source Files\Core">
       <UniqueIdentifier>{6cc4f91c-5a88-40f1-b2c8-327e4032b1e1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -75,14 +75,20 @@
     <ClInclude Include="Message\Message.h">
       <Filter>Header Files\Message</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\GameObject.h">
-      <Filter>Header Files\Scene</Filter>
+    <ClInclude Include="Core\Transform.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Scene.h">
-      <Filter>Header Files\Scene</Filter>
+    <ClInclude Include="Core\GameComponent.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\Component.h">
-      <Filter>Header Files\Scene</Filter>
+    <ClInclude Include="Core\GameObject.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Scene.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Space.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -101,14 +107,17 @@
     <ClCompile Include="Physics\Physics.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Message\IMessageReceiver.cpp">
-      <Filter>Source Files\Message</Filter>
+    <ClCompile Include="Core\GameComponent.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\GameObject.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Core\GameObject.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\Scene.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Core\Scene.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Transform.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

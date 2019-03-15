@@ -10,11 +10,17 @@ namespace ScratchEngine
 {
 	class Scene
 	{
+	private:
+		vector<GameObject*> gameObjects;
+
+	
 	public:
 		Scene();
 		~Scene();
 
+		void AddGameObject(GameObject* gameObject);
+	
 	private:
-		vector<GameObject*> gameObjects;
+		void Update();
 	};
 }

@@ -10,7 +10,7 @@ namespace ScratchEngine
 {
 	namespace Memory
 	{
-		class SimplePool
+		class __declspec(dllexport) SimplePool
 		{
 		private:
 			void* memory;

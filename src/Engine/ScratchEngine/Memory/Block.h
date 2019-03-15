@@ -33,7 +33,7 @@ namespace ScratchEngine
 		};
 
 #define __data_offset (sizeof(BlockStatus) + sizeof(size_t))
-#define __block_tail_size (sizeof(Block*))
+#define __block_tail_size 16
 #define __min_block_size (sizeof(Block) + __block_tail_size)
 	}
 }

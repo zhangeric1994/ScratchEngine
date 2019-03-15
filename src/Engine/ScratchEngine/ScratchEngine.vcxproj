@@ -147,6 +147,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Core\GameComponent.h" />
+    <ClInclude Include="Core\GameObject.h" />
+    <ClInclude Include="Core\Scene.h" />
+    <ClInclude Include="Core\Space.h" />
+    <ClInclude Include="Core\Transform.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Memory\Block.h" />
     <ClInclude Include="Memory\Pool.h" />
@@ -155,20 +160,18 @@
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
     <ClInclude Include="Physics\Physics.h" />
-    <ClInclude Include="Scene\Component.h" />
-    <ClInclude Include="Scene\GameObject.h" />
-    <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utility\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\GameComponent.cpp" />
+    <ClCompile Include="Core\GameObject.cpp" />
+    <ClCompile Include="Core\Scene.cpp" />
+    <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Memory\Pool.cpp" />
     <ClCompile Include="Memory\SimplePool.cpp" />
-    <ClCompile Include="Message\IMessageReceiver.cpp" />
     <ClCompile Include="Physics\Physics.cpp" />
-    <ClCompile Include="Scene\GameObject.cpp" />
-    <ClCompile Include="Scene\Scene.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

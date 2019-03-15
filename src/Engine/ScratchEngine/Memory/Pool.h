@@ -12,8 +12,11 @@ namespace ScratchEngine
 {
 	namespace Memory
 	{
-		struct Pool
+		class __declspec(dllexport) Pool
 		{
+			friend class PoolTest;
+
+		private:
 			void* memory;
 			size_t capacity;
 			size_t size;
@@ -21,6 +24,7 @@ namespace ScratchEngine
 			u32 numAllocated;
 			Block* root;
 
+		public:
 			Pool();
 			Pool(size_t size);
 			~Pool();
@@ -28,6 +32,7 @@ namespace ScratchEngine
 			void* Allocate(size_t size);
 			void Free(void* p);
 
+		private:
 			__forceinline void Add(Block* block);
 			__forceinline void Remove(Block* block);
 			

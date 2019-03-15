@@ -19,7 +19,7 @@ namespace ScratchEngine
 		MESSAGE_COLLISION_EXIT = 0x44,
 	};
 
-	struct Message
+	struct __declspec(dllexport) Message
 	{
 		MessageType type;
 	};
