@@ -9,7 +9,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	mesh = 0;
 
-	entityVector.resize(2);
+	entityVector.resize(3);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -68,7 +68,7 @@ void Game::CreateMatrces() {
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
 	
-	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
+	XMVECTOR pos = XMVectorSet(0, 0, -20, 0);
 	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
 	XMMATRIX V = XMMatrixLookToLH(
@@ -84,17 +84,24 @@ void Game::CreateMatrces() {
 void Game::CreateBasicGeometry() {
 	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
+	char* cubefile = (char*)"../Assets/Models/cube.obj";
 	mesh = new Mesh(device, filename);
+	mesh1 = new Mesh(device, cubefile);
 	Entity* temp = new Entity(mesh, simpleMaterial);
 	Entity* temp1 = new Entity(mesh, simpleMaterial);
+	Entity* temp2 = new Entity(mesh1, simpleMaterial);
 	entityVector[0] = temp;
 	entityVector[1] = temp1;
+	entityVector[2] = temp2;
 	temp->SetTranslation(-2, 0, 0);
 	temp1->SetTranslation(2, 0, 0);
-	Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, false, false);
-	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 1.0f, false, false);
-	collider->ApplyForce({ 0.9f,0,0 });
-	collider1->ApplyForce({ -0.9f,0,0 });
+	temp2->SetTranslation(0, -10, 0);
+	temp2->SetScale(100, 1, 100);
+	Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
+	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 1.0f, true, false);
+	Collider* collider2 = physics->addBoxCollider(temp2,XMFLOAT3{100,1,100}, 1.0f, false, true);
+	//collider->ApplyForce({ 0.9f,0,0 });
+	//collider1->ApplyForce({ -0.9f,0,0 });
 }
 
 void Game::OnResize() {

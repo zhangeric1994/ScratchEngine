@@ -40,6 +40,7 @@ namespace Colliders {
 		//bool CollidsionCheck(SphereCollider* sphere);
 		//bool CollidsionCheck(BoxCollider* box);
 	};
+	void ForceCalculation(Collider* a, XMVECTOR forceToA,Collider* b, XMVECTOR forceToB);
 	bool CollisionCheck(Collider* a, Collider* b);
 	//Sphere check
 	bool CollisionCheck(SphereCollider* a, SphereCollider* b);

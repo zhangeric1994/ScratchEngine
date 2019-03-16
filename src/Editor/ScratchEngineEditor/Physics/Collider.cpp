@@ -1,12 +1,14 @@
 #include "Collider.h"
 #include "Physics.h"
+
+using namespace DirectX;
 namespace Colliders{
 	void Collider::Update(float dt)
 	{
 		if (!Static) {
 
 			if (UseGravity) {
-				Velocity.y += 9.8f * Mass *dt;
+				Velocity.y -= 9.8f * Mass *dt;
 			}
 			Position = Item->individualPositon;
 			Position.x += Velocity.x *dt;
@@ -68,6 +70,24 @@ namespace Colliders{
 	{
 	}
 
+	void ForceCalculation(Collider * a, XMVECTOR forceToA, Collider * b, XMVECTOR forceToB)
+	{
+		XMVECTOR aVelcity = XMLoadFloat3(&a->Velocity);
+		XMVECTOR bVelcity = XMLoadFloat3(&b->Velocity);
+		XMFLOAT3 force3;
+		XMStoreFloat3(&force3, XMVector3Length(aVelcity * a->Mass + bVelcity * b->Mass) / (a->Mass + b->Mass));
+		//float distance = sqrt((point1.x - point2.x) * (point1.x - point2.x) +
+		//	(point1.y - point2.y) * (point1.y - point2.y) +
+		//	(point1.z - point2.z) * (point1.z - point2.z));
+		float force = force3.x*3.5f;
+		XMFLOAT3 force1;
+		XMFLOAT3 force2;
+		XMStoreFloat3(&force1, XMVector3Normalize(forceToA) * force);
+		XMStoreFloat3(&force2, XMVector3Normalize(forceToB) * force);
+		a->ApplyForce(force1);
+		b->ApplyForce(force2);
+	}
+
 	bool CollisionCheck(Collider * a, Collider * b)
 	{
 		if (a->type == Sphere && b->type == Sphere) {
@@ -91,7 +111,16 @@ namespace Colliders{
 			(a->Position.y - b->Position.y) * (a->Position.y - b->Position.y) + (a->Position.z - b->Position.z) * (a->Position.z - b->Position.z);
 		//calculate the sum of the radii squared
 		float radius_sum_squared = (a->Radius + b->Radius) * (a->Radius + b->Radius);
-		return squared_distance < radius_sum_squared;
+		if (squared_distance < radius_sum_squared) {
+			//create normalized vectors to apply the forces in the correct direction
+			XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
+			XMVECTOR f2 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
+			ForceCalculation(a, f2, b, f1);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	bool CollisionCheck(SphereCollider * a, BoxCollider * b)
@@ -104,14 +133,32 @@ namespace Colliders{
 			(y - a->Position.y) * (y - a->Position.y) +
 			(z - a->Position.z) * (z - a->Position.z));
 
-		return distance < a->Radius;
+		if (distance < a->Radius) {
+			//create normalized vectors to apply the forces in the correct direction
+			XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
+			XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
+			ForceCalculation(a, f2, b, f1);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	bool CollisionCheck(BoxCollider * a, BoxCollider * b)
 	{
-		return (a->minX <= b->maxX && a->maxX >= b->minX) &&
+		if ((a->minX <= b->maxX && a->maxX >= b->minX) &&
 			(a->minY <= b->maxY && a->maxY >= b->minY) &&
-			(a->minZ <= b->maxZ && a->maxZ >= b->minZ);
+			(a->minZ <= b->maxZ && a->maxZ >= b->minZ)) {
+			//create normalized vectors to apply the forces in the correct direction
+			XMVECTOR f1 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
+			XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
+			ForceCalculation(a, f2, b, f1);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	bool CollisionCheck(BoxCollider * a, SphereCollider * b)
@@ -123,8 +170,16 @@ namespace Colliders{
 		float distance = sqrt((x - b->Position.x) * (x - b->Position.x) +
 			(y - b->Position.y) * (y - b->Position.y) +
 			(z - b->Position.z) * (z - b->Position.z));
-
-		return distance < b->Radius;
+		if (distance < b->Radius) {
+			//create normalized vectors to apply the forces in the correct direction
+			XMVECTOR f1 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
+			XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
+			ForceCalculation(a, f2, b, f1);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 }

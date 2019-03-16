@@ -45,6 +45,7 @@ private:
 	XMFLOAT4X4 projectionMatrix;
 
 	Mesh* mesh;
+	Mesh* mesh1;
 
 	Physics* physics;
 

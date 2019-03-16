@@ -2,7 +2,7 @@
 #include <Windows.h>
 
 Camera::Camera() {
-	position = XMFLOAT3(0, 0, -5);
+	position = XMFLOAT3(0, 0, -20);
 	direction = XMFLOAT3(0, 0, 1);
 
 	rotationX = 0.0f;
