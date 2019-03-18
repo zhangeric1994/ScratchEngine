@@ -93,8 +93,8 @@ void Game::CreateBasicGeometry() {
 	temp1->SetTranslation(2, 0, 0);
 	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
 	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
-	collider->ApplyForce({ 0.9,0,0 });
-	collider1->ApplyForce({ -0.9,0,0 });
+	collider->ApplyForce({ 0.9f,0.0f,0.0f });
+	collider1->ApplyForce({ -0.9f, 0.0f, 0.0f });
 }
 
 void Game::OnResize() {
@@ -115,7 +115,7 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.6f, 0.6f, 0.6f, 0.6f };
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.6f };
 
 	//-set backgroud color
 	//-clear depth buffer
