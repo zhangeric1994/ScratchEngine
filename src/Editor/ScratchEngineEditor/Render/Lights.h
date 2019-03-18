@@ -17,5 +17,9 @@ struct PointLight {
 };
 
 struct SpotLight {
-
+	XMFLOAT4 AmbientColor;
+	XMFLOAT4 DiffuseColor;
+	XMFLOAT3 Position;
+	XMFLOAT3 Direction;
+	float	 Range;
 };
