@@ -20,6 +20,7 @@ struct SpotLight {
 	XMFLOAT4 AmbientColor;
 	XMFLOAT4 DiffuseColor;
 	XMFLOAT3 Position;
+	float	 Cone;
 	XMFLOAT3 Direction;
 	float	 Range;
 };

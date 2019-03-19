@@ -58,6 +58,6 @@ private:
 
 	PointLight pointLight;
 
-
+	SpotLight spotLight;
 
 };

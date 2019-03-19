@@ -91,11 +91,16 @@ void Entity::SetShader() {
 }
 
 void Entity::SetLight(DirectionalLight directionalLight, std::string bufferName) {
-	material->getPixelShader()->SetData(bufferName, &directionalLight, sizeof(DirectionalLight));
+	bool istrue = material->getPixelShader()->SetData(bufferName, &directionalLight, sizeof(DirectionalLight));
 }
 
-void Entity::SetPointLight(PointLight pLight, const char* bufferName) {
-	material->getPixelShader()->SetData(bufferName, &pLight, sizeof(pLight));
+void Entity::SetPointLight(PointLight pLight, std::string bufferName) {
+	bool istrue = material->getPixelShader()->SetData(bufferName, &pLight, sizeof(pLight));
+}
+
+void Entity::SetSpotLight(SpotLight sLight, std::string bufferName) {
+	bool istrue = material->getPixelShader()->SetData(bufferName, &sLight, sizeof(sLight));
+
 }
 
 void Entity::SetTexture(char* textureName, char* samplerName) {

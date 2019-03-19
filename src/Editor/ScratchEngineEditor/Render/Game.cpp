@@ -19,11 +19,18 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
-	directionalLight.Direction = XMFLOAT3(1, -1, 0);
+	directionalLight.Direction	  = XMFLOAT3(1, -1, 0);
 
 	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
 	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
+	pointLight.Position		= XMFLOAT3(0, 2.0f, -1.0f);
+
+	spotLight.AmbientColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	spotLight.DiffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	spotLight.Position	   = XMFLOAT3(0.0f, 2.0f, 0.0f);
+	spotLight.Direction	   = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	spotLight.Cone		   = 0.0f;
+	spotLight.Range		   = 1000.0f;
 }
 
 Game::~Game() {
@@ -93,7 +100,7 @@ void Game::CreateBasicGeometry() {
 	temp1->SetTranslation(2, 0, 0);
 	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
 	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
-	collider->ApplyForce({ 0.9f,0.0f,0.0f });
+	collider->ApplyForce({ 0.9f, 0.0f, 0.0f });
 	collider1->ApplyForce({ -0.9f, 0.0f, 0.0f });
 }
 
@@ -115,7 +122,7 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.6f };
+	const float color[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -131,8 +138,9 @@ void Game::Draw(float deltaTime, float totalTime) {
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-		entityVector[countOfEntity]->SetLight(directionalLight, "light");
+		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		//entityVector[countOfEntity]->SetLight(directionalLight, "light");
+		entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
 
