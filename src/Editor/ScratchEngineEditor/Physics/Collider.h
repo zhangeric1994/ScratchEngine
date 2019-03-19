@@ -9,8 +9,9 @@ namespace Colliders {
 
 	public:
 		//Collider(Entity* _item,float _radius, float _mass, bool _gravity,bool _static);
-		void Update(float dt);
+		void Update(float dt, float totalTime);
 		void ApplyForce(XMFLOAT3 force);
+		void ApplyGravity(float dt);
 		Entity* Item;
 		XMFLOAT3 Position;
 		XMFLOAT3 Velocity;
@@ -18,6 +19,7 @@ namespace Colliders {
 		bool Static;
 		float Mass;
 		ColliderType type;
+		std::unordered_map<Collider*, float> CollidedWith;
 		// should add game entity reference in here
 	};
 
@@ -35,20 +37,22 @@ namespace Colliders {
 	{
 	public:
 		float minX, maxX, minY, maxY, minZ, maxZ;
+		XMFLOAT3 size;
 		BoxCollider(Entity* _item, XMFLOAT3 size, float _mass, bool _gravity, bool _static);
 		~BoxCollider();
+		void UpdateVertex();
 		//bool CollidsionCheck(SphereCollider* sphere);
 		//bool CollidsionCheck(BoxCollider* box);
 	};
-	void ForceCalculation(Collider* a, XMVECTOR forceToA,Collider* b, XMVECTOR forceToB);
-	bool CollisionCheck(Collider* a, Collider* b);
+	void ForceCalculation(Collider* a,Collider* b, float totalTime);
+	bool CollisionCheck(Collider* a, Collider* b, float totalTime);
 	//Sphere check
-	bool CollisionCheck(SphereCollider* a, SphereCollider* b);
-	bool CollisionCheck(SphereCollider* a, BoxCollider* b);
+	bool CollisionCheck(SphereCollider* a, SphereCollider* b, float totalTime);
+	bool CollisionCheck(SphereCollider* a, BoxCollider* b, float totalTime);
 
 	//Box check
-	bool CollisionCheck(BoxCollider* a, BoxCollider* b);
-	bool CollisionCheck(BoxCollider* a, SphereCollider* b);
+	bool CollisionCheck(BoxCollider* a, BoxCollider* b, float totalTime);
+	bool CollisionCheck(BoxCollider* a, SphereCollider* b, float totalTime);
 }
 	
 

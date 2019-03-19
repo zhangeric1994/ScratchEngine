@@ -49,6 +49,7 @@ private:
 
 	Physics* physics;
 
+
 	std::vector<Entity*> entityVector;
 
 	Camera* camera;

@@ -9,7 +9,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	mesh = 0;
 
-	entityVector.resize(3);
+	entityVector.resize(7);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -89,19 +89,41 @@ void Game::CreateBasicGeometry() {
 	mesh1 = new Mesh(device, cubefile);
 	Entity* temp = new Entity(mesh, simpleMaterial);
 	Entity* temp1 = new Entity(mesh, simpleMaterial);
-	Entity* temp2 = new Entity(mesh1, simpleMaterial);
+	Entity* temp2 = new Entity(mesh, simpleMaterial);
+	Entity* temp3 = new Entity(mesh, simpleMaterial);
+	Entity* temp4 = new Entity(mesh, simpleMaterial);
+	Entity* temp5 = new Entity(mesh, simpleMaterial);
+	Entity* terrain = new Entity(mesh1, simpleMaterial);
 	entityVector[0] = temp;
 	entityVector[1] = temp1;
 	entityVector[2] = temp2;
+	entityVector[3] = temp3;
+	entityVector[4] = temp4;
+	entityVector[5] = temp5;
+	entityVector[6] = terrain;
 	temp->SetTranslation(-2, 0, 0);
-	temp1->SetTranslation(2, 0, 0);
-	temp2->SetTranslation(0, -10, 0);
-	temp2->SetScale(100, 1, 100);
-	Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
-	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 1.0f, true, false);
-	Collider* collider2 = physics->addBoxCollider(temp2,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	//collider->ApplyForce({ 0.9f,0,0 });
-	//collider1->ApplyForce({ -0.9f,0,0 });
+	temp1->SetTranslation(1, 0, 0);
+	temp2->SetTranslation(-1.5, 1, 0);
+	temp3->SetTranslation(1.5, 1, 0);
+	temp4->SetTranslation(-1, -1, 0);
+	temp5->SetTranslation(2, 0, 0);
+
+	terrain->SetTranslation(0, -10, 0);
+	terrain->SetScale(100, 1, 100);
+	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
+	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 0.7f, true, false);
+	Collider* collider2 = physics->addSphereCollider(temp2, 0.5f, 0.5f, true, false);
+	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
+	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
+	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
+	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
+	collider->ApplyForce({ 0.5f,0,0.1f });
+	collider1->ApplyForce({ -0.4f,0,0.1f });
+	collider2->ApplyForce({ 0.5f,0,-0.1f });
+	collider3->ApplyForce({ -0.9f,0,0.1f });
+	collider4->ApplyForce({ 1.0f,0,-0.1f });
+	collider5->ApplyForce({ -1.4f,0,0.1f });
+
 }
 
 void Game::OnResize() {
@@ -113,6 +135,7 @@ void Game::OnResize() {
 }
 
 void Game::Update(float deltaTime, float totalTime) {
+	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 	XMMATRIX view = camera->Update();
@@ -132,7 +155,8 @@ void Game::Draw(float deltaTime, float totalTime) {
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime);
+
+	
 	//-------------------------------------
 
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {

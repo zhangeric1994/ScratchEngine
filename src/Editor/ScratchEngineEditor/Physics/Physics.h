@@ -15,7 +15,7 @@ public:
 	int NumCoolidersHandled;
 	SphereCollider* addSphereCollider(Entity* obj, float _radius, float _mass, bool _gravity, bool _static);
 	BoxCollider* addBoxCollider(Entity * obj, XMFLOAT3 size, float _mass, bool _gravity, bool _static);
-	void CollisionsDetection(int start, int end, float deltaTime);
+	void CollisionsDetection(int start, int end, float deltaTime, float totalTime);
 private:
 	size_t MaxColliderNum;
 	std::vector<Collider*> ColliderHandler;

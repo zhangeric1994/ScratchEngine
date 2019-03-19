@@ -25,11 +25,12 @@ BoxCollider * Physics::addBoxCollider(Entity * obj,XMFLOAT3 size, float _mass, b
 	return temp;
 }
 
-void Physics::CollisionsDetection(int start, int end,float deltaTime)
+void Physics::CollisionsDetection(int start, int end,float deltaTime,float totalTime)
 {
 	for (int i = start; i < end; i++)
 	{
 		auto a = ColliderHandler.at(i);
+		a->ApplyGravity(deltaTime);
 		for (int j = i; j < ColliderHandler.size(); j++)
 		{
 			//calculate squared distance from centers
@@ -37,9 +38,13 @@ void Physics::CollisionsDetection(int start, int end,float deltaTime)
 			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
 			if (i != j)
 			{
-				Colliders::CollisionCheck(a, b);
+				bool collied = Colliders::CollisionCheck(a, b, totalTime);
+				if (a->CollidedWith[b] != 0 &&!collied) {
+					a->CollidedWith[b] = 0.0f;
+					b->CollidedWith[a] = 0.0f;
+				}
 			}
 		}
-		a->Update(deltaTime);
+		a->Update(deltaTime, totalTime);
 	}
 }
