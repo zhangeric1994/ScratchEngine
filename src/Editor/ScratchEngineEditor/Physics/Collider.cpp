@@ -60,6 +60,7 @@ namespace Colliders{
 	{
 	}
 
+
 	BoxCollider::BoxCollider(Entity * _item, XMFLOAT3 _size, float _mass, bool _gravity, bool _static)
 	{
 
@@ -88,35 +89,81 @@ namespace Colliders{
 		maxZ = Position.z + size.z / 2;
 	}
 
-	void ForceCalculation(Collider * a, Collider * b, float totalTime)
+
+	XMVECTOR getCollidedNormal(Collider * a, XMFLOAT3 collisionPoint)
+	{
+		if (a->type == Sphere) {
+			return { 1.0,1.0,1.0, 0 };
+		}
+		else if (a->type == Box) {
+			BoxCollider* item = reinterpret_cast<BoxCollider*> (a);
+			XMVECTOR AB = {0.0,0.0,0.0};
+			XMVECTOR AD = { 0.0,0.0,0.0 };
+			XMVECTOR ret;
+			if (item->maxX == collisionPoint.x) {
+				AB = { 0,item->maxY - collisionPoint.y,item->minZ - collisionPoint.z };
+				AD = { 0,item->minY - collisionPoint.y,item->minZ - collisionPoint.z };
+			}
+			else if (item->minX == collisionPoint.x) {	
+				AB = { 0,item->minY - collisionPoint.y,item->minZ - collisionPoint.z };
+				AD = { 0,item->maxY - collisionPoint.y,item->minZ - collisionPoint.z };
+			}
+			else if (item->maxY == collisionPoint.y) {
+				AB = { item->maxX - collisionPoint.x,0,item->minZ - collisionPoint.z };
+				AD = { item->minX - collisionPoint.x,0,item->minZ - collisionPoint.z };
+			}
+			else if (item->minY == collisionPoint.y) {
+				AB = { item->minX - collisionPoint.x,0,item->minZ - collisionPoint.z };
+				AD = { item->maxX - collisionPoint.x,0,item->minZ - collisionPoint.z };
+			}
+			else if (item->maxZ == collisionPoint.z) {
+				AB = { item->maxX - collisionPoint.x,item->maxY - collisionPoint.y,0 };
+				AD = { item->minX - collisionPoint.x,item->minY - collisionPoint.y,0 };
+			}
+			else if (item->minZ == collisionPoint.z) {
+				AB = { item->minX - collisionPoint.x,item->minY - collisionPoint.y,0 };
+				AD = { item->minX - collisionPoint.x,item->maxY - collisionPoint.y,0 };
+			}
+			ret = XMVector3Cross(AB, AD);
+			ret.m128_f32[0] = abs(ret.m128_f32[0]) > 0 ? (ret.m128_f32[0] < 0 ? -1.0f : 1.0f) : 0.0f;
+			ret.m128_f32[1] = abs(ret.m128_f32[1]) > 0 ? (ret.m128_f32[1] < 0 ? -1.0f : 1.0f) : 0.0f;
+			ret.m128_f32[2] = abs(ret.m128_f32[2]) > 0 ? (ret.m128_f32[2] < 0 ? -1.0f : 1.0f) : 0.0f;
+			return ret;
+		}
+		return XMVECTOR();
+	}
+
+	void ForceCalculation(Collider * a, Collider * b, XMFLOAT3 collisionPoint, float totalTime)
 	{
 		XMVECTOR aVelocity = XMLoadFloat3(&a->Velocity);
 		XMVECTOR bVelocity = XMLoadFloat3(&b->Velocity);
 		XMFLOAT3 aForce;
 		XMFLOAT3 bForce;
 
-		XMVECTOR normal = { 0,1.0,0 };
+		XMVECTOR aNormal = getCollidedNormal(a, collisionPoint);
+		XMVECTOR bNormal = getCollidedNormal(b, collisionPoint);
+
 		if (b->Static) {
 			// then the momentum is inifinity
 			// reverse the force
-			XMStoreFloat3(&aForce, -(aVelocity * a->Mass) * 1.9f * normal);
+			XMStoreFloat3(&aForce, -(aVelocity * a->Mass) * 1.9f * bNormal);
 			a->ApplyForce(aForce);
 			return;
 		}
 		else {
-			XMStoreFloat3(&aForce, (((a->Mass - b->Mass)*aVelocity + 2 * b->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.75f * a->Mass);
+			XMStoreFloat3(&aForce, (((a->Mass - b->Mass)*aVelocity + 2 * b->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.75f * a->Mass * bNormal);
 		}
 
 
 		if (a->Static) {
 			// then the momentum is inifinity
 			// reverse the force
-			XMStoreFloat3(&bForce, -(bVelocity * b->Mass) * 1.9f * normal);
+			XMStoreFloat3(&bForce, -(bVelocity * b->Mass) * 1.9f * aNormal);
 			b->ApplyForce(bForce);
 			return;
 		}
 		else {
-			XMStoreFloat3(&bForce, -(((b->Mass - a->Mass)*bVelocity + 2 * a->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.75f * b->Mass);
+			XMStoreFloat3(&bForce, -(((b->Mass - a->Mass)*bVelocity + 2 * a->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.75f * b->Mass * aNormal);
 			//XMStoreFloat3(&bForce, -(aVelcity * a->Mass));
 		}
 	
@@ -172,7 +219,7 @@ namespace Colliders{
 			//create normalized vectors to apply the forces in the correct direction
 			//XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
 			//XMVECTOR f2 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
-			ForceCalculation(a, b, totalTime);
+			ForceCalculation(a, b, {0,0,0},totalTime);
 			return true;
 		}
 		else {
@@ -195,7 +242,8 @@ namespace Colliders{
 			//create normalized vectors to apply the forces in the correct direction
 			//XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
 			//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
-			ForceCalculation(a, b, totalTime);
+			XMFLOAT3 collisionPoint = { x,y,z };
+			ForceCalculation(a, b, collisionPoint, totalTime);
 			return true;
 		}
 		else {
@@ -207,18 +255,18 @@ namespace Colliders{
 	{
 		a->UpdateVertex();
 		b->UpdateVertex();
+		XMVECTOR collisionPoint = { b->maxX,b->maxY,b->maxZ};
 		if ((a->minX <= b->maxX && a->maxX >= b->minX) &&
 			(a->minY <= b->maxY && a->maxY >= b->minY) &&
 			(a->minZ <= b->maxZ && a->maxZ >= b->minZ)) {
 			//create normalized vectors to apply the forces in the correct direction
 			//XMVECTOR f1 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
 			//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
-		
-			return false;
+			ForceCalculation(a, b, { 1,1,1 }, totalTime);
+			return true;
 		}
 		else {
-			ForceCalculation(a, b, totalTime);
-			return true;
+			return false;
 		}
 	}
 
@@ -236,7 +284,8 @@ namespace Colliders{
 			//create normalized vectors to apply the forces in the correct direction
 			//XMVECTOR f1 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
 			//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
-			ForceCalculation(a, b, totalTime);
+			XMFLOAT3 collisionPoint = { x,y,z };
+			ForceCalculation(a, b, collisionPoint, totalTime);
 			return true;
 		}
 		else {

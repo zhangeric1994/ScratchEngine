@@ -44,7 +44,8 @@ namespace Colliders {
 		//bool CollidsionCheck(SphereCollider* sphere);
 		//bool CollidsionCheck(BoxCollider* box);
 	};
-	void ForceCalculation(Collider* a,Collider* b, float totalTime);
+	XMVECTOR getCollidedNormal(Collider* b, XMFLOAT3 collisionPoint);
+	void ForceCalculation(Collider* a,Collider* b, XMFLOAT3 collisionPoint,float totalTime);
 	bool CollisionCheck(Collider* a, Collider* b, float totalTime);
 	//Sphere check
 	bool CollisionCheck(SphereCollider* a, SphereCollider* b, float totalTime);

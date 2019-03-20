@@ -88,7 +88,7 @@ void Game::CreateBasicGeometry() {
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 	Entity* temp = new Entity(mesh, simpleMaterial);
-	Entity* temp1 = new Entity(mesh, simpleMaterial);
+	Entity* temp1 = new Entity(mesh1, simpleMaterial);
 	Entity* temp2 = new Entity(mesh, simpleMaterial);
 	Entity* temp3 = new Entity(mesh, simpleMaterial);
 	Entity* temp4 = new Entity(mesh, simpleMaterial);
@@ -102,7 +102,7 @@ void Game::CreateBasicGeometry() {
 	entityVector[5] = temp5;
 	entityVector[6] = terrain;
 	temp->SetTranslation(-2, 0, 0);
-	temp1->SetTranslation(1, 0, 0);
+	temp1->SetTranslation(1, 2, 0);
 	temp2->SetTranslation(-1.5, 1, 0);
 	temp3->SetTranslation(1.5, 1, 0);
 	temp4->SetTranslation(-1, -1, 0);
@@ -111,18 +111,18 @@ void Game::CreateBasicGeometry() {
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
 	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 0.7f, true, false);
+	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
 	Collider* collider2 = physics->addSphereCollider(temp2, 0.5f, 0.5f, true, false);
 	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
 	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
 	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
 	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	collider->ApplyForce({ 0.5f,0,0.1f });
-	collider1->ApplyForce({ -0.4f,0,0.1f });
-	collider2->ApplyForce({ 0.5f,0,-0.1f });
-	collider3->ApplyForce({ -0.9f,0,0.1f });
-	collider4->ApplyForce({ 1.0f,0,-0.1f });
-	collider5->ApplyForce({ -1.4f,0,0.1f });
+	//collider->ApplyForce({ 0.5f,0,0.1f });
+	//collider1->ApplyForce({ -0.4f,0,0.1f });
+	//collider2->ApplyForce({ 0.5f,0,-0.1f });
+	//collider3->ApplyForce({ -0.9f,0,0.1f });
+	//collider4->ApplyForce({ 1.0f,0,-0.1f });
+	//collider5->ApplyForce({ -1.4f,0,0.1f });
 
 }
 
