@@ -93,3 +93,7 @@ XMMATRIX Camera::UpdateProjection(float aspectRatio) {
 
 	return projectionMatrix;
 }
+
+XMFLOAT3 Camera::getPosition() {
+	return position;
+}

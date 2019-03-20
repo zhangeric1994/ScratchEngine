@@ -1,14 +1,20 @@
 
 struct DirectionalLight {
-	float4   AmbientColor;
-	float4   DiffuseColor;
+	float3   AmbientColor;
+	float	 CameraX;
+	float3   DiffuseColor;
+	float	 CameraY;
 	float3   Direction;
+	float	 CameraZ;
 };
 
 struct PointLight {
-	float4	 AmbientColor;
-	float4	 DiffuseColor;
-	float3	 Position;
+	float3   AmbientColor;
+	float	 CameraX;
+	float3   DiffuseColor;
+	float	 CameraY;
+	float3   Position;
+	float	 CameraZ;
 };
 
 struct SpotLight {
@@ -20,19 +26,19 @@ struct SpotLight {
 	float	 Range;
 };
 
-//cbuffer colorData : register(b0) {
-//	DirectionalLight light;
-//};
-//
-//cbuffer colorData2 : register(b1) {
-//	DirectionalLight light2;
-//}
-//
-//cbuffer pointLightData : register(b2) {
-//	PointLight pointLight;
-//}
+cbuffer colorData : register(b0) {
+	DirectionalLight light;
+};
 
-cbuffer spotLightData : register(b0) {
+cbuffer colorData2 : register(b1) {
+	DirectionalLight light2;
+}
+
+cbuffer pointLightData : register(b2) {
+	PointLight pointLight;
+}
+
+cbuffer spotLightData : register(b3) {
 	SpotLight spotLight;
 }
 
@@ -58,17 +64,39 @@ struct VertexToPixel
 	float2 uv			: TEXCOORD;
 };
 
-float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
+float3 calculateDirectionalLight(float3 normal, float3 position, DirectionalLight light) {
+	//diffuse part
+	normal = normalize(normal);
 	float3 nDirection = -normalize(light.Direction);
 	float  NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
+	NdotL = saturate(NdotL);
+
+	//specular part
+	float3 CameraPos = float3(light.CameraX, light.CameraY, light.CameraZ);
+	float3 dirToCamera = normalize(CameraPos - position);
+	float3 reflectance = reflect(-nDirection, normal);
+	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
+
+	float3 finalColor = float3(1.0f, 1.0f, 1.0f) * light.DiffuseColor * NdotL + spec.rrr;
+
 	return finalColor;
 }
 
-float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
-	float3 nDirection = normalize(position - pointLight.Position);
+float3 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
+	//diffuse part
+	normal = normalize(normal);
+	float3 nDirection = -normalize(position - pointLight.Position);
 	float NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
+	NdotL = saturate(NdotL);
+
+	//spec part
+	float3 CameraPos = float3(light.CameraX, light.CameraY, light.CameraZ);
+	float3 dirToCamera = normalize(CameraPos - position);
+	float3 reflectance = reflect(-nDirection, normal);
+	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
+
+
+	float3 finalColor = pointLight.AmbientColor * pointLight.DiffuseColor * NdotL + spec.rrr;
 	return finalColor;
 }
 
@@ -107,10 +135,10 @@ float4 calculateSpotLight(float3 normal, float3 position, SpotLight spotLight) {
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET{
-	//float4 lightColor1 = calculateDirectionalLight(input.normal, light);
+	float3 lightColor1 = calculateDirectionalLight(input.normal, input.worldPos, light);
 	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 
-	//float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
+	float3 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
 	float4 spotLightColor = calculateSpotLight(input.normal, input.worldPos, spotLight);
 
@@ -120,10 +148,8 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
-	//return surfaceColor * lightColor1 + surfaceColor * lightColor2;
-	//return lightColor1;
+
 	//return pointLightColor;
-	//return spotLight.DiffuseColor;
-	//return pointLight.AmbientColor;
-	return spotLightColor;
+	return float4(lightColor1 + pointLightColor, 1.0f);
+	
 }

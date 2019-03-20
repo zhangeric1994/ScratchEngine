@@ -17,17 +17,24 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	physics = new Physics(200);
 	simpleMaterial = NULL;
 
-	directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
-	directionalLight.Direction	  = XMFLOAT3(1, -1, 0);
+	directionalLight.AmbientColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
+	directionalLight.DiffuseColor = XMFLOAT3(0.0f,  0.0f, 0.5f);
+	directionalLight.Direction	  = XMFLOAT3(-1.0f,  0.0f, 0.0f);
+	directionalLight.CameraX	  = camera->getPosition().x;
+	directionalLight.CameraY	  = camera->getPosition().y;
+	directionalLight.CameraZ	  = camera->getPosition().z;
+	//directionalLight.CameraPos	  = camera->getPosition();
 
-	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	pointLight.Position		= XMFLOAT3(0, 2.0f, -1.0f);
+	pointLight.AmbientColor = XMFLOAT3(1.0f,  1.0f,   1.0f);
+	pointLight.DiffuseColor = XMFLOAT3(0.0f,  0.0f,   0.7f);
+	pointLight.Position		= XMFLOAT3(0.0f, 10.0f,   0.0f);
+	pointLight.CameraX = camera->getPosition().x;
+	pointLight.CameraY = camera->getPosition().y;
+	pointLight.CameraZ = camera->getPosition().z;
 
-	spotLight.AmbientColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	spotLight.DiffuseColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	spotLight.Position	   = XMFLOAT3(0.0f, 2.0f, 0.0f);
+	spotLight.AmbientColor = XMFLOAT4(0.2f,  0.2f, 0.2f, 1.0f);
+	spotLight.DiffuseColor = XMFLOAT4(1.0f,  1.0f, 1.0f, 1.0f);
+	spotLight.Position	   = XMFLOAT3(0.0f,  2.0f, 0.0f);
 	spotLight.Direction	   = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	spotLight.Cone		   = 0.0f;
 	spotLight.Range		   = 1000.0f;
@@ -122,7 +129,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
+	//const float color[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -138,8 +146,8 @@ void Game::Draw(float deltaTime, float totalTime) {
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-		//entityVector[countOfEntity]->SetLight(directionalLight, "light");
+		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		entityVector[countOfEntity]->SetLight(directionalLight, "light");
 		entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
