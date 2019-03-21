@@ -37,14 +37,19 @@ namespace Colliders {
 	{
 	public:
 		float minX, maxX, minY, maxY, minZ, maxZ;
+		XMVECTOR AxisX, AxisY, AxisZ;
 		XMFLOAT3 size;
+		std::vector<XMVECTOR> planes;
+		std::vector<std::tuple<XMVECTOR,XMVECTOR>> edges;
 		BoxCollider(Entity* _item, XMFLOAT3 size, float _mass, bool _gravity, bool _static);
 		~BoxCollider();
 		void UpdateVertex();
 		//bool CollidsionCheck(SphereCollider* sphere);
 		//bool CollidsionCheck(BoxCollider* box);
 	};
+	bool getSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);
 	XMVECTOR getCollidedNormal(Collider* b, XMFLOAT3 collisionPoint);
+	XMFLOAT3 getCollisionPoint(BoxCollider* a, BoxCollider* b);
 	void ForceCalculation(Collider* a,Collider* b, XMFLOAT3 collisionPoint,float totalTime);
 	bool CollisionCheck(Collider* a, Collider* b, float totalTime);
 	//Sphere check

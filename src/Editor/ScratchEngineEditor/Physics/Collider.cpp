@@ -72,7 +72,11 @@ namespace Colliders{
 		Velocity = { 0,0,0 };
 		type = Box;
 		size = _size;
+		AxisX = { 1.f, 0.f, 0.f };
+		AxisY = { 0.f, 1.f, 0.f };
+		AxisZ = { 0.f, 0.f, 1.f };
 		UpdateVertex();
+
 	}
 
 	BoxCollider::~BoxCollider()
@@ -87,8 +91,50 @@ namespace Colliders{
 		maxY = Position.y + size.y / 2;
 		minZ = Position.z - size.z / 2;
 		maxZ = Position.z + size.z / 2;
+		XMVECTOR A = { minX,minY,minZ };
+		XMVECTOR B = { minX,minY,maxZ };
+		XMVECTOR C = { minX,maxY,minZ };
+		XMVECTOR D = { minX,maxY,maxZ };
+		XMVECTOR E = { maxX,minY,minZ };
+		XMVECTOR F = { maxX,minY,maxZ };
+		XMVECTOR G = { maxX,maxY,minZ };
+		XMVECTOR H = { maxX,maxY,maxZ };
+		planes.clear();
+		planes.push_back(XMPlaneFromPoints(A, C, B));
+		planes.push_back(XMPlaneFromPoints(A, E, C));
+		planes.push_back(XMPlaneFromPoints(A, E, F));
+		planes.push_back(XMPlaneFromPoints(E, F, G));
+		planes.push_back(XMPlaneFromPoints(C, G, D));
+		planes.push_back(XMPlaneFromPoints(B, D, F));
+		if (edges.size() == 0) {
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(A, B));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(A, C));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(A, E));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(E, G));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(E, F));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(F, H));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(F, B));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(B, D));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(C, G));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(C, D));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(G, H));
+			edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(H, D));
+		}
 	}
 
+
+	bool getSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider * a, BoxCollider * b)
+	{
+		return (abs(XMVector3Dot(RPos , Plane).m128_f32[0]) >
+				(abs(XMVector3Dot(a->AxisX*a->size.x/2,Plane).m128_f32[0]) +
+				abs(XMVector3Dot((a->AxisY*a->size.y/2),Plane).m128_f32[0]) +
+				abs(XMVector3Dot((a->AxisZ*a->size.z/2),Plane).m128_f32[0]) +
+				abs(XMVector3Dot((b->AxisX*b->size.x/2),Plane).m128_f32[0]) +
+				abs(XMVector3Dot((b->AxisY*b->size.y/2),Plane).m128_f32[0]) +
+				abs(XMVector3Dot((b->AxisZ*b->size.z/2),Plane).m128_f32[0])
+					)
+			);
+	}
 
 	XMVECTOR getCollidedNormal(Collider * a, XMFLOAT3 collisionPoint)
 	{
@@ -98,7 +144,7 @@ namespace Colliders{
 		else if (a->type == Box) {
 			BoxCollider* item = reinterpret_cast<BoxCollider*> (a);
 			XMVECTOR AB = {0.0,0.0,0.0};
-			XMVECTOR AD = { 0.0,0.0,0.0 };
+			XMVECTOR AD = {0.0,0.0,0.0};
 			XMVECTOR ret;
 			if (item->maxX == collisionPoint.x) {
 				AB = { 0,item->maxY - collisionPoint.y,item->minZ - collisionPoint.z };
@@ -133,16 +179,81 @@ namespace Colliders{
 		return XMVECTOR();
 	}
 
+	XMFLOAT3 getCollisionPoint(BoxCollider * a, BoxCollider * b)
+	{
+		XMVECTOR pLinePoint1 = {0.0f,0.0f,0.0f};
+		XMVECTOR pLinePoint2 = {0.0f,0.0f,0.0f};
+		for (int i = 0; i < a->planes.size(); i++) {
+			for (int j = 0; j < b->planes.size(); j++) {
+				XMPlaneIntersectPlane(&pLinePoint1, &pLinePoint2, a->planes[i], b->planes[j]);
+				if (!isnan(pLinePoint1.m128_f32[0])) {
+					// if there is a line
+					if (pLinePoint1.m128_f32[0] > a->maxX && pLinePoint2.m128_f32[0] > a->maxX) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					if (pLinePoint1.m128_f32[1] > a->maxY && pLinePoint2.m128_f32[1] > a->maxY) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					if (pLinePoint1.m128_f32[2] > a->maxZ && pLinePoint2.m128_f32[2] > a->maxZ) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					// if there is a line
+					if (pLinePoint1.m128_f32[0] < a->minX && pLinePoint2.m128_f32[0] < a->minX) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					if (pLinePoint1.m128_f32[1] < a->minY && pLinePoint2.m128_f32[1] < a->minY) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					if (pLinePoint1.m128_f32[2] < a->minZ && pLinePoint2.m128_f32[2] < a->minZ) {
+						// both of them are larger than max value, not valid
+						continue;
+					}
+					XMFLOAT3 cp;
+					XMStoreFloat3(&cp,(pLinePoint1 + pLinePoint2) / 2);
+					if (cp.x <= a->maxX && cp.y <= a->maxY && cp.z <= a->maxZ
+						&& cp.x >= a->minX && cp.y >= a->minY && cp.z >= a->minZ) {
+						return cp;
+					}
+				}
+			}
+		}
+		return {0,0,0};
+	}
+
 	void ForceCalculation(Collider * a, Collider * b, XMFLOAT3 collisionPoint, float totalTime)
 	{
 		XMVECTOR aVelocity = XMLoadFloat3(&a->Velocity);
 		XMVECTOR bVelocity = XMLoadFloat3(&b->Velocity);
+		XMVECTOR cp = XMLoadFloat3(&collisionPoint);
+		XMVECTOR aPos = XMLoadFloat3(&a->Position);
+		XMVECTOR bPos = XMLoadFloat3(&b->Position);
 		XMFLOAT3 aForce;
 		XMFLOAT3 bForce;
 
-		XMVECTOR aNormal = getCollidedNormal(a, collisionPoint);
-		XMVECTOR bNormal = getCollidedNormal(b, collisionPoint);
+		//XMVECTOR aNormal = getCollidedNormal(a, collisionPoint);
+		//XMVECTOR bNormal = getCollidedNormal(b, collisionPoint);
+		XMVECTOR aNormal;
+		XMVECTOR bNormal;
+		if (a->type == Sphere) {
+			aNormal = { 1.0, 1.0, 1.0, 0 };
+		}
+		else {
+			aNormal = XMVector3Reflect(XMVector3Normalize(cp - bPos), {0,1,0});
+			//return;
+		}
 
+		if (b->type == Sphere) {
+			bNormal = { 1.0, 1.0, 1.0, 0 };
+		}
+		else {
+			bNormal = XMVector3Reflect(XMVector3Normalize(cp - aPos), { 0,1,0 });
+			//return;
+		}
 		if (b->Static) {
 			// then the momentum is inifinity
 			// reverse the force
@@ -198,7 +309,7 @@ namespace Colliders{
 			return CollisionCheck(reinterpret_cast<SphereCollider*> (a), reinterpret_cast<SphereCollider*> (b), totalTime);
 		}
 		else if (a->type == Sphere && b->type == Box) {
-			return CollisionCheck(reinterpret_cast<SphereCollider*> (a), reinterpret_cast<BoxCollider*> (b), totalTime);
+			return CollisionCheck(reinterpret_cast<BoxCollider*> (b), reinterpret_cast<SphereCollider*> (a), totalTime);
 		}
 		else if (a->type == Box && b->type == Box) {
 			return CollisionCheck(reinterpret_cast<BoxCollider*> (a), reinterpret_cast<BoxCollider*> (b), totalTime);
@@ -251,47 +362,97 @@ namespace Colliders{
 		}
 	}
 
+	//bool CollisionCheck(BoxCollider * a, BoxCollider * b, float totalTime)
+	//{
+	//	a->UpdateVertex();
+	//	b->UpdateVertex();
+	//	XMVECTOR collisionPoint = { b->maxX,b->maxY,b->maxZ};
+	//	if ((a->minX <= b->maxX && a->maxX >= b->minX) &&
+	//		(a->minY <= b->maxY && a->maxY >= b->minY) &&
+	//		(a->minZ <= b->maxZ && a->maxZ >= b->minZ)) {
+	//		//create normalized vectors to apply the forces in the correct direction
+	//		//XMVECTOR f1 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
+	//		//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
+	//		ForceCalculation(a, b, { 1,1,1 }, totalTime);
+	//		return true;
+	//	}
+	//	else {
+	//		return false;
+	//	}
+	//}
+
 	bool CollisionCheck(BoxCollider * a, BoxCollider * b, float totalTime)
 	{
-		a->UpdateVertex();
-		b->UpdateVertex();
-		XMVECTOR collisionPoint = { b->maxX,b->maxY,b->maxZ};
-		if ((a->minX <= b->maxX && a->maxX >= b->minX) &&
-			(a->minY <= b->maxY && a->maxY >= b->minY) &&
-			(a->minZ <= b->maxZ && a->maxZ >= b->minZ)) {
-			//create normalized vectors to apply the forces in the correct direction
-			//XMVECTOR f1 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
-			//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(a->Velocity.x), -(a->Velocity.y), -(a->Velocity.z), 0.0f));
-			ForceCalculation(a, b, { 1,1,1 }, totalTime);
+		XMVECTOR RPos;
+		XMVECTOR aPos = XMLoadFloat3(&a->Position);
+		XMVECTOR bPos = XMLoadFloat3(&b->Position);
+		RPos = aPos - bPos;
+
+		if (!(getSeparatingPlane(RPos, a->AxisX, a, b) ||
+			getSeparatingPlane(RPos, a->AxisY, a, b) ||
+			getSeparatingPlane(RPos, a->AxisZ, a, b) ||
+			getSeparatingPlane(RPos, b->AxisX, a, b) ||
+			getSeparatingPlane(RPos, b->AxisY, a, b) ||
+			getSeparatingPlane(RPos, b->AxisZ, a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisX, b->AxisX), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisX, b->AxisY), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisX, b->AxisZ), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisY, b->AxisX), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisY, b->AxisY), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisY, b->AxisZ), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisZ, b->AxisX), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisZ, b->AxisY), a, b) ||
+			getSeparatingPlane(RPos, XMVector3Cross(a->AxisZ, b->AxisZ), a, b))) {
+			XMFLOAT3 ret = getCollisionPoint(a, b);
+;			ForceCalculation(a, b, ret, totalTime);
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
-
 	bool CollisionCheck(BoxCollider * a, SphereCollider * b, float totalTime)
 	{
 		a->UpdateVertex();
-		float x = max(a->minX, min(b->Position.x, a->maxX));
-		float y = max(a->minY, min(b->Position.y, a->maxY));
-		float z = max(a->minZ, min(b->Position.z, a->maxZ));
-
-		float distance = sqrt((x - b->Position.x) * (x - b->Position.x) +
-			(y - b->Position.y) * (y - b->Position.y) +
-			(z - b->Position.z) * (z - b->Position.z));
-		if (distance < b->Radius) {
-			//create normalized vectors to apply the forces in the correct direction
-			//XMVECTOR f1 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
-			//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
-			XMFLOAT3 collisionPoint = { x,y,z };
-			ForceCalculation(a, b, collisionPoint, totalTime);
-			return true;
+		XMVECTOR bPos;
+		bPos = XMLoadFloat3(&b->Position);
+		for (int i = 0; i < a->planes.size(); i++) {
+			XMVECTOR plane = a->planes[i];
+			float distance = XMVector3Dot(plane, bPos).m128_f32[0] + plane.m128_f32[3];
+			if (abs(distance) <= b->Radius) {
+				XMVECTOR collisionPoint = bPos - plane * distance;
+				XMFLOAT3 cp;
+				XMStoreFloat3(&cp, collisionPoint);
+				if (cp.x <= a->maxX && cp.y <= a->maxY && cp.z <= a->maxZ
+					&& cp.x >= a->minX && cp.y >= a->minY && cp.z >= a->minZ) {
+					cp;
+					ForceCalculation(a, b, cp, totalTime);
+					return true;
+				}
+			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
+	//bool CollisionCheck(BoxCollider * a, SphereCollider * b, float totalTime)
+	//{
+	//	a->UpdateVertex();
+	//	float x = max(a->minX, min(b->Position.x, a->maxX));
+	//	float y = max(a->minY, min(b->Position.y, a->maxY));
+	//	float z = max(a->minZ, min(b->Position.z, a->maxZ));
+
+	//	float distance = sqrt((x - b->Position.x) * (x - b->Position.x) +
+	//		(y - b->Position.y) * (y - b->Position.y) +
+	//		(z - b->Position.z) * (z - b->Position.z));
+	//	if (distance < b->Radius) {
+	//		//create normalized vectors to apply the forces in the correct direction
+	//		//XMVECTOR f1 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
+	//		//XMVECTOR f2 = XMVector3Normalize(XMVectorSet(-(b->Velocity.x), -(b->Velocity.y), -(b->Velocity.z), 0.0f));
+	//		XMFLOAT3 collisionPoint = { x,y,z };
+	//		ForceCalculation(a, b, collisionPoint, totalTime);
+	//		return true;
+	//	}
+	//	else {
+	//		return false;
+	//	}
+	//}
 
 }
 	

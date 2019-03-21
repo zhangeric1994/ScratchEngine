@@ -111,18 +111,18 @@ void Game::CreateBasicGeometry() {
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
 	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
+	//Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
 	Collider* collider2 = physics->addSphereCollider(temp2, 0.5f, 0.5f, true, false);
 	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
 	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
 	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
 	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	//collider->ApplyForce({ 0.5f,0,0.1f });
+	collider->ApplyForce({ 0.5f,0,0.1f });
 	//collider1->ApplyForce({ -0.4f,0,0.1f });
-	//collider2->ApplyForce({ 0.5f,0,-0.1f });
-	//collider3->ApplyForce({ -0.9f,0,0.1f });
-	//collider4->ApplyForce({ 1.0f,0,-0.1f });
-	//collider5->ApplyForce({ -1.4f,0,0.1f });
+	collider2->ApplyForce({ 0.5f,0,-0.1f });
+	collider3->ApplyForce({ -0.9f,0,0.1f });
+	collider4->ApplyForce({ 1.0f,0,-0.1f });
+	collider5->ApplyForce({ -1.4f,0,0.1f });
 
 }
 
