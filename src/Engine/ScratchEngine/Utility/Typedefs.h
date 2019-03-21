@@ -32,4 +32,6 @@ namespace ScratchEngine
 	typedef const char* pcstr;
 
 	typedef void(*Callback)(void* pUserData);
+
+	#define null_index -1
 }

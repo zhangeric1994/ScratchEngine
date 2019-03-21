@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 #include "Memory/Pool.cpp"
-#include "Memory/SimplePool.cpp"
+#include "Memory/PoolAllocator.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace ScratchEngine;
@@ -70,10 +70,10 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(SpeedTest2)
 		{
-			SimplePool pool(sizeof(Block), 1024);
+			PoolAllocator<sizeof(Block)> pool((size_t)1024);
 
 			for (int i = 0; i < 1000000; i++)
-				pool.Recycle(pool.Get());
+				pool.Free(pool.Allocate());
 		}
 	};
 }
