@@ -12,7 +12,7 @@ namespace ScratchEngine
 	namespace Memory
 	{
 		template<size_t BLOCKSIZE>
-		class PoolAllocator : Allocator
+		class __declspec(dllexport) PoolAllocator : Allocator
 		{
 		private:
 			void* memory;

@@ -22,7 +22,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::Insert(Collider* col
 	i32 iLeaf = _allocate_node(collider);
 	DynamicAABBTreeNode* leaf = _get_node(iLeaf);
 
-	if (!root)
+	if (root == null_index)
 		root = iLeaf;
 	else
 	{
@@ -52,7 +52,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::Insert(Collider* col
 			else
 				costL = (l->GetUnionVolume(leaf) - l->GetVolume()) + costI;
 
-			if (l->IsLeaf())
+			if (r->IsLeaf())
 				costR = r->GetUnionVolume(leaf) + costI;
 			else
 				costR = (r->GetUnionVolume(leaf) - r->GetVolume()) + costI;
@@ -61,9 +61,15 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::Insert(Collider* col
 				break;
 
 			if (costL < costR)
+			{
+				iCurrentNode = iL;
 				currentNode = l;
+			}
 			else
+			{
+				iCurrentNode = iR;
 				currentNode = r;
+			}
 		}
 		
 		i32 iNode = _allocate_node();
@@ -156,7 +162,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::_allocate_node(Colli
 		i32 previousCapacity = capacity;
 		DynamicAABBTreeNode* previousMemory = memory;
 
-		capacity += 128;
+		capacity *= 2;
 
 		memory = reinterpret_cast<DynamicAABBTreeNode*>(malloc(capacity * sizeof(DynamicAABBTreeNode)));
 
@@ -171,16 +177,19 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::_allocate_node(Colli
 
 	i32 id = freeList;
 	DynamicAABBTreeNode* node = _get_node(id);
-	node->box = collider->GetBoundingVolume();
+
+	freeList = node->next;
+	++numAllocated;
+
+	if (collider)
+		node->box = collider->GetBoundingVolume();
+
 	node->collider = collider;
 	node->height = 0;
 	node->parent = null_index;
 	node->left = null_index;
 	node->right = null_index;
-
-	freeList = node->next;
-	++numAllocated;
-
+	
 	return id;
 }
 
@@ -217,7 +226,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::_balance(i32 id)
 		DynamicAABBTreeNode* l2;
 		DynamicAABBTreeNode* r2;
 
-		if (balanceFactor > 1)
+		if (balanceFactor < -1)
 		{
 			iL2 = r1->left;
 			iR2 = r1->right;
@@ -261,7 +270,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::_balance(i32 id)
 			return iR1;
 		}
 
-		if (balanceFactor < -1)
+		if (balanceFactor > 1)
 		{
 			iL2 = l1->left;
 			iR2 = l1->right;
@@ -309,7 +318,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::_balance(i32 id)
 	return id;
 }
 
-void ScratchEngine::Physics::DynamicAABBTree::_update_box_and_height(DynamicAABBTreeNode * node)
+void ScratchEngine::Physics::DynamicAABBTree::_update_box_and_height(DynamicAABBTreeNode* node)
 {
 	DynamicAABBTreeNode* l = _get_node(node->left);
 	DynamicAABBTreeNode* r = _get_node(node->right);

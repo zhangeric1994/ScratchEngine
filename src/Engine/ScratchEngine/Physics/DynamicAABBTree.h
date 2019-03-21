@@ -6,7 +6,7 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class DynamicAABBTree
+		class __declspec(dllexport) DynamicAABBTree
 		{
 		private:
 			DynamicAABBTreeNode* memory;

@@ -10,12 +10,12 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class AxisAlignedBoundingBox
+		struct __declspec(dllexport) AxisAlignedBoundingBox
 		{
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
 
-		private:
+		protected:
 			union
 			{
 				struct
