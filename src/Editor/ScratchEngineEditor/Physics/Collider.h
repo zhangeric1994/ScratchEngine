@@ -45,6 +45,7 @@ namespace Colliders {
 		XMVECTOR AxisX, AxisY, AxisZ;
 		XMFLOAT3 size;
 		std::vector<XMVECTOR> planes;
+		std::vector<std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>> planesInfo;
 		std::vector<std::tuple<XMVECTOR,XMVECTOR>> edges;
 		BoxCollider(Entity* _item, XMFLOAT3 size, float _mass, bool _gravity, bool _static);
 		~BoxCollider();
@@ -71,6 +72,7 @@ namespace Colliders {
 
 	bool isUnique(std::vector<XMVECTOR>points, XMVECTOR test);
 	XMVECTOR getPlaneNormal(BoxCollider* Entity, XMVECTOR point);
+	XMVECTOR getLineIntersection(XMVECTOR start, XMVECTOR end, std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR> planeVertetices,XMFLOAT3 Max, XMFLOAT3 Min);
 }
 	
 
