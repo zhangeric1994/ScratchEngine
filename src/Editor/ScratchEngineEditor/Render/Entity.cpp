@@ -35,8 +35,7 @@ void Entity::SetWorldMatrix() {
 		XMMATRIX translationMatrix = XMMatrixTranslationFromVector(XMLoadFloat3(&individualPositon));
 
 		//rotation
-		XMVECTOR rotationQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&quaternion));
-		XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotationQuaternion);
+		XMMATRIX rotationMatrix = XMMatrixRotationRollPitchYaw(quaternion.x, quaternion.y, quaternion.z);
 
 		//scale
 		XMMATRIX scaleMatrix = XMMatrixScalingFromVector(XMLoadFloat3(&scaleVector));

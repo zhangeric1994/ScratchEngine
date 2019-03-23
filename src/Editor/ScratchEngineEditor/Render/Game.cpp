@@ -24,6 +24,12 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
 	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
 	pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
+
+#if defined(DEBUG) || defined(_DEBUG)
+	// Do we want a console window?  Probably only in debug mode
+	CreateConsoleWindow(500, 120, 32, 120);
+	printf("Console window created successfully.  Feel free to printf() here.\n");
+#endif
 }
 
 Game::~Game() {
@@ -89,7 +95,7 @@ void Game::CreateBasicGeometry() {
 	mesh1 = new Mesh(device, cubefile);
 	Entity* temp = new Entity(mesh, simpleMaterial);
 	Entity* temp1 = new Entity(mesh1, simpleMaterial);
-	Entity* temp2 = new Entity(mesh, simpleMaterial);
+	Entity* temp2 = new Entity(mesh1, simpleMaterial);
 	Entity* temp3 = new Entity(mesh, simpleMaterial);
 	Entity* temp4 = new Entity(mesh, simpleMaterial);
 	Entity* temp5 = new Entity(mesh, simpleMaterial);
@@ -102,24 +108,25 @@ void Game::CreateBasicGeometry() {
 	entityVector[5] = temp5;
 	entityVector[6] = terrain;
 	temp->SetTranslation(-2, 0, 0);
-	temp1->SetTranslation(1, 2, 0);
-	temp2->SetTranslation(-1.5, 1, 0);
-	temp3->SetTranslation(1.5, 1, 0);
+	temp1->SetTranslation(2.5, 1.5, 0);
+	temp2->SetTranslation(-2.5, 1, 0);
+	temp3->SetTranslation(0.0, 1, 0);
 	temp4->SetTranslation(-1, -1, 0);
 	temp5->SetTranslation(2, 0, 0);
-
+	temp1->SetRotation(0.5f, 0.0f, 0.0f);
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
 	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	//Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
-	Collider* collider2 = physics->addSphereCollider(temp2, 0.5f, 0.5f, true, false);
+	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
+	Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
 	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
 	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
 	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
 	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
 	collider->ApplyForce({ 0.5f,0,0.1f });
-	//collider1->ApplyForce({ -0.4f,0,0.1f });
-	collider2->ApplyForce({ 0.5f,0,-0.1f });
+	collider1->ApplyForce({ -1.5f,0,0.0f });
+	collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
+	collider2->ApplyForce({ 1.5f,0,0.0f });
 	collider3->ApplyForce({ -0.9f,0,0.1f });
 	collider4->ApplyForce({ 1.0f,0,-0.1f });
 	collider5->ApplyForce({ -1.4f,0,0.1f });
@@ -166,7 +173,6 @@ void Game::Draw(float deltaTime, float totalTime) {
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
-
 		//set vertex buffer and index buffer inside entity class
 		entityVector[countOfEntity]->Draw(context);
 	}

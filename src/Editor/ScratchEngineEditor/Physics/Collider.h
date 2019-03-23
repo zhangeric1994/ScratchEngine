@@ -1,6 +1,7 @@
 #pragma once
 #include <DirectXMath.h>
 #include "Entity.h"
+#include <tuple>
 using namespace DirectX;
 namespace Colliders {
 	enum ColliderType { Sphere, Box };
@@ -11,10 +12,13 @@ namespace Colliders {
 		//Collider(Entity* _item,float _radius, float _mass, bool _gravity,bool _static);
 		void Update(float dt, float totalTime);
 		void ApplyForce(XMFLOAT3 force);
+		void ApplyAngularForce(XMFLOAT3 force);
 		void ApplyGravity(float dt);
 		Entity* Item;
 		XMFLOAT3 Position;
+		XMFLOAT3 Rotation;
 		XMFLOAT3 Velocity;
+		XMFLOAT3 AngularVelocity;
 		bool UseGravity;
 		bool Static;
 		float Mass;
@@ -37,6 +41,7 @@ namespace Colliders {
 	{
 	public:
 		float minX, maxX, minY, maxY, minZ, maxZ;
+		float defaultMinX,defaultMaxX,defaultMinY,defaultMaxY,defaultMinZ,defaultMaxZ;
 		XMVECTOR AxisX, AxisY, AxisZ;
 		XMFLOAT3 size;
 		std::vector<XMVECTOR> planes;
@@ -48,17 +53,24 @@ namespace Colliders {
 		//bool CollidsionCheck(BoxCollider* box);
 	};
 	bool getSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);
-	XMVECTOR getCollidedNormal(Collider* b, XMFLOAT3 collisionPoint);
-	XMFLOAT3 getCollisionPoint(BoxCollider* a, BoxCollider* b);
-	void ForceCalculation(Collider* a,Collider* b, XMFLOAT3 collisionPoint,float totalTime);
+	XMVECTOR getCollidedNormal(Collider* Entity, XMVECTOR reflectPlane = { 0,0,0 });
+	XMVECTOR getCollisionPoint(BoxCollider* a, BoxCollider* b);
+	void ForceCalculation(Collider* a,Collider* b, XMVECTOR aNormal, XMVECTOR bNormal, XMVECTOR collisionPoint,float totalTime);
+	float AngularForceCalculation(Collider* a, XMVECTOR collisionPoint, XMVECTOR force, float totalTime);
 	bool CollisionCheck(Collider* a, Collider* b, float totalTime);
 	//Sphere check
 	bool CollisionCheck(SphereCollider* a, SphereCollider* b, float totalTime);
-	bool CollisionCheck(SphereCollider* a, BoxCollider* b, float totalTime);
 
 	//Box check
 	bool CollisionCheck(BoxCollider* a, BoxCollider* b, float totalTime);
 	bool CollisionCheck(BoxCollider* a, SphereCollider* b, float totalTime);
+
+
+
+	// Helper
+
+	bool isUnique(std::vector<XMVECTOR>points, XMVECTOR test);
+	XMVECTOR getPlaneNormal(BoxCollider* Entity, XMVECTOR point);
 }
 	
 
