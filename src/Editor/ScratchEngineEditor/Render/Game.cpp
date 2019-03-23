@@ -113,7 +113,7 @@ void Game::CreateBasicGeometry() {
 	temp3->SetTranslation(0.0, 1, 0);
 	temp4->SetTranslation(-1, -1, 0);
 	temp5->SetTranslation(2, 0, 0);
-	temp1->SetRotation(0.5f, 0.0f, 0.0f);
+	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
 	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
@@ -125,7 +125,7 @@ void Game::CreateBasicGeometry() {
 	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
 	collider->ApplyForce({ 0.5f,0,0.1f });
 	collider1->ApplyForce({ -1.5f,0,0.0f });
-	collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
+	//collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
 	collider2->ApplyForce({ 1.5f,0,0.0f });
 	collider3->ApplyForce({ -0.9f,0,0.1f });
 	collider4->ApplyForce({ 1.0f,0,-0.1f });

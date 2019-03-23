@@ -144,12 +144,20 @@ namespace Colliders{
 		XMVECTOR H = { maxX,maxY,maxZ };
 
 		planes.clear();
-		planes.push_back(XMPlaneFromPoints(A, C, B));
+		planes.push_back(XMPlaneFromPoints(B, A, D));
 		planes.push_back(XMPlaneFromPoints(A, E, C));
-		planes.push_back(XMPlaneFromPoints(A, E, F));
+		planes.push_back(XMPlaneFromPoints(E, A, F));
 		planes.push_back(XMPlaneFromPoints(E, F, G));
 		planes.push_back(XMPlaneFromPoints(C, G, D));
-		planes.push_back(XMPlaneFromPoints(B, D, F));
+		planes.push_back(XMPlaneFromPoints(F, B, H));
+
+		planesInfo.clear();
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(B, A, D, C));
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(A, E, C, G));
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(E, A, F, B));
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(E, F, G, H));
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(C, G, D, H));
+		planesInfo.push_back(std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>(F, B, H, D));
 
 		edges.clear();
 		edges.push_back(std::tuple<XMVECTOR, XMVECTOR>(A, B));
@@ -239,67 +247,109 @@ namespace Colliders{
 		// 3. intersectedPlaneB
  		XMVECTOR pLinePoint1 = {0.0f,0.0f,0.0f};
 		XMVECTOR pLinePoint2 = {0.0f,0.0f,0.0f};
-
 		std::vector <XMVECTOR> points;
+		a->UpdateVertex();
+		b->UpdateVertex();
+		//printf("===============================================================================\n");
 		for (int i = 0; i < a->planes.size(); i++) {
+			//printf("new plane\n");
+			//printf("-------------------------------------------------------------------------\n");
+
 			for (int j = 0; j < b->planes.size(); j++) {
-				XMPlaneIntersectPlane(&pLinePoint1, &pLinePoint2, a->planes[i], b->planes[j]);
+				XMPlaneIntersectPlane(&pLinePoint1, &pLinePoint2, b->planes[j], a->planes[i]);
+
 				if (!isnan(pLinePoint1.m128_f32[0])) {
+					float maxX = min(a->maxX, b->maxX);
+					float maxY = min(a->maxY, b->maxY);
+					float maxZ = min(a->maxZ, b->maxZ);
+					float minX = max(a->minX, b->minX);
+					float minY = max(a->minY, b->minY);
+					float minZ = max(a->minZ, b->minZ);
+					XMVECTOR collisionPoint = getLineIntersection(pLinePoint1, pLinePoint2, a -> planesInfo[i],
+						{ max(maxX,minX),max(maxY,minY),max(maxZ,minZ) }, { min(minX,maxX),min(minY,maxY),min(minZ,maxZ)});
+					//XMFLOAT3 cp;
+					//XMStoreFloat3(&cp, collisionPoint);
+					if (!isnan(collisionPoint.m128_f32[0])) {
+						points.push_back(collisionPoint);
+					}
+					
 					// if there is a line
-					if (pLinePoint1.m128_f32[0] > a->maxX && pLinePoint2.m128_f32[0] > a->maxX) {
-						// both of them are larger than max value, not valid
-						continue;
-					}
-					if (pLinePoint1.m128_f32[1] > a->maxY && pLinePoint2.m128_f32[1] > a->maxY) {
-						// both of them are larger than max value, not valid
-						continue;
-					}
-					if (pLinePoint1.m128_f32[2] > a->maxZ && pLinePoint2.m128_f32[2] > a->maxZ) {
-						// both of them are larger than max value, not valid
-						continue;
-					}
-					// if there is a line
-					if (pLinePoint1.m128_f32[0] < a->minX && pLinePoint2.m128_f32[0] < a->minX) {
-						// both of them are less than min value, not valid
-						continue;
-					}
-					if (pLinePoint1.m128_f32[1] < a->minY && pLinePoint2.m128_f32[1] < a->minY) {
-						// both of them are less than min value, not valid
-						continue;
-					}
-					if (pLinePoint1.m128_f32[2] < a->minZ && pLinePoint2.m128_f32[2] < a->minZ) {
-						// both of them are less than min value, not valid
-						continue;
-					}
-					pLinePoint1 = XMVectorClamp(pLinePoint1, { a->minX,a->minY,a->minZ }, { a->maxX,a->maxY,a->maxZ });
-					pLinePoint1 = XMVectorClamp(pLinePoint1, { b->minX,b->minY,b->minZ }, { b->maxX,b->maxY,b->maxZ });
-					pLinePoint2 = XMVectorClamp(pLinePoint2, { a->minX,a->minY,a->minZ }, { a->maxX,a->maxY,a->maxZ });
-					pLinePoint2 = XMVectorClamp(pLinePoint2, { b->minX,b->minY,b->minZ }, { b->maxX,b->maxY,b->maxZ });
-					XMFLOAT3 cp;
-					XMStoreFloat3(&cp, (pLinePoint1 + pLinePoint2) / 2);
-					return (pLinePoint1 + pLinePoint2) / 2;
-					//XMStoreFloat3(&cp,(pLinePoint1 + pLinePoint2) / 2);
-				/*	if (cp.x <= a->maxX && cp.y <= a->maxY && cp.z <= a->maxZ
-						&& cp.x >= a->minX && cp.y >= a->minY && cp.z >= a->minZ) {
-						printf("cp:  %f,  %f,  %f \n", cp.x, cp.y, cp.z);
-						
-						
-						if (isUnique(points, (pLinePoint1 + pLinePoint2) / 2)) {
+					//printf("pLinePoint1:  %f,  %f,  %f \n", pLinePoint1.m128_f32[0], pLinePoint1.m128_f32[1], pLinePoint1.m128_f32[2]);
+					//printf("pLinePoint2:  %f,  %f,  %f \n", pLinePoint2.m128_f32[0], pLinePoint2.m128_f32[1], pLinePoint2.m128_f32[2]);
+					
+					//if (pLinePoint1.m128_f32[0] > maxX && pLinePoint2.m128_f32[0] > maxX) {
+					//	// both of them are larger than max value, not valid
+					//	printf("diffX:  %f,  %f \n", pLinePoint2.m128_f32[0] - maxX, pLinePoint2.m128_f32[0] - maxX);
+					//	continue;
+					//}
+					
+					//if (pLinePoint1.m128_f32[1] > maxY&& pLinePoint2.m128_f32[1] > maxY) {
+					//	// both of them are larger than max value, not valid
+					//	printf("diffY:  %f,  %f \n", pLinePoint1.m128_f32[1] - maxY, pLinePoint2.m128_f32[1] - maxY);
+					//	continue;
+					//}
+					
+					//if (pLinePoint1.m128_f32[2] > maxZ&& pLinePoint2.m128_f32[2] > maxZ) {
+					//	// both of them are larger than max value, not valid
+					//	printf("diffZ:  %f,  %f \n", pLinePoint1.m128_f32[2] - maxZ, pLinePoint2.m128_f32[2] - maxZ);
+					//	continue;
+					//}
+					//// if there is a line
+					
+					//if (pLinePoint1.m128_f32[0] < minX && pLinePoint2.m128_f32[0] < minX) {
+					//	// both of them are less than min value, not valid
+					//	printf("diffXmin:  %f,  %f \n", pLinePoint1.m128_f32[0] - minX, pLinePoint2.m128_f32[0] - minX);
+					//	continue;
+					//}
+
+					//if (pLinePoint1.m128_f32[1] < minY && pLinePoint2.m128_f32[1] < minY) {
+					//	// both of them are less than min value, not valid
+					//	printf("diffYmin:  %f,  %f \n", pLinePoint1.m128_f32[1] - minY, pLinePoint2.m128_f32[1] - minY);
+					//	continue;
+					//}
+					
+					//if (pLinePoint1.m128_f32[2] < minZ && pLinePoint2.m128_f32[2] < minZ) {
+					//	// both of them are less than min value, not valid
+					//	printf("diffZmin:  %f,  %f \n", pLinePoint1.m128_f32[2] - minZ, pLinePoint2.m128_f32[2] - minZ);
+					//	continue;
+					//}
+					//pLinePoint1 = XMVectorClamp(pLinePoint1, { a->minX,a->minY,a->minZ }, { a->maxX,a->maxY,a->maxZ });
+					//pLinePoint1 = XMVectorClamp(pLinePoint1, { b->minX,b->minY,b->minZ }, { b->maxX,b->maxY,b->maxZ });
+					//pLinePoint2 = XMVectorClamp(pLinePoint2, { a->minX,a->minY,a->minZ }, { a->maxX,a->maxY,a->maxZ });
+					//pLinePoint2 = XMVectorClamp(pLinePoint2, { b->minX,b->minY,b->minZ }, { b->maxX,b->maxY,b->maxZ });
+					
+					//XMStoreFloat3(&cp, (pLinePoint1 + pLinePoint2) / 2);
+
+
+					//if (cp.x <= a->maxX && cp.y <= a->maxY && cp.z <= a->maxZ
+					//	&& cp.x >= a->minX && cp.y >= a->minY && cp.z >= a->minZ) {
+					//	printf("cp:  %f,  %f,  %f \n", cp.x, cp.y, cp.z);
+
+					//	return collisionPoint;
+					//}
+						/*if (isUnique(points, (pLinePoint1 + pLinePoint2) / 2)) {
 							points.push_back((pLinePoint1 + pLinePoint2) / 2);
 						}
 						XMVECTOR aPos = XMLoadFloat3(&a->Position);*/
 						//return std::tuple<XMVECTOR, XMVECTOR, XMVECTOR>((pLinePoint1 + pLinePoint2) / 2, {0,1,0}, b->planes[j]);
 					//}
 				}
+				else {
+					//printf(" Plane  Parallel!\n");
+				}
 			}
 		}
-		return { 1,1,1 };
-		//XMVECTOR ret = {0,0,0};
-		//for (int i = 0; i < points.size(); i++) {
-			//ret += points[i];
-		//}
-		//ret /= (float)points.size();
-		//return ret;
+		//return { 1,1,1 };
+		XMVECTOR ret = {0,0,0};
+		for (int i = 0; i < points.size(); i++) {
+			ret += points[i];
+		}
+		if (points.size() == 0) {
+			return { 0,0,0 };
+		}
+		ret /= (float)points.size();
+		//printf("cp:  %f,  %f,  %f \n", ret.m128_f32[0], ret.m128_f32[1], ret.m128_f32[2]);
+		return ret;
 	}
 
 	void ForceCalculation(Collider * a, Collider * b, XMVECTOR aNormal,XMVECTOR bNormal, XMVECTOR collisionPoint, float totalTime)
@@ -335,7 +385,7 @@ namespace Colliders{
 			// then the momentum is inifinity
 			// reverse the force
 			XMVECTOR bF = (bVelocity * b->Mass) * 1.9f * bNormal;
-		//	float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
+		    //float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
 			XMStoreFloat3(&bForce, bF);
 			b->ApplyForce(bForce);
 			//printf("normal:  %f,  %f,  %f \n", bNormal.m128_f32[0], bNormal.m128_f32[1], bNormal.m128_f32[2]);
@@ -581,6 +631,69 @@ namespace Colliders{
 				printf("%f \n", abs(A * x + B * y + C * z + D));
 			}
 		}*/
+		return ret;
+	}
+	XMVECTOR getLineIntersection(XMVECTOR start, XMVECTOR end, std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR> planeVertetices, 
+		XMFLOAT3 Max, XMFLOAT3 Min)
+	{
+		std::vector<XMVECTOR> planeVerteticesVec;
+		planeVerteticesVec.push_back(std::get<0>(planeVertetices));
+		planeVerteticesVec.push_back(std::get<1>(planeVertetices));
+		planeVerteticesVec.push_back(std::get<2>(planeVertetices));
+		planeVerteticesVec.push_back(std::get<3>(planeVertetices));
+		XMVECTOR v1 = end - start;
+		XMVECTOR ip = { 0,0,0 };
+		int counter = 0;
+		for (int i = 0; i < planeVerteticesVec.size()-1; i++)
+		{
+			XMVECTOR A = planeVerteticesVec[i];
+			for (int j = i + 1; j < planeVerteticesVec.size(); j++)
+			{
+				XMVECTOR B = planeVerteticesVec[j];
+				XMVECTOR v2 = XMVector3Normalize(B - A);
+				//printf("v1:  %f,  %f,  %f \n", v1.m128_f32[0], v1.m128_f32[1], v1.m128_f32[2]);
+				//printf("v2:  %f,  %f,  %f \n", v2.m128_f32[0], v2.m128_f32[1], v2.m128_f32[2]);
+				if (abs(XMVector3Dot(v1, v2).m128_f32[0]) == 1)
+				{
+					// 两线平行
+					//printf("line parallel \n ");
+					continue;
+				}
+
+				XMVECTOR diag = XMVector3Normalize(A - start);
+				XMVECTOR vecS1 = XMVector3Cross(v1, v2);            // 有向面积1
+				XMVECTOR vecS2 = XMVector3Cross(diag, v2); // 有向面积2
+				float num = XMVector3Dot(diag, vecS1).m128_f32[0];
+
+				// 判断两这直线是否共面
+				//if (num >= 1E-05f || num <= -1E-05f)
+				//{
+				//	continue;
+				//}
+
+				// 有向面积比值，利用点乘是因为结果可能是正数或者负数
+				float num2 = (XMVector3Dot(vecS2, vecS1) / XMVector3LengthSq(vecS1)).m128_f32[0];
+				XMVECTOR point = start + v1 * num2;
+				
+				point = XMVectorClamp(point, { Min.x,Min.y,Min.z }, { Max.x,Max.y,Max.z });
+				ip += point;
+				counter++;
+				//if (point.m128_f32[0] <= Max.x && point.m128_f32[0] >= Min.x &&
+				//	point.m128_f32[1] <= Max.y && point.m128_f32[1] >= Min.y &&
+				//	point.m128_f32[2] <= Max.z && point.m128_f32[2] >= Min.z) {
+			
+				//	printf("add!\n");
+				//}
+				//else {
+				//	printf("out of bound!\n");
+				//}
+			
+			}
+		}
+		if (counter == 0) {
+			return { NAN,NAN,NAN };
+		}
+		XMVECTOR ret = ip / (float)counter;
 		return ret;
 	}
 }
