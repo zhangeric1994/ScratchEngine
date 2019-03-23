@@ -33,8 +33,5 @@ void ScratchEngine::Scene::Update()
 
 		for (auto it = current->components.begin(); it != current->components.end(); it++)
 			(*it).second->Update();
-
-		for (auto it = current->components.begin(); it != current->components.end(); it++)
-			(*it).second->Update();
 	}
 }

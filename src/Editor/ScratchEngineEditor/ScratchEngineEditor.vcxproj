@@ -43,7 +43,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -110,7 +110,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\scratch-engine\src\Editor\ScratchEngineEditor\Physics;F:\scratch-engine\src\Editor\ScratchEngineEditor\Render;F:\scratch-engine\src\Editor\ScratchEngineEditor;..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,11 +172,32 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="header.h" />
+    <ClInclude Include="LoadSceneFile.h" />
+    <ClInclude Include="Physics\Collider.h" />
+    <ClInclude Include="Physics\Physics.h" />
+    <ClInclude Include="Render\Camera.h" />
+    <ClInclude Include="Render\DXCore.h" />
+    <ClInclude Include="Render\Entity.h" />
+    <ClInclude Include="Render\Game.h" />
+    <ClInclude Include="Render\Lights.h" />
+    <ClInclude Include="Render\Material.h" />
+    <ClInclude Include="Render\Mesh.h" />
+    <ClInclude Include="Render\SimpleShader.h" />
+    <ClInclude Include="Render\Vertex.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScratchEngineEditor.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Physics\Collider.cpp" />
+    <ClCompile Include="Physics\Physics.cpp" />
+    <ClCompile Include="Render\Camera.cpp" />
+    <ClCompile Include="Render\DXCore.cpp" />
+    <ClCompile Include="Render\Entity.cpp" />
+    <ClCompile Include="Render\Game.cpp" />
+    <ClCompile Include="Render\Material.cpp" />
+    <ClCompile Include="Render\Mesh.cpp" />
+    <ClCompile Include="Render\SimpleShader.cpp" />
     <ClCompile Include="ScratchEngineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -186,7 +207,27 @@
     <Image Include="ScratchEngineEditor.ico" />
     <Image Include="small.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Render\PixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="Render\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets" Condition="Exists('..\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\directxtk_desktop_2015.2019.2.7.1\build\native\directxtk_desktop_2015.targets'))" />
+  </Target>
 </Project>

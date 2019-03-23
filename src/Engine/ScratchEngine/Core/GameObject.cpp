@@ -8,6 +8,12 @@ ScratchEngine::GameObject::GameObject()
 {
 }
 
+ScratchEngine::GameObject::~GameObject()
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+		delete (*it).second;
+}
+
 void ScratchEngine::GameObject::SendMessage(const Message& message)
 {
 	HandleMessage(message);

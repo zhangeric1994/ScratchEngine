@@ -17,9 +17,11 @@ namespace ScratchEngine
 
 
 	public:
-		virtual void SendMessage(const Message& message);
-		virtual void SendMessageUp(const Message& message, u32 level = UINT_MAX);
-		virtual void SendMessageDown(const Message& message, u32 level = UINT_MAX);
+		GameObject* GetGameObject();
+
+		void SendMessage(const Message& message);
+		void SendMessageUp(const Message& message, u32 level = UINT_MAX);
+		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
 
 	private:

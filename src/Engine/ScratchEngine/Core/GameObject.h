@@ -1,5 +1,6 @@
 #pragma once
 
+//#include <type_traits>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -20,7 +21,7 @@ namespace ScratchEngine
 
 	public:
 		GameObject();
-		~GameObject() { }
+		~GameObject();
 
 		template<class T> GameComponent* GetComponent()
 		{
@@ -29,14 +30,17 @@ namespace ScratchEngine
 			return components.find(id) == components.end() ? nullptr : components[id];
 		}
 
-		template<class T> T* AddComponent()
+		template<class T, class... argTs> T* AddComponent(argTs... args)
 		{
+			//assert(std::is_base_of<GameComponent, T>::value)
+
 			type_index id = typeid(T);
 
 			if (components.find(id) != components.end())
-				throw "You cannot add duplicated components!";
+				throw "Cannot add duplicated components!";
 
-			T* component = new T();
+			T* component = new T(args...);
+			reinterpret_cast<GameComponent*>(component)->gameObject = this;
 
 			components[id] = component;
 

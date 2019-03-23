@@ -34,14 +34,17 @@
     <Filter Include="Header Files\Message">
       <UniqueIdentifier>{d203a301-c4bf-4daa-bc1c-28f213c80ef2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Message">
-      <UniqueIdentifier>{e4af0cac-be35-440d-b887-ed20070d9575}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Core">
       <UniqueIdentifier>{27be1762-fee6-409e-8eea-192a13baa76b}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Core">
       <UniqueIdentifier>{6cc4f91c-5a88-40f1-b2c8-327e4032b1e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{1c13c9d0-cd23-45a9-8de1-7bb4f74e7b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{a9641774-9500-4842-b3a6-b5b48c506824}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -59,9 +62,6 @@
     </ClInclude>
     <ClInclude Include="Memory\SimpleBlock.h">
       <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Physics.h">
-      <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Utility\Typedefs.h">
       <Filter>Header Files\Utility</Filter>
@@ -108,6 +108,30 @@
     <ClInclude Include="Physics\DynamicBVHNode.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Camera.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Lights.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Material.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Mesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\SimpleShader.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Vertex.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ForwardRenderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -118,9 +142,6 @@
     </ClCompile>
     <ClCompile Include="Memory\Pool.cpp">
       <Filter>Source Files\Memory</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\Physics.cpp">
-      <Filter>Source Files\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Core\GameComponent.cpp">
       <Filter>Source Files\Core</Filter>
@@ -146,5 +167,25 @@
     <ClCompile Include="Memory\DynamicPoolAllocator.h">
       <Filter>Header Files\Memory</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\Camera.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Material.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Mesh.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\SimpleShader.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ForwardRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ScratchEngine.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

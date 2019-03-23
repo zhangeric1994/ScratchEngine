@@ -165,7 +165,14 @@
     <ClInclude Include="Physics\DynamicBVHNode.h" />
     <ClInclude Include="Physics\DynamicAABBTree.h" />
     <ClInclude Include="Physics\DynamicAABBTreeNode.h" />
-    <ClInclude Include="Physics\Physics.h" />
+    <ClInclude Include="Rendering\Camera.h" />
+    <ClInclude Include="Rendering\ForwardRenderer.h" />
+    <ClInclude Include="Rendering\Lights.h" />
+    <ClInclude Include="Rendering\Material.h" />
+    <ClInclude Include="Rendering\Mesh.h" />
+    <ClInclude Include="Rendering\SimpleShader.h" />
+    <ClInclude Include="Rendering\Vertex.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Utility\Typedefs.h" />
   </ItemGroup>
@@ -180,8 +187,15 @@
     <ClCompile Include="Physics\AxisAlignedBoundingBox.cpp" />
     <ClCompile Include="Physics\DynamicAABBTree.cpp" />
     <ClCompile Include="Physics\DynamicAABBTreeNode.cpp" />
-    <ClCompile Include="Physics\Physics.cpp" />
+    <ClCompile Include="Rendering\Camera.cpp" />
+    <ClCompile Include="Rendering\ForwardRenderer.cpp" />
+    <ClCompile Include="Rendering\Material.cpp" />
+    <ClCompile Include="Rendering\Mesh.cpp" />
+    <ClCompile Include="Rendering\SimpleShader.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ScratchEngine.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

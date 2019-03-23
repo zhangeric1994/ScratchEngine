@@ -28,8 +28,23 @@ namespace ScratchEngineTest
 
 	struct TestComponent1 : GameComponent
 	{
+		int data;
 		bool isUpdated;
 		int numMessagesReceived;
+
+		TestComponent1()
+		{
+			data = 0;
+			isUpdated = false;
+			numMessagesReceived = 0;
+		}
+
+		TestComponent1(int data)
+		{
+			this->data = data;
+			isUpdated = false;
+			numMessagesReceived = 0;
+		}
 
 		void Update()
 		{
@@ -44,8 +59,23 @@ namespace ScratchEngineTest
 
 	struct TestComponent2 : GameComponent
 	{
+		int data;
 		bool isUpdated;
 		int numMessagesReceived;
+
+		TestComponent2()
+		{
+			data = 0;
+			isUpdated = false;
+			numMessagesReceived = 0;
+		}
+
+		TestComponent2(int data)
+		{
+			this->data = data;
+			isUpdated = false;
+			numMessagesReceived = 0;
+		}
 
 		void Update()
 		{
@@ -97,7 +127,7 @@ namespace ScratchEngineTest
 			Assert::IsNull(testObject3->GetChild(0));
 		}
 
-		TEST_METHOD(AddComponent)
+		TEST_METHOD(AddComponent1)
 		{
 			TestObject* testObject = new TestObject();
 
@@ -110,6 +140,41 @@ namespace ScratchEngineTest
 
 			Assert::AreEqual((uptr)testComponent1, (uptr)testObject->GetComponent<TestComponent1>());
 			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+
+			Assert::AreEqual((uptr)testObject, (uptr)testComponent1->GetGameObject());
+			Assert::AreEqual(0, testComponent1->data);
+			Assert::AreEqual(false, testComponent1->isUpdated);
+			Assert::AreEqual(0, testComponent1->numMessagesReceived);
+
+			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
+			Assert::AreEqual(0, testComponent2->data);
+			Assert::AreEqual(false, testComponent2->isUpdated);
+			Assert::AreEqual(0, testComponent2->numMessagesReceived);
+		}
+
+		TEST_METHOD(AddComponent2)
+		{
+			TestObject* testObject = new TestObject();
+
+
+			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>(1);
+			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>(2);
+
+
+			Assert::AreNotEqual((uptr)testComponent1, (uptr)testComponent2);
+
+			Assert::AreEqual((uptr)testComponent1, (uptr)testObject->GetComponent<TestComponent1>());
+			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+
+			Assert::AreEqual((uptr)testObject, (uptr)testComponent1->GetGameObject());
+			Assert::AreEqual(1, testComponent1->data);
+			Assert::AreEqual(false, testComponent1->isUpdated);
+			Assert::AreEqual(0, testComponent1->numMessagesReceived);
+
+			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
+			Assert::AreEqual(2, testComponent2->data);
+			Assert::AreEqual(false, testComponent2->isUpdated);
+			Assert::AreEqual(0, testComponent2->numMessagesReceived);
 		}
 
 		TEST_METHOD(RemoveComponent)
@@ -125,6 +190,8 @@ namespace ScratchEngineTest
 
 			Assert::IsNull(testObject->GetComponent<TestComponent1>());
 			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+
+			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
 		}
 
 		TEST_METHOD(SendMessage1)

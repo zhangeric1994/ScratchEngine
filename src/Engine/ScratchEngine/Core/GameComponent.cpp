@@ -1,5 +1,10 @@
 #include "GameObject.h"
 
+ScratchEngine::GameObject * ScratchEngine::GameComponent::GetGameObject()
+{
+	return gameObject;
+}
+
 void ScratchEngine::GameComponent::SendMessage(const Message & message)
 {
 	gameObject->SendMessage(message);
