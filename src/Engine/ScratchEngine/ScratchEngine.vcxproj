@@ -175,6 +175,7 @@
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Memory\DynamicPoolAllocator.h" />
     <ClCompile Include="Memory\Pool.cpp" />
     <ClCompile Include="Physics\AxisAlignedBoundingBox.cpp" />
     <ClCompile Include="Physics\DynamicAABBTree.cpp" />

@@ -143,5 +143,8 @@
     <ClCompile Include="Physics\DynamicAABBTreeNode.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Memory\DynamicPoolAllocator.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

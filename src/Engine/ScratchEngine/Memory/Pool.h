@@ -35,7 +35,6 @@ namespace ScratchEngine
 		private:
 			__forceinline void Add(Block* block);
 			__forceinline void Remove(Block* block);
-			
 		};
 
 #define __height(node) (node ? node->height : 0)
