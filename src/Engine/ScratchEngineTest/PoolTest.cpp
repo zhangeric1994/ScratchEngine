@@ -1,9 +1,6 @@
 #include "CppUnitTest.h"
 #include "stdafx.h"
 
-//#include "Memory/Pool.cpp"
-//#include "Memory/PoolAllocator.h"
-
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;

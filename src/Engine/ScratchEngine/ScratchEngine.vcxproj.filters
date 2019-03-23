@@ -90,12 +90,6 @@
     <ClInclude Include="Physics\AxisAlignedBoundingBox.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\BoundingVolumeHierarchy.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\BoundingVolumeHierarchyNode.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\DynamicAABBTree.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -107,6 +101,12 @@
     </ClInclude>
     <ClInclude Include="Memory\PoolAllocator.h">
       <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\DynamicBVH.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\DynamicBVHNode.h">
+      <Filter>Header Files\Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -18,5 +18,6 @@
 #include "Memory/PoolAllocator.h"
 
 #include "Physics/DynamicAABBTree.h"
+#include "Physics/DynamicBVH.h"
 
 #include "Utility/Typedefs.h"

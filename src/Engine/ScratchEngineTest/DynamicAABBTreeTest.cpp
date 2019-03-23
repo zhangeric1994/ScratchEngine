@@ -69,8 +69,10 @@ namespace ScratchEngineTest
 			DynamicAABBTree tree;
 
 
-			for (int i = 0; i < 2048; i++)
+			for (int i = 0; i < 64; i++)
 				tree.Insert(new AABBCollider(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f));
+
+			tree.Insert(new AABBCollider(0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f));
 		}
 
 		TEST_METHOD(Remove1)

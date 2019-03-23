@@ -42,7 +42,7 @@ namespace ScratchEngine
 
 			bool IsLeaf() const;
 			f32 GetVolume() const;
-			f32 GetUnionVolume(const DynamicAABBTreeNode* other) const;
+			f32 GetUnionVolume(const DynamicAABBTreeNode& other) const;
 		};
 	}
 }

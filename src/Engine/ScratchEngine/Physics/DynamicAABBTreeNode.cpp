@@ -10,7 +10,7 @@ ScratchEngine::f32 ScratchEngine::Physics::DynamicAABBTreeNode::GetVolume() cons
 	return box.GetVolume();
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::DynamicAABBTreeNode::GetUnionVolume(const DynamicAABBTreeNode* other) const
+ScratchEngine::f32 ScratchEngine::Physics::DynamicAABBTreeNode::GetUnionVolume(const DynamicAABBTreeNode& other) const
 {
-	return box.GetUnionVolume(other->box);
+	return box.GetUnionVolume(other.box);
 }

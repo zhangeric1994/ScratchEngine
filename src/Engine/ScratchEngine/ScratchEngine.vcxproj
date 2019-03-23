@@ -161,8 +161,8 @@
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
     <ClInclude Include="Physics\AxisAlignedBoundingBox.h" />
-    <ClInclude Include="Physics\BoundingVolumeHierarchy.h" />
-    <ClInclude Include="Physics\BoundingVolumeHierarchyNode.h" />
+    <ClInclude Include="Physics\DynamicBVH.h" />
+    <ClInclude Include="Physics\DynamicBVHNode.h" />
     <ClInclude Include="Physics\DynamicAABBTree.h" />
     <ClInclude Include="Physics\DynamicAABBTreeNode.h" />
     <ClInclude Include="Physics\Physics.h" />

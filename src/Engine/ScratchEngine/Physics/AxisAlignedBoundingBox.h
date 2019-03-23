@@ -14,6 +14,8 @@ namespace ScratchEngine
 		{
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
+			template<typename T> friend class DynamicBVH;
+			template<typename T> friend class DynamicBVHNode;
 
 		protected:
 			union

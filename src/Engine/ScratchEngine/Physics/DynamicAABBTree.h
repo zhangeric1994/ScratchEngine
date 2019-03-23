@@ -1,6 +1,10 @@
 #pragma once
 
+#include "../Memory/DynamicPoolAllocator.h"
+
 #include "DynamicAABBTreeNode.h"
+
+using namespace ScratchEngine::Memory;
 
 namespace ScratchEngine
 {
@@ -9,11 +13,9 @@ namespace ScratchEngine
 		class __declspec(dllexport) DynamicAABBTree
 		{
 		private:
-			DynamicAABBTreeNode* memory;
-			i32 freeList : 32;
-			i32 numAllocated : 32;
-			i32 capacity : 32;
-			i32 root : 32;
+			DynamicPoolAllocator<DynamicAABBTreeNode> allocator;
+
+			size_t root;
 
 		public:
 			DynamicAABBTree();
@@ -23,12 +25,8 @@ namespace ScratchEngine
 			void Remove(i32 id);
 
 		private:
-			__forceinline i32 _allocate_node(Collider* collider = nullptr);
-			__forceinline DynamicAABBTreeNode* _get_node(i32 id);
-			__forceinline void _free_node(i32 id);
-
 			__forceinline i32 _balance(i32 id);
-			__forceinline void _update_box_and_height(DynamicAABBTreeNode* node);
+			__forceinline void _update_box_and_height(DynamicAABBTreeNode& node);
 		};
 	}
 }

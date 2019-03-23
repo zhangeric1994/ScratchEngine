@@ -6,7 +6,7 @@ namespace ScratchEngine
 {
 	namespace Memory
 	{
-		enum BlockStatus : i32
+		enum BlockStatus : u64
 		{
 			ALLOCATED = 0xa110ced,
 			FREED = 0xf7ee,
