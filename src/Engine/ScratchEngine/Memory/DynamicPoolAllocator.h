@@ -18,14 +18,32 @@ namespace ScratchEngine
 			i32 next : 32;
 		};
 
+		template<class T> struct __declspec(dllexport) DynamicPoolPointer
+		{
+			template<class T> friend class DynamicPoolAllocator;
+
+		private:
+			DynamicPoolAllocator<T>* allocator;
+			i32 id;
+
+		public:
+			T* operator->()
+			{
+				return allocator.memory + id;
+			}
+		};
+
 		template<class T> class __declspec(dllexport) DynamicPoolAllocator
 		{
+			template<class T> friend class DynamicPoolPointer;
+
 		private:
 			T* memory;
 
 			i32 capacity;
 			i32 numAllocated;
 			i32 freeList;
+
 
 		public:
 			DynamicPoolAllocator(i32 capacity)
@@ -81,6 +99,41 @@ namespace ScratchEngine
 				return id;
 			}
 
+			//DynamicPoolPointer<T> AllocateDynamicPoolPointer()
+			//{
+			//	if (freeList == null_index)
+			//	{
+			//		void* previousMemory = memory;
+			//		i32 previousCapacity = capacity;
+
+			//		capacity *= 2;
+
+			//		memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
+			//		memcpy(memory, previousMemory, previousCapacity * sizeof(T));
+
+			//		reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
+			//		reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
+
+			//		for (i32 id = capacity - 2; id >= previousCapacity; --id)
+			//		{
+			//			reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
+			//			reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
+			//		}
+
+			//		freeList = previousCapacity;
+
+			//		_aligned_free(previousMemory);
+			//	}
+
+			//	i32 id = freeList;
+			//	reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = ALLOCATED;
+
+			//	freeList = reinterpret_cast<DynamicPoolBlock*>(memory + id)->next;
+			//	++numAllocated;
+
+			//	return { this, id };
+			//}
+				
 			__inline T& operator[](i32 id)
 			{
 				if (reinterpret_cast<DynamicPoolBlock*>(memory + id)->status == FREED)
