@@ -16,12 +16,15 @@ namespace ScratchEngine
 
 
 	private:
+		bool isStatic;
 		unordered_map<type_index, GameComponent*> components;
 
 
 	public:
 		GameObject();
 		~GameObject();
+
+		bool IsStatic();
 
 		template<class T> GameComponent* GetComponent()
 		{

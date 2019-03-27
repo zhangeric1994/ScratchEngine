@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-#include "AxisAlignedBoundingBox.h"
+#include "BoundingVolume.h"
 
 namespace ScratchEngine
 {
