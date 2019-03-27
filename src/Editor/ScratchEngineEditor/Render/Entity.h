@@ -25,7 +25,7 @@ public:
 	void SetLight(DirectionalLight directionalLight, std::string bufferName);
 	void SetPointLight(PointLight pLight, std::string bufferName);
 	void SetSpotLight(SpotLight sLight, std::string bufferName);
-	void SetTexture(char* textureName, char* samplerName);
+	void SetTexture(const char* textureName, const char* samplerName);
 
 	bool isUpdated();
 

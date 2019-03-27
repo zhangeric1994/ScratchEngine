@@ -42,9 +42,9 @@ cbuffer spotLightData : register(b3) {
 	SpotLight spotLight;
 }
 
-//Texture2D diffuseTexture : register(t0);
-//
-//SamplerState basicSampler : register(s0);
+Texture2D diffuseTexture : register(t0);
+
+SamplerState basicSampler : register(s0);
 
 // Struct representing the data we expect to receive from earlier pipeline stages
 // - Should match the output of our corresponding vertex shader
@@ -77,7 +77,7 @@ float3 calculateDirectionalLight(float3 normal, float3 position, DirectionalLigh
 	float3 reflectance = reflect(-nDirection, normal);
 	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
 
-	float3 finalColor = float3(1.0f, 1.0f, 1.0f) * light.DiffuseColor * NdotL + spec.rrr;
+	float3 finalColor = light.DiffuseColor * NdotL + spec.rrr;
 
 	return finalColor;
 }
@@ -96,7 +96,7 @@ float3 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
 
 
-	float3 finalColor = pointLight.AmbientColor * pointLight.DiffuseColor * NdotL + spec.rrr;
+	float3 finalColor = pointLight.DiffuseColor * NdotL + spec.rrr;
 	return finalColor;
 }
 
@@ -142,6 +142,8 @@ float4 main(VertexToPixel input) : SV_TARGET{
 
 	float4 spotLightColor = calculateSpotLight(input.normal, input.worldPos, spotLight);
 
+	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
+
 	//float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
 	// Just return the input color
@@ -150,6 +152,7 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   of the triangle we're rendering
 
 	//return pointLightColor;
-	return float4(lightColor1 + pointLightColor, 1.0f);
+	//return surfaceColor;
+	return float4(surfaceColor.rgb * (lightColor1 + pointLightColor), 1.0f);
 	
 }

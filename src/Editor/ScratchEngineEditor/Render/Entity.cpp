@@ -103,7 +103,7 @@ void Entity::SetSpotLight(SpotLight sLight, std::string bufferName) {
 
 }
 
-void Entity::SetTexture(char* textureName, char* samplerName) {
+void Entity::SetTexture(const char* textureName, const char* samplerName) {
 	material->getPixelShader()->SetShaderResourceView(textureName, material->getTexture());
 	material->getPixelShader()->SetSamplerState(samplerName, material->getSampler());
 }

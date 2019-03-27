@@ -18,7 +18,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	simpleMaterial = NULL;
 
 	directionalLight.AmbientColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
-	directionalLight.DiffuseColor = XMFLOAT3(0.0f,  0.0f, 0.5f);
+	directionalLight.DiffuseColor = XMFLOAT3(0.7f,  0.7f, 0.7f);
 	directionalLight.Direction	  = XMFLOAT3(-1.0f,  0.0f, 0.0f);
 	directionalLight.CameraX	  = camera->getPosition().x;
 	directionalLight.CameraY	  = camera->getPosition().y;
@@ -26,7 +26,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	//directionalLight.CameraPos	  = camera->getPosition();
 
 	pointLight.AmbientColor = XMFLOAT3(1.0f,  1.0f,   1.0f);
-	pointLight.DiffuseColor = XMFLOAT3(0.0f,  0.0f,   0.7f);
+	pointLight.DiffuseColor = XMFLOAT3(0.4f,  0.4f,   0.4f);
 	pointLight.Position		= XMFLOAT3(0.0f, 10.0f,   0.0f);
 	pointLight.CameraX = camera->getPosition().x;
 	pointLight.CameraY = camera->getPosition().y;
@@ -38,6 +38,18 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	spotLight.Direction	   = XMFLOAT3(0.0f, -1.0f, 0.0f);
 	spotLight.Cone		   = 0.0f;
 	spotLight.Range		   = 1000.0f;
+
+	texture = NULL;
+
+	sampler = NULL;
+
+	samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 }
 
 Game::~Game() {
@@ -49,6 +61,7 @@ Game::~Game() {
 	if (mesh) delete mesh;
 	delete camera;
 	if (simpleMaterial) delete simpleMaterial;
+	if (sampler) sampler->Release();
 }
 
 void Game::Init() {
@@ -69,7 +82,6 @@ void Game::LoadShaders() {
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
 
-	
 	vertexShader = new SimpleVertexShader(device, context);
 
 	vertexShader->LoadShaderFile(vertex);
@@ -96,7 +108,12 @@ void Game::CreateMatrces() {
 }
 
 void Game::CreateBasicGeometry() {
-	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/wood/wood1.png", 0, &texture);
+
+	//create sample
+	device->CreateSamplerState(&samplerDesc, &sampler);
+
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, sampler);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	mesh = new Mesh(device, filename);
 	Entity* temp = new Entity(mesh, simpleMaterial);
@@ -149,6 +166,7 @@ void Game::Draw(float deltaTime, float totalTime) {
 		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");
 		entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
+		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
 
