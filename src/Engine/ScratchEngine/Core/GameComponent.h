@@ -12,7 +12,7 @@ namespace ScratchEngine
 		friend class GameObject;
 
 
-	private:
+	protected:
 		GameObject* gameObject;
 
 

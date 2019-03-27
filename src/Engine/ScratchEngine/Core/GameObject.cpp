@@ -14,6 +14,11 @@ ScratchEngine::GameObject::~GameObject()
 		delete (*it).second;
 }
 
+bool ScratchEngine::GameObject::IsStatic()
+{
+	return isStatic;
+}
+
 void ScratchEngine::GameObject::SendMessage(const Message& message)
 {
 	HandleMessage(message);
