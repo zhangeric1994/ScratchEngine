@@ -18,31 +18,26 @@ namespace ScratchEngine
 	{
 		XMVECTOR gravity = XMVectorSet(0, -9.8f, 0, 0);
 		XMVECTOR AxisX = XMVectorSet(1, 0, 0, 0);
-		XMVECTOR AxisX = XMVectorSet(0, 1, 0, 0);
-		XMVECTOR AxisX = XMVectorSet(0, 0, 1, 0);
+		XMVECTOR AxisY = XMVectorSet(0, 1, 0, 0);
+		XMVECTOR AxisZ = XMVectorSet(0, 0, 1, 0);
 
 		
-		template<class T> class __declspec(dllexport) Collider : public GameComponent
+		class __declspec(dllexport) Collider : public GameComponent
 		{
 		protected:
-			T* boundingVolume;
-			std::unordered_map<gameObject*, float> CollidedWith;
+			BoundingVolumeType type;
+			BoundingVolume* boundingVolume;
+
 
 		public:
-			template<class V> bool Query(Collider<V>* other, float currentTime)
-			{
-				return GetBoundingVolume()->Query(other->GetBoundingVolume(), currentTime);
-			}
+			BoundingVolumeType GetType();
+			BoundingVolume* GetBoundingVolume();
 
-		private:
-			BoundingVolume<T> GetBoundingVolume()
-			{
-				return boundingVolume;
-			}
+			bool Query(Collider* other, float currentTime);
 		};
 
 		
-		class BoxCollider : public Collider<OrientedBoundingBox>
+		class BoxCollider : public Collider
 		{
 		private:
 			XMVECTOR size;
@@ -63,7 +58,7 @@ namespace ScratchEngine
 		};
 
 		
-		class SphereCollider : public Collider<BoundingSphere>
+		class SphereCollider : public Collider
 		{
 		private:
 			f32 radius;

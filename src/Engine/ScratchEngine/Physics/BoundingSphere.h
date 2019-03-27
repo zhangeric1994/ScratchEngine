@@ -1,24 +1,21 @@
 #pragma once
 
-#include <DirectXMath.h>
-
-#include "../Utility/Typedefs.h"
-
-using namespace DirectX;
+#include "BoundingVolume.h"
+#include "RigidBody.h"
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
-		enum BoundingVolumeType
+		struct BoundingSphere : public BoundingVolume
 		{
-			AABB,
-			OBB,
-			Sphere,
+			template<typename T1, typename T2> friend bool CollisionCheck(T1*, T2*, RigidBody*, RigidBody*, float);
+
+
+		private:
+			XMVECTOR center;
+			f32 radius;
 		};
-
-
-		struct BoundingVolume { };
 
 
 		//template<VolumeType T> XMVECTOR GetCollisionNormal(OrientedBoundingBox* a, XMVECTOR plane = { 0, 0, 0, 0 })
@@ -279,4 +276,3 @@ namespace ScratchEngine
 		//}
 	}
 }
-

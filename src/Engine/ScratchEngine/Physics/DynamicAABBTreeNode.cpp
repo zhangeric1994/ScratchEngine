@@ -7,10 +7,10 @@ bool ScratchEngine::Physics::DynamicAABBTreeNode::IsLeaf() const
 
 ScratchEngine::f32 ScratchEngine::Physics::DynamicAABBTreeNode::GetVolume() const
 {
-	return box.GetVolume();
+	return aabb.GetVolume();
 }
 
 ScratchEngine::f32 ScratchEngine::Physics::DynamicAABBTreeNode::GetUnionVolume(const DynamicAABBTreeNode& other) const
 {
-	return box.GetUnionVolume(other.box);
+	return aabb.GetUnionVolume(other.aabb);
 }

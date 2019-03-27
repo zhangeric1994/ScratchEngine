@@ -29,7 +29,6 @@ namespace ScratchEngine
 
 			void ApplyForce(XMVECTOR force);
 			void ApplyAngularForce(XMVECTOR force);
-			void Update(f32 deltaTime, f32 totalTime);
 		};
 	}
 }

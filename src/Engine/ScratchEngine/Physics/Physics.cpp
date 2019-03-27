@@ -1,7 +1,5 @@
 #include "Physics.h"
 
-using namespace Physics;
-
 Physics::Physics(size_t _MaxColliderNum)
 {
 	NumCoolidersHandled = 0;

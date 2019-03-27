@@ -1,29 +1,88 @@
 #include <cstdlib>
 
 #include "Collider.h"
-#include "Physics.h"
+#include "CollisionDetection.hpp"
 
 using namespace DirectX;
 
 f32 collisionCheckBack = 0.00f;
 
-SphereCollider::SphereCollider(f32 radius)
+bool ScratchEngine::Physics::Collider::Query(Collider* other, float currentTime)
+{
+	switch (type)
+	{
+	case ScratchEngine::Physics::AABB:
+		break;
+
+
+	case ScratchEngine::Physics::OBB:
+		switch (other->GetType())
+		{
+		case ScratchEngine::Physics::AABB:
+			break;
+
+
+		case ScratchEngine::Physics::OBB:
+			return ScratchEngine::Physics::CollisionCheck(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<OrientedBoundingBox*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			break;
+
+
+		case ScratchEngine::Physics::Sphere:
+			return ScratchEngine::Physics::CollisionCheck(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			break;
+		}
+		break;
+
+
+	case ScratchEngine::Physics::Sphere:
+		switch (other->GetType())
+		{
+		case ScratchEngine::Physics::AABB:
+			break;
+
+
+		case ScratchEngine::Physics::OBB:
+			return ScratchEngine::Physics::CollisionCheck(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			break;
+
+
+		case ScratchEngine::Physics::Sphere:
+			return ScratchEngine::Physics::CollisionCheck(static_cast<BoundingSphere*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			break;
+		}
+		break;
+	}
+
+	throw "NOT IMPLEMENTED";
+}
+
+ScratchEngine::Physics::BoundingVolumeType ScratchEngine::Physics::Collider::GetType()
+{
+	return type;
+}
+
+ScratchEngine::Physics::BoundingVolume * ScratchEngine::Physics::Collider::GetBoundingVolume()
+{
+	return boundingVolume;
+}
+
+ScratchEngine::Physics::SphereCollider::SphereCollider(f32 radius)
 {
 	this->radius = radius;
 }
 
 
-SphereCollider::~SphereCollider()
+ScratchEngine::Physics::SphereCollider::~SphereCollider()
 {
 }
 
 
-BoxCollider::BoxCollider(XMVECTOR size)
+ScratchEngine::Physics::BoxCollider::BoxCollider(XMVECTOR size)
 {
 	this->size = size;
 }
 
-BoxCollider::~BoxCollider()
+ScratchEngine::Physics::BoxCollider::~BoxCollider()
 {
 }
 

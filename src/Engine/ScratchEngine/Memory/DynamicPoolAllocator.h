@@ -18,6 +18,7 @@ namespace ScratchEngine
 			i32 next : 32;
 		};
 
+
 		template<class T> struct __declspec(dllexport) DynamicPoolPointer
 		{
 			template<class T> friend class DynamicPoolAllocator;
@@ -33,9 +34,10 @@ namespace ScratchEngine
 			}
 		};
 
+
 		template<class T> class __declspec(dllexport) DynamicPoolAllocator
 		{
-			template<class T> friend class DynamicPoolPointer;
+			template<class T> friend struct DynamicPoolPointer;
 
 		private:
 			T* memory;

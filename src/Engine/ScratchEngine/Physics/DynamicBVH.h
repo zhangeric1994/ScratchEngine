@@ -1,8 +1,12 @@
 #pragma once
 
+#include <stack>
+
 #include "../Memory/DynamicPoolAllocator.h"
 
 #include "DynamicBVHNode.h"
+
+using namespace ScratchEngine::Memory;
 
 namespace ScratchEngine
 {
@@ -10,9 +14,13 @@ namespace ScratchEngine
 	{
 		template<class T> class __declspec(dllexport) DynamicBVH
 		{
+			friend class PhysicsEngine;
+
+
 		private:
 			DynamicPoolAllocator<DynamicBVHNode<T>> allocator;
 			i32 root;
+
 
 		public:
 			DynamicBVH() : allocator(128)
@@ -20,14 +28,14 @@ namespace ScratchEngine
 				root = null_index;
 			}
 
-			i32 Insert(T* data, const AxisAlignedBoundingBox& box)
+			i32 Insert(T* data, const AxisAlignedBoundingBox& aabb)
 			{
 				assert(data);
 
 				i32 iLeaf = allocator.Allocate();
 				DynamicBVHNode<T>& leaf = allocator[iLeaf];
 
-				leaf.box = box;
+				leaf.aabb = aabb;
 				leaf.data = data;
 				leaf.height = 0;
 				leaf.parent = null_index;
@@ -143,7 +151,41 @@ namespace ScratchEngine
 				}
 			}
 
+
 		private:
+			template<typename V> void Query(int targetID, bool (V::*callback)(T*, T*))
+			{
+				DynamicBVHNode<T>* targetNode = allocator[targetID];
+
+				stack<int> s;
+
+				s.push(root);
+
+				while (!s.empty())
+				{
+					int id = s.pop();
+
+					if (id == null_index)
+						continue;
+
+					DynamicBVHNode<T>* node = allocator[id];
+
+					if (CollisionCheck(targetNode->aabb, node->aabb, nullptr, nullptr, 0))
+					{
+						if (node->IsLeaf())
+						{
+							if (!callback(targetNode->data, node->data))
+								return;
+						}
+						else
+						{
+							s.push(node->left);
+							s.push(node->right);
+						}
+					}
+				}
+			}
+
 			__forceinline i32 _balance(i32 id)
 			{
 				DynamicBVHNode<T>& node = allocator[id];
@@ -254,8 +296,8 @@ namespace ScratchEngine
 				DynamicBVHNode<T>& l = allocator[node.left];
 				DynamicBVHNode<T>& r = allocator[node.right];
 
-				node.box = l.box;
-				node.box.Union(r.box);
+				node.aabb = l.aabb;
+				node.aabb.Union(r.aabb);
 
 				node.height = __max(l.height, r.height) + 1;
 			}

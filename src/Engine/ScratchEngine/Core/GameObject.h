@@ -26,11 +26,11 @@ namespace ScratchEngine
 
 		bool IsStatic();
 
-		template<class T> GameComponent* GetComponent()
+		template<class T> T* GetComponent()
 		{
 			type_index id = typeid(T);
 
-			return components.find(id) == components.end() ? nullptr : components[id];
+			return static_cast<T*>(components.find(id) == components.end() ? nullptr : components[id]);
 		}
 
 		template<class T, class... argTs> T* AddComponent(argTs... args)

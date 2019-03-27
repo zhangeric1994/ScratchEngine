@@ -24,8 +24,8 @@ namespace ScratchEngineTest
 
 			AxisAlignedBoundingBox GetBoundingVolume()
 			{
-				AxisAlignedBoundingBox box(min, max);
-				return box;
+				AxisAlignedBoundingBox aabb(min, max);
+				return aabb;
 			}
 		};
 
