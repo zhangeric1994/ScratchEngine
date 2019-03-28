@@ -11,7 +11,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	mesh1 = 0;
 	lastPhysicsCheck = 0.0f;
 
-	entityVector.resize(100);
+	entityVector.resize(50);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -160,7 +160,7 @@ void Game::CreateBasicGeometry() {
 	//temp3->SetTranslation(0.0, 1, 0);
 	//temp4->SetTranslation(-1, -1, 0);
 	//temp5->SetTranslation(2, 0, 0);
-	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
+	
 	obstacle->SetTranslation(0.0f, -9.5f, 0.0f);
 	obstacle->SetTranslation(2.0f, -8.0f, 2.0f);
 	obstacle->SetScale(3, 3, 3);
@@ -180,7 +180,7 @@ void Game::CreateBasicGeometry() {
 	//collider3->ApplyForce({ -0.9f,0,0.1f });
 	//collider4->ApplyForce({ 1.0f,0,-0.1f });
 	//collider5->ApplyForce({ -1.4f,0,0.1f });
-	for (int i = 0; i < 99; i++)
+	for (int i = 0; i < 49; i++)
 	{
 		Entity* temp = new Entity(mesh, simpleMaterial);
 		entityVector[i] = temp;
@@ -188,7 +188,7 @@ void Game::CreateBasicGeometry() {
 		Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
 		collider->ApplyForce({ static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX) });
 	}
-	entityVector[99] = terrain;
+	entityVector[49] = terrain;
 	//entityVector[100] = obstacle;
 	Collider* collider6 = physics->addBoxCollider(terrain, XMFLOAT3{ 100,1,100 }, 1.0f, false, true);
 	//Collider* collider7 = physics->addBoxCollider(obstacle, XMFLOAT3{ 3,3,3 }, 1.0f, false, true);
