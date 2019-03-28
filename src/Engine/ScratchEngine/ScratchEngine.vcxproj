@@ -159,6 +159,7 @@
     <ClInclude Include="Common\Typedefs.h" />
     <ClInclude Include="Core\GameComponent.h" />
     <ClInclude Include="Core\GameObject.h" />
+    <ClInclude Include="Core\InputManager.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
@@ -192,10 +193,10 @@
   <ItemGroup>
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
+    <ClCompile Include="Core\InputManager.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Memory\DynamicPoolAllocator.h" />
     <ClCompile Include="Memory\BlockAllocator.cpp" />
     <ClCompile Include="Physics\BoundingVolume.cpp" />

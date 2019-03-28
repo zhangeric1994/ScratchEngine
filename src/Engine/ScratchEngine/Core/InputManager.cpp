@@ -22,7 +22,7 @@ bool InputManager::IsKeyDown(PBYTE keyCode)
 	}
 	return mapOfKeyCodes[keyCode];
 }
-bool InputManager::SetKeyState(char key, bool isDown)
+void InputManager::SetKeyState(char key, bool isDown)
 {
 	mem[key] = isDown;
 }

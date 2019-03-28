@@ -15,7 +15,7 @@ namespace ScratchEngine
 		// keyboard input
 		bool IsKeyDown(char);
 		bool IsKeyDown(PBYTE);
-		bool SetKeyState(char, bool);
+		void SetKeyState(char, bool);
 		void Clear();
 
 		// mouse input
