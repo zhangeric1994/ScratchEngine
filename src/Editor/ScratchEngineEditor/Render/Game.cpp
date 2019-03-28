@@ -10,8 +10,8 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	mesh = 0;
 	meshPlatform = 0;
 
-
-
+	CreateConsoleWindow(500, 120, 32, 120);
+	printf("Console window created successfully.  Feel free to printf() here.\n");
 
 	entityVector.resize(3);
 
@@ -86,6 +86,7 @@ void Game::Init() {
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
+	memOfKey = 0;
 }
 
 void Game::LoadShaders() {
@@ -158,8 +159,8 @@ void Game::CreateBasicGeometry() {
 	//temp2->SetRotation(90, 0, 0);
 	temp2->SetScale(10, 1, 10);
 
-	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
-	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
+	Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, false, false);
+	Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 1.0f, false, false);
 	collider->ApplyForce({ 0.9f, 0.0f, 0.0f });
 	collider1->ApplyForce({ -0.9f, 0.0f, 0.0f });
 
@@ -180,6 +181,13 @@ void Game::Update(float deltaTime, float totalTime) {
 	XMMATRIX view = camera->Update();
 	
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
+	
+	if (IsKeyDown('T')) 
+	{
+		printf("pressed T");
+	}
+	OnMouseDrag(MOUSEEVENTF_LEFTDOWN);
+	
 }
 
 void Game::Draw(float deltaTime, float totalTime) {
@@ -229,53 +237,106 @@ void Game::Draw(float deltaTime, float totalTime) {
 // from the OS-level messages anyway, so these helpers have
 // been created to provide basic mouse input if you want it.
 // --------------------------------------------------------
-void Game::OnMouseDown(WPARAM buttonState, int x, int y) {
-	// Add any custom code here...
+//void Game::OnMouseDown(WPARAM buttonState, int x, int y) {
+//	// Add any custom code here...
+//
+//	// Save the previous mouse position, so we have it for the future
+//	prevMousePos.x = x;
+//	prevMousePos.y = y;
+//
+//	// Caputure the mouse so we keep getting mouse move
+//	// events even if the mouse leaves the window.  we'll be
+//	// releasing the capture once a mouse button is released
+//	SetCapture(hWnd);
+//}
+//
+//// --------------------------------------------------------
+//// Helper method for mouse release
+//// --------------------------------------------------------
+//void Game::OnMouseUp(WPARAM buttonState, int x, int y) {
+//	// Add any custom code here...
+//
+//	// We don't care about the tracking the cursor outside
+//	// the window anymore (we're not dragging if the mouse is up)
+//	ReleaseCapture();
+//}
+//
+//// --------------------------------------------------------
+//// Helper method for mouse movement.  We only get this message
+//// if the mouse is currently over the window, or if we're 
+//// currently capturing the mouse.
+//// --------------------------------------------------------
+//void Game::OnMouseMove(WPARAM buttonState, int x, int y) {
+//	// Add any custom code here...
+//	if (buttonState & 0x0001) {
+//		camera->SetRotationX((y - prevMousePos.y) * 0.001f);
+//		camera->SetRotationY((x - prevMousePos.x) * 0.001f);
+//	}
+//	// Save the previous mouse position, so we have it for the future
+//	prevMousePos.x = x;
+//	prevMousePos.y = y;
+//}
+//
+//// --------------------------------------------------------
+//// Helper method for mouse wheel scrolling.  
+//// WheelDelta may be positive or negative, depending 
+//// on the direction of the scroll
+//// --------------------------------------------------------
+//void Game::OnMouseWheel(float wheelDelta, int x, int y) {
+//	// Add any custom code here...
+//}
 
-	// Save the previous mouse position, so we have it for the future
-	prevMousePos.x = x;
-	prevMousePos.y = y;
-
-	// Caputure the mouse so we keep getting mouse move
-	// events even if the mouse leaves the window.  we'll be
-	// releasing the capture once a mouse button is released
-	SetCapture(hWnd);
+bool Game::IsKeyDown(char key)
+{
+	if (this->memOfKey[key] == 0)
+	{
+		bool isDown = GetAsyncKeyState(key) & 0x8000;
+		this->memOfKey[key] = isDown;
+	}
+	return memOfKey[key];
 }
 
-// --------------------------------------------------------
-// Helper method for mouse release
-// --------------------------------------------------------
-void Game::OnMouseUp(WPARAM buttonState, int x, int y) {
-	// Add any custom code here...
+bool Game::IsKeyDown(PBYTE keyCode)
+{
+	if (this->mapOfKeyCodes[keyCode] == 0)
+	{
+		bool isDown = GetKeyboardState(keyCode);
+		this->mapOfKeyCodes[keyCode] = isDown ? 1 : -1;
+	}
+	return mapOfKeyCodes[keyCode];
+}
+void Game::SetKeyState(char key, bool isDown)
+{
+	memOfKey[key] = isDown;
+}
 
-	// We don't care about the tracking the cursor outside
-	// the window anymore (we're not dragging if the mouse is up)
+void Game::Clear()
+{
+	memset(memOfKey, 0, 1024);
+}
+
+void Game::OnMouseDown(WPARAM buttonState, int x, int y)
+{
+	this->mPos.x = x;
+	this->mPos.y = y;
+	SetCapture(this->hWnd);
+}
+
+void Game::OnMouseUp(WPARAM buttonState, int x, int y)
+{
+	//this->mPos.x = NULL;
+	//this->mPos.y = NULL;
 	ReleaseCapture();
 }
 
-// --------------------------------------------------------
-// Helper method for mouse movement.  We only get this message
-// if the mouse is currently over the window, or if we're 
-// currently capturing the mouse.
-// --------------------------------------------------------
-void Game::OnMouseMove(WPARAM buttonState, int x, int y) {
-	// Add any custom code here...
-	if (buttonState & 0x0001) {
-		camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-		camera->SetRotationY((x - prevMousePos.x) * 0.001f);
+void Game::OnMouseDrag(WPARAM buttonState)
+{
+	if (DragDetect(hWnd, mPos))
+	{
+		printf("done");
 	}
-	// Save the previous mouse position, so we have it for the future
-	prevMousePos.x = x;
-	prevMousePos.y = y;
-}
-
-// --------------------------------------------------------
-// Helper method for mouse wheel scrolling.  
-// WheelDelta may be positive or negative, depending 
-// on the direction of the scroll
-// --------------------------------------------------------
-void Game::OnMouseWheel(float wheelDelta, int x, int y) {
-	// Add any custom code here...
+	this->OnMouseDown(buttonState, mPos.x, mPos.y);
+	
 }
 #pragma endregion
 
