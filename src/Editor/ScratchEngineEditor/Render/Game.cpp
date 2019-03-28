@@ -117,7 +117,7 @@ void Game::CreateBasicGeometry() {
 	//create sample
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	simpleMaterial = new Material(vertexShader, pixelShader, texture, 0, sampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	mesh = new Mesh(device, filename);
 	Entity* temp = new Entity(mesh, simpleMaterial);
@@ -150,8 +150,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	//const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//const float color[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer

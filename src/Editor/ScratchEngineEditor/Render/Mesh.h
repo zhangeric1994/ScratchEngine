@@ -24,14 +24,18 @@ public:
 	ID3D11Buffer* GetIndexBuffer();
 	int GetIndexCount();
 
+	
+
+private:
+	ID3D11Buffer* vertexBuffer;
+	ID3D11Buffer* indexBuffer;
+	int indicesNum;
+
 	void CreateMesh(Vertex* vertices,
 		int verticesNumber,
 		unsigned int* indices,
 		int indicesNumber,
 		ID3D11Device* device);
 
-private:
-	ID3D11Buffer* vertexBuffer;
-	ID3D11Buffer* indexBuffer;
-	int indicesNum;
+	Vertex* ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber);
 };
