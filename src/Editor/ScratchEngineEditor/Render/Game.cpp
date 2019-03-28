@@ -126,6 +126,8 @@ Game::~Game() {
 	if (texture) texture->Release();
 	if (normalMap) normalMap->Release();
 	if (meshPlatform) delete meshPlatform;
+	if (shadowMap) shadowMap->Release();
+	if (shadowResourceView) shadowResourceView->Release();
 }
 
 void Game::Init() {
@@ -272,8 +274,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	//const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//const float color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
