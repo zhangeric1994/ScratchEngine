@@ -93,4 +93,6 @@ private:
 	XMFLOAT4 lightPosition;
 	D3D11_VIEWPORT shadowViewport;
 
+	ID3D11RasterizerState *shadowRenderState;
+
 };

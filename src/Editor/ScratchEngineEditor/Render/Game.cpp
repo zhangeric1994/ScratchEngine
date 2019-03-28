@@ -128,6 +128,7 @@ Game::~Game() {
 	if (meshPlatform) delete meshPlatform;
 	if (shadowMap) shadowMap->Release();
 	if (shadowResourceView) shadowResourceView->Release();
+	if (shadowRenderState) shadowRenderState->Release();
 }
 
 void Game::Init() {
@@ -218,6 +219,11 @@ void Game::CreateBasicGeometry() {
 		&shadowResourceView
 	);
 
+	device->CreateRasterizerState(
+		&shadowRenderStateDesc,
+		&shadowRenderState
+	);
+
 
 	//
 
@@ -289,32 +295,43 @@ void Game::Draw(float deltaTime, float totalTime) {
 	//-------------------------------------
 	
 	//first pass shadow map
+	context->OMSetRenderTargets(
+		0,
+		nullptr,
+		shadowdepthStencilView
+	);
+
+	context->RSSetState(shadowRenderState);
+	context->RSSetViewports(1, &shadowViewport);
+
+
+
 
 
 
 	//second pass render scene based on shadow map
-	for (auto& m : entityVector) {
-		m->SetWorldMatrix();
-		m->PrepareMatrix(viewMatrix, projectionMatrix);
-		//m->SetPointLight(pointLight, "pointLight");
-		m->SetLight(directionalLight, "light");
-		//m->SetLight(directionalLight1, "light1");
-		//m->SetSpotLight(spotLight, "spotLight");
-		m->SetTexture("diffuseTexture", "basicSampler");
-		m->SetNormalMap("normalMap");
-		m->CopyAllBufferData();
-		m->SetShader();
+	//for (auto& m : entityVector) {
+	//	m->SetWorldMatrix();
+	//	m->PrepareMatrix(viewMatrix, projectionMatrix);
+	//	//m->SetPointLight(pointLight, "pointLight");
+	//	m->SetLight(directionalLight, "light");
+	//	//m->SetLight(directionalLight1, "light1");
+	//	//m->SetSpotLight(spotLight, "spotLight");
+	//	m->SetTexture("diffuseTexture", "basicSampler");
+	//	m->SetNormalMap("normalMap");
+	//	m->CopyAllBufferData();
+	//	m->SetShader();
 
-		//set vertex buffer and index buffer inside entity class
-		m->Draw(context);
-	}
+	//	//set vertex buffer and index buffer inside entity class
+	//	m->Draw(context);
+	//}
 
 	//-------------------------------------
 
 	//End of rendering one frame
 	swapChain->Present(0, 0);
 
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 }
 
 #pragma region Mouse Input
