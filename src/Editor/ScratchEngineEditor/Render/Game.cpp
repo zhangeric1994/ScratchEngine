@@ -19,7 +19,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 		entityVector[countOfVector] = NULL;
 
 	camera = new Camera();
-	physics = new Physics(200);
+	physics = new CollisionManager(200);
 	simpleMaterial = NULL;
 
 

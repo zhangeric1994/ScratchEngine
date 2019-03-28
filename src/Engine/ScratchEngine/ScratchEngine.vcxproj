@@ -155,6 +155,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Stack.hpp" />
+    <ClInclude Include="Common\Typedefs.h" />
     <ClInclude Include="Core\GameComponent.h" />
     <ClInclude Include="Core\GameObject.h" />
     <ClInclude Include="Core\Scene.h" />
@@ -164,19 +166,19 @@
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Memory\Allocator.h" />
     <ClInclude Include="Memory\Block.h" />
-    <ClInclude Include="Memory\Pool.h" />
+    <ClInclude Include="Memory\BlockAllocator.h" />
     <ClInclude Include="Memory\PoolAllocator.h" />
-    <ClInclude Include="Memory\SimpleBlock.h" />
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
     <ClInclude Include="Physics\BoundingVolume.h" />
+    <ClInclude Include="Physics\BoxCollider.h" />
+    <ClInclude Include="Physics\Collision.h" />
     <ClInclude Include="Physics\Collider.h" />
-    <ClInclude Include="Physics\DynamicBVH.h" />
-    <ClInclude Include="Physics\DynamicBVHNode.h" />
-    <ClInclude Include="Physics\DynamicAABBTree.h" />
-    <ClInclude Include="Physics\DynamicAABBTreeNode.h" />
-    <ClInclude Include="Physics\Physics.h" />
+    <ClInclude Include="Physics\DynamicBVH.hpp" />
+    <ClInclude Include="Physics\DynamicBVHNode.hpp" />
+    <ClInclude Include="Physics\PhysicsEngine.h" />
     <ClInclude Include="Physics\RigidBody.h" />
+    <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
     <ClInclude Include="Rendering\ForwardRenderer.h" />
     <ClInclude Include="Rendering\Lights.h" />
@@ -186,7 +188,6 @@
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Utility\Typedefs.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\GameComponent.cpp" />
@@ -196,13 +197,14 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Memory\DynamicPoolAllocator.h" />
-    <ClCompile Include="Memory\Pool.cpp" />
+    <ClCompile Include="Memory\BlockAllocator.cpp" />
     <ClCompile Include="Physics\BoundingVolume.cpp" />
+    <ClCompile Include="Physics\BoxCollider.cpp" />
     <ClCompile Include="Physics\Collider.cpp" />
-    <ClCompile Include="Physics\DynamicAABBTree.cpp" />
-    <ClCompile Include="Physics\DynamicAABBTreeNode.cpp" />
-    <ClCompile Include="Physics\Physics.cpp" />
+    <ClCompile Include="Physics\Collision.cpp" />
+    <ClCompile Include="Physics\PhysicsEngine.cpp" />
     <ClCompile Include="Physics\RigidBody.cpp" />
+    <ClCompile Include="Physics\SphereCollider.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
     <ClCompile Include="Rendering\ForwardRenderer.cpp" />
     <ClCompile Include="Rendering\Material.cpp" />

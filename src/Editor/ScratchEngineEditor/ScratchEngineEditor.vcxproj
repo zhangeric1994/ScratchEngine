@@ -110,7 +110,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>F:\scratch-engine\src\Editor\ScratchEngineEditor\Physics;F:\scratch-engine\src\Editor\ScratchEngineEditor\Render;F:\scratch-engine\src\Editor\ScratchEngineEditor;..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

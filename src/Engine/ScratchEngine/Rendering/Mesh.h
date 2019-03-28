@@ -4,7 +4,7 @@
 #include <fstream> 
 #include <vector>
 #include <DirectXMath.h>
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
 
 using namespace DirectX;
 

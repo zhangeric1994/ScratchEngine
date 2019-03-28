@@ -4,7 +4,8 @@
 
 using namespace DirectX;
 float collisionCheckBack = 0.00f;
-namespace Colliders{
+namespace Colliders
+{
 	void Collider::Update(float dt, float totalTime)
 	{
 		if (!Static) {

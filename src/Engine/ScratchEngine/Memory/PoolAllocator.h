@@ -2,17 +2,21 @@
 
 #include <queue>
 
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
 
 #include "Allocator.h"
-#include "SimpleBlock.h"
 
 namespace ScratchEngine
 {
 	namespace Memory
 	{
-		template<size_t BLOCKSIZE>
-		class __declspec(dllexport) PoolAllocator : Allocator
+		struct PoolBlock				// 16 bytes
+		{
+			PoolBlock* next;			// 8 bytes
+			PoolBlock* previous;		// 8 bytes
+		};
+
+		template<size_t BLOCKSIZE> class __declspec(dllexport) PoolAllocator : StaticAllocator
 		{
 		private:
 			void* memory;
@@ -21,12 +25,12 @@ namespace ScratchEngine
 			size_t capcity;
 			size_t count;
 
-			SimpleBlock* freeList;
+			PoolBlock* freeList;
 
 		public:
 			PoolAllocator(size_t capacity)
 			{
-				_ASSERT(BLOCKSIZE >= sizeof(SimpleBlock));
+				_ASSERT(BLOCKSIZE >= sizeof(PoolBlock));
 
 				register size_t numAllocated = BLOCKSIZE * capacity;
 
@@ -36,11 +40,11 @@ namespace ScratchEngine
 
 				memory = _aligned_malloc(numAllocated, 16);
 
-				freeList = reinterpret_cast<SimpleBlock*>(memory);
+				freeList = reinterpret_cast<PoolBlock*>(memory);
 				freeList->previous = nullptr;
 
-				register SimpleBlock* a = freeList;
-				register SimpleBlock* b = reinterpret_cast<SimpleBlock*>(reinterpret_cast<uptr>(a) + BLOCKSIZE);
+				register PoolBlock* a = freeList;
+				register PoolBlock* b = reinterpret_cast<PoolBlock*>(reinterpret_cast<uptr>(a) + BLOCKSIZE);
 				freeList = a;
 
 				for (size_t i = 1; i < capacity; i++)
@@ -49,7 +53,7 @@ namespace ScratchEngine
 					b->previous = a;
 
 					a = b;
-					b = reinterpret_cast<SimpleBlock*>(reinterpret_cast<uptr>(b) + BLOCKSIZE);
+					b = reinterpret_cast<PoolBlock*>(reinterpret_cast<uptr>(b) + BLOCKSIZE);
 				}
 
 				b->next = nullptr;
@@ -71,7 +75,7 @@ namespace ScratchEngine
 
 			void Free(void* p)
 			{
-				register SimpleBlock* b = reinterpret_cast<SimpleBlock*>(p);
+				register PoolBlock* b = reinterpret_cast<PoolBlock*>(p);
 				b->next = freeList;
 				b->previous = nullptr;
 

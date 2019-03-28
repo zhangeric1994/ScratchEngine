@@ -110,6 +110,7 @@ ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::_get_box_volu
 	return XMVectorMultiply(lwh, XMVectorMultiply(XMVectorSwizzle(lwh, 1, 2, 0, 3), XMVectorSwizzle(lwh, 2, 0, 1, 3))).m128_f32[0];
 }
 
+
 const int ScratchEngine::Physics::OrientedBoundingBox::iSurfaces[6][4] = { { 1, 0, 3, 2 },
 																		   { 0, 4, 2, 6 },
 																		   { 4, 0, 5, 1 },
@@ -165,4 +166,9 @@ ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR size, 
 	positiveX = XMPlaneFromPoints(E, F, G);
 	positiveY = XMPlaneFromPoints(C, G, D);
 	positiveZ = XMPlaneFromPoints(F, B, H);
+}
+
+XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfSize() const
+{
+	return XMVectorSubtract(H, center);
 }

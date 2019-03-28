@@ -160,7 +160,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DynamicAABBTreeTest.cpp" />
     <ClCompile Include="DynamicBVHTest.cpp" />
     <ClCompile Include="PoolTest.cpp" />
     <ClCompile Include="GameObjectTest.cpp" />

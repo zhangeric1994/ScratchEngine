@@ -2,25 +2,22 @@
 
 #include <cstdlib>
 
-#include "BoundingVolume.h"
+#include "AxisAlignedBoundingBox.h"
+#include "Collider.h"
+#include "RigidBody.h"
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class Collider
-		{
-		public:
-			virtual AxisAlignedBoundingBox GetBoundingVolume() = 0;
-		};
 
 		class DynamicAABBTreeNode
 		{
 			friend class DynamicAABBTree;
 
 		private:
-			AxisAlignedBoundingBox box;
-			Collider* collider;
+			AxisAlignedBoundingBox aabb;
+			Collider* rigidBody;
 
 			i32 height : 32;
 			i32 parent : 32;

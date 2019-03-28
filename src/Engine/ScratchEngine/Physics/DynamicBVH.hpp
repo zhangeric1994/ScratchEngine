@@ -1,18 +1,35 @@
-#pragma once
+#ifndef DYNAMIC_BVH_HPP
+#define DYNAMIC_BVH_HPP
+
+#include <stack>
 
 #include "../Memory/DynamicPoolAllocator.h"
 
-#include "DynamicBVHNode.h"
+#include "DynamicBVHNode.hpp"
+
+using namespace ScratchEngine::Memory;
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
+		class IDynamicBVHQueryCallback
+		{
+			template<typename T> friend class DynamicBVH;
+
+		private:
+			virtual bool DynamicBVHTestOverlapCallback(i32 node1, i32 node2) = 0;
+		};
+
 		template<class T> class __declspec(dllexport) DynamicBVH
 		{
+			friend class PhysicsEngine;
+
+
 		private:
 			DynamicPoolAllocator<DynamicBVHNode<T>> allocator;
 			i32 root;
+
 
 		public:
 			DynamicBVH() : allocator(128)
@@ -20,14 +37,14 @@ namespace ScratchEngine
 				root = null_index;
 			}
 
-			i32 Insert(T* data, const AxisAlignedBoundingBox& box)
+			i32 Insert(T* data, const AxisAlignedBoundingBox& aabb)
 			{
 				assert(data);
 
 				i32 iLeaf = allocator.Allocate();
 				DynamicBVHNode<T>& leaf = allocator[iLeaf];
 
-				leaf.box = box;
+				leaf.aabb = aabb;
 				leaf.data = data;
 				leaf.height = 0;
 				leaf.parent = null_index;
@@ -143,7 +160,42 @@ namespace ScratchEngine
 				}
 			}
 
+
 		private:
+			void IsOverlappingWith(int targetID, IDynamicBVHQueryCallback* callback)
+			{
+				DynamicBVHNode<T>& targetNode = allocator[targetID];
+
+				stack<int> s;
+
+				s.push(root);
+
+				while (!s.empty())
+				{
+					int id = s.top();
+					s.pop();
+
+					if (id == null_index)
+						continue;
+
+					DynamicBVHNode<T>& node = allocator[id];
+
+					if (ScratchEngine::Physics::TestOverlap(&targetNode.aabb, &node.aabb, nullptr, nullptr, 0))
+					{
+						if (node.IsLeaf())
+						{
+							if (!callback->DynamicBVHTestOverlapCallback(targetID, id))
+								return;
+						}
+						else
+						{
+							s.push(node.left);
+							s.push(node.right);
+						}
+					}
+				}
+			}
+
 			__forceinline i32 _balance(i32 id)
 			{
 				DynamicBVHNode<T>& node = allocator[id];
@@ -254,11 +306,12 @@ namespace ScratchEngine
 				DynamicBVHNode<T>& l = allocator[node.left];
 				DynamicBVHNode<T>& r = allocator[node.right];
 
-				node.box = l.box;
-				node.box.Union(r.box);
+				node.aabb = l.aabb;
+				node.aabb.Union(r.aabb);
 
 				node.height = __max(l.height, r.height) + 1;
 			}
 		};
 	}
 }
+#endif

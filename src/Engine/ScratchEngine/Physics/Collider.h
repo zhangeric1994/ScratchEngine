@@ -1,11 +1,12 @@
-#pragma once
+#ifndef COLLIDER_H
+#define COLLIDER_H
 
 #include <DirectXMath.h>
 #include <tuple>
 #include <unordered_map>
 
+#include "../Common/Typedefs.h"
 #include "../Core/GameObject.h"
-#include "../Utility/Typedefs.h"
 
 #include "BoundingVolume.h"
 
@@ -16,61 +17,23 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		XMVECTOR gravity = XMVectorSet(0, -9.8f, 0, 0);
-		XMVECTOR AxisX = XMVectorSet(1, 0, 0, 0);
-		XMVECTOR AxisX = XMVectorSet(0, 1, 0, 0);
-		XMVECTOR AxisX = XMVectorSet(0, 0, 1, 0);
+		//XMVECTOR gravity = XMVectorSet(0, -9.8f, 0, 0);
+		//XMVECTOR AxisX = XMVectorSet(1, 0, 0, 0);
+		//XMVECTOR AxisY = XMVectorSet(0, 1, 0, 0);
+		//XMVECTOR AxisZ = XMVectorSet(0, 0, 1, 0);
 
-		
-		template<class T> class __declspec(dllexport) Collider : public GameComponent
+		class __declspec(dllexport) Collider : public GameComponent
 		{
 		protected:
-			T* boundingVolume;
-			std::unordered_map<gameObject*, float> CollidedWith;
+			BoundingVolumeType type;
+			BoundingVolume* boundingVolume;
+
 
 		public:
-			template<class V> bool Query(Collider<V>* other, float currentTime)
-			{
-				return GetBoundingVolume()->Query(other->GetBoundingVolume(), currentTime);
-			}
+			BoundingVolumeType GetType();
+			BoundingVolume* GetBoundingVolume();
 
-		private:
-			BoundingVolume<T> GetBoundingVolume()
-			{
-				return boundingVolume;
-			}
-		};
-
-		
-		class BoxCollider : public Collider<OrientedBoundingBox>
-		{
-		private:
-			XMVECTOR size;
-
-			//XMVECTOR min;
-			//XMVECTOR max;
-
-			// float minX, maxX, minY, maxY, minZ, maxZ;
-			// float defaultMinX, defaultMaxX, defaultMinY, defaultMaxY, defaultMinZ, defaultMaxZ;
-
-			//std::vector<XMVECTOR> planes;
-			//std::vector<std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>> planesInfo;
-			//std::vector<std::tuple<XMVECTOR, XMVECTOR>> edges;
-
-		public:
-			BoxCollider(XMVECTOR size);
-			~BoxCollider();
-		};
-
-		
-		class SphereCollider : public Collider<BoundingSphere>
-		{
-		private:
-			f32 radius;
-
-		public:
-			SphereCollider(f32 radius);
-			~SphereCollider();
+			bool IsOverlappingWith(Collider* other, float currentTime);
 		};
 
 
@@ -93,3 +56,4 @@ namespace ScratchEngine
 		//XMVECTOR getLineIntersection(XMVECTOR start, XMVECTOR end, std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR> planeVertetices, XMFLOAT3 Max, XMFLOAT3 Min);
 	}
 }
+#endif

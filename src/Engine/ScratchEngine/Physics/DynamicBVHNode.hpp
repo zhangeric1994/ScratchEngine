@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DYNAMIC_BVH_NODE
+#define DYNAMIC_BVH_NODE
 
 #include "BoundingVolume.h"
 
@@ -11,7 +12,7 @@ namespace ScratchEngine
 			template<class T> friend class DynamicBVH;
 
 		private:
-			AxisAlignedBoundingBox box;
+			AxisAlignedBoundingBox aabb;
 
 			T* data;
 
@@ -22,12 +23,12 @@ namespace ScratchEngine
 
 			f32 GetVolume() const
 			{
-				return box.GetVolume();
+				return aabb.GetVolume();
 			}
 
 			f32 GetUnionVolume(const DynamicBVHNode& other) const
 			{
-				return box.GetUnionVolume(other.box);
+				return aabb.GetUnionVolume(other.aabb);
 			}
 
 			bool IsLeaf() const
@@ -37,3 +38,4 @@ namespace ScratchEngine
 		};
 	}
 }
+#endif

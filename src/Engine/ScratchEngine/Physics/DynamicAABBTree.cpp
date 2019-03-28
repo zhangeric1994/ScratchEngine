@@ -14,8 +14,8 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::Insert(Collider* col
 	i32 iLeaf = allocator.Allocate();
 	DynamicAABBTreeNode& leaf = allocator[iLeaf];
 
-	leaf.box = collider->GetBoundingVolume();
-	leaf.collider = collider;
+	leaf.aabb = collider->GetBoundingVolume();
+	leaf.rigidBody = collider;
 	leaf.height = 0;
 	leaf.parent = null_index;
 	leaf.left = null_index;
@@ -63,7 +63,7 @@ ScratchEngine::i32 ScratchEngine::Physics::DynamicAABBTree::Insert(Collider* col
 		
 		i32 iNode = allocator.Allocate();
 		DynamicAABBTreeNode& node = allocator[iNode];
-		node.collider = nullptr;
+		node.rigidBody = nullptr;
 		node.height = 0;
 		node.parent = allocator[iCurrentNode].parent;
 		node.left = iCurrentNode;
@@ -246,8 +246,8 @@ void ScratchEngine::Physics::DynamicAABBTree::_update_box_and_height(DynamicAABB
 	DynamicAABBTreeNode& l = allocator[node.left];
 	DynamicAABBTreeNode& r = allocator[node.right];
 
-	node.box = l.box;
-	node.box.Union(r.box);
+	node.aabb = l.aabb;
+	node.aabb.Union(r.aabb);
 
 	node.height = __max(l.height, r.height) + 1;
 }
