@@ -163,6 +163,12 @@ void Game::LoadShaders() {
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
+
+	vertexShaderShadow = new SimpleVertexShader(device, context);
+	vertexShaderShadow->LoadShaderFile(vertexShadow);
+
+	pixelShaderShadow = new SimplePixelShader(device, context);
+	pixelShaderShadow->LoadShaderFile(pixelShadow);
 }
 
 void Game::CreateMatrces() {
@@ -303,36 +309,35 @@ void Game::Draw(float deltaTime, float totalTime) {
 	//-------------------------------------
 	
 	//first pass shadow map
-	//context->OMSetRenderTargets(
-	//	0,
-	//	nullptr,
-	//	shadowdepthStencilView
-	//);
+	context->OMSetRenderTargets(
+		0,
+		nullptr,
+		shadowdepthStencilView
+	);
 
-	//context->RSSetState(shadowRenderState);
-	//context->RSSetViewports(1, &shadowViewport);
-
+	context->RSSetState(shadowRenderState);
+	context->RSSetViewports(1, &shadowViewport);
 
 
 
 
 
 	//second pass render scene based on shadow map
-	for (auto& m : entityVector) {
-		m->SetWorldMatrix();
-		m->PrepareMatrix(viewMatrix, projectionMatrix);
-		//m->SetPointLight(pointLight, "pointLight");
-		m->SetLight(directionalLight, "light");
-		//m->SetLight(directionalLight1, "light1");
-		//m->SetSpotLight(spotLight, "spotLight");
-		m->SetTexture("diffuseTexture", "basicSampler");
-		m->SetNormalMap("normalMap");
-		m->CopyAllBufferData();
-		m->SetShader();
+	//for (auto& m : entityVector) {
+	//	m->SetWorldMatrix();
+	//	m->PrepareMatrix(viewMatrix, projectionMatrix);
+	//	//m->SetPointLight(pointLight, "pointLight");
+	//	m->SetLight(directionalLight, "light");
+	//	//m->SetLight(directionalLight1, "light1");
+	//	//m->SetSpotLight(spotLight, "spotLight");
+	//	m->SetTexture("diffuseTexture", "basicSampler");
+	//	m->SetNormalMap("normalMap");
+	//	m->CopyAllBufferData();
+	//	m->SetShader();
 
-		//set vertex buffer and index buffer inside entity class
-		m->Draw(context);
-	}
+	//	//set vertex buffer and index buffer inside entity class
+	//	m->Draw(context);
+	//}
 
 	//-------------------------------------
 
