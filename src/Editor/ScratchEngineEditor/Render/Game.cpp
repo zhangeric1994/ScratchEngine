@@ -20,7 +20,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 
 	directionalLight.AmbientColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
 	directionalLight.DiffuseColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
-	directionalLight.Direction	  = XMFLOAT3(1.0f,  0.0f, 1.0f);
+	directionalLight.Direction	  = XMFLOAT3(0.0f,  -1.0f, 0.0f);
 	directionalLight.CameraX	  = camera->getPosition().x;
 	directionalLight.CameraY	  = camera->getPosition().y;
 	directionalLight.CameraZ	  = camera->getPosition().z;
@@ -141,11 +141,11 @@ void Game::CreateBasicGeometry() {
 	entityVector[2] = temp2;
 
 	temp->SetTranslation(-2, 0, 0);
-	temp->SetScale(1.5f, 1.5f, 1.5f);
+	//temp->SetScale(1.5f, 1.5f, 1.5f);
 	temp1->SetTranslation(2, 0, 0);
 	temp2->SetTranslation(0, -2, 0);
-	temp2->SetRotation(90, 0, 0);
-	//temp2->SetScale(1, 1, 2);
+	//temp2->SetRotation(90, 0, 0);
+	temp2->SetScale(10, 1, 10);
 
 	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
 	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
@@ -190,7 +190,7 @@ void Game::Draw(float deltaTime, float totalTime) {
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
 		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");
-		entityVector[countOfEntity]->SetLight(directionalLight1, "light1");
+		//entityVector[countOfEntity]->SetLight(directionalLight1, "light1");
 		//entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
 		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
 		entityVector[countOfEntity]->SetNormalMap("normalMap");

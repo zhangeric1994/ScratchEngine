@@ -63,15 +63,15 @@ XMMATRIX Camera::Update() {
 	XMStoreFloat3(&leftDirection, leftVector);
 
 	if (GetAsyncKeyState('A') & 0x8000) {
-		position.x += leftDirection.x * 0.001f;
-		position.y += leftDirection.y * 0.001f;
-		position.z += leftDirection.z * 0.001f;
-	}
-
-	if (GetAsyncKeyState('D') & 0x8000) {
 		position.x -= leftDirection.x * 0.001f;
 		position.y -= leftDirection.y * 0.001f;
 		position.z -= leftDirection.z * 0.001f;
+	}
+
+	if (GetAsyncKeyState('D') & 0x8000) {
+		position.x += leftDirection.x * 0.001f;
+		position.y += leftDirection.y * 0.001f;
+		position.z += leftDirection.z * 0.001f;
 	}
 
 	//generate view matrix
