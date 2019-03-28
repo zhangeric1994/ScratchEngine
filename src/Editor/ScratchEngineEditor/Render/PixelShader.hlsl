@@ -43,6 +43,7 @@ cbuffer spotLightData : register(b3) {
 }
 
 Texture2D diffuseTexture : register(t0);
+Texture2D normalMap : register(t1);
 
 SamplerState basicSampler : register(s0);
 
@@ -61,12 +62,12 @@ struct VertexToPixel
 	float4 position		: SV_POSITION;
 	float3 normal		: NORMAL;
 	float3 worldPos		: POSITION;
+	float3 tangent		: TANGENT;
 	float2 uv			: TEXCOORD;
 };
 
 float3 calculateDirectionalLight(float3 normal, float3 position, DirectionalLight light) {
 	//diffuse part
-	normal = normalize(normal);
 	float3 nDirection = -normalize(light.Direction);
 	float  NdotL = saturate(dot(normal, nDirection));
 	NdotL = saturate(NdotL);
@@ -78,13 +79,11 @@ float3 calculateDirectionalLight(float3 normal, float3 position, DirectionalLigh
 	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
 
 	float3 finalColor = light.DiffuseColor * NdotL + spec.rrr;
-
 	return finalColor;
 }
 
 float3 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
 	//diffuse part
-	normal = normalize(normal);
 	float3 nDirection = -normalize(position - pointLight.Position);
 	float NdotL = saturate(dot(normal, nDirection));
 	NdotL = saturate(NdotL);
@@ -94,7 +93,6 @@ float3 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 	float3 dirToCamera = normalize(CameraPos - position);
 	float3 reflectance = reflect(-nDirection, normal);
 	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
-
 
 	float3 finalColor = pointLight.DiffuseColor * NdotL + spec.rrr;
 	return finalColor;
@@ -118,10 +116,7 @@ float4 calculateSpotLight(float3 normal, float3 position, SpotLight spotLight) {
 		finalColor *= pow(max(dot(-lightDir, spotLight.Direction), 0.0f), spotLight.Cone);
 	}
 
-	float test = pow(max(dot(-lightDir, spotLight.Direction), 0.0f), spotLight.Cone);
-
 	finalColor = saturate(finalColor);
-
 	return finalColor;
 }
 
@@ -135,8 +130,23 @@ float4 calculateSpotLight(float3 normal, float3 position, SpotLight spotLight) {
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET{
+	//normalize normal and tangent
+	input.normal = normalize(input.normal);
+	input.tangent = normalize(input.tangent);
+
+	//normal map
+	float3 textureNormal = normalMap.Sample(basicSampler, input.uv).rgb * 2 - 1;
+
+	float3 N = input.normal;
+	float3 T = input.tangent;
+	float3 B = cross(T, N);
+
+	float3x3 TBN = float3x3(T, B, N);
+
+	input.normal = normalize(mul(textureNormal, TBN));
+
+	//light color calculation
 	float3 lightColor1 = calculateDirectionalLight(input.normal, input.worldPos, light);
-	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 
 	float3 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
@@ -144,15 +154,11 @@ float4 main(VertexToPixel input) : SV_TARGET{
 
 	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
-	//float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
-
 	// Just return the input color
 	// - This color (like most values passing through the rasterizer) is 
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 
-	//return pointLightColor;
-	//return surfaceColor;
+	//return float4(surfaceColor.rgb, 1.0f);
 	return float4(surfaceColor.rgb * (lightColor1 + pointLightColor), 1.0f);
-	
 }

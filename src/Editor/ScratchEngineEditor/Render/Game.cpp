@@ -40,6 +40,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	spotLight.Range		   = 1000.0f;
 
 	texture = NULL;
+	normalMap = NULL;
 
 	sampler = NULL;
 
@@ -62,6 +63,8 @@ Game::~Game() {
 	delete camera;
 	if (simpleMaterial) delete simpleMaterial;
 	if (sampler) sampler->Release();
+	if (texture) texture->Release();
+	if (normalMap) normalMap->Release();
 }
 
 void Game::Init() {
@@ -108,12 +111,13 @@ void Game::CreateMatrces() {
 }
 
 void Game::CreateBasicGeometry() {
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/wood/wood1.png", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 
 	//create sample
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	simpleMaterial = new Material(vertexShader, pixelShader, texture, sampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, 0, sampler);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	mesh = new Mesh(device, filename);
 	Entity* temp = new Entity(mesh, simpleMaterial);
@@ -146,8 +150,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	//const float color[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	const float color[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	//const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -163,10 +167,11 @@ void Game::Draw(float deltaTime, float totalTime) {
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");
-		entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
+		//entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
 		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
+		entityVector[countOfEntity]->SetNormalMap("normalMap");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
 

@@ -108,6 +108,10 @@ void Entity::SetTexture(const char* textureName, const char* samplerName) {
 	material->getPixelShader()->SetSamplerState(samplerName, material->getSampler());
 }
 
+void Entity::SetNormalMap(const char* normalMapName) {
+	material->getPixelShader()->SetShaderResourceView(normalMapName, material->getNormalMap());
+}
+
 bool Entity::isUpdated() {
 	return isChanged;
 }

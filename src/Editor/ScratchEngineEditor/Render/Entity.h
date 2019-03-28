@@ -26,6 +26,7 @@ public:
 	void SetPointLight(PointLight pLight, std::string bufferName);
 	void SetSpotLight(SpotLight sLight, std::string bufferName);
 	void SetTexture(const char* textureName, const char* samplerName);
+	void SetNormalMap(const char* normalMapName);
 
 	bool isUpdated();
 
