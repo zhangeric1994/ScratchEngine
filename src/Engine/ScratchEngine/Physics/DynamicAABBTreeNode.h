@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 
-#include "BoundingVolume.h"
+#include "AxisAlignedBoundingBox.h"
 #include "Collider.h"
 #include "RigidBody.h"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
 
 namespace ScratchEngine
 {

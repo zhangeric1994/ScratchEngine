@@ -59,18 +59,18 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(SpeedTest1)
 		{
-			Pool pool(1024);
+			BlockAllocator allocator(1024);
 
 			for (int i = 0; i < 1000000; i++)
-				pool.Free(pool.Allocate(sizeof(Block)));
+				allocator.Free(allocator.Allocate(sizeof(Block)));
 		}
 
 		TEST_METHOD(SpeedTest2)
 		{
-			PoolAllocator<sizeof(Block)> pool((size_t)1024);
+			PoolAllocator<sizeof(Block)> allocator((size_t)1024);
 
 			for (int i = 0; i < 1000000; i++)
-				pool.Free(pool.Allocate());
+				allocator.Free(allocator.Allocate());
 		}
 	};
 }

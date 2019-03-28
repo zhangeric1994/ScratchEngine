@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
 
 #include "Block.h"
 
@@ -12,7 +12,7 @@ namespace ScratchEngine
 {
 	namespace Memory
 	{
-		class __declspec(dllexport) Pool
+		class __declspec(dllexport) BlockAllocator : StaticAllocator
 		{
 			friend class PoolTest;
 
@@ -25,9 +25,9 @@ namespace ScratchEngine
 			Block* root;
 
 		public:
-			Pool();
-			Pool(size_t size);
-			~Pool();
+			BlockAllocator();
+			BlockAllocator(size_t size);
+			~BlockAllocator();
 
 			void* Allocate(size_t size);
 			void Free(void* p);

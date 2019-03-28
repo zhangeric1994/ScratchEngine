@@ -1,21 +1,50 @@
 #include "PhysicsEngine.h"
 
+ScratchEngine::Physics::PhysicsEngine* ScratchEngine::Physics::PhysicsEngine::singleton = nullptr;
+
+const ScratchEngine::Physics::PhysicsEngine* ScratchEngine::Physics::PhysicsEngine::GetSingleton()
+{
+	if (!singleton)
+		Initialize();
+
+	return singleton;
+}
+
 void ScratchEngine::Physics::PhysicsEngine::Initialize()
 {
 }
 
-void ScratchEngine::Physics::PhysicsEngine::SolveCollision()
+ScratchEngine::Physics::PhysicsEngine::PhysicsEngine()
 {
-	for (auto it = movedObjects.begin(); it != movedObjects.end(); it++)
-		hierarchy.Query(*it, CheckExactCollision);
 }
 
-bool ScratchEngine::Physics::PhysicsEngine::CheckExactCollision(Collider* collider1, Collider* collider2)
+void ScratchEngine::Physics::PhysicsEngine::AddCollision(i32 node1, i32 node2)
 {
-	if (collider1->Query(collider2, 0))
 	{
+		Collision* collision = new Collision(node1, node2);
 
+		if (collisionList)
+		{
+			collision->next = collisionList;
+			collisionList->previous = collision;
+		}
+		else
+			collisionList = collision;
+	}
+}
+
+void ScratchEngine::Physics::PhysicsEngine::SolveCollision()
+{
+	for (int i = 0; i < movedObjects.GetSize(); ++i)
+		hierarchy.IsOverlappingWith(movedObjects[i], this);
+}
+
+bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(i32 node1, i32 node2)
+{
+	if (node1 != node2)
+	{
+		AddCollision(node1, node2);
 	}
 
-	return false;
+	return true;
 }

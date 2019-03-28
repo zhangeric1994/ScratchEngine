@@ -10,14 +10,13 @@
 // Headers for CppUnitTest
 #include "CppUnitTest.h"
 
+#include "Common/Typedefs.h"
+
 #include "Core/GameComponent.h"
 #include "Core/GameObject.h"
 #include "Core/Transform.h"
 
-#include "Memory/Pool.h"
+#include "Memory/BlockAllocator.h"
 #include "Memory/PoolAllocator.h"
 
-#include "Physics/DynamicAABBTree.h"
-#include "Physics/DynamicBVH.h"
-
-#include "Utility/Typedefs.h"
+#include "Physics/DynamicBVH.hpp"

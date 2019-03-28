@@ -1,8 +1,8 @@
 #include <exception>
 
-#include "Pool.h"
+#include "BlockAllocator.h"
 
-ScratchEngine::Memory::Pool::Pool()
+ScratchEngine::Memory::BlockAllocator::BlockAllocator()
 {
 	memory = nullptr;
 	capacity = 0;
@@ -12,7 +12,7 @@ ScratchEngine::Memory::Pool::Pool()
 	root = nullptr;
 }
 
-ScratchEngine::Memory::Pool::Pool(size_t size)
+ScratchEngine::Memory::BlockAllocator::BlockAllocator(size_t size)
 {
 	memory = _aligned_malloc(size, 16);
 
@@ -36,12 +36,12 @@ ScratchEngine::Memory::Pool::Pool(size_t size)
 	root = block;
 }
 
-ScratchEngine::Memory::Pool::~Pool()
+ScratchEngine::Memory::BlockAllocator::~BlockAllocator()
 {
 	_aligned_free(memory);
 }
 
-void* ScratchEngine::Memory::Pool::Allocate(size_t size)
+void* ScratchEngine::Memory::BlockAllocator::Allocate(size_t size)
 {
 	size = __max(__min_block_size, __data_offset + size + __block_tail_size);
 
@@ -107,7 +107,7 @@ void* ScratchEngine::Memory::Pool::Allocate(size_t size)
 	throw new exception("Not enough memory.");
 }
 
-void ScratchEngine::Memory::Pool::Free(void* p)
+void ScratchEngine::Memory::BlockAllocator::Free(void* p)
 {
 	Block* block = reinterpret_cast<Block*>(reinterpret_cast<uptr>(p) - __data_offset);
 
@@ -119,7 +119,7 @@ void ScratchEngine::Memory::Pool::Free(void* p)
 	Add(block);
 }
 
-void ScratchEngine::Memory::Pool::Add(Block * block)
+void ScratchEngine::Memory::BlockAllocator::Add(Block * block)
 {
 	/* Try to merge with the block right after */
 	register uptr p = reinterpret_cast<uptr>(block) + block->size;
@@ -156,7 +156,7 @@ void ScratchEngine::Memory::Pool::Add(Block * block)
 	root = AddToTree(root, block);
 }
 
-void ScratchEngine::Memory::Pool::Remove(Block * block)
+void ScratchEngine::Memory::BlockAllocator::Remove(Block * block)
 {
 	Block* nextBlock = block->next;
 	Block* parentBlock = block->parent;

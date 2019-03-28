@@ -1,9 +1,13 @@
-#pragma once
+#ifndef PHYSICS_ENGINE_H
+#define PHYSICS_ENGINE_H
 
 #include <vector>
 
+#include "../Common/Stack.hpp"
+
 #include "Collider.h"
-#include "DynamicBVH.h"
+#include "Collision.h"
+#include "DynamicBVH.hpp"
 
 using namespace std;
 
@@ -11,29 +15,25 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine
+		class PhysicsEngine : IDynamicBVHQueryCallback
 		{
 		private:
 			static PhysicsEngine* singleton;
 
-
-		public:
+			static const PhysicsEngine* GetSingleton();
 			static void Initialize();
 
-
-		private:
 			DynamicBVH<Collider> hierarchy;
-			vector<int> movedObjects;
+			Stack<int> movedObjects;
+			Collision* collisionList;
 
 			PhysicsEngine();
 
+			void AddCollision(i32 node1, i32 node2);
 
-		public:
 			void SolveCollision();
-		
-
-		private:
-			bool CheckExactCollision(Collider* collider1, Collider* collider2);
+			bool DynamicBVHTestOverlapCallback(i32 node1, i32 node2);
 		};
 	}
 }
+#endif

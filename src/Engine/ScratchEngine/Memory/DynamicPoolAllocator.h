@@ -3,8 +3,9 @@
 #include <cstring>
 #include <malloc.h>
 
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
 
+#include "Allocator.h"
 #include "Block.h"
 
 namespace ScratchEngine
@@ -19,7 +20,7 @@ namespace ScratchEngine
 		};
 
 
-		template<class T> struct __declspec(dllexport) DynamicPoolPointer
+		template<class T> struct __declspec(dllexport) DynamicPoolPointer : DynamicAllocator
 		{
 			template<class T> friend class DynamicPoolAllocator;
 

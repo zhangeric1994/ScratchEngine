@@ -1,6 +1,7 @@
-#pragma once
+#ifndef DYNAMIC_BVH_NODE
+#define DYNAMIC_BVH_NODE
 
-#include "AxisAlignedBoundingBox.h"
+#include "BoundingVolume.h"
 
 namespace ScratchEngine
 {
@@ -37,3 +38,4 @@ namespace ScratchEngine
 		};
 	}
 }
+#endif

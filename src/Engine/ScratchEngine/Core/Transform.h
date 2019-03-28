@@ -3,9 +3,10 @@
 #include <DirectXMath.h>
 #include <vector>
 
+#include "../Common/Typedefs.h"
 #include "../Message/IMessageReceiver.h"
 #include "../Message/Message.h"
-#include "../Utility/Typedefs.h"
+
 
 #include "Space.h"
 

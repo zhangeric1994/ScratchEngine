@@ -1,10 +1,11 @@
-#pragma once
+#ifndef DYNAMIC_BVH_HPP
+#define DYNAMIC_BVH_HPP
 
 #include <stack>
 
 #include "../Memory/DynamicPoolAllocator.h"
 
-#include "DynamicBVHNode.h"
+#include "DynamicBVHNode.hpp"
 
 using namespace ScratchEngine::Memory;
 
@@ -12,6 +13,14 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
+		class IDynamicBVHQueryCallback
+		{
+			template<typename T> friend class DynamicBVH;
+
+		private:
+			virtual bool DynamicBVHTestOverlapCallback(i32 node1, i32 node2) = 0;
+		};
+
 		template<class T> class __declspec(dllexport) DynamicBVH
 		{
 			friend class PhysicsEngine;
@@ -153,9 +162,9 @@ namespace ScratchEngine
 
 
 		private:
-			template<typename V> void Query(int targetID, bool (V::*callback)(T*, T*))
+			void IsOverlappingWith(int targetID, IDynamicBVHQueryCallback* callback)
 			{
-				DynamicBVHNode<T>* targetNode = allocator[targetID];
+				DynamicBVHNode<T>& targetNode = allocator[targetID];
 
 				stack<int> s;
 
@@ -163,24 +172,25 @@ namespace ScratchEngine
 
 				while (!s.empty())
 				{
-					int id = s.pop();
+					int id = s.top();
+					s.pop();
 
 					if (id == null_index)
 						continue;
 
-					DynamicBVHNode<T>* node = allocator[id];
+					DynamicBVHNode<T>& node = allocator[id];
 
-					if (CollisionCheck(targetNode->aabb, node->aabb, nullptr, nullptr, 0))
+					if (ScratchEngine::Physics::TestOverlap(&targetNode.aabb, &node.aabb, nullptr, nullptr, 0))
 					{
-						if (node->IsLeaf())
+						if (node.IsLeaf())
 						{
-							if (!callback(targetNode->data, node->data))
+							if (!callback->DynamicBVHTestOverlapCallback(targetID, id))
 								return;
 						}
 						else
 						{
-							s.push(node->left);
-							s.push(node->right);
+							s.push(node.left);
+							s.push(node.right);
 						}
 					}
 				}
@@ -304,3 +314,4 @@ namespace ScratchEngine
 		};
 	}
 }
+#endif

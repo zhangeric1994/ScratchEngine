@@ -1,17 +1,13 @@
 #pragma once
 
-#include "../Utility/Typedefs.h"
+#include "../Common/Typedefs.h"
+
+#include "Allocator.h"
 
 namespace ScratchEngine
 {
 	namespace Memory
 	{
-		enum BlockStatus : u64
-		{
-			ALLOCATED = 0xa110ced,
-			FREED = 0xf7ee,
-		};
-
 		struct Block					// 64 bytes
 		{
 			BlockStatus status;			// 8 bytes
