@@ -1,9 +1,10 @@
 #pragma once
 #include <DirectXMath.h>
-#include "Entity.h"
+#include "../Render/Entity.h"
 #include <tuple>
 using namespace DirectX;
-namespace Colliders {
+namespace Colliders
+{
 	enum ColliderType { Sphere, Box };
 	class Collider
 	{

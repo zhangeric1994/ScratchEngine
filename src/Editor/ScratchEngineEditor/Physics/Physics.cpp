@@ -1,15 +1,15 @@
 #include "Physics.h"
 using namespace Colliders;
-Physics::Physics(size_t _MaxColliderNum)
+CollisionManager::CollisionManager(size_t _MaxColliderNum)
 {
 	NumCoolidersHandled = 0;
 }
 
-Physics::~Physics()
+CollisionManager::~CollisionManager()
 {
 }
 
-SphereCollider * Physics::addSphereCollider(Entity * obj, float _radius, float _mass, bool _gravity, bool _static)
+SphereCollider * CollisionManager::addSphereCollider(Entity * obj, float _radius, float _mass, bool _gravity, bool _static)
 {
 	SphereCollider* temp = new SphereCollider(obj, _radius, _mass, _gravity, _static);
 	ColliderHandler.push_back(temp);
@@ -17,7 +17,7 @@ SphereCollider * Physics::addSphereCollider(Entity * obj, float _radius, float _
 	return temp;
 }
 
-BoxCollider * Physics::addBoxCollider(Entity * obj,XMFLOAT3 size, float _mass, bool _gravity, bool _static)
+BoxCollider * CollisionManager::addBoxCollider(Entity * obj,XMFLOAT3 size, float _mass, bool _gravity, bool _static)
 {
 	BoxCollider* temp = new BoxCollider(obj, size, _mass, _gravity, _static);
 	ColliderHandler.push_back(temp);
@@ -25,7 +25,7 @@ BoxCollider * Physics::addBoxCollider(Entity * obj,XMFLOAT3 size, float _mass, b
 	return temp;
 }
 
-void Physics::CollisionsDetection(int start, int end,float deltaTime,float totalTime)
+void CollisionManager::CollisionsDetection(int start, int end,float deltaTime,float totalTime)
 {
 	for (int i = start; i < end; i++)
 	{

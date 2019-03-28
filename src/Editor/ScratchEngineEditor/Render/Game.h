@@ -1,8 +1,9 @@
 #pragma once
 
-#include "DXCore.h"
 #include <DirectXMath.h>
 #include <vector>
+
+#include "DXCore.h"
 #include "SimpleShader.h"
 #include "Mesh.h"
 #include "Entity.h"
@@ -10,7 +11,9 @@
 #include "Material.h"
 #include "Lights.h"
 #include "Vertex.h"
-#include "Physics.h"
+#include "../Physics/Physics.h"
+
+using namespace Colliders;
 
 class Game
 	: public DXCore
@@ -47,8 +50,7 @@ private:
 	Mesh* mesh;
 	Mesh* mesh1;
 
-	Physics* physics;
-
+	CollisionManager* physics;
 
 	std::vector<Entity*> entityVector;
 
