@@ -65,7 +65,26 @@ private:
 	ID3D11ShaderResourceView* texture;
 	ID3D11ShaderResourceView* normalMap;
 
+
 	ID3D11SamplerState* sampler;
 	D3D11_SAMPLER_DESC samplerDesc;
+
+	//shadow map
+	D3D11_TEXTURE2D_DESC shadowMapDesc;
+	ID3D11Texture2D*     shadowMap;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+
+	ID3D11DepthStencilView* shadowdepthStencilView;
+
+	ID3D11ShaderResourceView* shadowResourceView;
+
+	D3D11_SAMPLER_DESC comparisonSamplerDesc;
+
+	D3D11_RASTERIZER_DESC drawingRenderStateDesc;
+
+	D3D11_RASTERIZER_DESC shadowRenderStateDesc;
 
 };
