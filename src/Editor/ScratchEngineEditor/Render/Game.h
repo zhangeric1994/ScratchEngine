@@ -58,6 +58,7 @@ private:
 	Camera* camera;
 
 	Material* simpleMaterial;
+	float lastPhysicsCheck;
 
 	DirectionalLight directionalLight;
 	DirectionalLight directionalLight1;

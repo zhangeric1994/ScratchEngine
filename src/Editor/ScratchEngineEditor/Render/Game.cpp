@@ -8,10 +8,10 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	pixelShader = 0;
 
 	mesh = 0;
-	meshPlatform = 0;
+	mesh1 = 0;
+	lastPhysicsCheck = 0.0f;
 
-
-	entityVector.resize(7);
+	entityVector.resize(100);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -79,7 +79,7 @@ Game::~Game() {
 	if (sampler) sampler->Release();
 	if (texture) texture->Release();
 	if (normalMap) normalMap->Release();
-	if (meshPlatform) delete meshPlatform;
+	if (mesh1) delete mesh1;
 }
 
 void Game::Init() {
@@ -139,43 +139,53 @@ void Game::CreateBasicGeometry() {
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
-	Entity* temp = new Entity(mesh, simpleMaterial);
-	Entity* temp1 = new Entity(mesh1, simpleMaterial);
-	Entity* temp2 = new Entity(mesh1, simpleMaterial);
-	Entity* temp3 = new Entity(mesh, simpleMaterial);
-	Entity* temp4 = new Entity(mesh, simpleMaterial);
-	Entity* temp5 = new Entity(mesh, simpleMaterial);
+	//Entity* temp = new Entity(mesh, simpleMaterial);
+	//Entity* temp1 = new Entity(mesh, simpleMaterial);
+	//Entity* temp2 = new Entity(mesh, simpleMaterial);
+	//Entity* temp3 = new Entity(mesh, simpleMaterial);
+	//Entity* temp4 = new Entity(mesh, simpleMaterial);
+	//Entity* temp5 = new Entity(mesh, simpleMaterial);
 	Entity* terrain = new Entity(mesh1, simpleMaterial);
-	entityVector[0] = temp;
-	entityVector[1] = temp1;
-	entityVector[2] = temp2;
-	entityVector[3] = temp3;
-	entityVector[4] = temp4;
-	entityVector[5] = temp5;
-	entityVector[6] = terrain;
-	temp->SetTranslation(-2, 0, 0);
-	temp1->SetTranslation(2.5, 1.5, 0);
-	temp2->SetTranslation(-2.5, 1, 0);
-	temp3->SetTranslation(0.0, 1, 0);
-	temp4->SetTranslation(-1, -1, 0);
-	temp5->SetTranslation(2, 0, 0);
+	//entityVector[0] = temp;
+	//entityVector[1] = temp1;
+	//entityVector[2] = temp2;
+	//entityVector[3] = temp3;
+	//entityVector[4] = temp4;
+	//entityVector[5] = temp5;
+	//entityVector[6] = terrain;
+	//temp->SetTranslation(-2, 0, 0);
+	//temp1->SetTranslation(2.5, 1.5, 0);
+	//temp2->SetTranslation(-2.5, 1, 0);
+	//temp3->SetTranslation(0.0, 1, 0);
+	//temp4->SetTranslation(-1, -1, 0);
+	//temp5->SetTranslation(2, 0, 0);
 	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
-	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
-	Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
-	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
-	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
-	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
-	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	collider->ApplyForce({ 0.5f,0,0.1f });
-	collider1->ApplyForce({ -1.5f,0,0.0f });
+	//Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
+	//Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 0.7f, true, false);
+	//Collider* collider2 = physics->addSphereCollider(temp2, 0.5f, 0.4f, true, false);
+	//Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
+	//Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
+	//Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
+	
+	//collider->ApplyForce({ 0.5f,0,0.1f });
+	//collider1->ApplyForce({ -1.5f,0,0.0f });
 	//collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
-	collider2->ApplyForce({ 1.5f,0,0.0f });
-	collider3->ApplyForce({ -0.9f,0,0.1f });
-	collider4->ApplyForce({ 1.0f,0,-0.1f });
-	collider5->ApplyForce({ -1.4f,0,0.1f });
+	//collider2->ApplyForce({ 1.5f,0,0.0f });
+	//collider3->ApplyForce({ -0.9f,0,0.1f });
+	//collider4->ApplyForce({ 1.0f,0,-0.1f });
+	//collider5->ApplyForce({ -1.4f,0,0.1f });
+	for (int i = 0; i < 99; i++)
+	{
+		Entity* temp = new Entity(mesh, simpleMaterial);
+		entityVector[i] = temp;
+		temp->SetTranslation(rand()%5, rand() % 5 + 2 * i, rand() % 5);
+		Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
+		collider->ApplyForce({ static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX) });
+	}
+	entityVector[99] = terrain;
+	Collider* collider6 = physics->addBoxCollider(terrain, XMFLOAT3{ 100,1,100 }, 1.0f, false, true);
 }
 
 void Game::OnResize() {
@@ -187,7 +197,10 @@ void Game::OnResize() {
 }
 
 void Game::Update(float deltaTime, float totalTime) {
-	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
+	if (deltaTime < 0.5f) {
+		physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
+	}
+	
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 	XMMATRIX view = camera->Update();

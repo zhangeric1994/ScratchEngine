@@ -3,18 +3,21 @@
 #include <tuple>
 
 using namespace DirectX;
-float collisionCheckBack = 0.00f;
+float collisionCheckBack = 0.2f;
 namespace Colliders
 {
 	void Collider::Update(float dt, float totalTime)
 	{
 		if (!Static) {
 			Position = Item->individualPositon;
-
+			//printf("Pos before: %f,%f,%f\n", Position.x, Position.y, Position.z);
+			//printf("vol: %f,%f,%f\n", Velocity.x, Velocity.y, Velocity.z);
+			//printf("dt: %f\n", dt);
 			Position.x += Velocity.x *dt;
 			Position.y += Velocity.y *dt;
 			Position.z += Velocity.z *dt;
 
+			//printf("pos: %f,%f,%f\n", Position.x, Position.y, Position.z);
 			Rotation = Item->quaternion;
 			Rotation.x += AngularVelocity.x *dt;
 			Rotation.y += AngularVelocity.y *dt;
@@ -29,11 +32,12 @@ namespace Colliders
 				it++;
 			}
 			//linear drag 
-			XMStoreFloat3(&Velocity, (XMLoadFloat3(&Velocity)*(1.0f - dt * 0.5f)));
+			XMStoreFloat3(&Velocity, (XMLoadFloat3(&Velocity)*(1.0f - dt * 0.7f)));
 			XMStoreFloat3(&AngularVelocity, (XMLoadFloat3(&AngularVelocity)*(1.0f - dt * 0.8f)));
 			Item->SetTranslation(Position.x, Position.y, Position.z);
 			Item->SetRotation(Rotation.x, Rotation.y, Rotation.z);
 		}
+		
 	}
 
 	void Collider::ApplyForce(XMFLOAT3 force)
@@ -367,8 +371,8 @@ namespace Colliders
 			// then the momentum is inifinity
 			// reverse the force
 
-			XMVECTOR aF = (aVelocity * a->Mass) * 1.9f * aNormal;
-			//float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
+			XMVECTOR aF = (aVelocity * a->Mass) * 1.5f * aNormal;
+			float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
 			XMStoreFloat3(&aForce, aF);
 			//XMStoreFloat3(&aForce, -(aVelocity * a->Mass) * 1.9f * bNormal);
 			a->ApplyForce(aForce);
@@ -385,7 +389,7 @@ namespace Colliders
 		if (a->Static) {
 			// then the momentum is inifinity
 			// reverse the force
-			XMVECTOR bF = (bVelocity * b->Mass) * 1.9f * bNormal;
+			XMVECTOR bF = (bVelocity * b->Mass) * 1.5f * bNormal;
 		    //float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
 			XMStoreFloat3(&bForce, bF);
 			b->ApplyForce(bForce);
@@ -404,24 +408,25 @@ namespace Colliders
 		else {
 			XMFLOAT3 vSum;
 			XMStoreFloat3(&vSum, XMVector3Length(aVelocity) + XMVector3Length(bVelocity));
-			if (abs(vSum.x) >= 0.10f) {
+			if (abs(vSum.x) >= 5.0f) {
 				a->CollidedWith[b] = totalTime;
 				b->CollidedWith[a] = totalTime;
 				XMVECTOR aF = XMLoadFloat3(&aForce);
 				XMVECTOR bF = XMLoadFloat3(&bForce);
-				float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
-				float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
-				XMStoreFloat3(&aForce, aF * (1 - aRatio));
-				XMStoreFloat3(&bForce, bF * (1 - bRatio));
+				//float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
+				//float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
+				XMStoreFloat3(&aForce, aF);
+				XMStoreFloat3(&bForce, bF);
 				a->ApplyForce(aForce);
 				b->ApplyForce(bForce);
-
+			}
+			else {
 				XMVECTOR f1 = XMVectorSet(b->Position.x - a->Position.x, b->Position.y - a->Position.y, b->Position.z - a->Position.z, 0.0f);
 				XMVECTOR f2 = XMVectorSet(a->Position.x - b->Position.x, a->Position.y - b->Position.y, a->Position.z - b->Position.z, 0.0f);
 				XMFLOAT3 force1;
 				XMFLOAT3 force2;
-				XMStoreFloat3(&force1, f1);
-				XMStoreFloat3(&force2, f2);
+				XMStoreFloat3(&force1, XMVector3Normalize(f1)*0.5f);
+				XMStoreFloat3(&force2, XMVector3Normalize(f2)*0.5f);
 				a->ApplyForce(force2);
 				b->ApplyForce(force1);
 			}
