@@ -95,4 +95,7 @@ private:
 
 	ID3D11RasterizerState *shadowRenderState;
 
+	SimpleVertexShader* vertexShaderShadow;
+	SimplePixelShader* pixelShaderShadow;
+
 };

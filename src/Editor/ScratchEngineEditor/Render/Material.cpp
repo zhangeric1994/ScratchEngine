@@ -18,6 +18,14 @@ SimpleVertexShader* Material::getVertexShader() {
 	return vertexShader;
 }
 
+void Material::setVertexShader(SimpleVertexShader* _vertexShader) {
+	vertexShader = _vertexShader;
+}
+
+void Material::setPixelShader(SimplePixelShader* _pixelShader) {
+	pixelShader = _pixelShader;
+}
+
 SimplePixelShader* Material::getPixelShader() {
 	return pixelShader;
 }

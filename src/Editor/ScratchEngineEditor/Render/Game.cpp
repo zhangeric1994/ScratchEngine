@@ -6,6 +6,8 @@ using namespace DirectX;
 Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true) {
 	vertexShader = 0;
 	pixelShader = 0;
+	vertexShaderShadow = 0;
+	pixelShaderShadow = 0;
 
 	mesh = 0;
 	meshPlatform = 0;
@@ -148,6 +150,12 @@ void Game::LoadShaders() {
 	std::wstring wPixel = wpath + std::wstring(L"/PixelShader.cso");
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
+
+	std::wstring sVertex = wpath + std::wstring(L"/VertexShaderShadow.cso");
+	std::wstring sPixel = wpath + std::wstring(L"/PixelShaderShadow.cso");
+
+	const wchar_t* vertexShadow = sVertex.c_str();
+	const wchar_t* pixelShadow = sPixel.c_str();
 
 	vertexShader = new SimpleVertexShader(device, context);
 
@@ -295,14 +303,14 @@ void Game::Draw(float deltaTime, float totalTime) {
 	//-------------------------------------
 	
 	//first pass shadow map
-	context->OMSetRenderTargets(
-		0,
-		nullptr,
-		shadowdepthStencilView
-	);
+	//context->OMSetRenderTargets(
+	//	0,
+	//	nullptr,
+	//	shadowdepthStencilView
+	//);
 
-	context->RSSetState(shadowRenderState);
-	context->RSSetViewports(1, &shadowViewport);
+	//context->RSSetState(shadowRenderState);
+	//context->RSSetViewports(1, &shadowViewport);
 
 
 
@@ -310,21 +318,21 @@ void Game::Draw(float deltaTime, float totalTime) {
 
 
 	//second pass render scene based on shadow map
-	//for (auto& m : entityVector) {
-	//	m->SetWorldMatrix();
-	//	m->PrepareMatrix(viewMatrix, projectionMatrix);
-	//	//m->SetPointLight(pointLight, "pointLight");
-	//	m->SetLight(directionalLight, "light");
-	//	//m->SetLight(directionalLight1, "light1");
-	//	//m->SetSpotLight(spotLight, "spotLight");
-	//	m->SetTexture("diffuseTexture", "basicSampler");
-	//	m->SetNormalMap("normalMap");
-	//	m->CopyAllBufferData();
-	//	m->SetShader();
+	for (auto& m : entityVector) {
+		m->SetWorldMatrix();
+		m->PrepareMatrix(viewMatrix, projectionMatrix);
+		//m->SetPointLight(pointLight, "pointLight");
+		m->SetLight(directionalLight, "light");
+		//m->SetLight(directionalLight1, "light1");
+		//m->SetSpotLight(spotLight, "spotLight");
+		m->SetTexture("diffuseTexture", "basicSampler");
+		m->SetNormalMap("normalMap");
+		m->CopyAllBufferData();
+		m->SetShader();
 
-	//	//set vertex buffer and index buffer inside entity class
-	//	m->Draw(context);
-	//}
+		//set vertex buffer and index buffer inside entity class
+		m->Draw(context);
+	}
 
 	//-------------------------------------
 
