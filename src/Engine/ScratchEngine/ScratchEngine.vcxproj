@@ -161,6 +161,7 @@
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
     <ClInclude Include="header.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Memory\Allocator.h" />
     <ClInclude Include="Memory\Block.h" />
     <ClInclude Include="Memory\Pool.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Memory\DynamicPoolAllocator.h" />
     <ClCompile Include="Memory\Pool.cpp" />
     <ClCompile Include="Physics\BoundingVolume.cpp" />

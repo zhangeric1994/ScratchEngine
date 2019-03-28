@@ -141,6 +141,9 @@
     <ClInclude Include="Physics\BoundingVolume.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -199,6 +202,9 @@
     </ClCompile>
     <ClCompile Include="Physics\BoundingVolume.cpp">
       <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
