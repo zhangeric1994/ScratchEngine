@@ -11,7 +11,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	mesh1 = 0;
 	lastPhysicsCheck = 0.0f;
 
-	entityVector.resize(50);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -135,6 +134,8 @@ void Game::CreateBasicGeometry() {
 	device->CreateSamplerState(&samplerDesc, &sampler);
 	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 
+	int entityNum = 50;
+	entityVector.resize(entityNum);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
 	mesh = new Mesh(device, filename);
@@ -180,7 +181,7 @@ void Game::CreateBasicGeometry() {
 	//collider3->ApplyForce({ -0.9f,0,0.1f });
 	//collider4->ApplyForce({ 1.0f,0,-0.1f });
 	//collider5->ApplyForce({ -1.4f,0,0.1f });
-	for (int i = 0; i < 49; i++)
+	for (int i = 0; i < entityNum - 1; i++)
 	{
 		Entity* temp = new Entity(mesh, simpleMaterial);
 		entityVector[i] = temp;
@@ -188,7 +189,7 @@ void Game::CreateBasicGeometry() {
 		Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
 		collider->ApplyForce({ static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX) });
 	}
-	entityVector[49] = terrain;
+	entityVector[entityNum -1] = terrain;
 	//entityVector[100] = obstacle;
 	Collider* collider6 = physics->addBoxCollider(terrain, XMFLOAT3{ 100,1,100 }, 1.0f, false, true);
 	//Collider* collider7 = physics->addBoxCollider(obstacle, XMFLOAT3{ 3,3,3 }, 1.0f, false, true);
@@ -206,7 +207,7 @@ void Game::Update(float deltaTime, float totalTime) {
 	if (deltaTime < 0.5f) {
 		physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
 	}
-	
+
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 	XMMATRIX view = camera->Update(deltaTime);

@@ -390,7 +390,7 @@ namespace Colliders
 			// then the momentum is inifinity
 			// reverse the force
 			XMVECTOR bF = (bVelocity * b->Mass) * 1.5f * bNormal;
-		    //float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
+		    float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
 			XMStoreFloat3(&bForce, bF);
 			b->ApplyForce(bForce);
 			//printf("normal:  %f,  %f,  %f \n", bNormal.m128_f32[0], bNormal.m128_f32[1], bNormal.m128_f32[2]);
@@ -413,10 +413,10 @@ namespace Colliders
 				b->CollidedWith[a] = totalTime;
 				XMVECTOR aF = XMLoadFloat3(&aForce);
 				XMVECTOR bF = XMLoadFloat3(&bForce);
-				//float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
-				//float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
-				XMStoreFloat3(&aForce, aF);
-				XMStoreFloat3(&bForce, bF);
+				float aRatio = AngularForceCalculation(a, collisionPoint, aF, totalTime);
+				float bRatio = AngularForceCalculation(b, collisionPoint, bF, totalTime);
+				XMStoreFloat3(&aForce, aF * (1- aRatio));
+				XMStoreFloat3(&bForce, bF * (1 - bRatio));
 				a->ApplyForce(aForce);
 				b->ApplyForce(bForce);
 			}
@@ -449,9 +449,9 @@ namespace Colliders
 			//float angle = XMConvertToDegrees(acos(XMVector3Dot(velocityNorm, CollisionNorm).m128_f32[0]));
 			float angularRatio = 1 - abs(XMVector3Dot(velocityNorm, CollisionNorm).m128_f32[0]);
 			XMFLOAT3 f;
-			XMStoreFloat3(&f, aVelocity * angularRatio * 20);
+			XMStoreFloat3(&f, -aVelocity * angularRatio);
 			XMFLOAT3 transformed = { f.y,f.x,f.z };
-			//a->ApplyAngularForce(transformed);
+			a->ApplyAngularForce(transformed);
 
 			return angularRatio;
 		}
