@@ -198,6 +198,9 @@ void Mesh::CreateMesh(Vertex* vertices,
 	int indicesNumber,
 	ID3D11Device* device) {
 
+	//calculate tangent
+	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
+
 	//initialize vertex buffer
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -228,4 +231,69 @@ void Mesh::CreateMesh(Vertex* vertices,
 
 	//initialize indicesNum
 	indicesNum = indicesNumber;
+}
+
+void Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber) {
+	for (int i = 0; i < verticesNumber; i++) {
+		vertices[i].tangent = XMFLOAT3(0, 0, 0);
+	}
+
+	for (int i = 0; i < indicesNumber; i += 3) {
+		Vertex v0 = vertices[indices[i]];
+		Vertex v1 = vertices[indices[i+1]];
+		Vertex v2 = vertices[indices[i+2]];
+
+		float positionX0 = v0.Position.x;
+		float positionY0 = v0.Position.y;
+		float positionZ0 = v0.Position.z;
+
+		float positionX1 = v1.Position.x;
+		float positionY1 = v1.Position.y;
+		float positionZ1 = v1.Position.z;
+
+		float positionX2 = v2.Position.x;
+		float positionY2 = v2.Position.y;
+		float positionZ2 = v2.Position.z;
+
+		float U0 = v0.UV.x;
+		float V0 = v0.UV.y;
+
+		float U1 = v1.UV.x;
+		float V1 = v1.UV.y;
+
+		float U2 = v2.UV.x;
+		float V2 = v2.UV.y;
+
+		float deltaPosX1 = positionX1 - positionX0;
+		float deltaPosY1 = positionY1 - positionY0;
+		float deltaPosZ1 = positionZ1 - positionZ0;
+
+		float deltaPosX2 = positionX2 - positionX0;
+		float deltaPosY2 = positionY2 - positionY0;
+		float deltaPosZ2 = positionZ2 - positionZ0;
+
+		float deltaU1 = U1 - U0;
+		float deltaV1 = V1 - V0;
+
+		float deltaU2 = U2 - U0;
+		float deltaV2 = V2 - V0;
+
+		float r = 1.0f / (deltaU1 * deltaV2 - deltaV1 * deltaU2);
+
+		float x = (deltaPosX1 * deltaV2 - deltaPosX2 * deltaV1) * r;
+		float y = (deltaPosY1 * deltaV2 - deltaPosY2 * deltaV1) * r;
+		float z = (deltaPosZ1 * deltaV2 - deltaPosZ2 * deltaV1) * r;
+
+		vertices[indices[i]].tangent.x += x;
+		vertices[indices[i]].tangent.y += y;
+		vertices[indices[i]].tangent.z += z;
+
+		vertices[indices[i+1]].tangent.x += x;
+		vertices[indices[i+1]].tangent.y += y;
+		vertices[indices[i+1]].tangent.z += z;
+
+		vertices[indices[i+2]].tangent.x += x;
+		vertices[indices[i+2]].tangent.y += y;
+		vertices[indices[i+2]].tangent.z += z;
+	}
 }

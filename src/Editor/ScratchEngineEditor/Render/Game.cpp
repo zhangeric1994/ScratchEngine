@@ -8,8 +8,13 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	pixelShader = 0;
 
 	mesh = 0;
+	meshPlatform = 0;
 
-	entityVector.resize(7);
+
+
+
+	entityVector.resize(3);
+
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
@@ -17,23 +22,53 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	physics = new Physics(200);
 	simpleMaterial = NULL;
 
-	directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
-	directionalLight.Direction = XMFLOAT3(1, -1, 0);
 
-	pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
 
-#if defined(DEBUG) || defined(_DEBUG)
-	// Do we want a console window?  Probably only in debug mode
-	CreateConsoleWindow(500, 120, 32, 120);
-	printf("Console window created successfully.  Feel free to printf() here.\n");
-#endif
+
+	directionalLight.AmbientColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
+	directionalLight.DiffuseColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
+	directionalLight.Direction	  = XMFLOAT3(0.0f,  -1.0f, 0.0f);
+	directionalLight.CameraX	  = camera->getPosition().x;
+	directionalLight.CameraY	  = camera->getPosition().y;
+	directionalLight.CameraZ	  = camera->getPosition().z;
+
+	directionalLight1.AmbientColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	directionalLight1.DiffuseColor = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	directionalLight1.Direction = XMFLOAT3(-1.0f, 1.0f, -1.0f);
+	directionalLight1.CameraX = camera->getPosition().x;
+	directionalLight1.CameraY = camera->getPosition().y;
+	directionalLight1.CameraZ = camera->getPosition().z;
+
+	pointLight.AmbientColor = XMFLOAT3(1.0f,  1.0f,   1.0f);
+	pointLight.DiffuseColor = XMFLOAT3(0.4f,  0.4f,   0.4f);
+	pointLight.Position		= XMFLOAT3(0.0f, 10.0f,   0.0f);
+	pointLight.CameraX = camera->getPosition().x;
+	pointLight.CameraY = camera->getPosition().y;
+	pointLight.CameraZ = camera->getPosition().z;
+
+	spotLight.AmbientColor = XMFLOAT4(0.2f,  0.2f, 0.2f, 1.0f);
+	spotLight.DiffuseColor = XMFLOAT4(1.0f,  1.0f, 1.0f, 1.0f);
+	spotLight.Position	   = XMFLOAT3(0.0f,  2.0f, 0.0f);
+	spotLight.Direction	   = XMFLOAT3(0.0f, -1.0f, 0.0f);
+	spotLight.Cone		   = 0.0f;
+	spotLight.Range		   = 1000.0f;
+
+	texture = NULL;
+	normalMap = NULL;
+	sampler = NULL;
+
+	samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
 }
 
 Game::~Game() {
-
 	for (auto& m : entityVector) delete m;
 
 	delete vertexShader;
@@ -41,6 +76,10 @@ Game::~Game() {
 	if (mesh) delete mesh;
 	delete camera;
 	if (simpleMaterial) delete simpleMaterial;
+	if (sampler) sampler->Release();
+	if (texture) texture->Release();
+	if (normalMap) normalMap->Release();
+	if (meshPlatform) delete meshPlatform;
 }
 
 void Game::Init() {
@@ -61,7 +100,6 @@ void Game::LoadShaders() {
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
 
-	
 	vertexShader = new SimpleVertexShader(device, context);
 
 	vertexShader->LoadShaderFile(vertex);
@@ -88,48 +126,42 @@ void Game::CreateMatrces() {
 }
 
 void Game::CreateBasicGeometry() {
-	simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_COLOR.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_NRM.jpg", 0, &normalMap);
+
+	/*CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);*/
+
+	device->CreateSamplerState(&samplerDesc, &sampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
+
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
 	mesh = new Mesh(device, filename);
-	mesh1 = new Mesh(device, cubefile);
+
+
+	filename = (char*)"../Assets/Models/cube.obj";
+	meshPlatform = new Mesh(device, filename);
+
 	Entity* temp = new Entity(mesh, simpleMaterial);
-	Entity* temp1 = new Entity(mesh1, simpleMaterial);
-	Entity* temp2 = new Entity(mesh1, simpleMaterial);
-	Entity* temp3 = new Entity(mesh, simpleMaterial);
-	Entity* temp4 = new Entity(mesh, simpleMaterial);
-	Entity* temp5 = new Entity(mesh, simpleMaterial);
-	Entity* terrain = new Entity(mesh1, simpleMaterial);
+	Entity* temp1 = new Entity(meshPlatform, simpleMaterial);
+	Entity* temp2 = new Entity(meshPlatform, simpleMaterial);
+
 	entityVector[0] = temp;
 	entityVector[1] = temp1;
 	entityVector[2] = temp2;
-	entityVector[3] = temp3;
-	entityVector[4] = temp4;
-	entityVector[5] = temp5;
-	entityVector[6] = terrain;
+
 	temp->SetTranslation(-2, 0, 0);
-	temp1->SetTranslation(2.5, 1.5, 0);
-	temp2->SetTranslation(-2.5, 1, 0);
-	temp3->SetTranslation(0.0, 1, 0);
-	temp4->SetTranslation(-1, -1, 0);
-	temp5->SetTranslation(2, 0, 0);
-	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
-	terrain->SetTranslation(0, -10, 0);
-	terrain->SetScale(100, 1, 100);
-	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
-	Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
-	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
-	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
-	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
-	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	collider->ApplyForce({ 0.5f,0,0.1f });
-	collider1->ApplyForce({ -1.5f,0,0.0f });
-	//collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
-	collider2->ApplyForce({ 1.5f,0,0.0f });
-	collider3->ApplyForce({ -0.9f,0,0.1f });
-	collider4->ApplyForce({ 1.0f,0,-0.1f });
-	collider5->ApplyForce({ -1.4f,0,0.1f });
+	//temp->SetScale(1.5f, 1.5f, 1.5f);
+	temp1->SetTranslation(2, 0, 0);
+	temp2->SetTranslation(0, -2, 0);
+	//temp2->SetRotation(90, 0, 0);
+	temp2->SetScale(10, 1, 10);
+
+	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
+	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
+	collider->ApplyForce({ 0.9f, 0.0f, 0.0f });
+	collider1->ApplyForce({ -0.9f, 0.0f, 0.0f });
 
 }
 
@@ -152,7 +184,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.6f, 0.6f, 0.6f, 0.6f };
+	const float color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	//const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -169,8 +202,12 @@ void Game::Draw(float deltaTime, float totalTime) {
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
 		entityVector[countOfEntity]->SetLight(directionalLight, "light");
+		//entityVector[countOfEntity]->SetLight(directionalLight1, "light1");
+		//entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
+		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
+		entityVector[countOfEntity]->SetNormalMap("normalMap");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
 		//set vertex buffer and index buffer inside entity class
@@ -181,6 +218,8 @@ void Game::Draw(float deltaTime, float totalTime) {
 
 	//End of rendering one frame
 	swapChain->Present(0, 0);
+
+	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 }
 
 #pragma region Mouse Input

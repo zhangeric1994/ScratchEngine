@@ -10,7 +10,7 @@
 #include "Material.h"
 #include "Lights.h"
 #include "Vertex.h"
-#include "Physics.h"
+#include "../Physics/Physics.h"
 
 class Game
 	: public DXCore
@@ -45,7 +45,9 @@ private:
 	XMFLOAT4X4 projectionMatrix;
 
 	Mesh* mesh;
-	Mesh* mesh1;
+
+	Mesh* meshPlatform;
+
 
 	Physics* physics;
 
@@ -57,9 +59,16 @@ private:
 	Material* simpleMaterial;
 
 	DirectionalLight directionalLight;
+	DirectionalLight directionalLight1;
 
 	PointLight pointLight;
 
+	SpotLight spotLight;
 
+	ID3D11ShaderResourceView* texture;
+	ID3D11ShaderResourceView* normalMap;
+
+	ID3D11SamplerState* sampler;
+	D3D11_SAMPLER_DESC samplerDesc;
 
 };

@@ -14,6 +14,8 @@ public:
 	XMMATRIX Update();
 	XMMATRIX UpdateProjection(float aspectRatio);
 
+	XMFLOAT3 getPosition();
+
 private:
 	XMFLOAT3 position;
 	XMFLOAT3 direction;

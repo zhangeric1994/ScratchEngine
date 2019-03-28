@@ -26,8 +26,8 @@ void Camera::SetRotationY(float _rotationY) {
 }
 
 XMMATRIX Camera::Update() {
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000) { position.y += -0.0001f; }
-	if (GetAsyncKeyState('X') & 0x8000) { position.y -= -0.0001f; }
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000) { position.y += -0.001f; }
+	if (GetAsyncKeyState('X') & 0x8000) { position.y -= -0.001f; }
 
 	//rotation quaternion
 	XMVECTOR rotationQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(rotationX, rotationY, 0)));
@@ -63,15 +63,15 @@ XMMATRIX Camera::Update() {
 	XMStoreFloat3(&leftDirection, leftVector);
 
 	if (GetAsyncKeyState('A') & 0x8000) {
-		position.x += leftDirection.x * 0.001f;
-		position.y += leftDirection.y * 0.001f;
-		position.z += leftDirection.z * 0.001f;
-	}
-
-	if (GetAsyncKeyState('D') & 0x8000) {
 		position.x -= leftDirection.x * 0.001f;
 		position.y -= leftDirection.y * 0.001f;
 		position.z -= leftDirection.z * 0.001f;
+	}
+
+	if (GetAsyncKeyState('D') & 0x8000) {
+		position.x += leftDirection.x * 0.001f;
+		position.y += leftDirection.y * 0.001f;
+		position.z += leftDirection.z * 0.001f;
 	}
 
 	//generate view matrix
@@ -92,4 +92,8 @@ XMMATRIX Camera::UpdateProjection(float aspectRatio) {
 		100.0f);					// Far clip plane distance
 
 	return projectionMatrix;
+}
+
+XMFLOAT3 Camera::getPosition() {
+	return position;
 }

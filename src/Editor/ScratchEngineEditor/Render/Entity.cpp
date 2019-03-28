@@ -90,16 +90,25 @@ void Entity::SetShader() {
 }
 
 void Entity::SetLight(DirectionalLight directionalLight, std::string bufferName) {
-	material->getPixelShader()->SetData(bufferName, &directionalLight, sizeof(DirectionalLight));
+	bool istrue = material->getPixelShader()->SetData(bufferName, &directionalLight, sizeof(DirectionalLight));
 }
 
-void Entity::SetPointLight(PointLight pLight, const char* bufferName) {
-	material->getPixelShader()->SetData(bufferName, &pLight, sizeof(pLight));
+void Entity::SetPointLight(PointLight pLight, std::string bufferName) {
+	bool istrue = material->getPixelShader()->SetData(bufferName, &pLight, sizeof(pLight));
 }
 
-void Entity::SetTexture(char* textureName, char* samplerName) {
+void Entity::SetSpotLight(SpotLight sLight, std::string bufferName) {
+	bool istrue = material->getPixelShader()->SetData(bufferName, &sLight, sizeof(sLight));
+
+}
+
+void Entity::SetTexture(const char* textureName, const char* samplerName) {
 	material->getPixelShader()->SetShaderResourceView(textureName, material->getTexture());
 	material->getPixelShader()->SetSamplerState(samplerName, material->getSampler());
+}
+
+void Entity::SetNormalMap(const char* normalMapName) {
+	material->getPixelShader()->SetShaderResourceView(normalMapName, material->getNormalMap());
 }
 
 bool Entity::isUpdated() {

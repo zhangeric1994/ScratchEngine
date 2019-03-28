@@ -23,8 +23,10 @@ public:
 	void CopyAllBufferData();
 	void SetShader();
 	void SetLight(DirectionalLight directionalLight, std::string bufferName);
-	void SetPointLight(PointLight pLight, const char* bufferName);
-	void SetTexture(char* textureName, char* samplerName);
+	void SetPointLight(PointLight pLight, std::string bufferName);
+	void SetSpotLight(SpotLight sLight, std::string bufferName);
+	void SetTexture(const char* textureName, const char* samplerName);
+	void SetNormalMap(const char* normalMapName);
 
 	bool isUpdated();
 
