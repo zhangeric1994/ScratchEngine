@@ -31,7 +31,7 @@ cbuffer colorData : register(b0) {
 };
 
 cbuffer colorData2 : register(b1) {
-	DirectionalLight light2;
+	DirectionalLight light1;
 }
 
 cbuffer pointLightData : register(b2) {
@@ -146,7 +146,8 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	input.normal = normalize(mul(textureNormal, TBN));
 
 	//light color calculation
-	float3 lightColor1 = calculateDirectionalLight(input.normal, input.worldPos, light);
+	float3 lightColor = calculateDirectionalLight(input.normal, input.worldPos, light);
+	float3 lightColor1 = calculateDirectionalLight(input.normal, input.worldPos, light1);
 
 	float3 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
@@ -159,7 +160,9 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 
+
+
 	//return float4(input.tangent, 1.0f);
 	//return float4(surfaceColor.rgb, 1.0f);
-	return float4(surfaceColor.rgb * (lightColor1 + pointLightColor), 1.0f);
+	return float4(surfaceColor.rgb * (lightColor1 + pointLightColor + lightColor), 1.0f);
 }

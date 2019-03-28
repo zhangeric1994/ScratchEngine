@@ -199,7 +199,7 @@ void Mesh::CreateMesh(Vertex* vertices,
 	ID3D11Device* device) {
 
 	//calculate tangent
-	vertices = ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
+	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
 
 	//initialize vertex buffer
 	D3D11_BUFFER_DESC vbd;
@@ -233,7 +233,7 @@ void Mesh::CreateMesh(Vertex* vertices,
 	indicesNum = indicesNumber;
 }
 
-Vertex* Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber) {
+void Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber) {
 	for (int i = 0; i < verticesNumber; i++) {
 		vertices[i].tangent = XMFLOAT3(0, 0, 0);
 	}
@@ -282,7 +282,7 @@ Vertex* Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int*
 
 		float x = (deltaPosX1 * deltaV2 - deltaPosX2 * deltaV1) * r;
 		float y = (deltaPosY1 * deltaV2 - deltaPosY2 * deltaV1) * r;
-		float z = (deltaPosY1 * deltaV2 - deltaPosY2 * deltaV1) * r;
+		float z = (deltaPosZ1 * deltaV2 - deltaPosZ2 * deltaV1) * r;
 
 		vertices[indices[i]].tangent.x += x;
 		vertices[indices[i]].tangent.y += y;
@@ -296,7 +296,4 @@ Vertex* Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int*
 		vertices[indices[i+2]].tangent.y += y;
 		vertices[indices[i+2]].tangent.z += z;
 	}
-
-	return vertices;
-
 }

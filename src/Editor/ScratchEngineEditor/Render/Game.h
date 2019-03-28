@@ -45,6 +45,7 @@ private:
 	XMFLOAT4X4 projectionMatrix;
 
 	Mesh* mesh;
+	Mesh* meshPlatform;
 
 	Physics* physics;
 
@@ -55,6 +56,7 @@ private:
 	Material* simpleMaterial;
 
 	DirectionalLight directionalLight;
+	DirectionalLight directionalLight1;
 
 	PointLight pointLight;
 

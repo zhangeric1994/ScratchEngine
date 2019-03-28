@@ -26,8 +26,8 @@ void Camera::SetRotationY(float _rotationY) {
 }
 
 XMMATRIX Camera::Update() {
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000) { position.y += -0.0001f; }
-	if (GetAsyncKeyState('X') & 0x8000) { position.y -= -0.0001f; }
+	if (GetAsyncKeyState(VK_SPACE) & 0x8000) { position.y += -0.001f; }
+	if (GetAsyncKeyState('X') & 0x8000) { position.y -= -0.001f; }
 
 	//rotation quaternion
 	XMVECTOR rotationQuaternion = XMQuaternionRotationRollPitchYawFromVector(XMLoadFloat3(&XMFLOAT3(rotationX, rotationY, 0)));
