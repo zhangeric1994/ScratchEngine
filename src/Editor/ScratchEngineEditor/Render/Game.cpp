@@ -106,6 +106,12 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	shadowRenderStateDesc.FillMode = D3D11_FILL_SOLID;
 	shadowRenderStateDesc.DepthClipEnable = true;
 
+	shadowViewport = {};
+	shadowViewport.Height = 1024;
+	shadowViewport.Width = 1024;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+
 }
 
 Game::~Game() {
@@ -149,6 +155,31 @@ void Game::LoadShaders() {
 }
 
 void Game::CreateMatrces() {
+	//shdaow map light wvp
+	XMMATRIX lightPerspectiveMatrix = XMMatrixPerspectiveFovRH(
+		XM_PIDIV2,
+		1.0f,
+		12.f,
+		50.f
+	);
+
+	XMStoreFloat4x4(
+		&lightProjectionMatrix,
+		XMMatrixTranspose(lightPerspectiveMatrix)
+	);
+
+	XMVECTOR eye = { 0.0f, 20.0f, 0.0f, 0.0f };
+	XMVECTOR at = { 0.0f, 0.0f, 0.0f, 0.0f };
+	XMVECTOR upL = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+	XMStoreFloat4x4(
+		&lightViewMatrix,
+		XMMatrixTranspose(XMMatrixLookAtRH(eye, at, upL))
+	);
+
+	XMStoreFloat4(&lightPosition, eye);
+	//
+
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
 	
@@ -260,20 +291,20 @@ void Game::Draw(float deltaTime, float totalTime) {
 
 
 	//second pass render scene based on shadow map
-	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-		entityVector[countOfEntity]->SetWorldMatrix();
-		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-		entityVector[countOfEntity]->SetLight(directionalLight, "light");
-		//entityVector[countOfEntity]->SetLight(directionalLight1, "light1");
-		//entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
-		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
-		entityVector[countOfEntity]->SetNormalMap("normalMap");
-		entityVector[countOfEntity]->CopyAllBufferData();
-		entityVector[countOfEntity]->SetShader();
+	for (auto& m : entityVector) {
+		m->SetWorldMatrix();
+		m->PrepareMatrix(viewMatrix, projectionMatrix);
+		//m->SetPointLight(pointLight, "pointLight");
+		m->SetLight(directionalLight, "light");
+		//m->SetLight(directionalLight1, "light1");
+		//m->SetSpotLight(spotLight, "spotLight");
+		m->SetTexture("diffuseTexture", "basicSampler");
+		m->SetNormalMap("normalMap");
+		m->CopyAllBufferData();
+		m->SetShader();
 
 		//set vertex buffer and index buffer inside entity class
-		entityVector[countOfEntity]->Draw(context);
+		m->Draw(context);
 	}
 
 	//-------------------------------------

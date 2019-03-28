@@ -87,4 +87,10 @@ private:
 
 	D3D11_RASTERIZER_DESC shadowRenderStateDesc;
 
+	XMFLOAT4X4 lightViewMatrix;
+	XMFLOAT4X4 lightProjectionMatrix;
+
+	XMFLOAT4 lightPosition;
+	D3D11_VIEWPORT shadowViewport;
+
 };
