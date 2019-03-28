@@ -146,6 +146,7 @@ void Game::CreateBasicGeometry() {
 	//Entity* temp4 = new Entity(mesh, simpleMaterial);
 	//Entity* temp5 = new Entity(mesh, simpleMaterial);
 	Entity* terrain = new Entity(mesh1, simpleMaterial);
+	Entity* obstacle = new Entity(mesh1, simpleMaterial);
 	//entityVector[0] = temp;
 	//entityVector[1] = temp1;
 	//entityVector[2] = temp2;
@@ -160,6 +161,9 @@ void Game::CreateBasicGeometry() {
 	//temp4->SetTranslation(-1, -1, 0);
 	//temp5->SetTranslation(2, 0, 0);
 	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
+	obstacle->SetTranslation(0.0f, -9.5f, 0.0f);
+	obstacle->SetTranslation(2.0f, -8.0f, 2.0f);
+	obstacle->SetScale(3, 3, 3);
 	terrain->SetTranslation(0, -10, 0);
 	terrain->SetScale(100, 1, 100);
 	//Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
@@ -185,7 +189,9 @@ void Game::CreateBasicGeometry() {
 		collider->ApplyForce({ static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX) });
 	}
 	entityVector[99] = terrain;
+	//entityVector[100] = obstacle;
 	Collider* collider6 = physics->addBoxCollider(terrain, XMFLOAT3{ 100,1,100 }, 1.0f, false, true);
+	//Collider* collider7 = physics->addBoxCollider(obstacle, XMFLOAT3{ 3,3,3 }, 1.0f, false, true);
 }
 
 void Game::OnResize() {
@@ -203,7 +209,7 @@ void Game::Update(float deltaTime, float totalTime) {
 	
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
-	XMMATRIX view = camera->Update();
+	XMMATRIX view = camera->Update(deltaTime);
 	
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 }

@@ -25,7 +25,7 @@ void Camera::SetRotationY(float _rotationY) {
 	rotationY = _rotationY;
 }
 
-XMMATRIX Camera::Update() {
+XMMATRIX Camera::Update(float deltaTime) {
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000) { position.y += -0.001f; }
 	if (GetAsyncKeyState('X') & 0x8000) { position.y -= -0.001f; }
 
@@ -41,16 +41,16 @@ XMMATRIX Camera::Update() {
 
 	//move forward
 	if (GetAsyncKeyState('W') & 0x8000) {
-		position.x += direction.x * 0.001f;
-		position.y += direction.y * 0.001f;
-		position.z += direction.z * 0.001f;
+		position.x += direction.x * 2.0f * deltaTime;
+		position.y += direction.y * 2.0f * deltaTime;
+		position.z += direction.z * 2.0f * deltaTime;
 	}
 
 	//move backward
 	if (GetAsyncKeyState('S') & 0x8000) {
-		position.x -= direction.x * 0.001f;
-		position.y -= direction.y * 0.001f;
-		position.z -= direction.z * 0.001f;
+		position.x -= direction.x * 2.0f * deltaTime;
+		position.y -= direction.y * 2.0f * deltaTime;
+		position.z -= direction.z * 2.0f * deltaTime;
 	}
 
 	XMFLOAT3 upDirection = XMFLOAT3(0, 1.0f, 0);
@@ -63,15 +63,15 @@ XMMATRIX Camera::Update() {
 	XMStoreFloat3(&leftDirection, leftVector);
 
 	if (GetAsyncKeyState('A') & 0x8000) {
-		position.x -= leftDirection.x * 0.001f;
-		position.y -= leftDirection.y * 0.001f;
-		position.z -= leftDirection.z * 0.001f;
+		position.x -= leftDirection.x * 2.0f * deltaTime;
+		position.y -= leftDirection.y * 2.0f * deltaTime;
+		position.z -= leftDirection.z * 2.0f * deltaTime;
 	}
 
 	if (GetAsyncKeyState('D') & 0x8000) {
-		position.x += leftDirection.x * 0.001f;
-		position.y += leftDirection.y * 0.001f;
-		position.z += leftDirection.z * 0.001f;
+		position.x += leftDirection.x * 2.0f * deltaTime;
+		position.y += leftDirection.y * 2.0f * deltaTime;
+		position.z += leftDirection.z * 2.0f * deltaTime;
 	}
 
 	//generate view matrix

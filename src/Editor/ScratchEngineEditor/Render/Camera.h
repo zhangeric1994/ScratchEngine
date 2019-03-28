@@ -11,7 +11,7 @@ public:
 	void SetRotationX(float _directionX);
 	void SetRotationY(float _directionY);
 
-	XMMATRIX Update();
+	XMMATRIX Update(float deltaTime);
 	XMMATRIX UpdateProjection(float aspectRatio);
 
 	XMFLOAT3 getPosition();

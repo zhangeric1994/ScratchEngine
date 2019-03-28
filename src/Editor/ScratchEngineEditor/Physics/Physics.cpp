@@ -36,7 +36,7 @@ void CollisionManager::CollisionsDetection(int start, int end,float deltaTime,fl
 			//calculate squared distance from centers
 			auto b = ColliderHandler.at(j); 
 			// in the future, if the collider belongs to the subObject of current checking one, it should has the option to ignore it.
-			if (i != j)
+			if (i != j )
 			{
 				bool collied = Colliders::CollisionCheck(a, b, totalTime);
 				if (a->CollidedWith[b] != 0 &&!collied) {
