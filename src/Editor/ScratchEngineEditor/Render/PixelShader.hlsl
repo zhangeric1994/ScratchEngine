@@ -78,7 +78,7 @@ float3 calculateDirectionalLight(float3 normal, float3 position, DirectionalLigh
 	float3 reflectance = reflect(-nDirection, normal);
 	float  spec = pow(saturate(dot(reflectance, dirToCamera)), 32.0f);
 
-	float3 finalColor = light.DiffuseColor * NdotL + spec.rrr;
+	float3 finalColor =  NdotL * (light.DiffuseColor + spec.rrr);
 	return finalColor;
 }
 
@@ -161,7 +161,7 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   of the triangle we're rendering
 
 
-
+	return float4(surfaceColor.rgb * lightColor, 1.0f);
 	//return float4(input.tangent, 1.0f);
 	//return float4(surfaceColor.rgb, 1.0f);
 	return float4(surfaceColor.rgb * (lightColor1 + pointLightColor + lightColor), 1.0f);
