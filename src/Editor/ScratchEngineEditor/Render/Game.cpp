@@ -1,6 +1,6 @@
 ﻿#include "Game.h"
 #include <string>
-
+#include <iostream>
 using namespace DirectX;
 
 Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true) {
@@ -19,6 +19,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 		entityVector[countOfVector] = NULL;
 
 	camera = new Camera();
+	inputM = new ScratchEngine::InputManager();
 	physics = new CollisionManager(200);
 	simpleMaterial = NULL;
 
@@ -75,6 +76,7 @@ Game::~Game() {
 	delete pixelShader;
 	if (mesh) delete mesh;
 	delete camera;
+	delete inputM;
 	if (simpleMaterial) delete simpleMaterial;
 	if (sampler) sampler->Release();
 	if (texture) texture->Release();
@@ -86,7 +88,6 @@ void Game::Init() {
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
-	memOfKey = 0;
 }
 
 void Game::LoadShaders() {
@@ -182,12 +183,18 @@ void Game::Update(float deltaTime, float totalTime) {
 	
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 	
-	if (IsKeyDown('T')) 
-	{
-		printf("pressed T");
-	}
-	OnMouseDrag(MOUSEEVENTF_LEFTDOWN);
-	
+	//OnMouseDrag(MOUSEEVENTF_LEFTDOWN);
+	//if (inputM->IsKeyDown('T'))
+	//{
+	//	printf("pressed T");
+	//} 
+	//if (GetAsyncKeyState('T') & 0x8000)
+	//{
+	//	printf("pressed T");
+	//}
+	// OnMouseDown(WM_MOUSEHOVER, 0, 0);
+	inputM->GetKey('C');
+	inputM->GetKeyDown('D');
 }
 
 void Game::Draw(float deltaTime, float totalTime) {
@@ -232,111 +239,58 @@ void Game::Draw(float deltaTime, float totalTime) {
 
 #pragma region Mouse Input
 
+ //--------------------------------------------------------
+ //Helper method for mouse clicking.  We get this information
+ //from the OS-level messages anyway, so these helpers have
+ //been created to provide basic mouse input if you want it.
+ //--------------------------------------------------------
+void Game::OnMouseDown(WPARAM buttonState, int x, int y) {
+	// Add any custom code here...
+	// Save the previous mouse position, so we have it for the future
+	prevMousePos.x = x;
+	prevMousePos.y = y;
+	
+	// Caputure the mouse so we keep getting mouse move
+	// events even if the mouse leaves the window.  we'll be
+	// releasing the capture once a mouse button is released
+	SetCapture(hWnd);
+}
+
 // --------------------------------------------------------
-// Helper method for mouse clicking.  We get this information
-// from the OS-level messages anyway, so these helpers have
-// been created to provide basic mouse input if you want it.
+// Helper method for mouse release
 // --------------------------------------------------------
-//void Game::OnMouseDown(WPARAM buttonState, int x, int y) {
-//	// Add any custom code here...
-//
-//	// Save the previous mouse position, so we have it for the future
-//	prevMousePos.x = x;
-//	prevMousePos.y = y;
-//
-//	// Caputure the mouse so we keep getting mouse move
-//	// events even if the mouse leaves the window.  we'll be
-//	// releasing the capture once a mouse button is released
-//	SetCapture(hWnd);
-//}
-//
-//// --------------------------------------------------------
-//// Helper method for mouse release
-//// --------------------------------------------------------
-//void Game::OnMouseUp(WPARAM buttonState, int x, int y) {
-//	// Add any custom code here...
-//
-//	// We don't care about the tracking the cursor outside
-//	// the window anymore (we're not dragging if the mouse is up)
-//	ReleaseCapture();
-//}
-//
-//// --------------------------------------------------------
-//// Helper method for mouse movement.  We only get this message
-//// if the mouse is currently over the window, or if we're 
-//// currently capturing the mouse.
-//// --------------------------------------------------------
-//void Game::OnMouseMove(WPARAM buttonState, int x, int y) {
-//	// Add any custom code here...
-//	if (buttonState & 0x0001) {
-//		camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-//		camera->SetRotationY((x - prevMousePos.x) * 0.001f);
-//	}
-//	// Save the previous mouse position, so we have it for the future
-//	prevMousePos.x = x;
-//	prevMousePos.y = y;
-//}
-//
-//// --------------------------------------------------------
-//// Helper method for mouse wheel scrolling.  
-//// WheelDelta may be positive or negative, depending 
-//// on the direction of the scroll
-//// --------------------------------------------------------
-//void Game::OnMouseWheel(float wheelDelta, int x, int y) {
-//	// Add any custom code here...
-//}
+void Game::OnMouseUp(WPARAM buttonState, int x, int y) {
+	// Add any custom code here...
 
-bool Game::IsKeyDown(char key)
-{
-	if (this->memOfKey[key] == 0)
-	{
-		bool isDown = GetAsyncKeyState(key) & 0x8000;
-		this->memOfKey[key] = isDown;
-	}
-	return memOfKey[key];
-}
-
-bool Game::IsKeyDown(PBYTE keyCode)
-{
-	if (this->mapOfKeyCodes[keyCode] == 0)
-	{
-		bool isDown = GetKeyboardState(keyCode);
-		this->mapOfKeyCodes[keyCode] = isDown ? 1 : -1;
-	}
-	return mapOfKeyCodes[keyCode];
-}
-void Game::SetKeyState(char key, bool isDown)
-{
-	memOfKey[key] = isDown;
-}
-
-void Game::Clear()
-{
-	memset(memOfKey, 0, 1024);
-}
-
-void Game::OnMouseDown(WPARAM buttonState, int x, int y)
-{
-	this->mPos.x = x;
-	this->mPos.y = y;
-	SetCapture(this->hWnd);
-}
-
-void Game::OnMouseUp(WPARAM buttonState, int x, int y)
-{
-	//this->mPos.x = NULL;
-	//this->mPos.y = NULL;
+	// We don't care about the tracking the cursor outside
+	// the window anymore (we're not dragging if the mouse is up)
 	ReleaseCapture();
 }
 
-void Game::OnMouseDrag(WPARAM buttonState)
-{
-	if (DragDetect(hWnd, mPos))
-	{
-		printf("done");
+// --------------------------------------------------------
+// Helper method for mouse movement.  We only get this message
+// if the mouse is currently over the window, or if we're 
+// currently capturing the mouse.
+// --------------------------------------------------------
+void Game::OnMouseMove(WPARAM buttonState, int x, int y) {
+	// Add any custom code here...
+	if (buttonState & 0x0001) {
+		camera->SetRotationX((y - prevMousePos.y) * 0.001f);
+		camera->SetRotationY((x - prevMousePos.x) * 0.001f);
 	}
-	this->OnMouseDown(buttonState, mPos.x, mPos.y);
-	
+	// Save the previous mouse position, so we have it for the future
+	prevMousePos.x = x;
+	prevMousePos.y = y;
 }
+
+// --------------------------------------------------------
+// Helper method for mouse wheel scrolling.  
+// WheelDelta may be positive or negative, depending 
+// on the direction of the scroll
+// --------------------------------------------------------
+void Game::OnMouseWheel(float wheelDelta, int x, int y) {
+	// Add any custom code here...
+}
+
 #pragma endregion
 

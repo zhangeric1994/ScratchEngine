@@ -12,7 +12,7 @@
 #include "Lights.h"
 #include "Vertex.h"
 #include "../Physics/Physics.h"
-#include "../InputManager.h"
+#include "InputManager.h"
 using namespace Colliders;
 
 class Game
@@ -27,21 +27,10 @@ public:
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
 
-	//void OnMouseDown(WPARAM buttonState, int x, int y);
-	//void OnMouseUp(WPARAM buttonState, int x, int y);
-	//void OnMouseMove(WPARAM buttonState, int x, int y);
-	//void OnMouseWheel(float wheelDelta, int x, int y);
-
-	// keyboard input
-	bool IsKeyDown(char);
-	bool IsKeyDown(PBYTE);
-	void SetKeyState(char, bool);
-	void Clear();
-
-	// mouse input
-	void OnMouseDown(WPARAM, int, int);
-	void OnMouseUp(WPARAM, int, int);
-	void OnMouseDrag(WPARAM);
+	void OnMouseDown(WPARAM buttonState, int x, int y);
+	void OnMouseUp(WPARAM buttonState, int x, int y);
+	void OnMouseMove(WPARAM buttonState, int x, int y);
+	void OnMouseWheel(float wheelDelta, int x, int y);
 
 private:
 
@@ -68,6 +57,7 @@ private:
 	std::vector<Entity*> entityVector;
 
 	Camera* camera;
+	ScratchEngine::InputManager* inputM;
 
 	Material* simpleMaterial;
 
@@ -84,8 +74,4 @@ private:
 	ID3D11SamplerState* sampler;
 	D3D11_SAMPLER_DESC samplerDesc;
 
-	HWND hWnd;
-	char* memOfKey;
-	std::map<PBYTE, bool> mapOfKeyCodes;
-	POINT mPos;
 };
