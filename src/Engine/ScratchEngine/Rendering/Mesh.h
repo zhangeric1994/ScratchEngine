@@ -12,33 +12,30 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		struct Mesh {
-		public:
-			Mesh(Vertex* vertices,
-				int verticesNumber,
-				unsigned int* indices,
-				int indicesNumber,
-				ID3D11Device* device);
+		struct Mesh
+		{
+			friend class RenderingEngine;
 
-			Mesh(ID3D11Device* device,
-				char* filename);
-
-			~Mesh();
-
-			ID3D11Buffer* GetVertexBuffer();
-			ID3D11Buffer* GetIndexBuffer();
-			int GetIndexCount();
-
-			void CreateMesh(Vertex* vertices,
-				int verticesNumber,
-				unsigned int* indices,
-				int indicesNumber,
-				ID3D11Device* device);
 
 		private:
 			ID3D11Buffer* vertexBuffer;
 			ID3D11Buffer* indexBuffer;
 			i32 indicesNum;
+
+
+		public:
+			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
+			Mesh(ID3D11Device* device, char* filename);
+			~Mesh();
+
+			void* operator new(size_t size);
+			void operator delete(void* p);
+
+			ID3D11Buffer* GetVertexBuffer();
+			ID3D11Buffer* GetIndexBuffer();
+			int GetIndexCount();
+
+			void CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
 		};
 	}
 }

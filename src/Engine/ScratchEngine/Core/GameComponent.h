@@ -25,7 +25,8 @@ namespace ScratchEngine
 
 
 	private:
-		virtual void Update() { };
+		virtual void Update(f32 deltaTime, f32 currentTime) { };
+		virtual void LateUpdate(f32 deltaTime, f32 currentTime) { };
 
 		virtual void HandleMessage(const Message& message) { }
 	};

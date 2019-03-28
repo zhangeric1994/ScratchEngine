@@ -43,6 +43,9 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{e41539a3-dd7d-4d7f-a87f-beee11ea629a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Rendering\Shaders">
+      <UniqueIdentifier>{d02e804f-e5f7-4dce-a525-64f27c2fa97f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -102,9 +105,6 @@
     <ClInclude Include="Rendering\Vertex.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\ForwardRenderer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -139,6 +139,21 @@
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Common\Stack.hpp">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\RenderingEngine.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Renderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Renderable.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\LinkedList.hpp">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Settings.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,9 +194,6 @@
     <ClCompile Include="Physics\Collider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\ForwardRenderer.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\RigidBody.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
@@ -203,10 +215,27 @@
     <ClCompile Include="Physics\BoundingVolume.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\RenderingEngine.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Renderer.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ScratchEngine.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
+      <Filter>Header Files\Rendering\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
+      <Filter>Header Files\Rendering\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VS_ZPrepass.hlsl">
+      <Filter>Header Files\Rendering\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

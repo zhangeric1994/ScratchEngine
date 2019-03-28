@@ -1,26 +1,40 @@
+#ifndef SCENE_H
+#define SCENE_H
 #pragma once
 
 #include <vector>
 
-#include "GameObject.h"
+#include "../Common/LinkedList.hpp"
+#include "../Common/Stack.hpp"
 
-using namespace std;
+#include "GameObject.h"
 
 namespace ScratchEngine
 {
 	class Scene
 	{
-	private:
-		vector<GameObject*> gameObjects;
+		friend class GameObject;
 
+
+	private:
+		static Scene* currentScene;
 	
+
 	public:
+		static Scene* GetCurrentScene();
+
+
+	private:
+		vector<GameObject*> roots;
+
 		Scene();
 		~Scene();
 
-		void AddGameObject(GameObject* gameObject);
+		size_t AddRootObject(GameObject* gameObject);
+		bool RemoveRootObject(GameObject* gameObject);
 	
-	private:
-		void Update();
+		void Update(f32 deltaTime, f32 currentTime);
+		void LateUpdate(f32 deltaTime, f32 currentTime);
 	};
 }
+#endif

@@ -3,6 +3,7 @@
 #include <cstring>
 #include <malloc.h>
 
+#include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
 
 #include "Allocator.h"
@@ -49,23 +50,32 @@ namespace ScratchEngine
 
 
 		public:
+			DynamicPoolAllocator() : DynamicAllocator(DEFAULT_DYNAMIC_POOL_ALLOCATOR_CAPACITY) { }
+
 			DynamicPoolAllocator(i32 capacity)
 			{
-				memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
-
-				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
-				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
-
-				for (i32 id = capacity - 2; id >= 0; --id)
+				if (capacity == 0)
+					memory == nullptr;
+				else
 				{
-					reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
-					reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
+					memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
+
+					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
+					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
+
+					for (i32 id = capacity - 2; id >= 0; --id)
+					{
+						reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
+						reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
+					}
 				}
 
 				this->capacity = capacity;
 				numAllocated = 0;
 				freeList = 0;
 			}
+
+			~DynamicPoolAllocator();
 
 			i32 Allocate()
 			{
@@ -74,9 +84,12 @@ namespace ScratchEngine
 					void* previousMemory = memory;
 					i32 previousCapacity = capacity;
 
-					capacity *= 2;
+					if (capacity == 0)
+						capacity = DEFAULT_DYNAMIC_POOL_ALLOCATOR_CAPACITY;
+					else
+						capacity *= 2;
 
-					memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
+					memory = reinterpret_cast<T*>(_aligned_realloc(capacity * sizeof(T), 16));
 					memcpy(memory, previousMemory, previousCapacity * sizeof(T));
 
 					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
@@ -89,8 +102,6 @@ namespace ScratchEngine
 					}
 
 					freeList = previousCapacity;
-
-					_aligned_free(previousMemory);
 				}
 
 				i32 id = freeList;
@@ -162,5 +173,14 @@ namespace ScratchEngine
 				--numAllocated;
 			}
 		};
-	}
+
+		template<class T> inline DynamicPoolAllocator<T>::DynamicPoolAllocator() : DynamicPoolAllocator(16)
+		{
+		}
+
+		template<class T> inline DynamicPoolAllocator<T>::~DynamicPoolAllocator()
+		{
+			_aligned_free(memory);
+		}
+}
 }

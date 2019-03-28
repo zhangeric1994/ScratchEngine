@@ -16,6 +16,7 @@ namespace ScratchEngine
 {
 	struct __declspec(dllexport) Transform : public IMessageReceiver
 	{
+		friend class Scene;
 		friend class GameObject;
 
 	private: // 120 bytes
@@ -27,6 +28,7 @@ namespace ScratchEngine
 
 		bool isDirty;
 
+		size_t index;
 		Transform* parent;
 		std::vector<Transform*> children;
 
@@ -65,7 +67,6 @@ namespace ScratchEngine
 		//void SetScale(f32 x, f32 y, f32 z);
 		//void SetScale(XMFLOAT3 scale);
 		//void SetScale(XMVECTOR scale);
-		void SetParent(Transform* parent);
 
 		void* operator new(size_t size);
 		void operator delete(void* p);
@@ -84,10 +85,14 @@ namespace ScratchEngine
 		virtual void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
 
+	protected:
+		void SetParent(Transform* other);
+
+
 	private:
 		XMMATRIX GetWorldMatrix();
 
-		void AddChild(Transform* gameObject);
+		size_t AddChild(Transform* gameObject);
 		void RemoveChild(Transform* gameObject);
 
 		virtual void HandleMessage(const Message& message) { }

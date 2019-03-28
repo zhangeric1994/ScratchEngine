@@ -183,7 +183,7 @@ void ScratchEngine::Transform::SetParent(Transform* parent)
 	if (this->parent)
 		this->parent->RemoveChild(this);
 
-	parent->AddChild(this);
+	index = parent->AddChild(this);
 
 	this->parent = parent;
 
@@ -280,15 +280,16 @@ void ScratchEngine::Transform::SendMessageDown(const Message& message, u32 level
 			(*it)->SendMessageDown(message, level);
 }
 
-void ScratchEngine::Transform::AddChild(Transform * gameObject)
+size_t ScratchEngine::Transform::AddChild(Transform* other)
 {
-	children.push_back(gameObject);
+	children.push_back(other);
+	return children.size() - 1;
 }
 
-void ScratchEngine::Transform::RemoveChild(Transform * gameObject)
+void ScratchEngine::Transform::RemoveChild(Transform* transform)
 {
 	for (auto it = children.begin(); it != children.end(); it++)
-		if (*it == gameObject)
+		if (*it == transform)
 		{
 			children.erase(it);
 			break;

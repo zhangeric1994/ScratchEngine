@@ -155,6 +155,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\LinkedList.hpp" />
+    <ClInclude Include="Common\Settings.h" />
     <ClInclude Include="Common\Stack.hpp" />
     <ClInclude Include="Common\Typedefs.h" />
     <ClInclude Include="Core\GameComponent.h" />
@@ -179,10 +181,12 @@
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
-    <ClInclude Include="Rendering\ForwardRenderer.h" />
+    <ClInclude Include="Rendering\Renderable.h" />
+    <ClInclude Include="Rendering\Renderer.h" />
     <ClInclude Include="Rendering\Lights.h" />
     <ClInclude Include="Rendering\Material.h" />
     <ClInclude Include="Rendering\Mesh.h" />
+    <ClInclude Include="Rendering\RenderingEngine.h" />
     <ClInclude Include="Rendering\SimpleShader.h" />
     <ClInclude Include="Rendering\Vertex.h" />
     <ClInclude Include="resource.h" />
@@ -204,14 +208,26 @@
     <ClCompile Include="Physics\RigidBody.cpp" />
     <ClCompile Include="Physics\SphereCollider.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
-    <ClCompile Include="Rendering\ForwardRenderer.cpp" />
+    <ClCompile Include="Rendering\Renderer.cpp" />
     <ClCompile Include="Rendering\Material.cpp" />
     <ClCompile Include="Rendering\Mesh.cpp" />
+    <ClCompile Include="Rendering\RenderingEngine.cpp" />
     <ClCompile Include="Rendering\SimpleShader.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ScratchEngine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VS_ZPrepass.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
