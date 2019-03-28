@@ -16,49 +16,130 @@
     <Filter Include="Header Files\Memory">
       <UniqueIdentifier>{6e3130ed-4a3b-4ef8-8765-de047ae2a80a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Utility">
-      <UniqueIdentifier>{4516fa08-4b69-484a-b224-384148546933}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\Physics">
       <UniqueIdentifier>{86e0a0f0-48c0-425b-aa95-7e26f3b1ed60}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\Memory">
       <UniqueIdentifier>{389b4f08-15da-4069-9b6b-6cf9c9e5e179}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Utility">
-      <UniqueIdentifier>{64c5053f-7f7a-4014-be43-fb29899c05c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Physics">
       <UniqueIdentifier>{64006520-6566-4737-aacb-6e557cc41184}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Message">
+      <UniqueIdentifier>{d203a301-c4bf-4daa-bc1c-28f213c80ef2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Core">
+      <UniqueIdentifier>{27be1762-fee6-409e-8eea-192a13baa76b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Core">
+      <UniqueIdentifier>{6cc4f91c-5a88-40f1-b2c8-327e4032b1e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{1c13c9d0-cd23-45a9-8de1-7bb4f74e7b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{a9641774-9500-4842-b3a6-b5b48c506824}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{e41539a3-dd7d-4d7f-a87f-beee11ea629a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\Block.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\Pool.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\SimpleBlock.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\SimplePool.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Physics.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility\Typedefs.h">
-      <Filter>Header Files\Utility</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Memory\Block.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Message\IMessageReceiver.h">
+      <Filter>Header Files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="Message\Message.h">
+      <Filter>Header Files\Message</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Transform.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameComponent.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameObject.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Scene.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Space.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\Allocator.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\PoolAllocator.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Camera.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Lights.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Material.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Mesh.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\SimpleShader.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Vertex.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\ForwardRenderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Collider.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\RigidBody.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\PhysicsEngine.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Collision.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\BlockAllocator.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Typedefs.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\BoundingVolume.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\BoxCollider.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\SphereCollider.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\DynamicBVHNode.hpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\DynamicBVH.hpp">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Stack.hpp">
+      <Filter>Header Files\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -68,13 +149,58 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\Pool.cpp">
+    <ClCompile Include="Core\GameComponent.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GameObject.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Scene.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Transform.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\DynamicPoolAllocator.h">
+      <Filter>Header Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Camera.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Material.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Mesh.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\SimpleShader.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\Collider.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ForwardRenderer.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\RigidBody.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicsEngine.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\BlockAllocator.cpp">
       <Filter>Source Files\Memory</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\SimplePool.cpp">
-      <Filter>Source Files\Memory</Filter>
+    <ClCompile Include="Physics\Collision.cpp">
+      <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Physics.cpp">
+    <ClCompile Include="Physics\BoxCollider.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\SphereCollider.cpp">
+      <Filter>Source Files\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\BoundingVolume.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
   </ItemGroup>

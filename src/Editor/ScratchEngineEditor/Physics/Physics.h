@@ -3,21 +3,22 @@
 #include <DirectXMath.h>
 #include <stdio.h>
 #include <vector>
-#include "Colliders.h"
-
-
+#include "Collider.h"
 using namespace DirectX;
-class Physics
+namespace Colliders
 {
-public:
-	Physics(size_t _MaxColliderNum);
-	~Physics();
+	class CollisionManager
+	{
+	public:
+		CollisionManager(size_t _MaxColliderNum);
+		~CollisionManager();
 
-
-	int NumCoolidersHandled;
-	Collider* addCollider(Entity* obj, float _radius, float _mass, bool _gravity, bool _static);
-	void CollisionsDetection(int start, int end, float deltaTime);
-private:
-	size_t MaxColliderNum;
-	std::vector<Collider*>* ColliderHandler;
-};
+		int NumCoolidersHandled;
+		SphereCollider* addSphereCollider(Entity* obj, float _radius, float _mass, bool _gravity, bool _static);
+		BoxCollider* addBoxCollider(Entity * obj, XMFLOAT3 size, float _mass, bool _gravity, bool _static);
+		void CollisionsDetection(int start, int end, float deltaTime, float totalTime);
+	private:
+		size_t MaxColliderNum;
+		std::vector<Collider*> ColliderHandler;
+	};
+}

@@ -10,12 +10,13 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	mesh = 0;
 	meshPlatform = 0;
 
-	entityVector.resize(3);
+
+	entityVector.resize(7);
 	for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
 		entityVector[countOfVector] = NULL;
 
 	camera = new Camera();
-	physics = new Physics(200);
+	physics = new CollisionManager(200);
 	simpleMaterial = NULL;
 
 	directionalLight.AmbientColor = XMFLOAT3(1.0f,  1.0f, 1.0f);
@@ -58,6 +59,13 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+
+#if defined(DEBUG) || defined(_DEBUG)
+	// Do we want a console window?  Probably only in debug mode
+	CreateConsoleWindow(500, 120, 32, 120);
+	printf("Console window created successfully.  Feel free to printf() here.\n");
+#endif
 }
 
 Game::~Game() {
@@ -104,7 +112,7 @@ void Game::CreateMatrces() {
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
 	
-	XMVECTOR pos = XMVectorSet(0, 0, -5, 0);
+	XMVECTOR pos = XMVectorSet(0, 0, -20, 0);
 	XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
 	XMVECTOR up = XMVectorSet(0, 1, 0, 0);
 	XMMATRIX V = XMMatrixLookToLH(
@@ -128,29 +136,46 @@ void Game::CreateBasicGeometry() {
 	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 
 	char* filename = (char*)"../Assets/Models/sphere.obj";
+	char* cubefile = (char*)"../Assets/Models/cube.obj";
 	mesh = new Mesh(device, filename);
-	filename = (char*)"../Assets/Models/cube.obj";
-	meshPlatform = new Mesh(device, filename);
-
+	mesh1 = new Mesh(device, cubefile);
 	Entity* temp = new Entity(mesh, simpleMaterial);
-	Entity* temp1 = new Entity(meshPlatform, simpleMaterial);
-	Entity* temp2 = new Entity(meshPlatform, simpleMaterial);
-
+	Entity* temp1 = new Entity(mesh1, simpleMaterial);
+	Entity* temp2 = new Entity(mesh1, simpleMaterial);
+	Entity* temp3 = new Entity(mesh, simpleMaterial);
+	Entity* temp4 = new Entity(mesh, simpleMaterial);
+	Entity* temp5 = new Entity(mesh, simpleMaterial);
+	Entity* terrain = new Entity(mesh1, simpleMaterial);
 	entityVector[0] = temp;
 	entityVector[1] = temp1;
 	entityVector[2] = temp2;
-
+	entityVector[3] = temp3;
+	entityVector[4] = temp4;
+	entityVector[5] = temp5;
+	entityVector[6] = terrain;
 	temp->SetTranslation(-2, 0, 0);
-	//temp->SetScale(1.5f, 1.5f, 1.5f);
-	temp1->SetTranslation(2, 0, 0);
-	temp2->SetTranslation(0, -2, 0);
-	//temp2->SetRotation(90, 0, 0);
-	temp2->SetScale(10, 1, 10);
-
-	Collider* collider = physics->addCollider(temp, 0.5f, 1.0f, false, false);
-	Collider* collider1 = physics->addCollider(temp1, 0.5f, 1.0f, false, false);
-	collider->ApplyForce({ 0.9f, 0.0f, 0.0f });
-	collider1->ApplyForce({ -0.9f, 0.0f, 0.0f });
+	temp1->SetTranslation(2.5, 1.5, 0);
+	temp2->SetTranslation(-2.5, 1, 0);
+	temp3->SetTranslation(0.0, 1, 0);
+	temp4->SetTranslation(-1, -1, 0);
+	temp5->SetTranslation(2, 0, 0);
+	//temp1->SetRotation(0.5f, 0.0f, 0.0f);
+	terrain->SetTranslation(0, -10, 0);
+	terrain->SetScale(100, 1, 100);
+	Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
+	Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
+	Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
+	Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
+	Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
+	Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
+	Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
+	collider->ApplyForce({ 0.5f,0,0.1f });
+	collider1->ApplyForce({ -1.5f,0,0.0f });
+	//collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
+	collider2->ApplyForce({ 1.5f,0,0.0f });
+	collider3->ApplyForce({ -0.9f,0,0.1f });
+	collider4->ApplyForce({ 1.0f,0,-0.1f });
+	collider5->ApplyForce({ -1.4f,0,0.1f });
 }
 
 void Game::OnResize() {
@@ -162,6 +187,7 @@ void Game::OnResize() {
 }
 
 void Game::Update(float deltaTime, float totalTime) {
+	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
 	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 	XMMATRIX view = camera->Update();
@@ -182,7 +208,8 @@ void Game::Draw(float deltaTime, float totalTime) {
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
-	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime);
+
+	
 	//-------------------------------------
 
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
@@ -196,7 +223,6 @@ void Game::Draw(float deltaTime, float totalTime) {
 		entityVector[countOfEntity]->SetNormalMap("normalMap");
 		entityVector[countOfEntity]->CopyAllBufferData();
 		entityVector[countOfEntity]->SetShader();
-
 		//set vertex buffer and index buffer inside entity class
 		entityVector[countOfEntity]->Draw(context);
 	}

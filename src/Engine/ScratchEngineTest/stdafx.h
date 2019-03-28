@@ -10,4 +10,13 @@
 // Headers for CppUnitTest
 #include "CppUnitTest.h"
 
-// TODO: reference additional headers your program requires here
+#include "Common/Typedefs.h"
+
+#include "Core/GameComponent.h"
+#include "Core/GameObject.h"
+#include "Core/Transform.h"
+
+#include "Memory/BlockAllocator.h"
+#include "Memory/PoolAllocator.h"
+
+#include "Physics/DynamicBVH.hpp"
