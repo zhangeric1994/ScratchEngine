@@ -130,6 +130,8 @@ Game::~Game() {
 	if (shadowMap) shadowMap->Release();
 	if (shadowResourceView) shadowResourceView->Release();
 	if (shadowRenderState) shadowRenderState->Release();
+	if (vertexShaderShadow) delete vertexShaderShadow;
+	if (pixelShaderShadow) delete pixelShaderShadow;
 }
 
 void Game::Init() {
@@ -236,7 +238,6 @@ void Game::CreateBasicGeometry() {
 		&shadowRenderStateDesc,
 		&shadowRenderState
 	);
-
 
 	//
 

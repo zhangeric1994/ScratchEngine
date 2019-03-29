@@ -65,7 +65,6 @@ private:
 	ID3D11ShaderResourceView* texture;
 	ID3D11ShaderResourceView* normalMap;
 
-
 	ID3D11SamplerState* sampler;
 	D3D11_SAMPLER_DESC samplerDesc;
 
