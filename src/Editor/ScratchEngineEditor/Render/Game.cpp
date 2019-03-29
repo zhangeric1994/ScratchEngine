@@ -113,8 +113,6 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	shadowViewport.Width = 1024;
 	shadowViewport.MinDepth = 0.f;
 	shadowViewport.MaxDepth = 1.f;
-
->>>>>>> 861e4f917c7f4aa6dba37f705d11a7a33f3f7325
 }
 
 Game::~Game() {
@@ -340,7 +338,6 @@ void Game::Draw(float deltaTime, float totalTime) {
 	//	//set vertex buffer and index buffer inside entity class
 	//	m->Draw(context);
 	//}
->>>>>>> 861e4f917c7f4aa6dba37f705d11a7a33f3f7325
 
 	//-------------------------------------
 
