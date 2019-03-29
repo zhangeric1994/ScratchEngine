@@ -25,7 +25,7 @@ namespace ScratchEngine
 	{
 		static bool SortRenderables(Renderable a, Renderable b);
 
-		class RenderingEngine
+		class __declspec(dllexport) RenderingEngine
 		{
 			friend class Camera;
 			friend class Light;
@@ -36,7 +36,6 @@ namespace ScratchEngine
 		private:
 			static RenderingEngine* singleton;
 
-			static RenderingEngine* GetSingleton();
 			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
@@ -60,6 +59,9 @@ namespace ScratchEngine
 			void RemoveLight(Light* light);
 			void DestroyRenderable(i32 id);
 			void DestroyViewer(i32 id);
+
+		public:
+			static RenderingEngine* GetSingleton();
 
 			void UpdateRenderables();
 			void UpdateViewers();

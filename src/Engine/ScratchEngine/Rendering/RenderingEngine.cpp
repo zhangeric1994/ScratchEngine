@@ -30,6 +30,8 @@ void ScratchEngine::Rendering::RenderingEngine::Initialize(i32 maxNumMaterials, 
 ScratchEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies) : materialAllocator(maxNumMeshes), meshAllocator(maxNumMeshes), renderableAllocator(defaultNumRenderables), viewerAllocator(defaultNumCameraProxies)
 {
 	rendererList = nullptr;
+	cameraList = nullptr;
+	lightList = nullptr;
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
@@ -177,6 +179,20 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 
 void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 {
+	for (Light* light = lightList; light; light = light->next)
+	{
+		if (light->isEnabled)
+		{
+			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
+			lightSource.ambientColor = light->ambientColor;
+			lightSource.diffuseColor = light->diffuseColor;
+			lightSource.type = light->type;
+			lightSource.range = 0;
+
+			XMStoreFloat3(&lightSource.position, light->GetPosition());
+			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetDirection());
+		}
+	}
 }
 
 void ScratchEngine::Rendering::RenderingEngine::SortRenderables()
@@ -203,7 +219,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		vertexShader->SetMatrix4x4("view", viewMatrix);
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 
-		
+		pixelShader->SetData("light", &lightSourceAllocator[0], sizeof(LightSource));
 		
 		vertexShader->CopyAllBufferData();
 		pixelShader->CopyAllBufferData();
@@ -211,14 +227,13 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		vertexShader->SetShader();
 		pixelShader->SetShader();
 
-
 		u32 indexCount = 0;
 		u32 stride = sizeof(Vertex);
 		u32 offset = 0;
 
 		do
 		{
-			Mesh* mesh = renderable.mesh;
+			Mesh* mesh = renderableAllocator[j].mesh;
 
 			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();

@@ -9,7 +9,7 @@ struct DirectionalLight
 struct LightSource
 {
 	float4 ambientColor;
-	float4 aiffuseColor;
+	float4 diffuseColor;
 	int type;
 	float3 position;
 	float3 direction;
@@ -24,7 +24,7 @@ struct PointLight
 
 cbuffer colorData : register(b0)
 {
-	DirectionalLight light;
+	LightSource light;
 };
 
 cbuffer colorData2 : register(b1)
@@ -73,6 +73,11 @@ float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 	return finalColor;
 }
 
+float4 CalculateDirectionalLight(LightSource light, float3 N)
+{
+	return mul(saturate(dot(N, -normalize(light.direction))), light.diffuseColor) + light.ambientColor;
+}
+
 // --------------------------------------------------------
 // The entry point (main method) for our pixel shader
 // 
@@ -84,10 +89,10 @@ float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 // --------------------------------------------------------
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	float4 lightColor1 = calculateDirectionalLight(input.normal, light);
+	//float4 lightColor1 = calculateDirectionalLight(input.normal, light);
 	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 
-	float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
+	//float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
 	//float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
@@ -96,5 +101,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 	//return surfaceColor * lightColor1 + surfaceColor * lightColor2;
-	return pointLightColor;
+	return CalculateDirectionalLight(light, input.normal);
 }
