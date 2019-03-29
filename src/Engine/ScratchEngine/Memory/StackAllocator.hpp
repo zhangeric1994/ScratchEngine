@@ -29,6 +29,7 @@ namespace ScratchEngine
 
 			i32 GetCapacity() const;
 			i32 GetNumAllocated() const;
+			void* GetMemoryAddress();
 
 			i32 Allocate();
 			
@@ -75,6 +76,11 @@ namespace ScratchEngine
 		template<class T> inline i32 DynamicStackAllocator<T>::GetNumAllocated() const
 		{
 			return numAllocated;
+		}
+
+		template<class T> inline void * DynamicStackAllocator<T>::GetMemoryAddress()
+		{
+			return memory;
 		}
 
 		template<class T> inline i32 DynamicStackAllocator<T>::Allocate()

@@ -46,8 +46,8 @@ void ScratchEngine::Rendering::RenderingEngine::AddRenderer(Renderer* renderer)
 
 	if (rendererList)
 		rendererList->previous = renderer;
-	else
-		rendererList = renderer;
+	
+	rendererList = renderer;
 }
 
 void ScratchEngine::Rendering::RenderingEngine::AddCamera(Camera* camera)
@@ -57,8 +57,8 @@ void ScratchEngine::Rendering::RenderingEngine::AddCamera(Camera* camera)
 
 	if (cameraList)
 		cameraList->previous = camera;
-	else
-		cameraList = camera;
+	
+	cameraList = camera;
 }
 
 void ScratchEngine::Rendering::RenderingEngine::AddLight(Light* light)
@@ -68,8 +68,8 @@ void ScratchEngine::Rendering::RenderingEngine::AddLight(Light* light)
 
 	if (lightList)
 		lightList->previous = light;
-	else
-		lightList = light;
+	
+	lightList = light;
 }
 
 void ScratchEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
@@ -138,6 +138,8 @@ void ScratchEngine::Rendering::RenderingEngine::DestroyViewer(i32 id)
 
 void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 {
+	renderableAllocator.Flush();
+
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
 		if (renderer->isEnabled)
@@ -169,8 +171,8 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
 
 			viewer.position = gameObject->GetPosition();
-			viewer.viewMatrix = XMMatrixLookToLH(viewer.position, XMVector3Transform(XMVectorSet(0, 0, 1, 0), rotationMatrix), XMVector3Transform(XMVectorSet(0, 1, 0, 0), rotationMatrix));
-			viewer.projectionMatrix = XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ);;
+			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
+			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
 		}
 		else
 			RenderingEngine::GetSingleton()->DestroyViewer(camera->viewer);
@@ -179,6 +181,8 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 
 void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 {
+	lightSourceAllocator.Flush();
+
 	for (Light* light = lightList; light; light = light->next)
 	{
 		if (light->isEnabled)
@@ -210,21 +214,13 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 	while (j < renderableAllocator.GetNumAllocated())
 	{
-		Renderable& renderable = renderableAllocator[j];
-		Material* material = renderable.material;
+		Material* material = renderableAllocator[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
-		vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
-		vertexShader->SetMatrix4x4("view", viewMatrix);
-		vertexShader->SetMatrix4x4("projection", projectionMatrix);
-
-		pixelShader->SetData("light", &lightSourceAllocator[0], sizeof(LightSource));
+		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		
-		vertexShader->CopyAllBufferData();
 		pixelShader->CopyAllBufferData();
-
-		vertexShader->SetShader();
 		pixelShader->SetShader();
 
 		u32 indexCount = 0;
@@ -233,7 +229,16 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 		do
 		{
-			Mesh* mesh = renderableAllocator[j].mesh;
+			Renderable& renderable = renderableAllocator[j];
+
+			vertexShader->SetMatrix4x4("view", viewMatrix);
+			vertexShader->SetMatrix4x4("projection", projectionMatrix);
+			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+
+			vertexShader->CopyAllBufferData();
+			vertexShader->SetShader();
+
+			Mesh* mesh = renderable.mesh;
 
 			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
@@ -245,7 +250,9 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 			indexCount += mesh->GetIndexCount();
-		} while (renderableAllocator[++j].material == material);
+
+			++j;
+		} while (j < renderableAllocator.GetNumAllocated() && renderableAllocator[j].material == material);
 
 		++j;
 	}

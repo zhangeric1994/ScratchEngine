@@ -7,10 +7,17 @@
 //
 // You will eventually ADD TO this, and/or make more of these!
 // --------------------------------------------------------
-struct Vertex
+
+namespace ScratchEngine
 {
-	DirectX::XMFLOAT3 Position;	    // The position of the vertex
-	//DirectX::XMFLOAT4 Color;        // The color of the vertex
-	DirectX::XMFLOAT3 Normal;
-	DirectX::XMFLOAT2 UV;
-};
+	namespace Rendering
+	{
+		struct Vertex
+		{
+			DirectX::XMFLOAT3 Position;	    // The position of the vertex
+			//DirectX::XMFLOAT4 Color;        // The color of the vertex
+			DirectX::XMFLOAT3 Normal;
+			DirectX::XMFLOAT2 UV;
+		};
+	}
+}

@@ -5,11 +5,15 @@
 // - All non-pipeline variables that get their values from 
 //    our C++ code must be defined inside a Constant Buffer
 // - The name of the cbuffer itself is unimportant
-cbuffer externalData : register(b0)
+cbuffer CameraData : register(b8)
 {
-	matrix world;
 	matrix view;
 	matrix projection;
+};
+
+cbuffer ObjectData : register(b9)
+{
+	matrix world;
 };
 
 // Struct representing a single vertex worth of data

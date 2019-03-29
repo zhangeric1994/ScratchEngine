@@ -5,14 +5,21 @@
 
 using namespace ScratchEngine;
 
-ScratchEngine::GameObject::GameObject() : components(4)
+ScratchEngine::GameObject::GameObject() : Transform(), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
 	isStatic = false;
 }
 
-ScratchEngine::GameObject::GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale) : Transform(position, rotation, scale)
+ScratchEngine::GameObject::GameObject(float x, float y, float z) : Transform(x, y, z), components(4)
+{
+	index = Scene::GetCurrentScene()->AddRootObject(this);
+
+	isStatic = false;
+}
+
+ScratchEngine::GameObject::GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale) : Transform(position, rotation, scale), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 

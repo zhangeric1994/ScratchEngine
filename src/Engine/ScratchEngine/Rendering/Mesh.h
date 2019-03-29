@@ -1,10 +1,13 @@
 #pragma once
+
 #include <d3d11.h>
-#include "Vertex.h"
 #include <fstream> 
 #include <vector>
 #include <DirectXMath.h>
+
 #include "../Common/Typedefs.h"
+
+#include "Vertex.h"
 
 using namespace DirectX;
 
@@ -12,7 +15,7 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		struct Mesh
+		struct __declspec(dllexport) Mesh
 		{
 			friend class RenderingEngine;
 

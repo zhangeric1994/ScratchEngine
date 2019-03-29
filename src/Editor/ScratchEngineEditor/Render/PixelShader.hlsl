@@ -1,27 +1,42 @@
 
-struct DirectionalLight {
-	float4 AmbientColor;
-	float4 DiffuseColor;
-	float3 Direction;
+//struct DirectionalLight
+//{
+//	float4 AmbientColor;
+//	float4 DiffuseColor;
+//	float3 Direction;
+//};
+
+struct LightSource
+{
+	float4 ambientColor;
+	float4 diffuseColor;
+	int type;
+	float3 position;
+	float range;
+	float3 direction;
 };
 
-struct PointLight {
-	float4 AmbientColor;
-	float4 DiffuseColor;
-	float3 Position;
+//struct PointLight
+//{
+//	float4 AmbientColor;
+//	float4 DiffuseColor;
+//	float3 Position;
+//};
+
+cbuffer Lights : register(b0)
+{
+	LightSource light;
 };
 
-cbuffer colorData : register(b0) {
-	DirectionalLight light;
-};
-
-cbuffer colorData2 : register(b1) {
-	DirectionalLight light2;
-}
-
-cbuffer pointLightData : register(b2) {
-	PointLight pointLight;
-}
+//cbuffer colorData2 : register(b1)
+//{
+//	DirectionalLight light2;
+//}
+//
+//cbuffer pointLightData : register(b2)
+//{
+//	PointLight pointLight;
+//}
 
 //Texture2D diffuseTexture : register(t0);
 //
@@ -45,18 +60,23 @@ struct VertexToPixel
 	float2 uv			: TEXCOORD;
 };
 
-float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
-	float3 nDirection = -normalize(light.Direction);
-	float  NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
-	return finalColor;
-}
+//float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
+//	float3 nDirection = -normalize(light.Direction);
+//	float  NdotL = saturate(dot(normal, nDirection));
+//	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
+//	return finalColor;
+//}
+//
+//float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
+//	float3 nDirection = -normalize(position - pointLight.Position);
+//	float NdotL = saturate(dot(normal, nDirection));
+//	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
+//	return finalColor;
+//}
 
-float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
-	float3 nDirection = -normalize(position - pointLight.Position);
-	float NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
-	return finalColor;
+float4 CalculateDirectionalLight(LightSource light, float3 N)
+{
+	return mul(saturate(dot(N, -normalize(light.direction))), light.diffuseColor) + light.ambientColor;
 }
 
 // --------------------------------------------------------
@@ -68,11 +88,12 @@ float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 //    "put the output of this into the current render target"
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
-float4 main(VertexToPixel input) : SV_TARGET{
-	float4 lightColor1 = calculateDirectionalLight(input.normal, light);
+float4 main(VertexToPixel input) : SV_TARGET
+{
+	//float4 lightColor1 = calculateDirectionalLight(input.normal, light);
 	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 
-	float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
+	//float4 pointLightColor = calculatePointLight(input.normal, input.worldPos, pointLight);
 
 	//float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
@@ -81,5 +102,5 @@ float4 main(VertexToPixel input) : SV_TARGET{
 	//   interpolated for each pixel between the corresponding vertices 
 	//   of the triangle we're rendering
 	//return surfaceColor * lightColor1 + surfaceColor * lightColor2;
-	return pointLightColor;
+	return CalculateDirectionalLight(light, input.normal);
 }

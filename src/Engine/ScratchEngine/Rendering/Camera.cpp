@@ -3,9 +3,11 @@
 
 ScratchEngine::Camera::Camera()
 {
-	fov = 1;
+	fov = 0.25f * 3.1415926535f;
 	nearZ = 0.1f;
 	farZ = 100;
+
+	viewer = null_index;
 
 	RenderingEngine::GetSingleton()->AddCamera(this);
 }

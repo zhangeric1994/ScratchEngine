@@ -22,6 +22,7 @@ namespace ScratchEngine
 
 	public:
 		GameObject();
+		GameObject(float x, float y, float z);
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 

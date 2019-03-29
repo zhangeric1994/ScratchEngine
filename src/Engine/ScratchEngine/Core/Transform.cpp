@@ -13,6 +13,17 @@ ScratchEngine::Transform::Transform()
 	_set_dirty();
 }
 
+ScratchEngine::Transform::Transform(float x, float y, float z)
+{
+	localPosition = XMVectorSet(x, y, z, 0);
+	localRotation = XMQuaternionIdentity();
+	localScale = XMVectorSet(1, 1, 1, 0);
+
+	parent = nullptr;
+
+	_set_dirty();
+}
+
 ScratchEngine::Transform::Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOAT3 scale)
 {
 	this->localPosition = XMLoadFloat3(&position);
@@ -308,9 +319,9 @@ void ScratchEngine::Transform::_set_local_position(XMVECTOR v)
 {
 	if (XMVector3NotEqual(v, localPosition))
 	{
-		_set_dirty();
-
 		localPosition = v;
+
+		_set_dirty();
 	}
 }
 
@@ -318,9 +329,9 @@ void ScratchEngine::Transform::_set_local_rotation(XMVECTOR q)
 {
 	if (XMQuaternionNotEqual(q, localRotation))
 	{
-		_set_dirty();
-
 		localRotation = q;
+
+		_set_dirty();
 	}
 }
 
@@ -330,9 +341,9 @@ void ScratchEngine::Transform::_set_local_scale(XMVECTOR v)
 
 	if (XMVector3NotEqual(v, localScale))
 	{
-		_set_dirty();
-
 		localScale = v;
+
+		_set_dirty();
 	}
 }
 
@@ -350,7 +361,7 @@ void ScratchEngine::Transform::_set_dirty()
 void ScratchEngine::Transform::_update_world_matrix()
 {
 	if (parent)
-		worldMatrix = parent->GetWorldMatrix() * XMMatrixScalingFromVector(localScale) * XMMatrixRotationQuaternion(localRotation) * XMMatrixTranslationFromVector(localPosition);
+		worldMatrix = XMMatrixTranslationFromVector(localPosition) * XMMatrixRotationQuaternion(localRotation) * XMMatrixScalingFromVector(localScale) * parent->GetWorldMatrix();
 	else
 		worldMatrix = XMMatrixScalingFromVector(localScale) * XMMatrixRotationQuaternion(localRotation) * XMMatrixTranslationFromVector(localPosition);
 
@@ -361,8 +372,6 @@ void ScratchEngine::Transform::_translate(XMVECTOR v, Space space)
 {
 	if (XMVector3NotEqual(v, XMVectorZero()))
 	{
-		_set_dirty();
-
 		switch (space)
 		{
 		case WORLD:
@@ -374,6 +383,8 @@ void ScratchEngine::Transform::_translate(XMVECTOR v, Space space)
 			localPosition = XMVectorAdd(localPosition, v);
 			break;
 		}
+
+		_set_dirty();
 	}
 }
 
@@ -381,18 +392,13 @@ void ScratchEngine::Transform::_rotate(XMVECTOR q, Space space)
 {
 	if (XMVector3NotEqual(q, XMQuaternionIdentity()))
 	{
-		_set_dirty();
-
 		switch (space)
 		{
 		case WORLD:
 			if (parent)
-			{
-				XMVECTOR p = parent->GetRotation();
-				localRotation = XMQuaternionMultiply(localRotation, XMQuaternionMultiply(p, XMQuaternionMultiply(q, XMQuaternionInverse(p))));
-			}
+				SetRotation(XMQuaternionMultiply(q, GetRotation()));
 			else
-				localRotation = XMQuaternionMultiply(localRotation, q);
+				localRotation = XMQuaternionMultiply(XMQuaternionInverse(q), XMQuaternionMultiply(localRotation, q));
 			break;
 
 
@@ -400,5 +406,7 @@ void ScratchEngine::Transform::_rotate(XMVECTOR q, Space space)
 			localRotation = XMQuaternionMultiply(localRotation, q);
 			break;
 		}
+
+		_set_dirty();
 	}
 }

@@ -39,6 +39,7 @@ namespace ScratchEngine
 
 	public:
 		Transform();
+		Transform(float x, float y, float z);
 		Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOAT3 scale);
 		Transform(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~Transform();

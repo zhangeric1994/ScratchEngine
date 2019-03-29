@@ -20,7 +20,7 @@ namespace ScratchEngine
 		Spot = 2,
 	};
 
-	class Light : public GameComponent
+	class __declspec(dllexport) Light : public GameComponent
 	{
 		friend class RenderingEngine;
 
@@ -48,7 +48,7 @@ namespace ScratchEngine
 		void SetDiffuseColor(f32 r, f32 g, f32 b);
 	};
 
-	class DirectionalLight : public Light
+	class __declspec(dllexport) DirectionalLight : public Light
 	{
 	public:
 		DirectionalLight();
@@ -57,7 +57,7 @@ namespace ScratchEngine
 		XMVECTOR GetDirection();
 	};
 
-	class PointLight : public Light
+	class __declspec(dllexport) PointLight : public Light
 	{
 	private:
 		f32 range;
@@ -68,7 +68,7 @@ namespace ScratchEngine
 		PointLight(XMVECTOR ambientColor, XMVECTOR diffuseColor);
 	};
 
-	class SpotLight : public Light
+	class __declspec(dllexport) SpotLight : public Light
 	{
 	private:
 		f32 range;

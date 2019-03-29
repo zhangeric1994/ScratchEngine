@@ -6,13 +6,14 @@
 
 namespace ScratchEngine
 {
-	struct Global
+	struct __declspec(dllexport) Global
 	{
 	private:
 		static f32 screenRatio;
 		
 	public:
 		static f32 GetScreenRatio();
+		static void SetScreenRatio(f32 value);
 	};
 }
 #endif

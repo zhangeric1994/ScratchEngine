@@ -1,10 +1,10 @@
 
-struct DirectionalLight
-{
-	float4 AmbientColor;
-	float4 DiffuseColor;
-	float3 Direction;
-};
+//struct DirectionalLight
+//{
+//	float4 AmbientColor;
+//	float4 DiffuseColor;
+//	float3 Direction;
+//};
 
 struct LightSource
 {
@@ -12,30 +12,31 @@ struct LightSource
 	float4 diffuseColor;
 	int type;
 	float3 position;
+	float range;
 	float3 direction;
 };
 
-struct PointLight
-{
-	float4 AmbientColor;
-	float4 DiffuseColor;
-	float3 Position;
-};
+//struct PointLight
+//{
+//	float4 AmbientColor;
+//	float4 DiffuseColor;
+//	float3 Position;
+//};
 
-cbuffer colorData : register(b0)
+cbuffer colorData : register(b1)
 {
 	LightSource light;
 };
 
-cbuffer colorData2 : register(b1)
-{
-	DirectionalLight light2;
-}
+//cbuffer colorData2 : register(b1)
+//{
+//	DirectionalLight light2;
+//}
 
-cbuffer pointLightData : register(b2)
-{
-	PointLight pointLight;
-}
+//cbuffer pointLightData : register(b2)
+//{
+//	PointLight pointLight;
+//}
 
 //Texture2D diffuseTexture : register(t0);
 //
@@ -59,19 +60,19 @@ struct VertexToPixel
 	float2 uv			: TEXCOORD;
 };
 
-float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
-	float3 nDirection = -normalize(light.Direction);
-	float  NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
-	return finalColor;
-}
+//float4 calculateDirectionalLight(float3 normal, DirectionalLight light) {
+//	float3 nDirection = -normalize(light.Direction);
+//	float  NdotL = saturate(dot(normal, nDirection));
+//	float4 finalColor = mul(NdotL, light.DiffuseColor) + light.AmbientColor;
+//	return finalColor;
+//}
 
-float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
-	float3 nDirection = -normalize(position - pointLight.Position);
-	float NdotL = saturate(dot(normal, nDirection));
-	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
-	return finalColor;
-}
+//float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight) {
+//	float3 nDirection = -normalize(position - pointLight.Position);
+//	float NdotL = saturate(dot(normal, nDirection));
+//	float4 finalColor = mul(NdotL, pointLight.DiffuseColor) + pointLight.AmbientColor;
+//	return finalColor;
+//}
 
 float4 CalculateDirectionalLight(LightSource light, float3 N)
 {

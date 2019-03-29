@@ -6,7 +6,8 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		struct Material {
+		struct __declspec(dllexport) Material
+		{
 		public:
 			Material(
 				SimpleVertexShader* _vertexShader,

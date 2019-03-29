@@ -58,7 +58,7 @@ struct SimpleSampler
 // --------------------------------------------------------
 // Base abstract class for simplifying shader handling
 // --------------------------------------------------------
-class ISimpleShader
+class __declspec(dllexport) ISimpleShader
 {
 public:
 	ISimpleShader(ID3D11Device* device, ID3D11DeviceContext* context);
@@ -149,7 +149,7 @@ protected:
 // --------------------------------------------------------
 // Derived class for VERTEX shaders ///////////////////////
 // --------------------------------------------------------
-class SimpleVertexShader : public ISimpleShader
+class __declspec(dllexport) SimpleVertexShader : public ISimpleShader
 {
 public:
 	SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext* context);
@@ -175,7 +175,7 @@ protected:
 // --------------------------------------------------------
 // Derived class for PIXEL shaders ////////////////////////
 // --------------------------------------------------------
-class SimplePixelShader : public ISimpleShader
+class __declspec(dllexport) SimplePixelShader : public ISimpleShader
 {
 public:
 	SimplePixelShader(ID3D11Device* device, ID3D11DeviceContext* context);

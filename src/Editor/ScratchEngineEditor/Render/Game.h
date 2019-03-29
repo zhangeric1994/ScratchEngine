@@ -3,20 +3,20 @@
 #include <DirectXMath.h>
 #include <vector>
 
+#include "Core/GameObject.h"
+#include "Rendering/Camera.h"
+#include "Rendering/Light.h"
+#include "Rendering/Material.h"
+#include "Rendering/Mesh.h"
+#include "Rendering/SimpleShader.h"
+#include "Rendering/Vertex.h"
+
 #include "DXCore.h"
-#include "SimpleShader.h"
-#include "Mesh.h"
-#include "Entity.h"
-#include "Camera.h"
-#include "Material.h"
-#include "Lights.h"
-#include "Vertex.h"
-#include "../Physics/Physics.h"
 
-using namespace Colliders;
+//using namespace Colliders;
+using namespace ScratchEngine::Rendering;
 
-class Game
-	: public DXCore
+class Game : public DXCore
 {
 public:
 	Game(HINSTANCE hInstance, char* name);
@@ -33,7 +33,6 @@ public:
 	void OnMouseWheel(float wheelDelta, int x, int y);
 
 private:
-
 	void LoadShaders();
 	void CreateMatrces();
 	void CreateBasicGeometry();
@@ -43,25 +42,23 @@ private:
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
 
-	XMFLOAT4X4 worldMatrix;
-	XMFLOAT4X4 viewMatrix;
-	XMFLOAT4X4 projectionMatrix;
+	//XMFLOAT4X4 worldMatrix;
+	//XMFLOAT4X4 viewMatrix;
+	//XMFLOAT4X4 projectionMatrix;
 
 	Mesh* mesh;
 	Mesh* mesh1;
 
-	CollisionManager* physics;
+	//CollisionManager* physics;
 
-	std::vector<Entity*> entityVector;
-
-	Camera* camera;
+	//std::vector<Entity*> entityVector;
 
 	Material* simpleMaterial;
 
-	DirectionalLight directionalLight;
+	DirectionalLight* directionalLight;
+	GameObject* camera;
+	GameObject* go1;
+	GameObject* go2;
 
-	PointLight pointLight;
-
-
-
+	//PointLight pointLight;
 };

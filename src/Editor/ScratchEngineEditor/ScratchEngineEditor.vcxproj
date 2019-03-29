@@ -172,32 +172,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="header.h" />
-    <ClInclude Include="LoadSceneFile.h" />
-    <ClInclude Include="Physics\Collider.h" />
-    <ClInclude Include="Physics\Physics.h" />
-    <ClInclude Include="Render\Camera.h" />
     <ClInclude Include="Render\DXCore.h" />
-    <ClInclude Include="Render\Entity.h" />
     <ClInclude Include="Render\Game.h" />
-    <ClInclude Include="Render\Lights.h" />
-    <ClInclude Include="Render\Material.h" />
-    <ClInclude Include="Render\Mesh.h" />
-    <ClInclude Include="Render\SimpleShader.h" />
-    <ClInclude Include="Render\Vertex.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScratchEngineEditor.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Physics\Collider.cpp" />
-    <ClCompile Include="Physics\Physics.cpp" />
-    <ClCompile Include="Render\Camera.cpp" />
     <ClCompile Include="Render\DXCore.cpp" />
-    <ClCompile Include="Render\Entity.cpp" />
     <ClCompile Include="Render\Game.cpp" />
-    <ClCompile Include="Render\Material.cpp" />
-    <ClCompile Include="Render\Mesh.cpp" />
-    <ClCompile Include="Render\SimpleShader.cpp" />
     <ClCompile Include="ScratchEngineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
