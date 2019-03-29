@@ -239,13 +239,13 @@ void Game::CreateBasicGeometry() {
 		&shadowRenderState
 	);
 
-	//
+	//--------------------------
 
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_COLOR.jpg", 0, &texture);
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_NRM.jpg", 0, &normalMap);
+	/*CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_COLOR.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_NRM.jpg", 0, &normalMap);*/
 
-	/*CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);*/
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
 	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
@@ -315,13 +315,24 @@ void Game::Draw(float deltaTime, float totalTime) {
 		shadowdepthStencilView
 	);
 
-
 	context->RSSetState(shadowRenderState);
 	context->RSSetViewports(1, &shadowViewport);
 
+	for (auto& m : entityVector) {
+		/*material->getVertexShader()->SetMatrix4x4("world", worldMatrix);
+		material->getVertexShader()->SetMatrix4x4("view", viewMatrix);
+		material->getVertexShader()->SetMatrix4x4("projection", projectionMatrix);*/
+		simpleMaterial->setVertexShader(vertexShaderShadow);
+		simpleMaterial->setPixelShader(pixelShaderShadow);
 
+		m->CopyAllBufferData();
+		m->SetShader();
 
+		//set vertex buffer and index buffer inside entity class
+		m->Draw(context);
+	}
 
+	//------------------------------------------
 
 	//second pass render scene based on shadow map
 	//for (auto& m : entityVector) {
