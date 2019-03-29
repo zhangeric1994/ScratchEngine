@@ -3,7 +3,7 @@
 #include <tuple>
 
 using namespace DirectX;
-float collisionCheckBack = 0.2f;
+float collisionCheckBack = 0.1f;
 namespace Colliders
 {
 	void Collider::Update(float dt, float totalTime)
@@ -33,7 +33,7 @@ namespace Colliders
 			}
 			//linear drag 
 			XMStoreFloat3(&Velocity, (XMLoadFloat3(&Velocity)*(1.0f - dt * 0.7f)));
-			XMStoreFloat3(&AngularVelocity, (XMLoadFloat3(&AngularVelocity)*(1.0f - dt * 0.8f)));
+			XMStoreFloat3(&AngularVelocity, (XMLoadFloat3(&AngularVelocity)*(1.0f - dt * 1.3f)));
 			Item->SetTranslation(Position.x, Position.y, Position.z);
 			Item->SetRotation(Rotation.x, Rotation.y, Rotation.z);
 		}
@@ -382,7 +382,7 @@ namespace Colliders
 			return;
 		}
 		else {
-			XMStoreFloat3(&aForce, (((a->Mass - b->Mass)*aVelocity + 2 * b->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.9f * a->Mass * aNormal);
+			XMStoreFloat3(&aForce, (((a->Mass - b->Mass)*aVelocity + 2 * b->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.7f * a->Mass * -aNormal);
 		}
 
 
@@ -398,7 +398,7 @@ namespace Colliders
 			return;
 		}
 		else {
-			XMStoreFloat3(&bForce, (((b->Mass - a->Mass)*bVelocity + 2 * a->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.9f * b->Mass * bNormal);
+			XMStoreFloat3(&bForce, (((b->Mass - a->Mass)*bVelocity + 2 * a->Mass * bVelocity) / (a->Mass + b->Mass)) * 0.7f * b->Mass * -bNormal);
 			//XMStoreFloat3(&bForce, -(aVelcity * a->Mass));
 		}
 	

@@ -165,7 +165,7 @@ void Game::CreateBasicGeometry() {
 	obstacle->SetTranslation(0.0f, -9.5f, 0.0f);
 	obstacle->SetTranslation(2.0f, -8.0f, 2.0f);
 	obstacle->SetScale(3, 3, 3);
-	terrain->SetTranslation(0, -10, 0);
+	terrain->SetTranslation(0, -10, 15);
 	terrain->SetScale(100, 1, 100);
 	//Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
 	//Collider* collider1 = physics->addSphereCollider(temp1, 0.5f, 0.7f, true, false);
@@ -185,7 +185,7 @@ void Game::CreateBasicGeometry() {
 	{
 		Entity* temp = new Entity(mesh, simpleMaterial);
 		entityVector[i] = temp;
-		temp->SetTranslation(rand()%5, rand() % 5 + 2 * i, rand() % 5);
+		temp->SetTranslation(rand()%5, rand() % 5 + 2 * i, rand() % 5+15);
 		Collider* collider = physics->addSphereCollider(temp, 0.5f, 1.0f, true, false);
 		collider->ApplyForce({ static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX),  static_cast <float> (rand()) / static_cast <float> (RAND_MAX) });
 	}
