@@ -58,6 +58,16 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	//view port example
+	/*D3D11_VIEWPORT viewport = {};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = (float)width;
+	viewport.Height = (float)height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	context->RSSetViewports(1, &viewport);*/
 }
 
 Game::~Game() {
@@ -185,6 +195,10 @@ void Game::Draw(float deltaTime, float totalTime) {
 	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime);
 	//-------------------------------------
 
+	//simple shadow map
+
+
+	//second pass rendering color
 	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
 		entityVector[countOfEntity]->SetWorldMatrix();
 		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
@@ -248,8 +262,8 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y) {
 void Game::OnMouseMove(WPARAM buttonState, int x, int y) {
 	// Add any custom code here...
 	if (buttonState & 0x0001) {
-		camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-		camera->SetRotationY((x - prevMousePos.x) * 0.001f);
+		camera->SetRotationX((y - prevMousePos.y) * 0.005f);
+		camera->SetRotationY((x - prevMousePos.x) * 0.005f);
 	}
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
