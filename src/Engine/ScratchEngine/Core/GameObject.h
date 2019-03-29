@@ -10,7 +10,7 @@
 
 namespace ScratchEngine
 {
-	class __declspec(dllexport) GameObject : public Transform
+	class __declspec(dllexport) GameObject : public Transform, private IUpdatable
 	{
 		friend class Scene;
 
@@ -34,7 +34,7 @@ namespace ScratchEngine
 		template<class T, class... argTs> T* AddComponent(argTs... args);
 		template<class T> void RemoveComponent();
 
-		void SendMessage(const Message& message);
+		void SendMessage_(const Message& message);
 		void SendMessageUp(const Message& message, u32 level = UINT_MAX);
 		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
@@ -66,7 +66,8 @@ namespace ScratchEngine
 			throw "Cannot add duplicated components!";
 
 		T* component = new T(args...);
-		reinterpret_cast<GameComponent*>(component)->gameObject = this;
+		static_cast<GameComponent*>(component)->isEnabled = true;
+		static_cast<GameComponent*>(component)->gameObject = this;
 
 		components[id] = component;
 

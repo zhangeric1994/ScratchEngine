@@ -1,25 +1,39 @@
 
-struct DirectionalLight {
+struct DirectionalLight
+{
 	float4 AmbientColor;
 	float4 DiffuseColor;
 	float3 Direction;
 };
 
-struct PointLight {
+struct LightSource
+{
+	float4 ambientColor;
+	float4 aiffuseColor;
+	int type;
+	float3 position;
+	float3 direction;
+};
+
+struct PointLight
+{
 	float4 AmbientColor;
 	float4 DiffuseColor;
 	float3 Position;
 };
 
-cbuffer colorData : register(b0) {
+cbuffer colorData : register(b0)
+{
 	DirectionalLight light;
 };
 
-cbuffer colorData2 : register(b1) {
+cbuffer colorData2 : register(b1)
+{
 	DirectionalLight light2;
 }
 
-cbuffer pointLightData : register(b2) {
+cbuffer pointLightData : register(b2)
+{
 	PointLight pointLight;
 }
 
@@ -68,7 +82,8 @@ float4 calculatePointLight(float3 normal,float3 position, PointLight pointLight)
 //    "put the output of this into the current render target"
 // - Named "main" because that's the default the shader compiler looks for
 // --------------------------------------------------------
-float4 main(VertexToPixel input) : SV_TARGET{
+float4 main(VertexToPixel input) : SV_TARGET
+{
 	float4 lightColor1 = calculateDirectionalLight(input.normal, light);
 	//float4 lightColor2 = calculateDirectionalLight(input.normal, light2);
 

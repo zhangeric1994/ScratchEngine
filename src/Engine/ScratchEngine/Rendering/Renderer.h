@@ -1,3 +1,5 @@
+#ifndef RENDERER_H
+#define RENDERER_H
 #pragma once
 
 #include "../Common/Typedefs.h"
@@ -5,31 +7,33 @@
 
 #include "Material.h"
 #include "Mesh.h"
-#include "Renderable.h"
 
 using namespace ScratchEngine::Rendering;
 
 namespace ScratchEngine
 {
-	class Renderer : public GameComponent
+	class __declspec(dllexport) Renderer : public GameComponent
 	{
 		friend class RenderingEngine;
 
 
 	protected:
-		i32 mesh;
-		i32 material;
+		Material* material;
+		Mesh* mesh;
 		i32 renderable;
 
 		Renderer* next;
 		Renderer* previous;
 
+	public:
 		Renderer();
-		Renderer(i32 mesh, i32 material);
+		Renderer(Material* material, Mesh* mesh);
 		~Renderer();
 	};
+
 
 	class __declspec(dllexport) ForwardRenderer : public Renderer
 	{
 	};
 }
+#endif

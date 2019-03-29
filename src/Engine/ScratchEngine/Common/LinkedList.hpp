@@ -2,7 +2,7 @@
 #define LINKED_LIST_H
 #pragma once
 
-#include "../Memory/DynamicPoolAllocator.h"
+#include "../Memory/DynamicPoolAllocator.hpp"
 
 using namespace ScratchEngine::Memory;
 
@@ -78,15 +78,17 @@ namespace ScratchEngine
 	{
 		int id = allocator.Allocate();
 
+		LinkedListNode<T> node = allocator[id];
+		node.data = data;
 		node->previous = null_index;
 		node->next = first;
+
+		first = id;
 
 		if (++size == 1)
 			last = id;
 		else
 			allocator[first].previous = id;
-
-		first = id;
 
 		return id;
 	}
@@ -120,15 +122,15 @@ namespace ScratchEngine
 		i32 next = node.next;
 		i32 previous = node.previous;
 
-		if (previous != null_index)
-			allocator[previous].next = next;
-		else
+		if (previous == null_index)
 			first = next;
-
-		if (next != null_index)
-			allocator[next].previous = previous;
 		else
+			allocator[previous].next = next;
+
+		if (next == null_index)
 			last = previous;
+		else
+			allocator[next].previous = previous;
 
 		--size;
 
@@ -150,10 +152,10 @@ namespace ScratchEngine
 
 		first = next;
 
-		if (next != null_index)
-			allocator[next].previous = null_index;
+		if (next == null_index)
+			last = null_index;
 		else
-			last = previous
+			allocator[next].previous = null_index;
 
 		--size;
 
@@ -167,17 +169,22 @@ namespace ScratchEngine
 		if (size == 0)
 			throw "[LinkedList] Invalid Access!";
 
-		T data = allocator[last].data;
 		i32 id = last;
 
-		last = allocator[last].previous;
+		LinkedListNode<T>& node = allocator[id];
+		T data = node.data;
+		i32 previous = node.previous;
 
-		allocator.Free(id);
-
-		if (--size == 0)
+		if (previous == null_index)
 			first = null_index;
 		else
-			allocator[last].next = null_index;
+			allocator[previous].next = null_index;			
+
+		last = previous;
+
+		--size;
+
+		allocator.Free(id);
 
 		return data;
 	}

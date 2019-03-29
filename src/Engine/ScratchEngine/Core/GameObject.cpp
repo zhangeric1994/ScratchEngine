@@ -53,7 +53,7 @@ void ScratchEngine::GameObject::SetParent(GameObject* other)
 	return Transform::SetParent(other);
 }
 
-void ScratchEngine::GameObject::SendMessage(const Message& message)
+void ScratchEngine::GameObject::SendMessage_(const Message& message)
 {
 	HandleMessage(message);
 

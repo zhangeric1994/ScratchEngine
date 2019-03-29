@@ -15,8 +15,8 @@ namespace ScratchEngine
 				ID3D11SamplerState* _sampler
 			);
 
-			SimpleVertexShader* getVertexShader();
-			SimplePixelShader* getPixelShader();
+			SimpleVertexShader* GetVertexShader();
+			SimplePixelShader* GetPixelShader();
 
 			ID3D11ShaderResourceView* getTexture();
 			ID3D11SamplerState* getSampler();

@@ -36,7 +36,6 @@ namespace ScratchEngine
 			bool IsOverlappingWith(Collider* other, float currentTime);
 		};
 
-
 		//bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);
 		//XMVECTOR getCollidedNormal(Collider* Entity, XMVECTOR reflectPlane = { 0,0,0 });
 		//XMVECTOR getCollisionPoint(BoxCollider* a, BoxCollider* b);

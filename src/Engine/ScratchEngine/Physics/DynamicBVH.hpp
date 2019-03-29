@@ -3,7 +3,7 @@
 
 #include <stack>
 
-#include "../Memory/DynamicPoolAllocator.h"
+#include "../Memory/DynamicPoolAllocator.hpp"
 
 #include "DynamicBVHNode.hpp"
 

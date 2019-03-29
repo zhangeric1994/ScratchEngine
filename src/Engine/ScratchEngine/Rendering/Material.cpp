@@ -12,11 +12,11 @@ ScratchEngine::Rendering::Material::Material(
 	sampler = _sampler;
 }
 
-SimpleVertexShader* ScratchEngine::Rendering::Material::getVertexShader() {
+SimpleVertexShader* ScratchEngine::Rendering::Material::GetVertexShader() {
 	return vertexShader;
 }
 
-SimplePixelShader* ScratchEngine::Rendering::Material::getPixelShader() {
+SimplePixelShader* ScratchEngine::Rendering::Material::GetPixelShader() {
 	return pixelShader;
 }
 

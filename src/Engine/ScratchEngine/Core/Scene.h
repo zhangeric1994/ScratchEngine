@@ -8,10 +8,11 @@
 #include "../Common/Stack.hpp"
 
 #include "GameObject.h"
+#include "IUpdatable.h"
 
 namespace ScratchEngine
 {
-	class Scene
+	class Scene : IUpdatable
 	{
 		friend class GameObject;
 

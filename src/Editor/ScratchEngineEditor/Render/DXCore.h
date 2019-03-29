@@ -88,4 +88,3 @@ private:
 	void UpdateTimer();			// Updates the timer for this frame
 	void UpdateTitleBarStats();	// Puts debug info in the title bar
 };
-

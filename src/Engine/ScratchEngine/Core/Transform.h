@@ -6,18 +6,22 @@
 #include "../Common/Typedefs.h"
 #include "../Message/IMessageReceiver.h"
 #include "../Message/Message.h"
-
+#include "../Rendering/RenderingEngine.h"
 
 #include "Space.h"
 
 using namespace DirectX;
+using namespace ScratchEngine::Rendering;
+
 
 namespace ScratchEngine
 {
 	struct __declspec(dllexport) Transform : public IMessageReceiver
 	{
-		friend class Scene;
 		friend class GameObject;
+		friend class RenderingEngine;
+		friend class Scene;
+		
 
 	private: // 120 bytes
 		XMMATRIX worldMatrix;
@@ -80,7 +84,7 @@ namespace ScratchEngine
 		//void Scale(XMFLOAT3 scale);
 		//void Scale(XMVECTOR scale);
 
-		virtual void SendMessage(const Message& message);
+		virtual void SendMessage_(const Message& message);
 		virtual void SendMessageUp(const Message& message, u32 level = UINT_MAX);
 		virtual void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 

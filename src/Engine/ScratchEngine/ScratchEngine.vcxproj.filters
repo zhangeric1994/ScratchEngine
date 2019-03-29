@@ -81,16 +81,10 @@
     <ClInclude Include="Memory\Allocator.h">
       <Filter>Header Files\Memory</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\PoolAllocator.h">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Camera.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Lights.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\Material.h">
@@ -156,6 +150,27 @@
     <ClInclude Include="Common\Settings.h">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
+    <ClInclude Include="Core\IUpdatable.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\PoolAllocator.hpp">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\StackAllocator.hpp">
+      <Filter>Header Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Viewer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Global.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Light.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\LightSource.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -175,9 +190,6 @@
     </ClCompile>
     <ClCompile Include="Core\Transform.cpp">
       <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Memory\DynamicPoolAllocator.h">
-      <Filter>Header Files\Memory</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Camera.cpp">
       <Filter>Source Files\Rendering</Filter>
@@ -220,6 +232,15 @@
     </ClCompile>
     <ClCompile Include="Rendering\Renderer.cpp">
       <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\DynamicPoolAllocator.hpp">
+      <Filter>Header Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Light.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Global.cpp">
+      <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

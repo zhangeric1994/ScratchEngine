@@ -1,13 +1,18 @@
 #include "GameObject.h"
 
+bool ScratchEngine::GameComponent::IsEnabled()
+{
+	return isEnabled;
+}
+
 ScratchEngine::GameObject * ScratchEngine::GameComponent::GetGameObject()
 {
 	return gameObject;
 }
 
-void ScratchEngine::GameComponent::SendMessage(const Message & message)
+void ScratchEngine::GameComponent::SendMessage_(const Message & message)
 {
-	gameObject->SendMessage(message);
+	gameObject->SendMessage_(message);
 }
 
 void ScratchEngine::GameComponent::SendMessageUp(const Message & message, u32 level)

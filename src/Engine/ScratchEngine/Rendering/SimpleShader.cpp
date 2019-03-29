@@ -450,6 +450,14 @@ bool ISimpleShader::SetMatrix4x4(std::string name, const DirectX::XMFLOAT4X4 dat
 }
 
 // --------------------------------------------------------
+// Sets a MATRIX (4x4) variable by name in the local data buffer
+// --------------------------------------------------------
+bool ISimpleShader::SetMatrix4x4(std::string name, const DirectX::XMMATRIX data)
+{
+	return this->SetData(name, &data, sizeof(float) * 16);
+}
+
+// --------------------------------------------------------
 // Gets info about a shader variable, if it exists
 // --------------------------------------------------------
 const SimpleShaderVariable* ISimpleShader::GetVariableInfo(std::string name)

@@ -4,20 +4,32 @@
 
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
-#include "../Memory/DynamicPoolAllocator.h"
-#include "../Memory/PoolAllocator.h"
+#include "../Memory/DynamicPoolAllocator.hpp"
+#include "../Memory/StackAllocator.hpp"
+#include "../Memory/PoolAllocator.hpp"
 
+#include "Camera.h"
+#include "Light.h"
+#include "LightSource.h"
+#include "Mesh.h"
+#include "Renderable.h"
 #include "Renderer.h"
+#include "Viewer.h"
 
+using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;
 
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
+		static bool SortRenderables(Renderable a, Renderable b);
+
 		class RenderingEngine
 		{
-			friend class Mesh;
+			friend class Camera;
+			friend class Light;
+			friend struct Mesh;
 			friend class Renderer;
 
 
@@ -25,22 +37,35 @@ namespace ScratchEngine
 			static RenderingEngine* singleton;
 
 			static RenderingEngine* GetSingleton();
-			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128);
+			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
-			DynamicPoolAllocator<Renderable> renderableAllocator;
-
+			DynamicStackAllocator<Renderable> renderableAllocator;
+			DynamicPoolAllocator<Viewer> viewerAllocator;
+			DynamicStackAllocator<LightSource> lightSourceAllocator;
 			Renderer* rendererList;
+			Camera* cameraList;
+			Light* lightList;
 
-			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables);
+			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);
 			~RenderingEngine();
 
 			void AddRenderer(Renderer* renderer);
-			i32 CreateRenderable();
+			void AddCamera(Camera* camera);
+			void AddLight(Light* light);
 
 			void RemoveRenderer(Renderer* renderer);
-			void RemoveRenderable(i32 id);
+			void RemoveCamera(Camera* camera);
+			void RemoveLight(Light* light);
+			void DestroyRenderable(i32 id);
+			void DestroyViewer(i32 id);
+
+			void UpdateRenderables();
+			void UpdateViewers();
+			void UpdateLightSources();
+			void SortRenderables();
+			void DrawForward(ID3D11DeviceContext* context);
 		};
 	}
 }

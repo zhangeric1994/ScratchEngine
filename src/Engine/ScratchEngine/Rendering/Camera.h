@@ -1,22 +1,33 @@
+#ifndef CAMERA_H
+#define CAMERA_H
 #pragma once
-#include <DirectXMath.h>
 
-using namespace DirectX;
+#include "../Core/GameComponent.h"
 
-class Camera {
-public:
-	Camera();
-	Camera(XMFLOAT3 _position, XMFLOAT3 _direction);
+#include "Mesh.h"
+#include "Viewer.h"
 
-	void SetRotationX(float _directionX);
-	void SetRotationY(float _directionY);
+using namespace ScratchEngine::Rendering;
 
-	XMMATRIX Update();
-	XMMATRIX UpdateProjection(float aspectRatio);
+namespace ScratchEngine
+{
+	class __declspec(dllexport)  Camera : public GameComponent
+	{
+		friend class RenderingEngine;
 
-private:
-	XMFLOAT3 position;
-	XMFLOAT3 direction;
-	float	 rotationX;
-	float	 rotationY;
-};
+
+	private:
+		f32 fov;
+		f32 nearZ;
+		f32 farZ;
+		i32 viewer;
+		Camera* next;
+		Camera* previous;
+
+
+	public:
+		Camera();
+		~Camera();
+	};
+}
+#endif // !CAMERA_H

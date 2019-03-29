@@ -10,7 +10,7 @@ namespace ScratchEngineTest
 	//template<class T> __declspec(dllimport) T* AddComponent();
 	//template<class T> __declspec(dllimport) T* GetComponent();
 
-	struct TestObject : GameObject
+	struct TestObject : public GameObject
 	{
 		bool isUpdated;
 		int numMessagesReceived;
@@ -26,7 +26,7 @@ namespace ScratchEngineTest
 		}
 	};
 
-	struct TestComponent1 : GameComponent
+	struct TestComponent1 : public GameComponent
 	{
 		int data;
 		bool isUpdated;
@@ -57,7 +57,7 @@ namespace ScratchEngineTest
 		}
 	};
 
-	struct TestComponent2 : GameComponent
+	struct TestComponent2 : public GameComponent
 	{
 		int data;
 		bool isUpdated;
@@ -200,7 +200,7 @@ namespace ScratchEngineTest
 
 
 			Message message;
-			testObject->SendMessage(message);
+			testObject->SendMessage_(message);
 
 
 			Assert::AreEqual(1, testObject->numMessagesReceived);
@@ -215,7 +215,7 @@ namespace ScratchEngineTest
 			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
 
 			Message message;
-			testObject->SendMessage(message);
+			testObject->SendMessage_(message);
 
 
 			Assert::AreEqual(1, testObject->numMessagesReceived);
@@ -237,7 +237,7 @@ namespace ScratchEngineTest
 			testObject2->SetParent(testObject1);
 
 			Message message;
-			testObject1->SendMessage(message);
+			testObject1->SendMessage_(message);
 
 
 			Assert::AreEqual(1, testObject1->numMessagesReceived);

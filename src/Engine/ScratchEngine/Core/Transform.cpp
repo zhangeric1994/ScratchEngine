@@ -258,7 +258,7 @@ void ScratchEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 //	}
 //}
 
-void ScratchEngine::Transform::SendMessage(const Message& message)
+void ScratchEngine::Transform::SendMessage_(const Message& message)
 {
 	HandleMessage(message);
 }

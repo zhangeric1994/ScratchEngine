@@ -13,10 +13,14 @@ namespace ScratchEngine
 		{
 			friend class RenderingEngine;
 
+			friend bool SortRenderables(Renderable, Renderable);
+
 
 		private:
 			Mesh* mesh;
 			Material* material;
+
+			XMMATRIX worldMatrix;
 
 			Renderable();
 		};
