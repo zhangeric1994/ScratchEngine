@@ -15,6 +15,9 @@ public:
 	SimpleVertexShader* getVertexShader();
 	SimplePixelShader* getPixelShader();
 
+	void setVertexShader(SimpleVertexShader* _vertexShader);
+	void setPixelShader(SimplePixelShader* _pixelShader);
+
 	ID3D11ShaderResourceView* getTexture();
 	ID3D11ShaderResourceView* getNormalMap();
 	ID3D11SamplerState* getSampler();

@@ -6,6 +6,8 @@ using namespace DirectX;
 Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true) {
 	vertexShader = 0;
 	pixelShader = 0;
+	vertexShaderShadow = 0;
+	pixelShaderShadow = 0;
 
 	mesh = 0;
 	meshPlatform = 0;
@@ -59,15 +61,60 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	//view port example
-	/*D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	context->RSSetViewports(1, &viewport);*/
+	//shadow map
+
+	//shdaow map desc
+	shadowMapDesc = {};
+	shadowMapDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+	shadowMapDesc.MipLevels = 1;
+	shadowMapDesc.ArraySize = 1;
+	shadowMapDesc.SampleDesc.Count = 1;
+	shadowMapDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_DEPTH_STENCIL;
+	shadowMapDesc.Height = 1024;
+	shadowMapDesc.Width = 1024;
+	
+	depthStencilView = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	shaderResourceViewDesc = {};
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	comparisonSamplerDesc = {};
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.BorderColor[0] = 1.0f;
+	comparisonSamplerDesc.BorderColor[1] = 1.0f;
+	comparisonSamplerDesc.BorderColor[2] = 1.0f;
+	comparisonSamplerDesc.BorderColor[3] = 1.0f;
+	comparisonSamplerDesc.MinLOD = 0.f;
+	comparisonSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	comparisonSamplerDesc.MipLODBias = 0.f;
+	comparisonSamplerDesc.MaxAnisotropy = 0;
+	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	comparisonSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+
+	drawingRenderStateDesc = {};
+	drawingRenderStateDesc.CullMode = D3D11_CULL_BACK;
+	drawingRenderStateDesc.FillMode = D3D11_FILL_SOLID;
+	drawingRenderStateDesc.DepthClipEnable = true;
+
+	shadowRenderStateDesc = {};
+	shadowRenderStateDesc.CullMode = D3D11_CULL_FRONT;
+	shadowRenderStateDesc.FillMode = D3D11_FILL_SOLID;
+	shadowRenderStateDesc.DepthClipEnable = true;
+
+	shadowViewport = {};
+	shadowViewport.Height = 1024;
+	shadowViewport.Width = 1024;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+
+>>>>>>> 861e4f917c7f4aa6dba37f705d11a7a33f3f7325
 }
 
 Game::~Game() {
@@ -82,6 +129,9 @@ Game::~Game() {
 	if (texture) texture->Release();
 	if (normalMap) normalMap->Release();
 	if (meshPlatform) delete meshPlatform;
+	if (shadowMap) shadowMap->Release();
+	if (shadowResourceView) shadowResourceView->Release();
+	if (shadowRenderState) shadowRenderState->Release();
 }
 
 void Game::Init() {
@@ -102,15 +152,52 @@ void Game::LoadShaders() {
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
 
+	std::wstring sVertex = wpath + std::wstring(L"/VertexShaderShadow.cso");
+	std::wstring sPixel = wpath + std::wstring(L"/PixelShaderShadow.cso");
+
+	const wchar_t* vertexShadow = sVertex.c_str();
+	const wchar_t* pixelShadow = sPixel.c_str();
+
 	vertexShader = new SimpleVertexShader(device, context);
 
 	vertexShader->LoadShaderFile(vertex);
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
+
+	vertexShaderShadow = new SimpleVertexShader(device, context);
+	vertexShaderShadow->LoadShaderFile(vertexShadow);
+
+	pixelShaderShadow = new SimplePixelShader(device, context);
+	pixelShaderShadow->LoadShaderFile(pixelShadow);
 }
 
 void Game::CreateMatrces() {
+	//shdaow map light wvp
+	XMMATRIX lightPerspectiveMatrix = XMMatrixPerspectiveFovRH(
+		XM_PIDIV2,
+		1.0f,
+		12.f,
+		50.f
+	);
+
+	XMStoreFloat4x4(
+		&lightProjectionMatrix,
+		XMMatrixTranspose(lightPerspectiveMatrix)
+	);
+
+	XMVECTOR eye = { 0.0f, 20.0f, 0.0f, 0.0f };
+	XMVECTOR at = { 0.0f, 0.0f, 0.0f, 0.0f };
+	XMVECTOR upL = { 0.0f, 1.0f, 0.0f, 0.0f };
+
+	XMStoreFloat4x4(
+		&lightViewMatrix,
+		XMMatrixTranspose(XMMatrixLookAtRH(eye, at, upL))
+	);
+
+	XMStoreFloat4(&lightPosition, eye);
+	//
+
 	XMMATRIX W = XMMatrixIdentity();
 	XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
 	
@@ -128,6 +215,33 @@ void Game::CreateMatrces() {
 }
 
 void Game::CreateBasicGeometry() {
+	//shadow map
+	device->CreateTexture2D(
+		&shadowMapDesc,
+		nullptr,
+		&shadowMap
+	);
+
+	device->CreateDepthStencilView(
+		shadowMap,
+		&depthStencilViewDesc,
+		&shadowdepthStencilView
+	);
+
+	device->CreateShaderResourceView(
+		shadowMap,
+		&shaderResourceViewDesc,
+		&shadowResourceView
+	);
+
+	device->CreateRasterizerState(
+		&shadowRenderStateDesc,
+		&shadowRenderState
+	);
+
+
+	//
+
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_COLOR.jpg", 0, &texture);
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_NRM.jpg", 0, &normalMap);
 
@@ -181,8 +295,8 @@ void Game::Update(float deltaTime, float totalTime) {
 
 void Game::Draw(float deltaTime, float totalTime) {
 	//backgroud color
-	const float color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
-	//const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	//const float color[4] = { 0.1f, 0.1f, 0.1f, 1.0f };
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	//-set backgroud color
 	//-clear depth buffer
@@ -194,33 +308,46 @@ void Game::Draw(float deltaTime, float totalTime) {
 		0);
 	physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime);
 	//-------------------------------------
+	
+	//first pass shadow map
+	context->OMSetRenderTargets(
+		0,
+		nullptr,
+		shadowdepthStencilView
+	);
 
-	//simple shadow map
+
+	context->RSSetState(shadowRenderState);
+	context->RSSetViewports(1, &shadowViewport);
 
 
-	//second pass rendering color
-	for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-		entityVector[countOfEntity]->SetWorldMatrix();
-		entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		//entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-		entityVector[countOfEntity]->SetLight(directionalLight, "light");
-		//entityVector[countOfEntity]->SetLight(directionalLight1, "light1");
-		//entityVector[countOfEntity]->SetSpotLight(spotLight, "spotLight");
-		entityVector[countOfEntity]->SetTexture("diffuseTexture", "basicSampler");
-		entityVector[countOfEntity]->SetNormalMap("normalMap");
-		entityVector[countOfEntity]->CopyAllBufferData();
-		entityVector[countOfEntity]->SetShader();
 
-		//set vertex buffer and index buffer inside entity class
-		entityVector[countOfEntity]->Draw(context);
-	}
+
+
+	//second pass render scene based on shadow map
+	//for (auto& m : entityVector) {
+	//	m->SetWorldMatrix();
+	//	m->PrepareMatrix(viewMatrix, projectionMatrix);
+	//	//m->SetPointLight(pointLight, "pointLight");
+	//	m->SetLight(directionalLight, "light");
+	//	//m->SetLight(directionalLight1, "light1");
+	//	//m->SetSpotLight(spotLight, "spotLight");
+	//	m->SetTexture("diffuseTexture", "basicSampler");
+	//	m->SetNormalMap("normalMap");
+	//	m->CopyAllBufferData();
+	//	m->SetShader();
+
+	//	//set vertex buffer and index buffer inside entity class
+	//	m->Draw(context);
+	//}
+>>>>>>> 861e4f917c7f4aa6dba37f705d11a7a33f3f7325
 
 	//-------------------------------------
 
 	//End of rendering one frame
 	swapChain->Present(0, 0);
 
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 }
 
 #pragma region Mouse Input
