@@ -10,7 +10,7 @@ ScratchEngine::Transform::Transform()
 
 	parent = nullptr;
 
-	_set_dirty();
+	__MarkDirty();
 }
 
 ScratchEngine::Transform::Transform(float x, float y, float z)
@@ -21,7 +21,7 @@ ScratchEngine::Transform::Transform(float x, float y, float z)
 
 	parent = nullptr;
 
-	_set_dirty();
+	__MarkDirty();
 }
 
 ScratchEngine::Transform::Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOAT3 scale)
@@ -32,7 +32,7 @@ ScratchEngine::Transform::Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOA
 
 	parent = nullptr;
 
-	_set_dirty();
+	__MarkDirty();
 }
 
 ScratchEngine::Transform::Transform(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale)
@@ -43,131 +43,148 @@ ScratchEngine::Transform::Transform(XMVECTOR position, XMVECTOR rotation, XMVECT
 
 	parent = nullptr;
 
-	_set_dirty();
+	__MarkDirty();
 }
 
 ScratchEngine::Transform::~Transform()
 {
 }
 
-XMVECTOR ScratchEngine::Transform::GetLocalPosition()
+__inline XMVECTOR ScratchEngine::Transform::GetLocalPosition()
 {
 	return localPosition;
 }
 
-XMVECTOR ScratchEngine::Transform::GetPosition()
+__inline XMVECTOR ScratchEngine::Transform::GetPosition()
 {
 	return parent ? XMVector3Transform(localPosition, parent->GetWorldMatrix()) : localPosition;
 }
 
-XMVECTOR ScratchEngine::Transform::GetLocalRotation()
+__inline XMVECTOR ScratchEngine::Transform::GetLocalRotation()
 {
 	return localRotation;
 }
 
-XMVECTOR ScratchEngine::Transform::GetRotation()
+__inline XMVECTOR ScratchEngine::Transform::GetRotation()
 {
 	return parent ? XMQuaternionMultiply(localRotation, parent->GetRotation()) : localRotation;
 }
 
-XMVECTOR ScratchEngine::Transform::GetLocalScale()
+__inline XMVECTOR ScratchEngine::Transform::GetLocalScale()
 {
 	return localScale;
 }
 
-XMVECTOR ScratchEngine::Transform::GetScale()
+__inline XMVECTOR ScratchEngine::Transform::GetScale()
 {
-	return parent ? XMVectorMultiply(localScale, XMVectorAbs(XMVector3Rotate(parent->GetScale(), XMQuaternionInverse(localRotation)))) : localScale;
+	return parent ? XMVectorMultiply(localScale, parent->GetScale()) : localScale;
 }
 
-ScratchEngine::Transform* ScratchEngine::Transform::GetParent()
+__inline ScratchEngine::Transform* ScratchEngine::Transform::GetParent()
 {
 	return parent;
 }
 
-ScratchEngine::Transform* ScratchEngine::Transform::GetChild(size_t index)
+__inline ScratchEngine::Transform* ScratchEngine::Transform::GetChild(size_t index)
 {
 	return index < children.size() ? children[index] : nullptr;
 }
 
-size_t ScratchEngine::Transform::GetChildCount()
+__inline size_t ScratchEngine::Transform::GetChildCount()
 {
 	return children.size();
 }
 
-void ScratchEngine::Transform::SetLocalPosition(f32 x, f32 y, f32 z)
+__inline void ScratchEngine::Transform::SetLocalPosition(f32 x, f32 y, f32 z)
 {
-	_set_local_position(XMVectorSet(x, y, z, 0));
+	SetLocalPosition(XMVectorSet(x, y, z, 0));
 }
 
-void ScratchEngine::Transform::SetLocalPosition(XMFLOAT3 position)
+__inline void ScratchEngine::Transform::SetLocalPosition(XMFLOAT3 position)
 {
-	_set_local_position(XMLoadFloat3(&position));
+	SetLocalPosition(XMLoadFloat3(&position));
 }
 
-void ScratchEngine::Transform::SetLocalPosition(XMVECTOR position)
+__inline void ScratchEngine::Transform::SetLocalPosition(XMVECTOR position)
 {
-	_set_local_position(position);
+	if (XMVector3NotEqual(position, localPosition))
+	{
+		localPosition = position;
+
+		__MarkDirty();
+	}
 }
 
-void ScratchEngine::Transform::SetPosition(f32 x, f32 y, f32 z)
+__inline void ScratchEngine::Transform::SetPosition(f32 x, f32 y, f32 z)
 {
-	_set_local_position(parent ? XMVector3Transform(XMVectorSet(x, y, z, 0), XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : XMVectorSet(x, y, z, 0));
+	SetLocalPosition(parent ? XMVector3Transform(XMVectorSet(x, y, z, 0), XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : XMVectorSet(x, y, z, 0));
 }
 
-void ScratchEngine::Transform::SetPosition(XMFLOAT3 position)
+__inline void ScratchEngine::Transform::SetPosition(XMFLOAT3 position)
 {
-	_set_local_position(parent ? XMVector3Transform(XMLoadFloat3(&position), XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : XMLoadFloat3(&position));
+	SetLocalPosition(parent ? XMVector3Transform(XMLoadFloat3(&position), XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : XMLoadFloat3(&position));
 }
 
-void ScratchEngine::Transform::SetPosition(XMVECTOR position)
+__inline void ScratchEngine::Transform::SetPosition(XMVECTOR position)
 {
-	_set_local_position(parent ? XMVector3Transform(position, XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : position);
+	SetLocalPosition(parent ? XMVector3Transform(position, XMMatrixInverse(nullptr, parent->GetWorldMatrix())) : position);
 }
 
-void ScratchEngine::Transform::SetLocalRotation(f32 x, f32 y, f32 z)
+__inline void ScratchEngine::Transform::SetLocalRotation(f32 x, f32 y, f32 z)
 {
-	_set_local_rotation(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
+	SetLocalRotation(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
 }
 
-void ScratchEngine::Transform::SetLocalRotation(XMFLOAT4 rotation)
+__inline void ScratchEngine::Transform::SetLocalRotation(XMFLOAT4 rotation)
 {
-	_set_local_rotation(XMLoadFloat4(&rotation));
+	SetLocalRotation(XMLoadFloat4(&rotation));
 }
 
-void ScratchEngine::Transform::SetLocalRotation(XMVECTOR rotation)
+__inline void ScratchEngine::Transform::SetLocalRotation(XMVECTOR rotation)
 {
-	_set_local_rotation(rotation);
+	if (XMQuaternionNotEqual(rotation, localRotation))
+	{
+		localRotation = rotation;
+
+		__MarkDirty();
+	}
 }
 
-void ScratchEngine::Transform::SetRotation(f32 x, f32 y, f32 z)
+__inline void ScratchEngine::Transform::SetRotation(f32 x, f32 y, f32 z)
 {
-	_set_local_rotation(parent ? XMQuaternionMultiply(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), XMQuaternionInverse(parent->GetRotation())) : XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
+	SetLocalRotation(parent ? XMQuaternionMultiply(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), XMQuaternionInverse(parent->GetRotation())) : XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)));
 }
 
-void ScratchEngine::Transform::SetRotation(XMFLOAT4 rotation)
+__inline void ScratchEngine::Transform::SetRotation(XMFLOAT4 rotation)
 {
-	_set_local_rotation(parent ? XMQuaternionMultiply(XMLoadFloat4(&rotation), XMQuaternionInverse(parent->GetRotation())) : XMLoadFloat4(&rotation));
+	SetLocalRotation(parent ? XMQuaternionMultiply(XMLoadFloat4(&rotation), XMQuaternionInverse(parent->GetRotation())) : XMLoadFloat4(&rotation));
 }
 
-void ScratchEngine::Transform::SetRotation(XMVECTOR rotation)
+__inline void ScratchEngine::Transform::SetRotation(XMVECTOR rotation)
 {
-	_set_local_rotation(parent ? XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())) : rotation);
+	SetLocalRotation(parent ? XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())) : rotation);
 }
 
-void ScratchEngine::Transform::SetLocalScale(f32 x, f32 y, f32 z)
+__inline void ScratchEngine::Transform::SetLocalScale(f32 x, f32 y, f32 z)
 {
-	_set_local_scale(XMVectorSet(x, y, z, 0));
+	SetLocalScale(XMVectorSet(x, y, z, 0));
 }
 
-void ScratchEngine::Transform::SetLocalScale(XMFLOAT3 scale)
+__inline void ScratchEngine::Transform::SetLocalScale(XMFLOAT3 scale)
 {
-	_set_local_scale(XMLoadFloat3(&scale));
+	SetLocalScale(XMLoadFloat3(&scale));
 }
 
-void ScratchEngine::Transform::SetLocalScale(XMVECTOR scale)
+__inline void ScratchEngine::Transform::SetLocalScale(XMVECTOR scale)
 {
-	_set_local_scale(scale);
+	scale = XMVectorMax(scale, XMVectorZero());
+
+	if (XMVector3NotEqual(scale, localScale))
+	{
+		localScale = scale;
+
+		__MarkDirty();
+	}
 }
 
 //void ScratchEngine::Transform::SetScale(f32 x, f32 y, f32 z)
@@ -192,18 +209,24 @@ void ScratchEngine::Transform::SetParent(Transform* parent)
 	XMVECTOR scale = GetScale();
 
 	if (this->parent)
-		this->parent->RemoveChild(this);
-
-	index = parent->AddChild(this);
+		this->parent->__RemoveChild(this);
 
 	this->parent = parent;
 
-	// SetPosition(position);
-	// SetRotation(rotation);
+	if (parent)
+	{
+		index = parent->__AddChild(this);
 
-	_set_local_position(XMVector3Transform(position, XMMatrixInverse(nullptr, parent->GetWorldMatrix())));
-	_set_local_rotation(XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())));
-	_set_local_scale(XMVectorDivide(scale, XMVectorAbs(XMVector3Rotate(parent->GetScale(), XMQuaternionInverse(localRotation)))));
+		SetLocalPosition(XMVector3Transform(position, XMMatrixInverse(nullptr, parent->GetWorldMatrix())));
+		SetLocalRotation(XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())));
+		SetLocalScale(XMVectorDivide(scale, parent->GetScale()));
+	}
+	else
+	{
+		SetLocalPosition(position);
+		SetLocalPosition(rotation);
+		SetLocalPosition(scale);
+	}
 }
 
 void* ScratchEngine::Transform::operator new(size_t size)
@@ -216,45 +239,81 @@ void ScratchEngine::Transform::operator delete(void* p)
 	return _aligned_free(p);
 }
 
-void ScratchEngine::Transform::Translate(float x, float y, float z, Space space)
+__inline void ScratchEngine::Transform::Translate(float x, float y, float z, Space space)
 {
-	_translate(XMVectorSet(x, y, z, 0), space);
+	Translate(XMVectorSet(x, y, z, 0), space);
 }
 
-void ScratchEngine::Transform::Translate(XMFLOAT3 translation, Space space)
+__inline void ScratchEngine::Transform::Translate(XMFLOAT3 translation, Space space)
 {
-	_translate(XMLoadFloat3(&translation), space);
+	Translate(XMLoadFloat3(&translation), space);
 }
 
-void ScratchEngine::Transform::Translate(XMVECTOR translation, Space space)
+__inline void ScratchEngine::Transform::Translate(XMVECTOR translation, Space space)
 {
-	_translate(translation, space);
+	if (XMVector3NotEqual(translation, XMVectorZero()))
+	{
+		switch (space)
+		{
+		case WORLD:
+			localPosition = XMVectorAdd(localPosition, parent ? XMVector3Transform(translation, XMMatrixInverse(nullptr, GetWorldMatrix())) : translation);
+			break;
+
+
+		case SELF:
+			localPosition = XMVectorAdd(localPosition, translation);
+			break;
+		}
+
+		__MarkDirty();
+	}
 }
 
-void ScratchEngine::Transform::Rotate(float x, float y, float z, Space space)
+__inline void ScratchEngine::Transform::Rotate(float x, float y, float z, Space space)
 {
-	_rotate(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), space);
+	Rotate(XMQuaternionRotationRollPitchYaw(XMConvertToRadians(x), XMConvertToRadians(y), XMConvertToRadians(z)), space);
 }
 
-void ScratchEngine::Transform::Rotate(XMFLOAT4 rotation, Space space)
+__inline void ScratchEngine::Transform::Rotate(XMFLOAT4 rotation, Space space)
 {
-	_rotate(XMLoadFloat4(&rotation), space);
+	Rotate(XMLoadFloat4(&rotation), space);
 }
 
-void ScratchEngine::Transform::Rotate(XMVECTOR rotation, Space space)
+__inline void ScratchEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 {
-	_rotate(rotation, space);
+	if (XMVector3NotEqual(rotation, XMQuaternionIdentity()))
+	{
+		switch (space)
+		{
+		case WORLD:
+			if (parent)
+			{
+				XMVECTOR parentRotation = parent->GetRotation();
+				localRotation = XMQuaternionMultiply(localRotation, XMQuaternionMultiply(parentRotation, XMQuaternionMultiply(rotation, XMQuaternionInverse(parentRotation))));
+			}
+			else
+				localRotation = XMQuaternionMultiply(localRotation, rotation);
+			break;
+
+
+		case SELF:
+			localRotation = XMQuaternionMultiply(localRotation, rotation);
+			break;
+		}
+
+		__MarkDirty();
+	}
 }
 
 //void ScratchEngine::Transform::Scale(XMFLOAT3 scale)
 //{
-//	XMVECTOR v = XMVectorMax(XMLoadFloat3(&scale), XMVectorZero());
+//	XMVECTOR translation = XMVectorMax(XMLoadFloat3(&scale), XMVectorZero());
 //
-//	if (XMVector3NotEqual(v, XMVectorSet(1, 1, 1, 0)))
+//	if (XMVector3NotEqual(translation, XMVectorSet(1, 1, 1, 0)))
 //	{
-//		_set_dirty();
+//		__MarkDirty();
 //
-//		localScale = XMVectorMultiply(v, localScale);
+//		localScale = XMVectorMultiply(translation, localScale);
 //	}
 //}
 //
@@ -264,13 +323,13 @@ void ScratchEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 //
 //	if (XMVector3NotEqual(scale, XMVectorSet(1, 1, 1, 0)))
 //	{
-//		_set_dirty();
+//		__MarkDirty();
 //
 //		localScale = XMVectorMultiply(scale, localScale);
 //	}
 //}
 
-void ScratchEngine::Transform::SendMessage_(const Message& message)
+__inline void ScratchEngine::Transform::SendMessage_(const Message& message)
 {
 	HandleMessage(message);
 }
@@ -292,74 +351,37 @@ void ScratchEngine::Transform::SendMessageDown(const Message& message, u32 level
 			(*it)->SendMessageDown(message, level);
 }
 
-size_t ScratchEngine::Transform::AddChild(Transform* other)
-{
-	children.push_back(other);
-	return children.size() - 1;
-}
-
-void ScratchEngine::Transform::RemoveChild(Transform* transform)
-{
-	for (auto it = children.begin(); it != children.end(); it++)
-		if (*it == transform)
-		{
-			children.erase(it);
-			break;
-		}
-}
-
-XMMATRIX ScratchEngine::Transform::GetWorldMatrix()
+__inline XMMATRIX ScratchEngine::Transform::GetWorldMatrix()
 {
 	if (isDirty)
-		_update_world_matrix();
+		__UpdateWorldMatrix();
 
 	return worldMatrix;
 }
 
-__forceinline void ScratchEngine::Transform::_set_local_position(XMVECTOR v)
-{
-	if (XMVector3NotEqual(v, localPosition))
-	{
-		localPosition = v;
-
-		_set_dirty();
-	}
-}
-
-__forceinline void ScratchEngine::Transform::_set_local_rotation(XMVECTOR q)
-{
-	if (XMQuaternionNotEqual(q, localRotation))
-	{
-		localRotation = q;
-
-		_set_dirty();
-	}
-}
-
-__forceinline void ScratchEngine::Transform::_set_local_scale(XMVECTOR v)
-{
-	v = XMVectorMax(v, XMVectorZero());
-
-	if (XMVector3NotEqual(v, localScale))
-	{
-		localScale = v;
-
-		_set_dirty();
-	}
-}
-
-__forceinline void ScratchEngine::Transform::_set_dirty()
+__forceinline void ScratchEngine::Transform::__MarkDirty()
 {
 	if (!isDirty)
 	{
 		isDirty = true;
 
 		for (auto it = children.begin(); it != children.end(); it++)
-			(*it)->_set_dirty();
+			(*it)->__MarkDirty();
 	}
 }
 
-__forceinline void ScratchEngine::Transform::_update_world_matrix()
+__forceinline size_t ScratchEngine::Transform::__AddChild(Transform* other)
+{
+	children.push_back(other);
+	return children.size() - 1;
+}
+
+__forceinline void ScratchEngine::Transform::__RemoveChild(Transform* transform)
+{
+	children.erase(children.begin() + transform->index);
+}
+
+__forceinline void ScratchEngine::Transform::__UpdateWorldMatrix()
 {
 	if (parent)
 		worldMatrix = XMMatrixScalingFromVector(localScale) * XMMatrixRotationQuaternion(localRotation) * XMMatrixTranslationFromVector(localPosition) * parent->GetWorldMatrix();
@@ -367,47 +389,4 @@ __forceinline void ScratchEngine::Transform::_update_world_matrix()
 		worldMatrix = XMMatrixScalingFromVector(localScale) * XMMatrixRotationQuaternion(localRotation) * XMMatrixTranslationFromVector(localPosition);
 
 	isDirty = false;
-}
-
-__forceinline void ScratchEngine::Transform::_translate(XMVECTOR v, Space space)
-{
-	if (XMVector3NotEqual(v, XMVectorZero()))
-	{
-		switch (space)
-		{
-		case WORLD:
-			localPosition = XMVectorAdd(localPosition, parent ? XMVector3Transform(v, XMMatrixInverse(nullptr, GetWorldMatrix())) : v);
-			break;
-
-
-		case SELF:
-			localPosition = XMVectorAdd(localPosition, v);
-			break;
-		}
-
-		_set_dirty();
-	}
-}
-
-__forceinline void ScratchEngine::Transform::_rotate(XMVECTOR q, Space space)
-{
-	if (XMVector3NotEqual(q, XMQuaternionIdentity()))
-	{
-		switch (space)
-		{
-		case WORLD:
-			if (parent)
-				localRotation = XMQuaternionMultiply(localRotation, XMQuaternionMultiply(q, XMQuaternionInverse(parent->GetRotation())));
-			else
-				localRotation = XMQuaternionMultiply(localRotation, q);
-			break;
-
-
-		case SELF:
-			localRotation = XMQuaternionMultiply(localRotation, q);
-			break;
-		}
-
-		_set_dirty();
-	}
 }

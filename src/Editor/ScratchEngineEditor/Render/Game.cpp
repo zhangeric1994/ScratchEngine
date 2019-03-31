@@ -153,29 +153,31 @@ void Game::CreateBasicGeometry()
 	//collider5->ApplyForce({ -1.4f,0,0.1f });
 
 	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
-	camera = new GameObject(0, 0, -5);
-	GameObject* directionalLightObject = new GameObject(/*0.0f, 10.0f, 10.0f*/);
-	go1 = new GameObject();
-	go2 = new GameObject();
-	GameObject* go3 = new GameObject();
-	GameObject* go4 = new GameObject();
-
+	
+	camera = new GameObject();
 	camera->AddComponent<Camera>();
-	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
-	directionalLightObject->SetPosition(0, 2, 2);
+	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(-90, 0, 0);
-
-	go1->SetPosition(0, 0, 5);
+	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
+	
+	go1 = new GameObject();
+	go1->SetPosition(0, 0, 10);
+	go1->SetLocalRotation(45, 0, 0);
+	go1->SetLocalScale(1, 2, 1);
 	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
 
+	go2 = new GameObject();
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
 	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
 
+	GameObject* go3 = new GameObject();
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
 	go3->AddComponent<Renderer>(simpleMaterial, mesh);
+
+	GameObject* go4 = new GameObject();
 }
 
 void Game::OnResize()
@@ -218,7 +220,7 @@ void Game::Update(float deltaTime, float totalTime)
 		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
 	go1->Rotate(0, 0, 20 * deltaTime);
-	go2->SetLocalRotation(0, 0, -50 * totalTime);
+	go2->Rotate(0, 0, -50 * deltaTime);
 }
 
 void Game::Draw(float deltaTime, float totalTime)

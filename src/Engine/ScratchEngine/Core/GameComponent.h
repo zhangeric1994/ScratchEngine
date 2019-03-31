@@ -15,12 +15,12 @@ namespace ScratchEngine
 
 
 	protected:
-		bool isEnabled;
+		bool isActive;
 		GameObject* gameObject;
 
 
 	public:
-		bool IsEnabled();
+		bool IsActive();
 		GameObject* GetGameObject();
 
 		void SendMessage_(const Message& message);

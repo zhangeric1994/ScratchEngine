@@ -55,11 +55,9 @@ void ScratchEngine::Scene::Update(f32 deltaTime, f32 currentTime)
 
 		gameObject->Update(deltaTime, currentTime);
 
-		for (auto it = gameObject->components.begin(); it != gameObject->components.end(); it++)
-			(*it).second->Update(deltaTime, currentTime);
-
 		for (auto it = gameObject->children.begin(); it != gameObject->children.end(); it++)
-			s.Push(static_cast<GameObject*>(*it));
+			if (static_cast<GameObject*>(*it)->IsActiveSelf())
+				s.Push(static_cast<GameObject*>(*it));
 	}
 }
 
@@ -76,10 +74,8 @@ void ScratchEngine::Scene::LateUpdate(f32 deltaTime, f32 currentTime)
 
 		gameObject->LateUpdate(deltaTime, currentTime);
 
-		for (auto it = gameObject->components.begin(); it != gameObject->components.end(); it++)
-			(*it).second->LateUpdate(deltaTime, currentTime);
-
 		for (auto it = gameObject->children.begin(); it != gameObject->children.end(); it++)
-			s.Push(static_cast<GameObject*>(*it));
+			if (static_cast<GameObject*>(*it)->IsActiveSelf())
+				s.Push(static_cast<GameObject*>(*it));
 	}
 }

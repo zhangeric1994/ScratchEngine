@@ -1,8 +1,8 @@
 #include "GameObject.h"
 
-bool ScratchEngine::GameComponent::IsEnabled()
+bool ScratchEngine::GameComponent::IsActive()
 {
-	return isEnabled;
+	return isActive;
 }
 
 ScratchEngine::GameObject * ScratchEngine::GameComponent::GetGameObject()

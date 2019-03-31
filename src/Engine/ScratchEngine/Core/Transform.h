@@ -32,8 +32,8 @@ namespace ScratchEngine
 
 		bool isDirty;
 
-		size_t index;
 		Transform* parent;
+		size_t index;
 		std::vector<Transform*> children;
 
 
@@ -44,31 +44,31 @@ namespace ScratchEngine
 		Transform(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~Transform();
 
-		__inline XMVECTOR GetLocalPosition();
-		__inline XMVECTOR GetPosition();
-		__inline XMVECTOR GetLocalRotation();
-		__inline XMVECTOR GetRotation();
-		__inline XMVECTOR GetLocalScale();
-		__inline XMVECTOR GetScale();
-		__inline Transform* GetParent();
-		__inline Transform* GetChild(size_t index);
-		__inline size_t GetChildCount();
+		XMVECTOR GetLocalPosition();
+		XMVECTOR GetPosition();
+		XMVECTOR GetLocalRotation();
+		XMVECTOR GetRotation();
+		XMVECTOR GetLocalScale();
+		XMVECTOR GetScale();
+		Transform* GetParent();
+		Transform* GetChild(size_t index);
+		size_t GetChildCount();
 
-		__inline void SetLocalPosition(f32 x, f32 y, f32 z);
-		__inline void SetLocalPosition(XMFLOAT3 position);
-		__inline void SetLocalPosition(XMVECTOR position);
-		__inline void SetPosition(f32 x, f32 y, f32 z);
-		__inline void SetPosition(XMFLOAT3 position);
-		__inline void SetPosition(XMVECTOR position);
-		__inline void SetLocalRotation(f32 x, f32 y, f32 z);
-		__inline void SetLocalRotation(XMFLOAT4 rotation);
-		__inline void SetLocalRotation(XMVECTOR rotation);
-		__inline void SetRotation(f32 x, f32 y, f32 z);
-		__inline void SetRotation(XMFLOAT4 rotation);
-		__inline void SetRotation(XMVECTOR rotation);
-		__inline void SetLocalScale(f32 x, f32 y, f32 z);
-		__inline void SetLocalScale(XMFLOAT3 scale);
-		__inline void SetLocalScale(XMVECTOR scale);
+		void SetLocalPosition(f32 x, f32 y, f32 z);
+		void SetLocalPosition(XMFLOAT3 position);
+		void SetLocalPosition(XMVECTOR position);
+		void SetPosition(f32 x, f32 y, f32 z);
+		void SetPosition(XMFLOAT3 position);
+		void SetPosition(XMVECTOR position);
+		void SetLocalRotation(f32 x, f32 y, f32 z);
+		void SetLocalRotation(XMFLOAT4 rotation);
+		void SetLocalRotation(XMVECTOR rotation);
+		void SetRotation(f32 x, f32 y, f32 z);
+		void SetRotation(XMFLOAT4 rotation);
+		void SetRotation(XMVECTOR rotation);
+		void SetLocalScale(f32 x, f32 y, f32 z);
+		void SetLocalScale(XMFLOAT3 scale);
+		void SetLocalScale(XMVECTOR scale);
 		//void SetScale(f32 x, f32 y, f32 z);
 		//void SetScale(XMFLOAT3 scale);
 		//void SetScale(XMVECTOR scale);
@@ -97,19 +97,13 @@ namespace ScratchEngine
 	private:
 		XMMATRIX GetWorldMatrix();
 
-		size_t AddChild(Transform* gameObject);
-		void RemoveChild(Transform* gameObject);
-
 		virtual void HandleMessage(const Message& message) { }
 
-		__forceinline void _set_local_position(XMVECTOR v);
-		__forceinline void _set_local_rotation(XMVECTOR q);
-		__forceinline void _set_local_scale(XMVECTOR v);
-		__forceinline void _set_dirty();
+		void __MarkDirty();
+		
+		size_t __AddChild(Transform* gameObject);
+		void __RemoveChild(Transform* gameObject);
 
-		__forceinline void _update_world_matrix();
-
-		__forceinline void _translate(XMVECTOR v, Space space);
-		__forceinline void _rotate(XMVECTOR q, Space space);
+		void __UpdateWorldMatrix();
 	};
 }

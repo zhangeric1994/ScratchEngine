@@ -10,22 +10,6 @@ namespace ScratchEngineTest
 	//template<class T> __declspec(dllimport) T* AddComponent();
 	//template<class T> __declspec(dllimport) T* GetComponent();
 
-	struct TestObject : public GameObject
-	{
-		bool isUpdated;
-		int numMessagesReceived;
-
-		void Update()
-		{
-			isUpdated = true;
-		}
-
-		void HandleMessage(const Message& message)
-		{
-			++numMessagesReceived;
-		}
-	};
-
 	struct TestComponent1 : public GameComponent
 	{
 		int data;
@@ -93,9 +77,9 @@ namespace ScratchEngineTest
 	public:
 		TEST_METHOD(SetParent1)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			testObject2->SetParent(testObject1);
@@ -109,9 +93,9 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(SetParent2)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			testObject2->SetParent(testObject3);
@@ -129,24 +113,24 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(AddComponent1)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>();
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>();
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>();
 
 
 			Assert::AreNotEqual((uptr)testComponent1, (uptr)testComponent2);
 
-			Assert::AreEqual((uptr)testComponent1, (uptr)testObject->GetComponent<TestComponent1>());
-			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+			Assert::AreEqual((uptr)testComponent1, (uptr)gameObject->GetComponent<TestComponent1>());
+			Assert::AreEqual((uptr)testComponent2, (uptr)gameObject->GetComponent<TestComponent2>());
 
-			Assert::AreEqual((uptr)testObject, (uptr)testComponent1->GetGameObject());
+			Assert::AreEqual((uptr)gameObject, (uptr)testComponent1->GetGameObject());
 			Assert::AreEqual(0, testComponent1->data);
 			Assert::AreEqual(false, testComponent1->isUpdated);
 			Assert::AreEqual(0, testComponent1->numMessagesReceived);
 
-			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
+			Assert::AreEqual((uptr)gameObject, (uptr)testComponent2->GetGameObject());
 			Assert::AreEqual(0, testComponent2->data);
 			Assert::AreEqual(false, testComponent2->isUpdated);
 			Assert::AreEqual(0, testComponent2->numMessagesReceived);
@@ -154,24 +138,24 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(AddComponent2)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>(1);
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>(2);
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>(1);
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>(2);
 
 
 			Assert::AreNotEqual((uptr)testComponent1, (uptr)testComponent2);
 
-			Assert::AreEqual((uptr)testComponent1, (uptr)testObject->GetComponent<TestComponent1>());
-			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+			Assert::AreEqual((uptr)testComponent1, (uptr)gameObject->GetComponent<TestComponent1>());
+			Assert::AreEqual((uptr)testComponent2, (uptr)gameObject->GetComponent<TestComponent2>());
 
-			Assert::AreEqual((uptr)testObject, (uptr)testComponent1->GetGameObject());
+			Assert::AreEqual((uptr)gameObject, (uptr)testComponent1->GetGameObject());
 			Assert::AreEqual(1, testComponent1->data);
 			Assert::AreEqual(false, testComponent1->isUpdated);
 			Assert::AreEqual(0, testComponent1->numMessagesReceived);
 
-			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
+			Assert::AreEqual((uptr)gameObject, (uptr)testComponent2->GetGameObject());
 			Assert::AreEqual(2, testComponent2->data);
 			Assert::AreEqual(false, testComponent2->isUpdated);
 			Assert::AreEqual(0, testComponent2->numMessagesReceived);
@@ -179,54 +163,50 @@ namespace ScratchEngineTest
 
 		TEST_METHOD(RemoveComponent)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>();
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>();
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>();
 
-			testObject->RemoveComponent<TestComponent1>();
+			gameObject->RemoveComponent<TestComponent1>();
 
 
-			Assert::IsNull(testObject->GetComponent<TestComponent1>());
-			Assert::AreEqual((uptr)testComponent2, (uptr)testObject->GetComponent<TestComponent2>());
+			Assert::IsNull(gameObject->GetComponent<TestComponent1>());
+			Assert::AreEqual((uptr)testComponent2, (uptr)gameObject->GetComponent<TestComponent2>());
 
-			Assert::AreEqual((uptr)testObject, (uptr)testComponent2->GetGameObject());
+			Assert::AreEqual((uptr)gameObject, (uptr)testComponent2->GetGameObject());
 		}
 
 		TEST_METHOD(SendMessage1)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
 			Message message;
-			testObject->SendMessage_(message);
-
-
-			Assert::AreEqual(1, testObject->numMessagesReceived);
+			gameObject->SendMessage_(message);
 		}
 
 		TEST_METHOD(SendMessage2)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>();
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>();
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>();
 
 			Message message;
-			testObject->SendMessage_(message);
+			gameObject->SendMessage_(message);
 
 
-			Assert::AreEqual(1, testObject->numMessagesReceived);
 			Assert::AreEqual(1, testComponent1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent2->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessage3)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
 
 
 			TestComponent1* testComponent11 = testObject1->AddComponent<TestComponent1>();
@@ -240,46 +220,41 @@ namespace ScratchEngineTest
 			testObject1->SendMessage_(message);
 
 
-			Assert::AreEqual(1, testObject1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent11->numMessagesReceived);
 			Assert::AreEqual(1, testComponent12->numMessagesReceived);
 
-			Assert::AreEqual(0, testObject2->numMessagesReceived);
 			Assert::AreEqual(0, testComponent21->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageDown1)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
 			Message message;
-			testObject->SendMessageDown(message);
-
-			Assert::AreEqual(1, testObject->numMessagesReceived);
+			gameObject->SendMessageDown(message);
 		}
 
 		TEST_METHOD(SendMessageDown2)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>();
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>();
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>();
 
 			Message message;
-			testObject->SendMessageDown(message);
+			gameObject->SendMessageDown(message);
 
-			Assert::AreEqual(1, testObject->numMessagesReceived);
 			Assert::AreEqual(1, testComponent1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent2->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageDown3)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			TestComponent1* testComponent11 = testObject1->AddComponent<TestComponent1>();
@@ -294,22 +269,19 @@ namespace ScratchEngineTest
 			testObject1->SendMessageDown(message);
 
 
-			Assert::AreEqual(1, testObject1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent11->numMessagesReceived);
 			Assert::AreEqual(1, testComponent12->numMessagesReceived);
 
-			Assert::AreEqual(1, testObject2->numMessagesReceived);
 			Assert::AreEqual(1, testComponent21->numMessagesReceived);
 
-			Assert::AreEqual(1, testObject3->numMessagesReceived);
 			Assert::AreEqual(1, testComponent31->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageDown4)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			TestComponent1* testComponent11 = testObject1->AddComponent<TestComponent1>();
@@ -324,51 +296,46 @@ namespace ScratchEngineTest
 			testObject1->SendMessageDown(message, 1);
 
 
-			Assert::AreEqual(1, testObject1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent11->numMessagesReceived);
 			Assert::AreEqual(1, testComponent12->numMessagesReceived);
 
-			Assert::AreEqual(1, testObject2->numMessagesReceived);
 			Assert::AreEqual(1, testComponent21->numMessagesReceived);
 			
-			Assert::AreEqual(0, testObject3->numMessagesReceived);
 			Assert::AreEqual(0, testComponent31->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageUp1)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
 			Message message;
-			testObject->SendMessageUp(message);
+			gameObject->SendMessageUp(message);
 
 
-			Assert::AreEqual(1, testObject->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageUp2)
 		{
-			TestObject* testObject = new TestObject();
+			GameObject* gameObject = new GameObject();
 
 
-			TestComponent1* testComponent1 = testObject->AddComponent<TestComponent1>();
-			TestComponent2* testComponent2 = testObject->AddComponent<TestComponent2>();
+			TestComponent1* testComponent1 = gameObject->AddComponent<TestComponent1>();
+			TestComponent2* testComponent2 = gameObject->AddComponent<TestComponent2>();
 
 			Message message;
-			testObject->SendMessageUp(message);
+			gameObject->SendMessageUp(message);
 
 
-			Assert::AreEqual(1, testObject->numMessagesReceived);
 			Assert::AreEqual(1, testComponent1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent2->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageUp3)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			TestComponent1* testComponent11 = testObject1->AddComponent<TestComponent1>();
@@ -383,19 +350,17 @@ namespace ScratchEngineTest
 			testObject3->SendMessageUp(message);
 
 
-			Assert::AreEqual(1, testObject2->numMessagesReceived);
 			Assert::AreEqual(1, testComponent21->numMessagesReceived);
 
-			Assert::AreEqual(1, testObject1->numMessagesReceived);
 			Assert::AreEqual(1, testComponent11->numMessagesReceived);
 			Assert::AreEqual(1, testComponent12->numMessagesReceived);
 		}
 
 		TEST_METHOD(SendMessageUp4)
 		{
-			TestObject* testObject1 = new TestObject();
-			TestObject* testObject2 = new TestObject();
-			TestObject* testObject3 = new TestObject();
+			GameObject* testObject1 = new GameObject();
+			GameObject* testObject2 = new GameObject();
+			GameObject* testObject3 = new GameObject();
 
 
 			TestComponent1* testComponent11 = testObject1->AddComponent<TestComponent1>();
@@ -410,10 +375,8 @@ namespace ScratchEngineTest
 			testObject3->SendMessageUp(message, 1);
 
 
-			Assert::AreEqual(1, testObject2->numMessagesReceived);
 			Assert::AreEqual(1, testComponent21->numMessagesReceived);
 
-			Assert::AreEqual(0, testObject1->numMessagesReceived);
 			Assert::AreEqual(0, testComponent11->numMessagesReceived);
 			Assert::AreEqual(0, testComponent12->numMessagesReceived);
 		}

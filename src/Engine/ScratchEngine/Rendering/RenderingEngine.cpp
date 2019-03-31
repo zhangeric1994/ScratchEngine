@@ -150,7 +150,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
-		if (renderer->isEnabled)
+		if (renderer->isActive)
 		{
 			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
 
@@ -167,7 +167,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 
 	for (Camera* camera = cameraList; camera; camera = camera->next)
 	{
-		if (camera->isEnabled)
+		if (camera->isActive)
 		{
 			if (camera->viewer == null_index)
 				camera->viewer = viewerAllocator.Allocate();
@@ -193,7 +193,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 	for (Light* light = lightList; light; light = light->next)
 	{
-		if (light->isEnabled)
+		if (light->isActive)
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.ambientColor = light->ambientColor;

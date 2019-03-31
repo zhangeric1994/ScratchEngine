@@ -10,12 +10,13 @@
 
 namespace ScratchEngine
 {
-	class __declspec(dllexport) GameObject : public Transform, private IUpdatable
+	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable
 	{
 		friend class Scene;
 
 
 	private:
+		bool isActive;
 		bool isStatic;
 		unordered_map<type_index, GameComponent*> components;
 
@@ -26,6 +27,8 @@ namespace ScratchEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
+		bool IsActive();
+		bool IsActiveSelf();
 		bool IsStatic();
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
@@ -41,23 +44,23 @@ namespace ScratchEngine
 
 
 	protected:
-		void virtual Update(f32 deltaTime, f32 currentTime) { }
-		void virtual LateUpdate(f32 deltaTime, f32 currentTime) { }
+		void Update(f32 deltaTime, f32 currentTime);
+		void LateUpdate(f32 deltaTime, f32 currentTime);
 
 
 	private:
-		virtual void HandleMessage(const Message& message) { }
+		void HandleMessage(const Message& message) { }
 	};
 
 
-	template<class T> inline T* GameObject::GetComponent()
+	template<class T> __inline T* GameObject::GetComponent()
 	{
 		type_index id = typeid(T);
 
 		return static_cast<T*>(components.find(id) == components.end() ? nullptr : components[id]);
 	}
 
-	template<class T, class ...argTs> inline T* GameObject::AddComponent(argTs ...args)
+	template<class T, class ...argTs> __inline T* GameObject::AddComponent(argTs ...args)
 	{
 		//assert(std::is_base_of<GameComponent, T>::value)
 
@@ -67,7 +70,7 @@ namespace ScratchEngine
 			throw "Cannot add duplicated components!";
 
 		T* component = new T(args...);
-		static_cast<GameComponent*>(component)->isEnabled = true;
+		static_cast<GameComponent*>(component)->isActive = true;
 		static_cast<GameComponent*>(component)->gameObject = this;
 
 		components[id] = component;
@@ -75,7 +78,7 @@ namespace ScratchEngine
 		return component;
 	}
 
-	template<class T> inline void GameObject::RemoveComponent()
+	template<class T> __inline void GameObject::RemoveComponent()
 	{
 		type_index id = typeid(T);
 
