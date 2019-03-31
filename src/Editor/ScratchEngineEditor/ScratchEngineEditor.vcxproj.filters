@@ -68,14 +68,6 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Render\PixelShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Render\VertexShader.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

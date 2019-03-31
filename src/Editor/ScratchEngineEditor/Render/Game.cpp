@@ -72,12 +72,21 @@ void Game::LoadShaders()
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
 
+	vsZPrepass = new SimpleVertexShader(device, context);
+	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
 	
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile(vertex);
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile(pixel);
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
 void Game::CreateMatrces()
@@ -162,7 +171,7 @@ void Game::CreateBasicGeometry()
 
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh);
+	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
 
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
@@ -209,10 +218,11 @@ void Game::Update(float deltaTime, float totalTime)
 		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
 	go1->Rotate(0, 0, 20 * deltaTime);
-	//go2->Rotate(0, 0, -50 * deltaTime, WORLD);
+	go2->SetLocalRotation(0, 0, -50 * totalTime);
 }
 
-void Game::Draw(float deltaTime, float totalTime) {
+void Game::Draw(float deltaTime, float totalTime)
+{
 	//backgroud color
 	const float color[4] = { 0, 0, 0, 0 };
 
@@ -242,6 +252,11 @@ void Game::Draw(float deltaTime, float totalTime) {
 	renderingEngine->UpdateViewers();
 	renderingEngine->UpdateLightSources();
 	renderingEngine->SortRenderables();
+
+	context->OMSetDepthStencilState(nullptr, 0);
+	renderingEngine->PerformZPrepass(vsZPrepass, context);
+	
+	context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 	renderingEngine->DrawForward(context);
 
 	//End of rendering one frame

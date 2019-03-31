@@ -32,10 +32,18 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, 
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
+	delete vsZPrepass;
+
+
 	singleton = nullptr;
 }
 
@@ -204,11 +212,55 @@ void ScratchEngine::Rendering::RenderingEngine::SortRenderables()
 	renderableAllocator.Sort(ScratchEngine::Rendering::SortRenderables);
 }
 
+void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)
+{
+	context->PSSetShader(nullptr, nullptr, 0);
+
+	Viewer& viewer = viewerAllocator[cameraList->viewer];
+
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(viewer.projectionMatrix, viewer.viewMatrix);
+
+	i32 j = 0;
+
+	while (j < renderableAllocator.GetNumAllocated())
+	{
+		Renderable& renderable = renderableAllocator[j];
+
+		shader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		shader->SetMatrix4x4("world", renderable.worldMatrix);
+
+		shader->CopyAllBufferData();
+		shader->SetShader();
+
+		Mesh* mesh = renderable.mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		UINT indexCount = 0;
+
+		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+		indexCount += mesh->GetIndexCount();
+
+		++j;
+	}
+}
+
 void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
 {
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
+	
 	XMMATRIX viewMatrix = viewer.viewMatrix;
 	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
+	XMVECTOR cameraPosition = viewer.position;
 
 	i32 j = 0;
 
@@ -219,13 +271,14 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
-		
+		pixelShader->SetFloat4("cameraPosition", cameraPosition);
+
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
 
-		u32 indexCount = 0;
 		u32 stride = sizeof(Vertex);
 		u32 offset = 0;
+		u32 indexCount = 0;
 
 		do
 		{
@@ -233,6 +286,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 			vertexShader->SetMatrix4x4("view", viewMatrix);
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
+			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
 
 			vertexShader->CopyAllBufferData();

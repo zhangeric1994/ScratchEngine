@@ -1,24 +1,32 @@
-cbuffer externalData : register(b0)
-{
-	matrix world;
-	matrix view;
-	matrix projection;
-};
-
 struct VertexShaderInput
-{ 
-	float3 position : POSITION;
+{
+    float3 position : POSITION;
 };
 
 struct VertexToPixel
 {
-	float4 position : SV_POSITION;
+    float4 svPosition : SV_POSITION;
 };
 
-VertexToPixel main( VertexShaderInput input )
+
+cbuffer CameraData : register(b2)
+{
+	matrix view;
+	matrix projection;
+    matrix viewProjection;
+};
+
+cbuffer ObjectData : register(b3)
+{
+    matrix world;
+};
+
+
+VertexToPixel main(VertexShaderInput input)
 {
 	VertexToPixel output;
-	output.position = mul(float4(input.position, 1.0f), mul(mul(world, view), projection));
+
+    output.svPosition = mul(float4(input.position, 1.0f), mul(world, viewProjection));
 
 	return output;
 }

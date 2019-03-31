@@ -46,6 +46,8 @@ namespace ScratchEngine
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
+			SimpleVertexShader* vsZPrepass;
+			ID3D11DepthStencilState* zPrepassDepthState;
 
 			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);
 			~RenderingEngine();
@@ -67,6 +69,7 @@ namespace ScratchEngine
 			void UpdateViewers();
 			void UpdateLightSources();
 			void SortRenderables();
+			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
 			void DrawForward(ID3D11DeviceContext* context);
 		};
 	}

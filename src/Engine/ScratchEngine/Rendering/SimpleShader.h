@@ -88,6 +88,7 @@ public:
 	bool SetFloat3(std::string name, const DirectX::XMFLOAT3 data);
 	bool SetFloat4(std::string name, const float data[4]);
 	bool SetFloat4(std::string name, const DirectX::XMFLOAT4 data);
+	bool SetFloat4(std::string name, const DirectX::XMVECTOR data);
 	bool SetMatrix4x4(std::string name, const float data[16]);
 	bool SetMatrix4x4(std::string name, const DirectX::XMFLOAT4X4 data);
 	bool SetMatrix4x4(std::string name, const DirectX::XMMATRIX data);

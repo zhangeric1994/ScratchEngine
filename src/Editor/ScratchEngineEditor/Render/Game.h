@@ -39,6 +39,7 @@ private:
 
 	POINT prevMousePos;
 
+	SimpleVertexShader* vsZPrepass;
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
 
@@ -59,6 +60,8 @@ private:
 	GameObject* camera;
 	GameObject* go1;
 	GameObject* go2;
+
+	ID3D11DepthStencilState* zPrepassDepthStencilState;
 
 	//PointLight pointLight;
 };

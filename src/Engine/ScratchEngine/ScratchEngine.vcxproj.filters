@@ -43,8 +43,8 @@
     <Filter Include="Header Files\Common">
       <UniqueIdentifier>{e41539a3-dd7d-4d7f-a87f-beee11ea629a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\Rendering\Shaders">
-      <UniqueIdentifier>{d02e804f-e5f7-4dce-a525-64f27c2fa97f}</UniqueIdentifier>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{0004aed9-3405-49f0-8e38-d5395bd97933}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -250,13 +250,16 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Rendering\Shaders\PixelShader.hlsl">
-      <Filter>Header Files\Rendering\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
-      <Filter>Header Files\Rendering\Shaders</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\VS_ZPrepass.hlsl">
-      <Filter>Header Files\Rendering\Shaders</Filter>
+    <FxCompile Include="Rendering\Shaders\vs_zprepass.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\ps_zprepass.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
