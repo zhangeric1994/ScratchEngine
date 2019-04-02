@@ -19,6 +19,7 @@ namespace ScratchEngine
 			size_t count;
 			size_t generation;
 
+
 		public:
 			explicit Barrier(size_t n);
 

@@ -4,14 +4,6 @@
 #include "RenderingEngine.h"
 #include "SimpleShader.h"
 
-static bool ScratchEngine::Rendering::SortRenderables(Renderable a, Renderable b)
-{
-	uptr ma = reinterpret_cast<uptr>(a.material);
-	uptr mb = reinterpret_cast<uptr>(b.material);
-
-	return ma < mb;
-}
-
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::GetSingleton()
@@ -209,7 +201,13 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 void ScratchEngine::Rendering::RenderingEngine::SortRenderables()
 {
-	renderableAllocator.Sort(ScratchEngine::Rendering::SortRenderables);
+	renderableAllocator.Sort([](Renderable a, Renderable b)
+	{
+		uptr ma = reinterpret_cast<uptr>(a.material);
+		uptr mb = reinterpret_cast<uptr>(b.material);
+
+		return ma < mb;
+	});
 }
 
 void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)

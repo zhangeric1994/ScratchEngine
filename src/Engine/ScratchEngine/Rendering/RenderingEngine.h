@@ -23,8 +23,6 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		static bool SortRenderables(Renderable a, Renderable b);
-
 		class __declspec(dllexport) RenderingEngine
 		{
 			friend class Camera;
