@@ -16,9 +16,6 @@
     <Filter Include="Header Files\Render">
       <UniqueIdentifier>{d0f759f5-2967-423c-ac52-5fb216773c63}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Render">
-      <UniqueIdentifier>{63f18b25-c209-43c5-bc14-5652648575c2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{8fe3aa8f-86ef-4296-b4e7-e08eb00e7aba}</UniqueIdentifier>
     </Filter>
@@ -46,12 +43,6 @@
   <ItemGroup>
     <ClCompile Include="ScratchEngineEditor.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\DXCore.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Game.cpp">
-      <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

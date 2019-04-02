@@ -1,10 +1,15 @@
-#include "DXCore.h"
+#include <thread>
 #include <WindowsX.h>
 #include <sstream>
 
+#include "DXCore.h"
+#include "Game.h"
+
+using namespace std;
+
 // Define the static instance variable so our OS-level 
 // message handling function below can talk to our object
-DXCore* DXCore::DXCoreInstance = 0;
+ScratchEngine::DXCore* ScratchEngine::DXCore::DXCoreInstance = 0;
 
 // --------------------------------------------------------
 // The global callback function for handling windows OS-level messages.
@@ -12,7 +17,7 @@ DXCore* DXCore::DXCoreInstance = 0;
 // This needs to be a global function (not part of a class), but we want
 // to forward the parameters to our class to properly handle them.
 // --------------------------------------------------------
-LRESULT DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT ScratchEngine::DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	return DXCoreInstance->ProcessMessage(hWnd, uMsg, wParam, lParam);
 }
@@ -26,7 +31,7 @@ LRESULT DXCore::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 // windowHeight - Height of the window's client (internal) area
 // debugTitleBarStats - Show debug stats in the title bar, like FPS?
 // --------------------------------------------------------
-DXCore::DXCore(
+ScratchEngine::DXCore::DXCore(
 	HINSTANCE hInstance,		// The application's handle
 	char* titleBarText,			// Text for the window's title bar
 	unsigned int windowWidth,	// Width of the window's client area
@@ -65,7 +70,7 @@ DXCore::DXCore(
 // --------------------------------------------------------
 // Destructor - Clean up (release) all DirectX references
 // --------------------------------------------------------
-DXCore::~DXCore()
+ScratchEngine::DXCore::~DXCore()
 {
 	// Release all DirectX resources
 	if (context) { context->ClearState(); }
@@ -91,7 +96,7 @@ DXCore::~DXCore()
 // --------------------------------------------------------
 // Created the actual window for our application
 // --------------------------------------------------------
-HRESULT DXCore::InitWindow()
+HRESULT ScratchEngine::DXCore::InitWindow()
 {
 	// Start window creation by filling out the
 	// appropriate window class struct
@@ -171,7 +176,7 @@ HRESULT DXCore::InitWindow()
 // also creates several DirectX objects we'll need to start
 // drawing things to the screen.
 // --------------------------------------------------------
-HRESULT DXCore::InitDirectX()
+HRESULT ScratchEngine::DXCore::InitDirectX()
 {
 	// This will hold options for DirectX initialization
 	unsigned int deviceFlags = 0;
@@ -287,7 +292,7 @@ HRESULT DXCore::InitDirectX()
 // resolution won't match up.  This can result in odd
 // stretching/skewing.
 // --------------------------------------------------------
-void DXCore::OnResize()
+void ScratchEngine::DXCore::OnResize()
 {
 	// Release existing DirectX views and buffers
 	if (depthStencilView) { depthStencilView->Release(); }
@@ -351,7 +356,7 @@ void DXCore::OnResize()
 //  - OS-level messages coming in from Windows itself
 //  - Calling update & draw back and forth, forever
 // --------------------------------------------------------
-HRESULT DXCore::Run()
+HRESULT ScratchEngine::DXCore::Run()
 {
 	// Grab the start time now that
 	// the game loop is running
@@ -363,6 +368,13 @@ HRESULT DXCore::Run()
 
 	// Give subclass a chance to initialize
 	Init();
+	// Update();
+
+	thread updatingThread(&Game::Update, static_cast<Game*>(this));
+	thread renderingThread(&Game::Draw, static_cast<Game*>(this));
+
+	// renderingThread.join();
+	// updatingThread.join();
 
 	// Our overall game and message loop
 	MSG msg = {};
@@ -376,18 +388,16 @@ HRESULT DXCore::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		else
-		{
-			// Update timer and title bar (if necessary)
-			UpdateTimer();
-			if(titleBarStats)
-				UpdateTitleBarStats();
-
-			// The game loop
-			Update(deltaTime, totalTime);
-			Draw(deltaTime, totalTime);
-		}
+		//else
+		//{
+		//	// The game loop
+		//	Update(deltaTime, totalTime);
+		//	Draw(deltaTime, totalTime);
+		//}
 	}
+
+	renderingThread.detach();
+	updatingThread.detach();
 
 	// We'll end up here once we get a WM_QUIT message,
 	// which usually comes from the user closing the window
@@ -399,7 +409,7 @@ HRESULT DXCore::Run()
 // Sends an OS-level window close message to our process, which
 // will be handled by our message processing function
 // --------------------------------------------------------
-void DXCore::Quit()
+void ScratchEngine::DXCore::Quit()
 {
 	PostMessage(this->hWnd, WM_CLOSE, NULL, NULL);
 }
@@ -409,7 +419,7 @@ void DXCore::Quit()
 // Uses high resolution time stamps to get very accurate
 // timing information, and calculates useful time stats
 // --------------------------------------------------------
-void DXCore::UpdateTimer()
+void ScratchEngine::DXCore::UpdateTimer()
 {
 	// Grab the current time
 	__int64 now;
@@ -436,7 +446,7 @@ void DXCore::UpdateTimer()
 //  - The current FPS and ms/frame
 //  - The version of DirectX actually being used (usually 11)
 // --------------------------------------------------------
-void DXCore::UpdateTitleBarStats()
+void ScratchEngine::DXCore::UpdateTitleBarStats()
 {
 	fpsFrameCount++;
 
@@ -484,7 +494,7 @@ void DXCore::UpdateTitleBarStats()
 // windowLines   - Number of lines visible at once in the window
 // windowColumns - Number of columns visible at once in the window
 // --------------------------------------------------------
-void DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns)
+void ScratchEngine::DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns)
 {
 	// Our temp console info struct
 	CONSOLE_SCREEN_BUFFER_INFO coninfo;
@@ -520,7 +530,7 @@ void DXCore::CreateConsoleWindow(int bufferLines, int bufferColumns, int windowL
 // our program to hang and Windows would think it was
 // unresponsive.
 // --------------------------------------------------------
-LRESULT DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT ScratchEngine::DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// Check the incoming message and handle any we care about
 	switch (uMsg)
