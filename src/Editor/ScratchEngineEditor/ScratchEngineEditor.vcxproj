@@ -181,8 +181,6 @@ xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Render\DXCore.cpp" />
-    <ClCompile Include="Render\Game.cpp" />
     <ClCompile Include="ScratchEngineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -2,16 +2,16 @@
 
 #include "Game.h"
 
-#include "Core/Global.h"
+#include "../Core/Global.h"
 
-#include "Rendering/RenderingEngine.h"
-#include "Rendering/Mesh.h"
+#include "../Rendering/RenderingEngine.h"
+#include "../Rendering/Mesh.h"
 
 using namespace DirectX;
 using namespace ScratchEngine;
 using namespace ScratchEngine::Rendering;
 
-Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true)
+ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true), frameBarrier(2)
 {
 	vertexShader = nullptr;
 	pixelShader = nullptr;
@@ -41,7 +41,7 @@ Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720,
 #endif
 }
 
-Game::~Game()
+ScratchEngine::Game::~Game()
 {
 	//for (auto& m : entityVector) delete m;
 
@@ -52,14 +52,14 @@ Game::~Game()
 	//if (simpleMaterial) delete simpleMaterial;
 }
 
-void Game::Init()
+void ScratchEngine::Game::Init()
 {
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
 }
 
-void Game::LoadShaders()
+void ScratchEngine::Game::LoadShaders()
 {
 	char buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);
@@ -89,7 +89,7 @@ void Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void Game::CreateMatrces()
+void ScratchEngine::Game::CreateMatrces()
 {
 	//XMMATRIX W = XMMatrixIdentity();
 	//XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
@@ -107,7 +107,7 @@ void Game::CreateMatrces()
 	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); 
 }
 
-void Game::CreateBasicGeometry()
+void ScratchEngine::Game::CreateBasicGeometry()
 {
 	//simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
@@ -180,7 +180,7 @@ void Game::CreateBasicGeometry()
 	GameObject* go4 = new GameObject();
 }
 
-void Game::OnResize()
+void ScratchEngine::Game::OnResize()
 {
 	// Handle base-level DX resize stuff
 	DXCore::OnResize();
@@ -191,78 +191,100 @@ void Game::OnResize()
 	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection));
 }
 
-void Game::Update(float deltaTime, float totalTime)
+void ScratchEngine::Game::Update()
 {
-	//physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
-	
-	if (GetAsyncKeyState(VK_ESCAPE)) Quit();
+	for (;;)
+	{
+		frameBarrier.Wait();
 
-	//XMMATRIX view = camera->Update();
-	//
-	//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 
-	if (GetAsyncKeyState('W') & 0x8000)
-		camera->Translate(0.0f, 0.0f, deltaTime, SELF);
+		// Update timer and title bar (if necessary)
+		UpdateTimer();
+		if (titleBarStats)
+			UpdateTitleBarStats();
 
-	if (GetAsyncKeyState('A') & 0x8000)
-		camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
+		//physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
 
-	if (GetAsyncKeyState('S') & 0x8000)
-		camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
+		if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
-	if (GetAsyncKeyState('D') & 0x8000)
-		camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
+		//XMMATRIX view = camera->Update();
+		//
+		//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 
-	if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-		camera->Translate(0.0f, deltaTime, 0.0f, SELF);
+		if (GetAsyncKeyState('W') & 0x8000)
+			camera->Translate(0.0f, 0.0f, deltaTime, SELF);
 
-	if (GetAsyncKeyState('X') & 0x8000)
-		camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
+		if (GetAsyncKeyState('A') & 0x8000)
+			camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
 
-	go1->Rotate(0, 0, 20 * deltaTime);
-	go2->Rotate(0, 0, -50 * deltaTime);
+		if (GetAsyncKeyState('S') & 0x8000)
+			camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
+
+		if (GetAsyncKeyState('D') & 0x8000)
+			camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
+
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+			camera->Translate(0.0f, deltaTime, 0.0f, SELF);
+
+		if (GetAsyncKeyState('X') & 0x8000)
+			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
+
+		go1->Rotate(0, 0, 20 * deltaTime);
+		go2->Rotate(0, 0, -50 * deltaTime);
+
+		frameBarrier.Wait();
+	}
 }
 
-void Game::Draw(float deltaTime, float totalTime)
+void ScratchEngine::Game::Draw()
 {
-	//backgroud color
-	const float color[4] = { 0, 0, 0, 0 };
-
-	//-set backgroud color
-	//-clear depth buffer
-	context->ClearRenderTargetView(backBufferRTV, color);
-	context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-	//
-	////-------------------------------------
-
-	//for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-	//	entityVector[countOfEntity]->SetWorldMatrix();
-	//	entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-	//	entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-	//	entityVector[countOfEntity]->SetLight(directionalLight, "light");
-	//	entityVector[countOfEntity]->CopyAllBufferData();
-	//	entityVector[countOfEntity]->SetShader();
-	//	//set vertex buffer and index buffer inside entity class
-	//	entityVector[countOfEntity]->Draw(context);
-	//}
-
-	////-------------------------------------
-
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
-	renderingEngine->UpdateRenderables();
-	renderingEngine->UpdateViewers();
-	renderingEngine->UpdateLightSources();
-	renderingEngine->SortRenderables();
 
-	context->OMSetDepthStencilState(nullptr, 0);
-	renderingEngine->PerformZPrepass(vsZPrepass, context);
-	
-	context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-	renderingEngine->DrawForward(context);
+	for (;;)
+	{
+		renderingEngine->UpdateRenderables();
+		renderingEngine->UpdateViewers();
+		renderingEngine->UpdateLightSources();
+		renderingEngine->SortRenderables();
 
-	//End of rendering one frame
-	swapChain->Present(0, 0);
+		frameBarrier.Wait();
+
+
+		//backgroud color
+		const float color[4] = { 0, 0, 0, 0 };
+
+		//-set backgroud color
+		//-clear depth buffer
+		context->ClearRenderTargetView(backBufferRTV, color);
+		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+		//
+		////-------------------------------------
+
+		//for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
+		//	entityVector[countOfEntity]->SetWorldMatrix();
+		//	entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
+		//	entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
+		//	entityVector[countOfEntity]->SetLight(directionalLight, "light");
+		//	entityVector[countOfEntity]->CopyAllBufferData();
+		//	entityVector[countOfEntity]->SetShader();
+		//	//set vertex buffer and index buffer inside entity class
+		//	entityVector[countOfEntity]->Draw(context);
+		//}
+
+		////-------------------------------------
+
+		context->OMSetDepthStencilState(nullptr, 0);
+		renderingEngine->PerformZPrepass(vsZPrepass, context);
+
+		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+		renderingEngine->DrawForward(context);
+
+		//End of rendering one frame
+		swapChain->Present(0, 0);
+
+		frameBarrier.Wait();
+	}
 }
 
 #pragma region Mouse Input
@@ -272,7 +294,7 @@ void Game::Draw(float deltaTime, float totalTime)
 // from the OS-level messages anyway, so these helpers have
 // been created to provide basic mouse input if you want it.
 // --------------------------------------------------------
-void Game::OnMouseDown(WPARAM buttonState, int x, int y)
+void ScratchEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
 
@@ -289,7 +311,7 @@ void Game::OnMouseDown(WPARAM buttonState, int x, int y)
 // --------------------------------------------------------
 // Helper method for mouse release
 // --------------------------------------------------------
-void Game::OnMouseUp(WPARAM buttonState, int x, int y)
+void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
 
@@ -303,7 +325,7 @@ void Game::OnMouseUp(WPARAM buttonState, int x, int y)
 // if the mouse is currently over the window, or if we're 
 // currently capturing the mouse.
 // --------------------------------------------------------
-void Game::OnMouseMove(WPARAM buttonState, int x, int y)
+void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
 	if (buttonState & 0x0001)
@@ -325,7 +347,7 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 // WheelDelta may be positive or negative, depending 
 // on the direction of the scroll
 // --------------------------------------------------------
-void Game::OnMouseWheel(float wheelDelta, int x, int y)
+void ScratchEngine::Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...
 }
