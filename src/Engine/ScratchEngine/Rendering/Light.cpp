@@ -3,7 +3,7 @@
 #include "Light.h"
 #include "RenderingEngine.h"
 
-ScratchEngine::Light::Light(LightType type) : Light(type, XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f), XMVectorSet(0.6f, 0.6f, 0.0f, 1.0f))
+ScratchEngine::Light::Light(LightType type) : Light(type, XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f), XMVectorSet(0.6f, 0.6f, 0.6f, 1.0f))
 {
 }
 

@@ -57,6 +57,7 @@ namespace ScratchEngine
 		D3D11_SAMPLER_DESC samplerDesc;
 
 		ID3D11ShaderResourceView* texture;
+		ID3D11ShaderResourceView* normalMap;
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;

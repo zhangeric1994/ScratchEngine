@@ -204,6 +204,8 @@ void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices,
 	int indicesNumber,
 	ID3D11Device* device) {
 
+	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
+
 	//initialize vertex buffer
 	D3D11_BUFFER_DESC vbd;
 	vbd.Usage = D3D11_USAGE_IMMUTABLE;

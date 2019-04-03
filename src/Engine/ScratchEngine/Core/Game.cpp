@@ -27,6 +27,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 
 	sampler = 0;
 	texture = 0;
+	normalMap = 0;
 
 	samplerDesc = {};
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -74,6 +75,8 @@ ScratchEngine::Game::~Game()
 	if (texture) texture->Release();
 
 	if (sampler) sampler->Release();
+
+	if (normalMap) normalMap->Release();
 
 	RenderingEngine::Stop();
 }
@@ -127,13 +130,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/wood/wood1.png", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 	
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, texture, nullptr, sampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
@@ -200,8 +204,8 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
-		//go1->Rotate(0, 0, 20 * deltaTime);
-		//go2->Rotate(0, 0, -50 * deltaTime);
+		go1->Rotate(0, 0, 20 * deltaTime);
+		go2->Rotate(0, 0, -50 * deltaTime);
 
 		frameBarrier.Wait();
 	}

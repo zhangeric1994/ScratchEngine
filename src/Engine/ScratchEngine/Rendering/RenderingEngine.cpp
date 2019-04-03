@@ -271,6 +271,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 		pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
 		pixelShader->SetSamplerState("basicSampler", material->getSampler());
+		pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
