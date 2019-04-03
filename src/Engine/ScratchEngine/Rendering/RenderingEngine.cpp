@@ -269,6 +269,9 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 
+		pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
+		pixelShader->SetSamplerState("basicSampler", material->getSampler());
+
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
 

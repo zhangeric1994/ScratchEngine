@@ -35,7 +35,7 @@ namespace ScratchEngine
 				ID3D11DeviceContext* context,
 				const wchar_t* texturePath
 			);
-
+			
 		private:
 			SimpleVertexShader* vertexShader;
 			SimplePixelShader* pixelShader;

@@ -25,6 +25,18 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	mesh = nullptr;
 	mesh1 = nullptr;
 
+	sampler = 0;
+	texture = 0;
+
+	samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -58,6 +70,10 @@ ScratchEngine::Game::~Game()
 	
 	if (mesh1)
 		delete mesh1;
+
+	if (texture) texture->Release();
+
+	if (sampler) sampler->Release();
 
 	RenderingEngine::Stop();
 }
@@ -108,13 +124,15 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
+
+	device->CreateSamplerState(&samplerDesc, &sampler);
+	bool istrue = CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
 	
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr, nullptr);
-	
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, nullptr, sampler);
 
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
@@ -205,7 +223,7 @@ void ScratchEngine::Game::Draw()
 		frameBarrier.Wait();
 
 
-		const float color[4] = { 0, 0, 0, 0 };
+		const float color[4] = { 0.2f, 0.2f, 0.2f, 0 };
 
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
