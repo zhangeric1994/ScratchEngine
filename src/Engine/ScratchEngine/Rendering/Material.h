@@ -27,13 +27,13 @@ namespace ScratchEngine
 			bool setTexture(
 				ID3D11Device* device,
 				ID3D11DeviceContext* context,
-				const char* texturePath
+				const wchar_t* texturePath
 			);
 
 			bool setNormalMap(
 				ID3D11Device* device,
 				ID3D11DeviceContext* context,
-				const char* texturePath
+				const wchar_t* texturePath
 			);
 
 		private:
