@@ -4,11 +4,13 @@ ScratchEngine::Rendering::Material::Material(
 	SimpleVertexShader* _vertexShader,
 	SimplePixelShader* _pixelShader,
 	ID3D11ShaderResourceView* _texture,
+	ID3D11ShaderResourceView* _normalMap,
 	ID3D11SamplerState* _sampler
 ) {
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
 	texture = _texture;
+	normalMap = _normalMap;
 	sampler = _sampler;
 }
 
@@ -26,4 +28,12 @@ ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getTexture() {
 
 ID3D11SamplerState* ScratchEngine::Rendering::Material::getSampler() {
 	return sampler;
+}
+
+bool ScratchEngine::Rendering::Material::setTexture(
+	ID3D11Device* device,
+	ID3D11DeviceContext* context,
+	const char* texturePath
+) {
+	return CreateWICTextureFromFile(device, context, texturePath, 0, &texture);
 }

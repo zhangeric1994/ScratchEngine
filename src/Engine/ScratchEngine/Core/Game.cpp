@@ -113,7 +113,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mesh1 = new Mesh(device, cubefile);
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr, nullptr);
 	
 
 	camera = new GameObject();
@@ -181,8 +181,8 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
-		go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
+		//go1->Rotate(0, 0, 20 * deltaTime);
+		//go2->Rotate(0, 0, -50 * deltaTime);
 
 		frameBarrier.Wait();
 	}

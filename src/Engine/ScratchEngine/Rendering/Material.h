@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SimpleShader.h"
+#include <WICTextureLoader.h>
 
 namespace ScratchEngine
 {
@@ -13,6 +14,7 @@ namespace ScratchEngine
 				SimpleVertexShader* _vertexShader,
 				SimplePixelShader* _pixelShader,
 				ID3D11ShaderResourceView* _texture,
+				ID3D11ShaderResourceView* _normalMap,
 				ID3D11SamplerState* _sampler
 			);
 
@@ -22,11 +24,24 @@ namespace ScratchEngine
 			ID3D11ShaderResourceView* getTexture();
 			ID3D11SamplerState* getSampler();
 
+			bool setTexture(
+				ID3D11Device* device,
+				ID3D11DeviceContext* context,
+				const char* texturePath
+			);
+
+			bool setNormalMap(
+				ID3D11Device* device,
+				ID3D11DeviceContext* context,
+				const char* texturePath
+			);
+
 		private:
 			SimpleVertexShader* vertexShader;
 			SimplePixelShader* pixelShader;
 
 			ID3D11ShaderResourceView* texture;
+			ID3D11ShaderResourceView* normalMap;
 			ID3D11SamplerState* sampler;
 		};
 	}
