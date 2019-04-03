@@ -50,7 +50,7 @@ namespace ScratchEngine
 	{
 		first = null_index;
 		last = null_index;
-		size = 0;
+		this->size = 0;
 	}
 
 	template<class T> inline T LinkedList<T>::GetFirst() const

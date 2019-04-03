@@ -3,6 +3,7 @@
 #include "Game.h"
 
 #include "../Core/Global.h"
+#include "../Core/Scene.h"
 
 #include "../Rendering/RenderingEngine.h"
 #include "../Rendering/Mesh.h"
@@ -15,22 +16,14 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 {
 	vertexShader = nullptr;
 	pixelShader = nullptr;
+	vsZPrepass = nullptr;
 
-	//entityVector.resize(7);
-	//for (int countOfVector = 0; countOfVector < entityVector.size(); countOfVector++)
-	//	entityVector[countOfVector] = NULL;
+	simpleMaterial = nullptr;
 
-	//camera = new Camera();
-	//physics = new CollisionManager(200);
-	//simpleMaterial = NULL;
-
-	//directionalLight.AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	//directionalLight.DiffuseColor = XMFLOAT4(0, 0, 0.5, 1);
-	//directionalLight.Direction = XMFLOAT3(1, -1, 0);
-
-	//pointLight.AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-	//pointLight.DiffuseColor = XMFLOAT4(0.0f, 0.0f, 0.7f, 1.0f);
-	//pointLight.Position = XMFLOAT3(0, 2.0f, -1.0f);
+	zPrepassDepthStencilState = nullptr;
+	
+	mesh = nullptr;
+	mesh1 = nullptr;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -43,13 +36,30 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 
 ScratchEngine::Game::~Game()
 {
-	//for (auto& m : entityVector) delete m;
+	if (vertexShader)
+		delete vertexShader;
 
-	//delete vertexShader;
-	//delete pixelShader;
-	//if (mesh) delete mesh;
-	//delete camera;
-	//if (simpleMaterial) delete simpleMaterial;
+	if (pixelShader)
+		delete pixelShader;
+	
+	if (vsZPrepass)
+		delete vsZPrepass;
+
+	if (simpleMaterial)
+		delete simpleMaterial;
+
+	if (zPrepassDepthStencilState)
+		zPrepassDepthStencilState->Release();
+
+	delete Scene::GetCurrentScene();
+
+	if (mesh)
+		delete mesh;
+	
+	if (mesh1)
+		delete mesh1;
+
+	RenderingEngine::Stop();
 }
 
 void ScratchEngine::Game::Init()
@@ -91,76 +101,30 @@ void ScratchEngine::Game::LoadShaders()
 
 void ScratchEngine::Game::CreateMatrces()
 {
-	//XMMATRIX W = XMMatrixIdentity();
-	//XMStoreFloat4x4(&worldMatrix, XMMatrixTranspose(W)); 
-	//
-	//XMVECTOR pos = XMVectorSet(0, 0, -20, 0);
-	//XMVECTOR dir = XMVectorSet(0, 0, 1, 0);
-	//XMVECTOR up = XMVectorSet(0, 1, 0, 0);
-	//XMMATRIX V = XMMatrixLookToLH(
-	//	pos,     // The position of the "camera"
-	//	dir,     // Direction the camera is looking
-	//	up);     // "Up" direction in 3D space (prevents roll)
-	//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V));
 
-	//XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection)); 
 }
 
 void ScratchEngine::Game::CreateBasicGeometry()
 {
-	//simpleMaterial = new Material(vertexShader, pixelShader, 0, 0);
 	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
+	
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
-	//Entity* temp = new Entity(mesh, simpleMaterial);
-	//Entity* temp1 = new Entity(mesh1, simpleMaterial);
-	//Entity* temp2 = new Entity(mesh1, simpleMaterial);
-	//Entity* temp3 = new Entity(mesh, simpleMaterial);
-	//Entity* temp4 = new Entity(mesh, simpleMaterial);
-	//Entity* temp5 = new Entity(mesh, simpleMaterial);
-	//Entity* terrain = new Entity(mesh1, simpleMaterial);
-	//entityVector[0] = temp;
-	//entityVector[1] = temp1;
-	//entityVector[2] = temp2;
-	//entityVector[3] = temp3;
-	//entityVector[4] = temp4;
-	//entityVector[5] = temp5;
-	//entityVector[6] = terrain;
-	//temp->SetTranslation(-2, 0, 0);
-	//temp1->SetTranslation(2.5, 1.5, 0);
-	//temp2->SetTranslation(-2.5, 1, 0);
-	//temp3->SetTranslation(0.0, 1, 0);
-	//temp4->SetTranslation(-1, -1, 0);
-	//temp5->SetTranslation(2, 0, 0);
-	////temp1->SetRotation(0.5f, 0.0f, 0.0f);
-	//terrain->SetTranslation(0, -10, 0);
-	//terrain->SetScale(100, 1, 100);
-	//Collider* collider = physics->addSphereCollider(temp, 0.5f, 0.5f, true, false);
-	//Collider* collider1 = physics->addBoxCollider(temp1, XMFLOAT3{ 1,1,1 }, 0.7f, true, false);
-	//Collider* collider2 = physics->addBoxCollider(temp2, XMFLOAT3{ 1,1,1 }, 0.4f, true, false);
-	//Collider* collider3 = physics->addSphereCollider(temp3, 0.5f, 0.7f, true, false);
-	//Collider* collider4 = physics->addSphereCollider(temp4, 0.5f, 0.5f, true, false);
-	//Collider* collider5 = physics->addSphereCollider(temp5, 0.5f, 0.7f, true, false);
-	//Collider* collider6 = physics->addBoxCollider(terrain,XMFLOAT3{100,1,100}, 1.0f, false, true);
-	//collider->ApplyForce({ 0.5f,0,0.1f });
-	//collider1->ApplyForce({ -1.5f,0,0.0f });
-	////collider1->ApplyAngularForce({ -0.5f,0.0f,0.0f });
-	//collider2->ApplyForce({ 1.5f,0,0.0f });
-	//collider3->ApplyForce({ -0.9f,0,0.1f });
-	//collider4->ApplyForce({ 1.0f,0,-0.1f });
-	//collider5->ApplyForce({ -1.4f,0,0.1f });
+
 
 	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	
+
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
+
 
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(-90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 	
+
 	go1 = new GameObject();
 	go1->SetPosition(0, 0, 10);
 	go1->SetLocalRotation(45, 0, 0);
@@ -182,34 +146,22 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 void ScratchEngine::Game::OnResize()
 {
-	// Handle base-level DX resize stuff
 	DXCore::OnResize();
 
 	Global::SetScreenRatio((float)width / height);
-
-	//XMMATRIX projection = camera->UpdateProjection((float)width / height);
-	//XMStoreFloat4x4(&projectionMatrix, XMMatrixTranspose(projection));
 }
 
 void ScratchEngine::Game::Update()
 {
-	for (;;)
+	while (isRunning)
 	{
-		frameBarrier.Wait();
-
-
-		// Update timer and title bar (if necessary)
 		UpdateTimer();
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
-		//physics->CollisionsDetection(0, physics->NumCoolidersHandled, deltaTime, totalTime);
+		frameBarrier.Wait();
 
 		if (GetAsyncKeyState(VK_ESCAPE)) Quit();
-
-		//XMMATRIX view = camera->Update();
-		//
-		//XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(view));
 
 		if (GetAsyncKeyState('W') & 0x8000)
 			camera->Translate(0.0f, 0.0f, deltaTime, SELF);
@@ -234,45 +186,29 @@ void ScratchEngine::Game::Update()
 
 		frameBarrier.Wait();
 	}
+
+	allThreadBarrier.Wait();
 }
 
 void ScratchEngine::Game::Draw()
 {
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 
-	for (;;)
+	while (isRunning)
 	{
 		renderingEngine->UpdateRenderables();
 		renderingEngine->UpdateViewers();
 		renderingEngine->UpdateLightSources();
 		renderingEngine->SortRenderables();
 
+
 		frameBarrier.Wait();
 
 
-		//backgroud color
 		const float color[4] = { 0, 0, 0, 0 };
 
-		//-set backgroud color
-		//-clear depth buffer
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-		//
-		////-------------------------------------
-
-		//for (int countOfEntity = 0; countOfEntity < entityVector.size(); countOfEntity++) {
-		//	entityVector[countOfEntity]->SetWorldMatrix();
-		//	entityVector[countOfEntity]->PrepareMatrix(viewMatrix, projectionMatrix);
-		//	entityVector[countOfEntity]->SetPointLight(pointLight, "pointLight");
-		//	entityVector[countOfEntity]->SetLight(directionalLight, "light");
-		//	entityVector[countOfEntity]->CopyAllBufferData();
-		//	entityVector[countOfEntity]->SetShader();
-		//	//set vertex buffer and index buffer inside entity class
-		//	entityVector[countOfEntity]->Draw(context);
-		//}
-
-		////-------------------------------------
 
 		context->OMSetDepthStencilState(nullptr, 0);
 		renderingEngine->PerformZPrepass(vsZPrepass, context);
@@ -280,11 +216,13 @@ void ScratchEngine::Game::Draw()
 		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 		renderingEngine->DrawForward(context);
 
-		//End of rendering one frame
 		swapChain->Present(0, 0);
+
 
 		frameBarrier.Wait();
 	}
+
+	allThreadBarrier.Wait();
 }
 
 #pragma region Mouse Input

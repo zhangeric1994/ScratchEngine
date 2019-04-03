@@ -23,7 +23,7 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		class __declspec(dllexport) RenderingEngine
+		class RenderingEngine
 		{
 			friend class Camera;
 			friend class Light;
@@ -34,8 +34,6 @@ namespace ScratchEngine
 		private:
 			static RenderingEngine* singleton;
 
-			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
-
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
 			DynamicStackAllocator<Renderable> renderableAllocator;
@@ -44,8 +42,8 @@ namespace ScratchEngine
 			Renderer* rendererList;
 			Camera* cameraList;
 			Light* lightList;
-			SimpleVertexShader* vsZPrepass;
-			ID3D11DepthStencilState* zPrepassDepthState;
+			//SimpleVertexShader* vsZPrepass;
+			//ID3D11DepthStencilState* zPrepassDepthState;
 
 			RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies);
 			~RenderingEngine();
@@ -62,6 +60,9 @@ namespace ScratchEngine
 
 		public:
 			static RenderingEngine* GetSingleton();
+
+			static void Initialize(i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS, i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES, i32 defaultNumRenderables = 128, i32 defaultNumViews = 4);
+			static void Stop();
 
 			void UpdateRenderables();
 			void UpdateViewers();

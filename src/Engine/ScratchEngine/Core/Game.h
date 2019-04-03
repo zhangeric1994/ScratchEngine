@@ -46,16 +46,10 @@ namespace ScratchEngine
 		SimpleVertexShader* vertexShader;
 		SimplePixelShader* pixelShader;
 
-		//XMFLOAT4X4 worldMatrix;
-		//XMFLOAT4X4 viewMatrix;
-		//XMFLOAT4X4 projectionMatrix;
+		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
 		Mesh* mesh;
 		Mesh* mesh1;
-
-		//CollisionManager* physics;
-
-		//std::vector<Entity*> entityVector;
 
 		Material* simpleMaterial;
 
@@ -64,10 +58,6 @@ namespace ScratchEngine
 		GameObject* go1;
 		GameObject* go2;
 
-		ID3D11DepthStencilState* zPrepassDepthStencilState;
-
 		Barrier frameBarrier;
-
-		//PointLight pointLight;
 	};
 }

@@ -37,6 +37,7 @@ ScratchEngine::DXCore::DXCore(
 	unsigned int windowWidth,	// Width of the window's client area
 	unsigned int windowHeight,	// Height of the window's client area
 	bool debugTitleBarStats)	// Show extra stats (fps) in title bar?
+	: allThreadBarrier(3)
 {
 	// Save a static reference to this object.
 	//  - Since the OS-level message function must be a non-member (global) function, 
@@ -81,16 +82,19 @@ ScratchEngine::DXCore::~DXCore()
 	if (swapChain) { swapChain->Release();}
 	if (context) { context->Release(); }
 
-	//#if defined(DEBUG) || defined(_DEBUG)
-	ID3D11Debug *d3dDebug;
-	HRESULT hr = device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug));
-	if (SUCCEEDED(hr)){
-		hr = d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-	}
-	if (d3dDebug != nullptr)			d3dDebug->Release();
-	//#endif
+	if (device)
+	{
+//#if defined(DEBUG) || defined(_DEBUG)
+//		ID3D11Debug *d3dDebug;
+//		HRESULT hr = device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug));
+//		if (SUCCEEDED(hr)) {
+//			hr = d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+//		}
+//		if (d3dDebug != nullptr)			d3dDebug->Release();
+//#endif
 
-	if (device) { device->Release(); }
+		device->Release();
+	}
 }
 
 // --------------------------------------------------------
@@ -358,6 +362,8 @@ void ScratchEngine::DXCore::OnResize()
 // --------------------------------------------------------
 HRESULT ScratchEngine::DXCore::Run()
 {
+	isRunning = true;
+
 	// Grab the start time now that
 	// the game loop is running
 	__int64 now;
@@ -368,13 +374,9 @@ HRESULT ScratchEngine::DXCore::Run()
 
 	// Give subclass a chance to initialize
 	Init();
-	// Update();
 
 	thread updatingThread(&Game::Update, static_cast<Game*>(this));
 	thread renderingThread(&Game::Draw, static_cast<Game*>(this));
-
-	// renderingThread.join();
-	// updatingThread.join();
 
 	// Our overall game and message loop
 	MSG msg = {};
@@ -388,13 +390,11 @@ HRESULT ScratchEngine::DXCore::Run()
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-		//else
-		//{
-		//	// The game loop
-		//	Update(deltaTime, totalTime);
-		//	Draw(deltaTime, totalTime);
-		//}
 	}
+
+	isRunning = false;
+
+	allThreadBarrier.Wait();
 
 	renderingThread.detach();
 	updatingThread.detach();

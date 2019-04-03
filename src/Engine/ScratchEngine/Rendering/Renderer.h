@@ -25,6 +25,7 @@ namespace ScratchEngine
 		Renderer* next;
 		Renderer* previous;
 
+
 	public:
 		Renderer();
 		Renderer(Material* material, Mesh* mesh);
@@ -32,7 +33,7 @@ namespace ScratchEngine
 	};
 
 
-	class __declspec(dllexport) ForwardRenderer : public Renderer
+	class __declspec(dllexport) ForwardRenderer final : public Renderer
 	{
 	};
 }

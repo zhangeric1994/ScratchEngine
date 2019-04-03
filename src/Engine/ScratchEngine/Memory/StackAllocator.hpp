@@ -23,6 +23,7 @@ namespace ScratchEngine
 		public:
 			DynamicStackAllocator();
 			DynamicStackAllocator(i32 capacity);
+			~DynamicStackAllocator();
 
 			T& operator[](i32 id);
 			T operator[](i32 id) const;
@@ -50,6 +51,11 @@ namespace ScratchEngine
 
 			this->capacity = capacity;
 			this->numAllocated = 0;
+		}
+
+		template<class T> inline DynamicStackAllocator<T>::~DynamicStackAllocator()
+		{
+			_aligned_free(memory);
 		}
 
 		template<class T> inline T & DynamicStackAllocator<T>::operator[](i32 id)

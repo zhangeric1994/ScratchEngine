@@ -4,9 +4,13 @@
 #include <d3d11.h>
 #include <string>
 
+#include "../Multithreading/Barrier.h"
+
 // We can include the correct library files here
 // instead of in Visual Studio settings if we want
 #pragma comment(lib, "d3d11.lib")
+
+using namespace ScratchEngine::Multithreading;
 
 namespace ScratchEngine
 {
@@ -61,6 +65,9 @@ namespace ScratchEngine
 		// Size of the window's client area
 		unsigned int width;
 		unsigned int height;
+
+		bool isRunning;
+		Barrier allThreadBarrier;
 
 		// DirectX related objects and variables
 		D3D_FEATURE_LEVEL		dxFeatureLevel;

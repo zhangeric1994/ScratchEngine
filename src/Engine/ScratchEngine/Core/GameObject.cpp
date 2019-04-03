@@ -9,28 +9,27 @@ ScratchEngine::GameObject::GameObject() : Transform(), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 ScratchEngine::GameObject::GameObject(float x, float y, float z) : Transform(x, y, z), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 ScratchEngine::GameObject::GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale) : Transform(position, rotation, scale), components(4)
 {
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
-	isActive = true;
-	isStatic = false;
+	flag = FLAG_ACTIVE;
 }
 
 ScratchEngine::GameObject::~GameObject()
 {
+	isDestroyed = true;
+
 	if (!Scene::GetCurrentScene()->RemoveRootObject(this))
 		parent->__RemoveChild(this);
 
@@ -41,9 +40,19 @@ ScratchEngine::GameObject::~GameObject()
 		delete (*it);
 }
 
+__inline GameObject* ScratchEngine::GameObject::GetParent()
+{
+	return static_cast<GameObject*>(parent);
+}
+
+__inline GameObject* ScratchEngine::GameObject::GetChild(size_t index)
+{
+	return static_cast<GameObject*>(Transform::GetChild(index));
+}
+
 __inline bool ScratchEngine::GameObject::IsActive()
 {
-	return parent ? isActive && static_cast<GameObject*>(parent)->IsActive() : isActive;
+	return parent ? IsActiveSelf() && static_cast<GameObject*>(parent)->IsActive() : IsActiveSelf();
 }
 
 __inline bool ScratchEngine::GameObject::IsActiveSelf()
@@ -54,16 +63,6 @@ __inline bool ScratchEngine::GameObject::IsActiveSelf()
 __inline bool ScratchEngine::GameObject::IsStatic()
 {
 	return isStatic;
-}
-
-__inline GameObject* ScratchEngine::GameObject::GetParent()
-{
-	return static_cast<GameObject*>(parent);
-}
-
-__inline GameObject* ScratchEngine::GameObject::GetChild(size_t index)
-{
-	return static_cast<GameObject*>(Transform::GetChild(index));
 }
 
 __inline void ScratchEngine::GameObject::SetParent(GameObject* other)
@@ -109,7 +108,7 @@ __inline void ScratchEngine::GameObject::Update(f32 deltaTime, f32 currentTime)
 	for (auto it = components.begin(); it != components.end(); it++)
 	{
 		GameComponent* component = (*it).second;
-		if (component->isActive)
+		if (component->IsActiveSelf())
 			component->Update(deltaTime, currentTime);
 	}
 }
@@ -119,7 +118,7 @@ __inline void ScratchEngine::GameObject::LateUpdate(f32 deltaTime, f32 currentTi
 	for (auto it = components.begin(); it != components.end(); it++)
 	{
 		GameComponent* component = (*it).second;
-		if (component->isActive)
+		if (component->IsActiveSelf())
 			component->LateUpdate(deltaTime, currentTime);
 	}
 }

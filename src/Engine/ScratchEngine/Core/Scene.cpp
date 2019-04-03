@@ -12,12 +12,17 @@ ScratchEngine::Scene* ScratchEngine::Scene::GetCurrentScene()
 	return currentScene;
 }
 
-ScratchEngine::Scene::Scene()
+ScratchEngine::Scene::Scene() : roots(8)
 {
+	flag = FLAG_ACTIVE;
 }
 
 ScratchEngine::Scene::~Scene()
 {
+	isDestroyed = true;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		delete *it;
 }
 
 size_t ScratchEngine::Scene::AddRootObject(GameObject* gameObject)
@@ -29,6 +34,9 @@ size_t ScratchEngine::Scene::AddRootObject(GameObject* gameObject)
 
 bool ScratchEngine::Scene::RemoveRootObject(GameObject* gameObject)
 {
+	if (isDestroyed)
+		return true;
+
 	if (gameObject->parent)
 		return false;
 

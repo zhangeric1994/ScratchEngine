@@ -10,7 +10,7 @@ namespace ScratchEngine
 		{
 		private:
 			int id;
-			bool isActive;
+			bool flag;
 
 
 		public:

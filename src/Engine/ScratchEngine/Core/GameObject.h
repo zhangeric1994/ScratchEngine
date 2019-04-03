@@ -16,9 +16,53 @@ namespace ScratchEngine
 
 
 	private:
-		bool isActive;
-		bool isStatic;
 		unordered_map<type_index, GameComponent*> components;
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isActive : 1;
+				bool isStatic : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool isDestroyed : 1;
+			};
+		};
 
 
 	public:
@@ -27,12 +71,12 @@ namespace ScratchEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
-		bool IsActive();
-		bool IsActiveSelf();
-		bool IsStatic();
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
 		template<class T> T* GetComponent();
+		bool IsActive();
+		bool IsActiveSelf();
+		bool IsStatic();
 
 		void SetParent(GameObject* other);
 		template<class T, class... argTs> T* AddComponent(argTs... args);
@@ -70,7 +114,7 @@ namespace ScratchEngine
 			throw "Cannot add duplicated components!";
 
 		T* component = new T(args...);
-		static_cast<GameComponent*>(component)->isActive = true;
+		static_cast<GameComponent*>(component)->flag = FLAG_ACTIVE;
 		static_cast<GameComponent*>(component)->gameObject = this;
 
 		components[id] = component;
@@ -83,6 +127,8 @@ namespace ScratchEngine
 		type_index id = typeid(T);
 
 		auto it = components.find(id);
+
+		delete *it;
 
 		if (it != components.end())
 			components.erase(it);

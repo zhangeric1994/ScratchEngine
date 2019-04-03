@@ -14,6 +14,7 @@ namespace ScratchEngine
 {
 	class Scene : IUpdatable
 	{
+		friend class Game;
 		friend class GameObject;
 
 
@@ -27,6 +28,52 @@ namespace ScratchEngine
 
 	private:
 		vector<GameObject*> roots;
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isActive : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool isDestroyed : 1;
+			};
+		};
 
 		Scene();
 		~Scene();

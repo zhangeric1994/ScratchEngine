@@ -30,10 +30,7 @@ namespace ScratchEngine
 			i32 id;
 
 		public:
-			T* operator->()
-			{
-				return allocator.memory + id;
-			}
+			T* operator->();
 		};
 
 
@@ -51,30 +48,7 @@ namespace ScratchEngine
 
 		public:
 			DynamicPoolAllocator();
-
-			DynamicPoolAllocator(i32 capacity)
-			{
-				if (capacity == 0)
-					memory == nullptr;
-				else
-				{
-					memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
-
-					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
-					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
-
-					for (i32 id = capacity - 2; id >= 0; --id)
-					{
-						reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
-						reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
-					}
-				}
-
-				this->capacity = capacity;
-				numAllocated = 0;
-				freeList = 0;
-			}
-
+			DynamicPoolAllocator(i32 capacity);
 			~DynamicPoolAllocator();
 
 			i32 Allocate()
@@ -172,13 +146,41 @@ namespace ScratchEngine
 			}
 		};
 
+		template<class T>inline T * DynamicPoolPointer<T>::operator->()
+		{
+			return allocator.memory + id;
+		}
+
 		template<class T> inline DynamicPoolAllocator<T>::DynamicPoolAllocator() : DynamicPoolAllocator(DEFAULT_DYNAMIC_POOL_ALLOCATOR_CAPACITY)
 		{
+		}
+
+		template<class T> inline DynamicPoolAllocator<T>::DynamicPoolAllocator(i32 capacity)
+		{
+			if (capacity == 0)
+				memory == nullptr;
+			else
+			{
+				memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
+
+				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
+				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
+
+				for (i32 id = capacity - 2; id >= 0; --id)
+				{
+					reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
+					reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
+				}
+			}
+
+			this->capacity = capacity;
+			numAllocated = 0;
+			freeList = 0;
 		}
 
 		template<class T> inline DynamicPoolAllocator<T>::~DynamicPoolAllocator()
 		{
 			_aligned_free(memory);
 		}
-}
+	}
 }

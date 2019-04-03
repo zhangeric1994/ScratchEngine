@@ -19,23 +19,21 @@ void ScratchEngine::Rendering::RenderingEngine::Initialize(i32 maxNumMaterials, 
 	singleton = new RenderingEngine(maxNumMeshes, maxNumMeshes, defaultNumRenderables, defaultNumViews);
 }
 
+void ScratchEngine::Rendering::RenderingEngine::Stop()
+{
+	if (singleton)
+		delete singleton;
+}
+
 ScratchEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies) : materialAllocator(maxNumMeshes), meshAllocator(maxNumMeshes), renderableAllocator(defaultNumRenderables), viewerAllocator(defaultNumCameraProxies)
 {
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
-
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
-	delete vsZPrepass;
-
-
 	singleton = nullptr;
 }
 
@@ -142,7 +140,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 
 	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
 	{
-		if (renderer->isActive)
+		if (renderer->IsActive())
 		{
 			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
 
@@ -159,7 +157,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 
 	for (Camera* camera = cameraList; camera; camera = camera->next)
 	{
-		if (camera->isActive)
+		if (camera->IsActive())
 		{
 			if (camera->viewer == null_index)
 				camera->viewer = viewerAllocator.Allocate();
@@ -185,7 +183,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 
 	for (Light* light = lightList; light; light = light->next)
 	{
-		if (light->isActive)
+		if (light->IsActive())
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.ambientColor = light->ambientColor;

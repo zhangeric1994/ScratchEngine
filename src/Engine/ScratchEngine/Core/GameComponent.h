@@ -15,13 +15,59 @@ namespace ScratchEngine
 
 
 	protected:
-		bool isActive;
 		GameObject* gameObject;
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isActive : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+			};
+		};
 
 
 	public:
-		bool IsActive();
 		GameObject* GetGameObject();
+		bool IsActive();
+		bool IsActiveSelf();
 
 		void SendMessage_(const Message& message);
 		void SendMessageUp(const Message& message, u32 level = UINT_MAX);
