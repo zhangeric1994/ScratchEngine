@@ -30,6 +30,8 @@ cbuffer CameraData : register(b2)
 
 Texture2D diffuseTexture : register(t0);
 
+Texture2D normalMap : register(t1);
+
 SamplerState basicSampler : register(s0);
 
 
@@ -46,6 +48,21 @@ float4 BlinnPhong(float3 N, float3 L, float3 V, float shininess)
 float4 main(VertexToPixel input) : SV_TARGET
 {
     float3 N = normalize(input.normal);
+	input.normal = normalize(input.normal);
+	input.tangent = normalize(input.tangent);
+
+	//normal map
+	float3 textureNormal = normalMap.Sample(basicSampler, input.uv).rgb * 2 - 1;
+
+	float3 N = input.normal;
+	float3 T = input.tangent;
+	float3 B = cross(T, N);
+
+	float3x3 TBN = float3x3(T, B, N);
+
+	input.normal = normalize(mul(textureNormal, TBN));
+
+    N = normalize(input.normal);
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 
@@ -53,4 +70,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	//return float4(surfaceColor.rgb, 1.0f);
     return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
+    return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
 }

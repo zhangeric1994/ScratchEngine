@@ -30,18 +30,6 @@ ID3D11SamplerState* ScratchEngine::Rendering::Material::getSampler() {
 	return sampler;
 }
 
-bool ScratchEngine::Rendering::Material::setTexture(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	const wchar_t* texturePath
-) {
-	return DirectX::CreateWICTextureFromFile(device, context, texturePath, 0, &texture);
-}
-
-bool ScratchEngine::Rendering::Material::setNormalMap(
-	ID3D11Device* device,
-	ID3D11DeviceContext* context,
-	const wchar_t* texturePath
-) {
-	return DirectX::CreateWICTextureFromFile(device, context, texturePath, 0, &normalMap);
+ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getNormalMap() {
+	return normalMap;
 }

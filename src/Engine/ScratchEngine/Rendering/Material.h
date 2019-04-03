@@ -22,19 +22,8 @@ namespace ScratchEngine
 			SimplePixelShader* GetPixelShader();
 
 			ID3D11ShaderResourceView* getTexture();
+			ID3D11ShaderResourceView* getNormalMap();
 			ID3D11SamplerState* getSampler();
-
-			bool setTexture(
-				ID3D11Device* device,
-				ID3D11DeviceContext* context,
-				const wchar_t* texturePath
-			);
-
-			bool setNormalMap(
-				ID3D11Device* device,
-				ID3D11DeviceContext* context,
-				const wchar_t* texturePath
-			);
 			
 		private:
 			SimpleVertexShader* vertexShader;
