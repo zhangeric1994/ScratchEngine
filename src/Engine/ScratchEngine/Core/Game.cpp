@@ -126,7 +126,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
-	bool istrue = CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/wood/wood1.png", 0, &texture);
 	
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
@@ -141,7 +142,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(-90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
-	
+
 
 	go1 = new GameObject();
 	go1->SetPosition(0, 0, 10);

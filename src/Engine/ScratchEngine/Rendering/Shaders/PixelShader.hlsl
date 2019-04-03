@@ -53,6 +53,5 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
-	return float4(surfaceColor.rgb, 1.0f);
-    //return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
+    return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
 }
