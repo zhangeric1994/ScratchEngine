@@ -79,7 +79,10 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
 
+	float4 depthColor = ShadowMap.Sample(basicSampler, input.uv);
 
+	//return depthColor;
+	//return shadowAmount.rrrr;
 	//return float4(surfaceColor.rgb, 1.0f);
     //return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
     return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16)) * shadowAmount;
