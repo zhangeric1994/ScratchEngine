@@ -363,30 +363,6 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 
 	while (j < renderableAllocator.GetNumAllocated())
 	{
-		/*Renderable& renderable = renderableAllocator[j];
-
-		shader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-		shader->SetMatrix4x4("world", renderable.worldMatrix);
-
-		shader->CopyAllBufferData();
-		shader->SetShader();
-
-		Mesh* mesh = renderable.mesh;
-
-		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
-		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
-
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		UINT indexCount = 0;
-
-		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
-
-		indexCount += mesh->GetIndexCount();*/
 		Renderable& renderable = renderableAllocator[j];
 
 		Mesh* mesh = renderable.mesh;

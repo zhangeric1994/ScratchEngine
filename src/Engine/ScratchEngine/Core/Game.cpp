@@ -59,8 +59,9 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 
 	shaderResourceViewDesc = {};
 	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
 
 	comparisonSamplerDesc = {};
 	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
@@ -193,6 +194,10 @@ void ScratchEngine::Game::LoadShaders()
 	//shadow map
 	device->CreateTexture2D(&shadowDesc, 0, &shadowMap);
 
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
 	device->CreateDepthStencilView(shadowMap, &depthStencilViewDesc, &shadowDepthStencilView);
 	device->CreateShaderResourceView(shadowMap, &shaderResourceViewDesc, &shadowResourceView);
 
@@ -211,7 +216,7 @@ void ScratchEngine::Game::LoadShaders()
 	shadowSampDesc.BorderColor[1] = 1.0f;
 	shadowSampDesc.BorderColor[2] = 1.0f;
 	shadowSampDesc.BorderColor[3] = 1.0f;
-	device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
+	device->CreateSamplerState(&comparisonSamplerDesc, &shadowSampler);
 
 }
 
@@ -342,7 +347,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetState(shadowRasterizerState);
 		context->RSSetViewports(1, &shadowViewport);
 
-		//renderingEngine->RenderShadowMap(shadowShader, context);
+		renderingEngine->RenderShadowMap(shadowShader, context);
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
