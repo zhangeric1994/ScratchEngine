@@ -149,6 +149,10 @@ ScratchEngine::Game::~Game()
 
 	if (shadowRasterizerState) shadowRasterizerState->Release();
 
+	if (shadowDepthStencilView) shadowDepthStencilView->Release();
+
+	if (shadowResourceView) shadowResourceView->Release();
+
 	RenderingEngine::Stop();
 }
 
