@@ -38,6 +38,68 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
+	//shdaow map desc
+	shadowDesc = {};
+	shadowDesc.Width = 1024;
+	shadowDesc.Height = 1024;
+	shadowDesc.ArraySize = 1;
+	shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	shadowDesc.CPUAccessFlags = 0;
+	shadowDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	shadowDesc.MipLevels = 1;
+	shadowDesc.MiscFlags = 0;
+	shadowDesc.SampleDesc.Count = 1;
+	shadowDesc.SampleDesc.Quality = 0;
+	shadowDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	depthStencilView = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	shaderResourceViewDesc = {};
+	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	shaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	shaderResourceViewDesc.Texture2D.MipLevels = 1;
+
+	comparisonSamplerDesc = {};
+	comparisonSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	comparisonSamplerDesc.BorderColor[0] = 1.0f;
+	comparisonSamplerDesc.BorderColor[1] = 1.0f;
+	comparisonSamplerDesc.BorderColor[2] = 1.0f;
+	comparisonSamplerDesc.BorderColor[3] = 1.0f;
+	comparisonSamplerDesc.MinLOD = 0.f;
+	comparisonSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	comparisonSamplerDesc.MipLODBias = 0.f;
+	comparisonSamplerDesc.MaxAnisotropy = 0;
+	comparisonSamplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+	comparisonSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+
+	drawingRenderStateDesc = {};
+	drawingRenderStateDesc.CullMode = D3D11_CULL_BACK;
+	drawingRenderStateDesc.FillMode = D3D11_FILL_SOLID;
+	drawingRenderStateDesc.DepthClipEnable = true;
+
+	shadowRenderStateDesc = {};
+	shadowRenderStateDesc.CullMode = D3D11_CULL_FRONT;
+	shadowRenderStateDesc.FillMode = D3D11_FILL_SOLID;
+	shadowRenderStateDesc.DepthClipEnable = true;
+	shadowRenderStateDesc.DepthBias = 1000;
+	shadowRenderStateDesc.DepthBiasClamp = 0.0f;
+	shadowRenderStateDesc.SlopeScaledDepthBias = 1.0f;
+
+
+	shadowViewport = {};
+	shadowViewport.Height = 1024;
+	shadowViewport.Width = 1024;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+
+	
+
+
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
 #if defined(DEBUG) || defined(_DEBUG)
@@ -78,6 +140,14 @@ ScratchEngine::Game::~Game()
 
 	if (normalMap) normalMap->Release();
 
+	if (shadowSampler) shadowSampler->Release();
+
+	if (shadowMap) shadowMap->Release();
+
+	if (shadowShader) delete shadowShader;
+
+	if (shadowRasterizerState) shadowRasterizerState->Release();
+
 	RenderingEngine::Stop();
 }
 
@@ -103,6 +173,9 @@ void ScratchEngine::Game::LoadShaders()
 
 	vsZPrepass = new SimpleVertexShader(device, context);
 	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+
+	shadowShader = new SimpleVertexShader(device, context);
+	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
 	
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile(vertex);
@@ -116,6 +189,30 @@ void ScratchEngine::Game::LoadShaders()
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+
+	//shadow map
+	device->CreateTexture2D(&shadowDesc, 0, &shadowMap);
+
+	device->CreateDepthStencilView(shadowMap, &depthStencilViewDesc, &shadowDepthStencilView);
+	device->CreateShaderResourceView(shadowMap, &shaderResourceViewDesc, &shadowResourceView);
+
+	device->CreateRasterizerState(
+		&shadowRenderStateDesc,
+		&shadowRasterizerState
+	);
+
+	D3D11_SAMPLER_DESC shadowSampDesc = {};
+	shadowSampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR; // Could be anisotropic
+	shadowSampDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+	shadowSampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	shadowSampDesc.BorderColor[0] = 1.0f;
+	shadowSampDesc.BorderColor[1] = 1.0f;
+	shadowSampDesc.BorderColor[2] = 1.0f;
+	shadowSampDesc.BorderColor[3] = 1.0f;
+	device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
+
 }
 
 void ScratchEngine::Game::CreateMatrces()
@@ -137,27 +234,27 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mesh1 = new Mesh(device, cubefile);
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler, shadowSampler);
 
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
 
 
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetRotation(-90, 0, 0);
+	directionalLightObject->SetRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 
 	go1 = new GameObject();
-	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
-	go1->SetLocalScale(1, 2, 1);
+	go1->SetPosition(0, -2, 10);
+	//go1->SetLocalRotation(0, 0, 0);
+	go1->SetLocalScale(10, 1, 10);
 	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
 
 	go2 = new GameObject();
 	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
+	go2->SetLocalPosition(0, 2, 0);
+	go2->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go3 = new GameObject();
 	go3->SetParent(go2);
@@ -165,6 +262,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go4 = new GameObject();
+
 }
 
 void ScratchEngine::Game::OnResize()
@@ -204,8 +302,8 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
-		go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
+		/*go1->Rotate(0, 0, 20 * deltaTime);
+		go2->Rotate(0, 0, -50 * deltaTime);*/
 
 		frameBarrier.Wait();
 	}
@@ -233,11 +331,38 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		context->OMSetDepthStencilState(nullptr, 0);
-		renderingEngine->PerformZPrepass(vsZPrepass, context);
+		//Shadow map(temporarily)
+		context->OMSetRenderTargets(
+			0,
+			nullptr,
+			shadowDepthStencilView
+		);
+		//context->ClearDepthStencilView(shadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-		renderingEngine->DrawForward(context);
+		context->RSSetState(shadowRasterizerState);
+		context->RSSetViewports(1, &shadowViewport);
+
+		//renderingEngine->RenderShadowMap(shadowShader, context);
+
+		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+		
+		shadowViewport.Width = (float)width;
+		shadowViewport.Height = (float)height;
+		
+		context->RSSetViewports(1, &shadowViewport);
+		context->RSSetState(0);
+
+
+		//End of shadow map
+
+		/*context->OMSetDepthStencilState(nullptr, 0);
+		renderingEngine->PerformZPrepass(vsZPrepass, context);*/ 
+
+		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+
+
+
+		renderingEngine->DrawForward(context, shadowResourceView);
 
 		swapChain->Present(0, 0);
 

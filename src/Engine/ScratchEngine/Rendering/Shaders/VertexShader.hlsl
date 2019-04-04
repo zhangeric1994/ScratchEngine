@@ -13,6 +13,7 @@ struct VertexToPixel
     float3 normal : NORMAL;
 	float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
+	float4 shadowPos : SHADOW;
 };
 
 
@@ -21,6 +22,8 @@ cbuffer CameraData : register(b2)
 	matrix view;
 	matrix projection;
     matrix viewProjection;
+	matrix shadowProjection;
+	matrix shadowView;
 };
 
 cbuffer ObjectData : register(b3)
@@ -34,6 +37,9 @@ VertexToPixel main(VertexShaderInput input)
     VertexToPixel output;
 
     matrix WVP = mul(world, viewProjection);
+
+	matrix shadowMVP = mul(mul(world, shadowView), shadowProjection);
+	output.shadowPos = mul(float4(input.position, 1.0f), shadowMVP);
 
     output.svPosition = mul(float4(input.position, 1.0f), WVP);
     output.position = mul(float4(input.position, 1.0f), world);

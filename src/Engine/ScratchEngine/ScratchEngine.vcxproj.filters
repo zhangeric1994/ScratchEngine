@@ -282,6 +282,9 @@
     <FxCompile Include="Rendering\Shaders\vs_zprepass.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

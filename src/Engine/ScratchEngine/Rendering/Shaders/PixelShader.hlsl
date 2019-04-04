@@ -5,6 +5,7 @@ struct VertexToPixel
     float3 normal : NORMAL;
 	float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
+	float4 shadowPos : SHADOW;
 };
 
 struct LightSource
@@ -32,7 +33,11 @@ Texture2D diffuseTexture : register(t0);
 
 Texture2D normalMap : register(t1);
 
+Texture2D ShadowMap	: register(t2);
+
 SamplerState basicSampler : register(s0);
+
+SamplerComparisonState shadowSampler : register(s1);
 
 
 float4 Lambert(float4 ambientColor, float4 diffuseColor, float3 N, float3 L)
@@ -47,7 +52,6 @@ float4 BlinnPhong(float3 N, float3 L, float3 V, float shininess)
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    float3 N = normalize(input.normal);
 	input.normal = normalize(input.normal);
 	input.tangent = normalize(input.tangent);
 
@@ -68,7 +72,18 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
+	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
+	shadowUV.y = 1.0f - shadowUV.y;
+
+	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
+
+	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
+
+	
+
+	//return input.shadowPos;
 	//return float4(surfaceColor.rgb, 1.0f);
-    return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
-    return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
+    //return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
+    return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16)) * shadowAmount;
+	return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
 }

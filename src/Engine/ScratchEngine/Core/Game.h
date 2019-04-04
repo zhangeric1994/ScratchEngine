@@ -65,5 +65,33 @@ namespace ScratchEngine
 		GameObject* go2;
 
 		Barrier frameBarrier;
+
+		//shadow map
+		D3D11_TEXTURE2D_DESC shadowMapDesc;
+		ID3D11Texture2D*     shadowMap;
+
+		ID3D11SamplerState* shadowSampler;
+
+		D3D11_TEXTURE2D_DESC shadowDesc;
+
+		SimpleVertexShader* shadowShader;
+
+		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
+
+		ID3D11DepthStencilView* shadowDepthStencilView;
+
+		ID3D11ShaderResourceView* shadowResourceView;
+
+		D3D11_SAMPLER_DESC comparisonSamplerDesc;
+
+		D3D11_RASTERIZER_DESC drawingRenderStateDesc;
+
+		D3D11_RASTERIZER_DESC shadowRenderStateDesc;
+
+		D3D11_VIEWPORT shadowViewport;
+
+		ID3D11RasterizerState* shadowRasterizerState;
 	};
 }

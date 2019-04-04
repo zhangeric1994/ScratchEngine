@@ -249,7 +249,7 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
+void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowMap)
 {
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
 	
@@ -257,6 +257,22 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	XMMATRIX projectionMatrix = viewer.projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
 	XMVECTOR cameraPosition = viewer.position;
+
+	XMFLOAT4X4 shadowViewMatrix;
+	XMFLOAT4X4 shadowProjectionMatrix;
+
+	XMMATRIX shadowView = XMMatrixLookToLH(
+		XMVectorSet(0, 10, -10, 0),
+		XMVectorSet(0, -1, 1, 0), 
+		XMVectorSet(0, 1, 0, 0));
+	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
+
+	XMMATRIX shadowProjection = XMMatrixOrthographicLH(
+		10,
+		10,
+		0.1f,
+		50);
+	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
 
 	i32 j = 0;
 
@@ -272,6 +288,8 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
 		pixelShader->SetSamplerState("basicSampler", material->getSampler());
 		pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
+		pixelShader->SetShaderResourceView("shadowMap", shadowMap);
+		pixelShader->SetSamplerState("shadowSampler", material->getShadowSampler());
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
@@ -288,6 +306,8 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+			vertexShader->SetMatrix4x4("shadowView", shadowViewMatrix);
+			vertexShader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
 
 			vertexShader->CopyAllBufferData();
 			vertexShader->SetShader();
@@ -310,4 +330,99 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 		++j;
 	}
+}
+
+void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShader* shader, ID3D11DeviceContext* context) {
+	shader->SetShader();
+
+	XMFLOAT4X4 shadowViewMatrix;
+	XMFLOAT4X4 shadowProjectionMatrix;
+
+	XMMATRIX shadowView = XMMatrixLookToLH(
+		XMVectorSet(0, 10, -10, 0),
+		XMVectorSet(0, -1, 1, 0), 
+		XMVectorSet(0, 1, 0, 0));
+	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
+
+	XMMATRIX shadowProjection = XMMatrixOrthographicLH(
+		10,
+		10,
+		0.1f,
+		50);
+	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
+
+	shader->SetMatrix4x4("shadowView", shadowViewMatrix);
+	shader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
+
+	context->PSSetShader(0, 0, 0);
+
+	u32 stride = sizeof(Vertex);
+	u32 offset = 0;
+
+	i32 j = 0;
+
+	while (j < renderableAllocator.GetNumAllocated())
+	{
+		/*Renderable& renderable = renderableAllocator[j];
+
+		shader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		shader->SetMatrix4x4("world", renderable.worldMatrix);
+
+		shader->CopyAllBufferData();
+		shader->SetShader();
+
+		Mesh* mesh = renderable.mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		UINT indexCount = 0;
+
+		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+		indexCount += mesh->GetIndexCount();*/
+		Renderable& renderable = renderableAllocator[j];
+
+		Mesh* mesh = renderable.mesh;
+
+		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+		context->IASetVertexBuffers(
+			0,
+			1,
+			&vertexBuffer,
+			&stride,
+			&offset
+		);
+
+		context->IASetIndexBuffer(
+			indexBuffer,
+			DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
+			0
+		);
+
+		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//context->IASetInputLayout(m_inputLayout.Get());
+
+		
+
+		//set up constant buffer
+		shader->SetMatrix4x4("world", renderable.worldMatrix);
+		shader->CopyAllBufferData();
+
+		//......
+
+		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+
+		++j;
+	}
+	
 }
