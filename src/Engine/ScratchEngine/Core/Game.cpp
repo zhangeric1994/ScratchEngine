@@ -250,8 +250,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetRotation(90, 0, 0);
+	//directionalLightObject->SetRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
+
+	XMVECTOR position = directionalLight->GetDirection();
 
 
 	go1 = new GameObject();
@@ -294,22 +296,22 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState(VK_ESCAPE)) Quit();
 
 		if (GetAsyncKeyState('W') & 0x8000)
-			camera->Translate(0.0f, 0.0f, deltaTime, SELF);
+			camera->Translate(0.0f, 0.0f, deltaTime*5, SELF);
 
 		if (GetAsyncKeyState('A') & 0x8000)
-			camera->Translate(-deltaTime, 0.0f, 0.0f, SELF);
+			camera->Translate(-deltaTime*5, 0.0f, 0.0f, SELF);
 
 		if (GetAsyncKeyState('S') & 0x8000)
-			camera->Translate(0.0f, 0.0f, -deltaTime, SELF);
+			camera->Translate(0.0f, 0.0f, -deltaTime*5, SELF);
 
 		if (GetAsyncKeyState('D') & 0x8000)
-			camera->Translate(deltaTime, 0.0f, 0.0f, SELF);
+			camera->Translate(deltaTime*5, 0.0f, 0.0f, SELF);
 
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-			camera->Translate(0.0f, deltaTime, 0.0f, SELF);
+			camera->Translate(0.0f, deltaTime*5, 0.0f, SELF);
 
 		if (GetAsyncKeyState('X') & 0x8000)
-			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
+			camera->Translate(0.0f, -deltaTime*5, 0.0f, SELF);
 
 		/*go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);*/
@@ -343,10 +345,10 @@ void ScratchEngine::Game::Draw()
 		//Shadow map(temporarily)
 		context->OMSetRenderTargets(
 			0,
-			nullptr,
+			0,
 			shadowDepthStencilView
 		);
-		//context->ClearDepthStencilView(shadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+		context->ClearDepthStencilView(shadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		context->RSSetState(shadowRasterizerState);
 		context->RSSetViewports(1, &shadowViewport);
@@ -364,8 +366,8 @@ void ScratchEngine::Game::Draw()
 
 		//End of shadow map
 
-		/*context->OMSetDepthStencilState(nullptr, 0);
-		renderingEngine->PerformZPrepass(vsZPrepass, context);*/ 
+		//context->OMSetDepthStencilState(nullptr, 0);
+		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
 		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 
@@ -430,7 +432,7 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 	}
 
 	if (buttonState & 0x0002)
-		camera->Rotate((y - prevMousePos.y) / 31.41592653579f, (x - prevMousePos.x) / 31.41592653579f, 0.0f);
+		camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f , (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

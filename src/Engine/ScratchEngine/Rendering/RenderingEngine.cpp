@@ -333,7 +333,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 }
 
 void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShader* shader, ID3D11DeviceContext* context) {
-	shader->SetShader();
+	
 
 	XMFLOAT4X4 shadowViewMatrix;
 	XMFLOAT4X4 shadowProjectionMatrix;
@@ -353,8 +353,6 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 
 	shader->SetMatrix4x4("shadowView", shadowViewMatrix);
 	shader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
-
-	context->PSSetShader(0, 0, 0);
 
 	u32 stride = sizeof(Vertex);
 	u32 offset = 0;
@@ -384,7 +382,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 			0
 		);
 
-		context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		//context->IASetInputLayout(m_inputLayout.Get());
 
 		
@@ -392,7 +390,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 		//set up constant buffer
 		shader->SetMatrix4x4("world", renderable.worldMatrix);
 		shader->CopyAllBufferData();
-
+		shader->SetShader();
+		context->PSSetShader(0, 0, 0);
 		//......
 
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);

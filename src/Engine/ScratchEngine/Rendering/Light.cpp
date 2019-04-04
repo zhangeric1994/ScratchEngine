@@ -60,7 +60,7 @@ ScratchEngine::DirectionalLight::DirectionalLight(XMVECTOR ambientColor, XMVECTO
 
 XMVECTOR ScratchEngine::DirectionalLight::GetDirection()
 {
-	return XMVector3Rotate(XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f), gameObject->GetRotation());
+	return XMVector3Rotate(XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f), gameObject->GetRotation());
 }
 
 
