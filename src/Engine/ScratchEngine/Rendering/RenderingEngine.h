@@ -15,6 +15,7 @@
 #include "Renderable.h"
 #include "Renderer.h"
 #include "Viewer.h"
+#include "ShadowMap.h"
 
 using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;
@@ -33,6 +34,8 @@ namespace ScratchEngine
 
 		private:
 			static RenderingEngine* singleton;
+
+			ShadowMap* shadow;
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
@@ -69,8 +72,9 @@ namespace ScratchEngine
 			void UpdateLightSources();
 			void SortRenderables();
 			void PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context);
-			void DrawForward(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowMap);
-			void RenderShadowMap(SimpleVertexShader* shader, ID3D11DeviceContext* context);
+			void DrawForward(ID3D11DeviceContext* context);
+			void RenderShadowMap(ID3D11DeviceContext* context);
+			void SetShadowMap(ShadowMap* _shadow);
 		};
 	}
 }

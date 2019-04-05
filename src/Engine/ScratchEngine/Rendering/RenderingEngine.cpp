@@ -251,8 +251,10 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, ID3D11ShaderResourceView* shadowMap)
+void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
 {
+	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
+
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
 	
 	XMMATRIX viewMatrix = viewer.viewMatrix;
@@ -291,7 +293,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		pixelShader->SetSamplerState("basicSampler", material->getSampler());
 		pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
 		pixelShader->SetShaderResourceView("ShadowMap", shadowMap);
-		pixelShader->SetSamplerState("shadowSampler", material->getShadowSampler());
+		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
@@ -333,7 +335,11 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShader* shader, ID3D11DeviceContext* context) {
+void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* context) {
+	context->OMSetRenderTargets(0, 0, shadow->getShadowDSV());
+	context->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	context->RSSetState(shadow->getRasterizerState());
+
 	XMFLOAT4X4 shadowViewMatrix;
 	XMFLOAT4X4 shadowProjectionMatrix;
 
@@ -349,6 +355,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 		0.1f,
 		50);
 	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
+
+	SimpleVertexShader* shader = shadow->getShadowShader();
 
 	shader->SetShader();
 	shader->SetMatrix4x4("shadowView", shadowViewMatrix);
@@ -396,4 +404,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 		++j;
 	}
 	
+}
+
+void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow) {
+	shadow = _shadow;
 }

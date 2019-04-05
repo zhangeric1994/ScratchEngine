@@ -11,6 +11,7 @@
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
+#include "../Rendering/ShadowMap.h"
 
 #include "DXCore.h"
 
@@ -39,6 +40,7 @@ namespace ScratchEngine
 		void LoadShaders();
 		void CreateMatrces();
 		void CreateBasicGeometry();
+		void CreateAllMaps();
 
 		POINT prevMousePos;
 
@@ -66,26 +68,10 @@ namespace ScratchEngine
 
 		Barrier frameBarrier;
 
-		//shadow map
-		ID3D11Texture2D*     shadowMap;
-		D3D11_TEXTURE2D_DESC shadowDesc;
-
-		ID3D11SamplerState* shadowSampler;
-
-		SimpleVertexShader* shadowShader;
-
-		D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-
-		D3D11_SHADER_RESOURCE_VIEW_DESC shaderResourceViewDesc;
-
-		ID3D11DepthStencilView* shadowDepthStencilView;
-
-		ID3D11ShaderResourceView* shadowResourceView;
-
-		D3D11_RASTERIZER_DESC shadowRenderStateDesc;
-
+		//final shadow map
+		ShadowMap* shadow;
 		D3D11_VIEWPORT shadowViewport;
-
-		ID3D11RasterizerState* shadowRasterizerState;
+		float shadowMapSize;
+		SimpleVertexShader* shadowShader;
 	};
 }

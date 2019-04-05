@@ -5,15 +5,13 @@ ScratchEngine::Rendering::Material::Material(
 	SimplePixelShader* _pixelShader,
 	ID3D11ShaderResourceView* _texture,
 	ID3D11ShaderResourceView* _normalMap,
-	ID3D11SamplerState* _sampler,
-	ID3D11SamplerState* _shadowSampler
+	ID3D11SamplerState* _sampler
 ) {
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
 	texture = _texture;
 	normalMap = _normalMap;
 	sampler = _sampler;
-	shadowSampler = _shadowSampler;
 }
 
 SimpleVertexShader* ScratchEngine::Rendering::Material::GetVertexShader() {
@@ -38,8 +36,4 @@ ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getNormalMap() {
 
 void ScratchEngine::Rendering::Material::setShadowMap(ID3D11ShaderResourceView* _shadowMap) {
 	shadowMap = _shadowMap;
-}
-
-ID3D11SamplerState* ScratchEngine::Rendering::Material::getShadowSampler() {
-	return shadowSampler;
 }

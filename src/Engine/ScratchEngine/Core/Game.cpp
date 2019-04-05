@@ -29,6 +29,18 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	texture = 0;
 	normalMap = 0;
 
+	shadow = new ShadowMap();
+
+	shadowMapSize = 1024;
+
+	shadowViewport = {};
+	shadowViewport.Height = shadowMapSize;
+	shadowViewport.Width = shadowMapSize;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+	shadowViewport.TopLeftX = 0;
+	shadowViewport.TopLeftY = 0;
+
 	samplerDesc = {};
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
@@ -37,39 +49,6 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	//shdaow map desc
-	shadowDesc = {};
-	shadowDesc.Width = 1024;
-	shadowDesc.Height = 1024;
-	shadowDesc.ArraySize = 1;
-	shadowDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-	shadowDesc.CPUAccessFlags = 0;
-	shadowDesc.Format = DXGI_FORMAT_R32_TYPELESS;
-	shadowDesc.MipLevels = 1;
-	shadowDesc.MiscFlags = 0;
-	shadowDesc.SampleDesc.Count = 1;
-	shadowDesc.SampleDesc.Quality = 0;
-	shadowDesc.Usage = D3D11_USAGE_DEFAULT;
-
-	depthStencilView = {};
-	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-	shaderResourceViewDesc = {};
-	shaderResourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	shaderResourceViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	shaderResourceViewDesc.Texture2D.MipLevels = 1;
-	shaderResourceViewDesc.Texture2D.MostDetailedMip = 0;
-
-	shadowRenderStateDesc = {};
-	shadowRenderStateDesc.CullMode = D3D11_CULL_BACK;
-	shadowRenderStateDesc.FillMode = D3D11_FILL_SOLID;
-	shadowRenderStateDesc.DepthClipEnable = true;
-	shadowRenderStateDesc.DepthBias = 1000;
-	shadowRenderStateDesc.DepthBiasClamp = 0.0f;
-	shadowRenderStateDesc.SlopeScaledDepthBias = 1.0f;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -111,17 +90,7 @@ ScratchEngine::Game::~Game()
 
 	if (normalMap) normalMap->Release();
 
-	if (shadowSampler) shadowSampler->Release();
-
-	if (shadowMap) shadowMap->Release();
-
-	if (shadowShader) delete shadowShader;
-
-	if (shadowRasterizerState) shadowRasterizerState->Release();
-
-	if (shadowDepthStencilView) shadowDepthStencilView->Release();
-
-	if (shadowResourceView) shadowResourceView->Release();
+	if (shadow) delete shadow;
 
 	RenderingEngine::Stop();
 }
@@ -129,6 +98,7 @@ ScratchEngine::Game::~Game()
 void ScratchEngine::Game::Init()
 {
 	LoadShaders();
+	CreateAllMaps();
 	CreateMatrces();
 	CreateBasicGeometry();
 }
@@ -164,33 +134,15 @@ void ScratchEngine::Game::LoadShaders()
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+}
 
-	//shadow map
-	device->CreateTexture2D(&shadowDesc, 0, &shadowMap);
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-	device->CreateDepthStencilView(shadowMap, &depthStencilViewDesc, &shadowDepthStencilView);
-	device->CreateShaderResourceView(shadowMap, &shaderResourceViewDesc, &shadowResourceView);
-
-	D3D11_SAMPLER_DESC shadowSampDesc = {};
-	shadowSampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR; // Could be anisotropic
-	shadowSampDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
-	shadowSampDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSampDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSampDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSampDesc.BorderColor[0] = 1.0f;
-	shadowSampDesc.BorderColor[1] = 1.0f;
-	shadowSampDesc.BorderColor[2] = 1.0f;
-	shadowSampDesc.BorderColor[3] = 1.0f;
-	device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
-
-	device->CreateRasterizerState(
-		&shadowRenderStateDesc,
-		&shadowRasterizerState
-	);
+void ScratchEngine::Game::CreateAllMaps() {
+	//shadow map setup
+	shadow->setUp(device);
+	shadow->setShader(shadowShader);
+	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	renderingEngine->SetShadowMap(shadow);
+	//End of shadow map
 }
 
 void ScratchEngine::Game::CreateMatrces()
@@ -211,8 +163,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 
-
-	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler, shadowSampler);
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
@@ -302,36 +253,18 @@ void ScratchEngine::Game::Draw()
 		renderingEngine->UpdateLightSources();
 		renderingEngine->SortRenderables();
 
-
 		frameBarrier.Wait();
 
-
-		const float color[4] = { 0.2f, 0.2f, 0.2f, 0 };
+		const float color[4] = { 0.0f, 0.0f, 0.0f, 0 };
 
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		//Shadow map(temporarily)
-		context->OMSetRenderTargets(
-			0,
-			0,
-			shadowDepthStencilView
-		);
-		context->ClearDepthStencilView(shadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-		context->RSSetState(shadowRasterizerState);
-
-		shadowViewport = {};
-		shadowViewport.Height = 1024;
-		shadowViewport.Width = 1024;
-		shadowViewport.MinDepth = 0.f;
-		shadowViewport.MaxDepth = 1.f;
-		shadowViewport.TopLeftX = 0;
-		shadowViewport.TopLeftY = 0;
-
+		shadowViewport.Height = shadowMapSize;
+		shadowViewport.Width = shadowMapSize;
 		context->RSSetViewports(1, &shadowViewport);
 
-		renderingEngine->RenderShadowMap(shadowShader, context);
+		renderingEngine->RenderShadowMap(context);
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -342,16 +275,12 @@ void ScratchEngine::Game::Draw()
 		context->RSSetState(0);
 
 
-		//End of shadow map
-
 		context->OMSetDepthStencilState(nullptr, 0);
 		renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
 		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 
-
-
-		renderingEngine->DrawForward(context, shadowResourceView);
+		renderingEngine->DrawForward(context);
 
 		swapChain->Present(0, 0);
 
