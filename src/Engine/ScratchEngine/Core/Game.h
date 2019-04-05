@@ -82,7 +82,6 @@ namespace ScratchEngine
 
 		ID3D11ShaderResourceView* shadowResourceView;
 
-
 		D3D11_RASTERIZER_DESC shadowRenderStateDesc;
 
 		D3D11_VIEWPORT shadowViewport;

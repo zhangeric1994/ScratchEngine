@@ -186,6 +186,9 @@
     <ClInclude Include="Core\DXCore.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ShadowMap.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -265,6 +268,9 @@
     </ClCompile>
     <ClCompile Include="Multithreading\Barrier.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\ShadowMap.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
