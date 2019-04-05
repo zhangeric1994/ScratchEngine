@@ -82,9 +82,6 @@ namespace ScratchEngine
 
 		ID3D11ShaderResourceView* shadowResourceView;
 
-		D3D11_SAMPLER_DESC comparisonSamplerDesc;
-
-		D3D11_RASTERIZER_DESC drawingRenderStateDesc;
 
 		D3D11_RASTERIZER_DESC shadowRenderStateDesc;
 
