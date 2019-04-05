@@ -66,23 +66,19 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	input.normal = normalize(mul(textureNormal, TBN));
 
+	//param for light calculation
     N = normalize(input.normal);
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 
+	//texture color
 	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
 
+	//shadow map
 	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
 	shadowUV.y = 1.0f - shadowUV.y;
-
 	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
-
 	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
 
-
-	//return shadowAmount.rrrr;
-	//return float4(surfaceColor.rgb, 1.0f);
-    //return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
     return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16)) * shadowAmount;
-	return surfaceColor * (Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16));
 }

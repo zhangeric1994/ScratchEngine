@@ -157,8 +157,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_COLOR.jpg", 0, &texture);
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/WhiteMarble_NRM.jpg", 0, &normalMap);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 	
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
@@ -234,7 +234,7 @@ void ScratchEngine::Game::Update()
 			camera->Translate(0.0f, -deltaTime*5, 0.0f, SELF);
 
 		//go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
+		//go2->Rotate(0, 0, -50 * deltaTime);
 
 		frameBarrier.Wait();
 	}
