@@ -67,12 +67,10 @@ namespace ScratchEngine
 		Barrier frameBarrier;
 
 		//shadow map
-		D3D11_TEXTURE2D_DESC shadowMapDesc;
 		ID3D11Texture2D*     shadowMap;
+		D3D11_TEXTURE2D_DESC shadowDesc;
 
 		ID3D11SamplerState* shadowSampler;
-
-		D3D11_TEXTURE2D_DESC shadowDesc;
 
 		SimpleVertexShader* shadowShader;
 

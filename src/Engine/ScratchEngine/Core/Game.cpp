@@ -84,7 +84,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	drawingRenderStateDesc.DepthClipEnable = true;
 
 	shadowRenderStateDesc = {};
-	shadowRenderStateDesc.CullMode = D3D11_CULL_FRONT;
+	shadowRenderStateDesc.CullMode = D3D11_CULL_BACK;
 	shadowRenderStateDesc.FillMode = D3D11_FILL_SOLID;
 	shadowRenderStateDesc.DepthClipEnable = true;
 	shadowRenderStateDesc.DepthBias = 1000;
@@ -92,11 +92,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	shadowRenderStateDesc.SlopeScaledDepthBias = 1.0f;
 
 
-	shadowViewport = {};
-	shadowViewport.Height = 1024;
-	shadowViewport.Width = 1024;
-	shadowViewport.MinDepth = 0.f;
-	shadowViewport.MaxDepth = 1.f;
+	
 
 	
 
@@ -205,10 +201,7 @@ void ScratchEngine::Game::LoadShaders()
 	device->CreateDepthStencilView(shadowMap, &depthStencilViewDesc, &shadowDepthStencilView);
 	device->CreateShaderResourceView(shadowMap, &shaderResourceViewDesc, &shadowResourceView);
 
-	device->CreateRasterizerState(
-		&shadowRenderStateDesc,
-		&shadowRasterizerState
-	);
+	
 
 	D3D11_SAMPLER_DESC shadowSampDesc = {};
 	shadowSampDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR; // Could be anisotropic
@@ -220,8 +213,14 @@ void ScratchEngine::Game::LoadShaders()
 	shadowSampDesc.BorderColor[1] = 1.0f;
 	shadowSampDesc.BorderColor[2] = 1.0f;
 	shadowSampDesc.BorderColor[3] = 1.0f;
-	device->CreateSamplerState(&comparisonSamplerDesc, &shadowSampler);
+	device->CreateSamplerState(&shadowSampDesc, &shadowSampler);
 
+	device->CreateRasterizerState(
+		&shadowRenderStateDesc,
+		&shadowRasterizerState
+	);
+
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void ScratchEngine::Game::CreateMatrces()
@@ -351,6 +350,15 @@ void ScratchEngine::Game::Draw()
 		context->ClearDepthStencilView(shadowDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 		context->RSSetState(shadowRasterizerState);
+
+		shadowViewport = {};
+		shadowViewport.Height = 1024;
+		shadowViewport.Width = 1024;
+		shadowViewport.MinDepth = 0.f;
+		shadowViewport.MaxDepth = 1.f;
+		shadowViewport.TopLeftX = 0;
+		shadowViewport.TopLeftY = 0;
+
 		context->RSSetViewports(1, &shadowViewport);
 
 		renderingEngine->RenderShadowMap(shadowShader, context);

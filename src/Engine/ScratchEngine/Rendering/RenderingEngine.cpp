@@ -262,7 +262,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	XMFLOAT4X4 shadowProjectionMatrix;
 
 	XMMATRIX shadowView = XMMatrixLookToLH(
-		XMVectorSet(0, 10, -10, 0),
+		XMVectorSet(0, 10, 0, 0),
 		XMVectorSet(0, -1, 1, 0), 
 		XMVectorSet(0, 1, 0, 0));
 	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
@@ -319,7 +319,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 			context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 			context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-			context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
@@ -339,7 +339,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 	XMFLOAT4X4 shadowProjectionMatrix;
 
 	XMMATRIX shadowView = XMMatrixLookToLH(
-		XMVectorSet(0, 10, -10, 0),
+		XMVectorSet(0, 10, 0, 0),
 		XMVectorSet(0, -1, 1, 0), 
 		XMVectorSet(0, 1, 0, 0));
 	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
@@ -351,8 +351,11 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 		50);
 	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
 
+	shader->SetShader();
 	shader->SetMatrix4x4("shadowView", shadowViewMatrix);
 	shader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
+
+	context->PSSetShader(0, 0, 0);
 
 	u32 stride = sizeof(Vertex);
 	u32 offset = 0;
@@ -378,20 +381,14 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShad
 
 		context->IASetIndexBuffer(
 			indexBuffer,
-			DXGI_FORMAT_R16_UINT, // Each index is one 16-bit unsigned integer (short).
+			DXGI_FORMAT_R32_UINT, 
 			0
 		);
-
-		//context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//context->IASetInputLayout(m_inputLayout.Get());
-
-		
 
 		//set up constant buffer
 		shader->SetMatrix4x4("world", renderable.worldMatrix);
 		shader->CopyAllBufferData();
-		shader->SetShader();
-		context->PSSetShader(0, 0, 0);
+		
 		//......
 
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);

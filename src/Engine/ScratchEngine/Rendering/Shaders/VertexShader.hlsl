@@ -36,12 +36,12 @@ VertexToPixel main(VertexShaderInput input)
 {
     VertexToPixel output;
 
-    matrix WVP = mul(world, viewProjection);
+	matrix shadowWVP = mul(mul(world, shadowView), shadowProjection);
+	output.shadowPos = mul(float4(input.position, 1.0f), shadowWVP);
 
-	matrix shadowMVP = mul(mul(world, shadowView), shadowProjection);
-	output.shadowPos = mul(float4(input.position, 1.0f), shadowMVP);
-
+	matrix WVP = mul(world, viewProjection);
     output.svPosition = mul(float4(input.position, 1.0f), WVP);
+
     output.position = mul(float4(input.position, 1.0f), world);
     output.normal = normalize(mul(input.normal, (float3x3)world));
 	output.tangent = normalize(mul(input.tangent, (float3x3)world));
