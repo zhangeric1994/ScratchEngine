@@ -287,7 +287,7 @@ void ScratchEngine::Game::Update()
 			camera->Translate(0.0f, -deltaTime*5, 0.0f, SELF);
 
 		//go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(-50 * deltaTime, -50 * deltaTime, -50 * deltaTime);
+		//go2->Rotate(-50 * deltaTime, -50 * deltaTime, -50 * deltaTime);
 
 		frameBarrier.Wait();
 	}
@@ -348,10 +348,10 @@ void ScratchEngine::Game::Draw()
 
 		//End of shadow map
 
-		//context->OMSetDepthStencilState(nullptr, 0);
-		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
+		context->OMSetDepthStencilState(nullptr, 0);
+		renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
-		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 
 
 

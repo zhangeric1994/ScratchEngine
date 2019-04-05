@@ -169,6 +169,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
 
 			viewer.position = gameObject->GetPosition();
+			//viewer.position = XMVectorSet(0, 0, -5.0f, 0);
 			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
 			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
 		}
@@ -190,9 +191,10 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 			lightSource.diffuseColor = light->diffuseColor;
 			lightSource.type = light->type;
 			lightSource.range = 0;
+			lightSource.direction = XMFLOAT3(0, -1.0f, 0);
 
 			XMStoreFloat3(&lightSource.position, light->GetPosition());
-			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetDirection());
+			//XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetDirection());
 		}
 	}
 }
@@ -319,7 +321,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 			context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 			context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-			//context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
@@ -333,8 +334,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 }
 
 void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(SimpleVertexShader* shader, ID3D11DeviceContext* context) {
-	
-
 	XMFLOAT4X4 shadowViewMatrix;
 	XMFLOAT4X4 shadowProjectionMatrix;
 
