@@ -409,3 +409,26 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceCont
 void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow) {
 	shadow = _shadow;
 }
+
+void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(ID3D11DeviceContext * context, Mesh * cube, SimpleVertexShader* cubeVS, SimplePixelShader* cubePS) {
+	ID3D11Buffer* cubeVB = cube->GetVertexBuffer();
+	ID3D11Buffer* cubeIB = cube->GetIndexBuffer();
+
+	u32 stride = sizeof(Vertex);
+	u32 offset = 0;
+
+	context->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
+	context->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
+
+	Viewer& viewer = viewerAllocator[cameraList->viewer];
+
+	XMMATRIX viewMatrix = viewer.viewMatrix;
+	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+
+	cubeVS->SetMatrix4x4("view", viewMatrix);
+	cubeVS->SetMatrix4x4("projection", projectionMatrix);
+	cubeVS->CopyAllBufferData();
+	cubeVS->SetShader();
+
+
+}

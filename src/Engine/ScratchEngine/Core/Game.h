@@ -12,6 +12,7 @@
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
 #include "../Rendering/ShadowMap.h"
+#include <DDSTextureLoader.h>
 
 #include "DXCore.h"
 
@@ -73,5 +74,12 @@ namespace ScratchEngine
 		D3D11_VIEWPORT shadowViewport;
 		float shadowMapSize;
 		SimpleVertexShader* shadowShader;
+
+		//cube map
+		ID3D11ShaderResourceView* cubeSRV;
+		SimpleVertexShader* cubeVS;
+		SimplePixelShader* cubePS;
+		ID3D11RasterizerState* cubeRS;
+		ID3D11DepthStencilState* cubeDSS;
 	};
 }

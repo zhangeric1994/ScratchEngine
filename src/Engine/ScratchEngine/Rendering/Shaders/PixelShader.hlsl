@@ -39,7 +39,6 @@ SamplerState basicSampler : register(s0);
 
 SamplerComparisonState shadowSampler : register(s1);
 
-
 float4 Lambert(float4 ambientColor, float4 diffuseColor, float3 N, float3 L)
 {
     return ambientColor + saturate(dot(N, L)) * diffuseColor;

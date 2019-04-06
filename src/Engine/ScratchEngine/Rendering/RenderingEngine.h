@@ -75,6 +75,7 @@ namespace ScratchEngine
 			void DrawForward(ID3D11DeviceContext* context);
 			void RenderShadowMap(ID3D11DeviceContext* context);
 			void SetShadowMap(ShadowMap* _shadow);
+			void RenderCubeMap(ID3D11DeviceContext* context, Mesh* cube, SimpleVertexShader* cubeVS, SimplePixelShader* cubePS);
 		};
 	}
 }
