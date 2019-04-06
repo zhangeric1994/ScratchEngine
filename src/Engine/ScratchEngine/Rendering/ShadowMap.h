@@ -12,10 +12,8 @@ namespace ScratchEngine {
 
 			void setUp(ID3D11Device* device);
 			void setShader(SimpleVertexShader* _shadowShader);
-			//void setViewport(float height, float width);
 
 			ID3D11DepthStencilView*		getShadowDSV();
-			//D3D11_VIEWPORT				getViewport();
 			ID3D11RasterizerState*		getRasterizerState();
 			ID3D11ShaderResourceView*	getShadowSRV();
 			SimpleVertexShader*			getShadowShader();
@@ -43,9 +41,6 @@ namespace ScratchEngine {
 			ID3D11ShaderResourceView*			shadowResourceView;
 
 			ID3D11RasterizerState*				shadowRasterizerState;
-
-			//may define viewport in game.h
-			//D3D11_VIEWPORT						shadowViewport;
 		};
 	}
 }

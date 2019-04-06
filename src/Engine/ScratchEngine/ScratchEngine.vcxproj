@@ -189,6 +189,7 @@
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Physics\SphereCollider.h" />
     <ClInclude Include="Rendering\Camera.h" />
+    <ClInclude Include="Rendering\CubeMap.h" />
     <ClInclude Include="Rendering\LightSource.h" />
     <ClInclude Include="Rendering\ShadowMap.h" />
     <ClInclude Include="Rendering\Viewer.h" />
@@ -223,6 +224,7 @@
     <ClCompile Include="Physics\RigidBody.cpp" />
     <ClCompile Include="Physics\SphereCollider.cpp" />
     <ClCompile Include="Rendering\Camera.cpp" />
+    <ClCompile Include="Rendering\CubeMap.cpp" />
     <ClCompile Include="Rendering\Light.cpp" />
     <ClCompile Include="Rendering\Renderer.cpp" />
     <ClCompile Include="Rendering\Material.cpp" />

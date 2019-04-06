@@ -30,12 +30,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	normalMap = 0;
 
 	shadow = new ShadowMap();
-
-	cubeVS = 0;
-	cubePS = 0;
-	cubeDSS = 0;
-	cubeRS = 0;
-	cubeSRV = 0;
+	cubeMap = new CubeMap();
 
 	shadowMapSize = 1024;
 
@@ -98,11 +93,7 @@ ScratchEngine::Game::~Game()
 
 	if (shadow) delete shadow;
 
-	//cube map
-	if (cubeSRV) cubeSRV->Release();
-	if (cubePS) delete cubePS;
-	if (cubeVS) delete cubeVS;
-	if (cubeDSS) cubeDSS->Release();
+	if (cubeMap) delete cubeMap;
 
 	RenderingEngine::Stop();
 }
@@ -110,9 +101,9 @@ ScratchEngine::Game::~Game()
 void ScratchEngine::Game::Init()
 {
 	LoadShaders();
-	CreateAllMaps();
 	CreateMatrces();
 	CreateBasicGeometry();
+	CreateAllMaps();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
@@ -143,13 +134,8 @@ void ScratchEngine::Game::LoadShaders()
 	pixelShader->LoadShaderFile(pixel);
 
 	//cube map shader load
-	cubeVS = new SimpleVertexShader(device, context);
-	bool isload = cubeVS->LoadShaderFile((wpath + std::wstring(L"/cubeVS.cso")).c_str());
-	if (isload = false) printf("load cube vs failed.");
-
-	cubePS = new SimplePixelShader(device, context);
-	isload = cubePS->LoadShaderFile((wpath + std::wstring(L"/cubePS.cso")).c_str());
-	if (isload = false) printf("load cube ps failed.");
+	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
+	cubeMap->setVS(device, context, (wpath + std::wstring(L"/cubeVS.cso")).c_str());
 	//end of cube map shader
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
@@ -167,6 +153,13 @@ void ScratchEngine::Game::CreateAllMaps() {
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map
+
+	//cube map
+	cubeMap->setUp(device);
+	cubeMap->setMesh(mesh1);
+	cubeMap->setSampler(sampler);
+	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds");
+	//end of cube map
 }
 
 void ScratchEngine::Game::CreateMatrces()
@@ -192,7 +185,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
 
-
 	GameObject* directionalLightObject = new GameObject();
 	//directionalLightObject->SetRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
@@ -214,27 +206,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go4 = new GameObject();
-
-	//cube map (temp)
-	HRESULT isOK = CreateDDSTextureFromFile(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds", 0, &cubeSRV);
-	if (FAILED(isOK)) { printf("DDS not loaded."); }
-
-	D3D11_RASTERIZER_DESC cubeRD = {};
-	cubeRD.CullMode = D3D11_CULL_FRONT;
-	cubeRD.FillMode = D3D11_FILL_SOLID;
-	cubeRD.DepthClipEnable = true;
-	isOK = device->CreateRasterizerState(&cubeRD, &cubeRS);
-	if (FAILED(isOK)) { printf("rasterizer state not set."); }
-
-	D3D11_DEPTH_STENCIL_DESC cubeDSD = {};
-	cubeDSD.DepthEnable = true;
-	cubeDSD.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
-	cubeDSD.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	isOK = device->CreateDepthStencilState(&cubeDSD, &cubeDSS);
-	if (FAILED(isOK)) { printf("dss not set."); }
-
-
-
 }
 
 void ScratchEngine::Game::OnResize()
@@ -323,19 +294,7 @@ void ScratchEngine::Game::Draw()
 
 		renderingEngine->DrawForward(context);
 
-		//cube map (temp)
-		renderingEngine->RenderCubeMap(context, mesh1, cubeVS, cubePS);
-
-		cubePS->SetShaderResourceView("cubeTexture", cubeSRV);
-		cubePS->SetSamplerState("basicSampler", sampler);
-		cubePS->SetShader();
-
-		context->RSSetState(cubeRS);
-		context->OMSetDepthStencilState(cubeDSS, 0);
-
-		context->DrawIndexed(mesh1->GetIndexCount(), 0, 0);
-
-
+		renderingEngine->RenderCubeMap(context, cubeMap);
 
 		swapChain->Present(0, 0);
 

@@ -16,6 +16,7 @@
 #include "Renderer.h"
 #include "Viewer.h"
 #include "ShadowMap.h"
+#include "CubeMap.h"
 
 using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;
@@ -75,7 +76,7 @@ namespace ScratchEngine
 			void DrawForward(ID3D11DeviceContext* context);
 			void RenderShadowMap(ID3D11DeviceContext* context);
 			void SetShadowMap(ShadowMap* _shadow);
-			void RenderCubeMap(ID3D11DeviceContext* context, Mesh* cube, SimpleVertexShader* cubeVS, SimplePixelShader* cubePS);
+			void RenderCubeMap(ID3D11DeviceContext* context, CubeMap* cubeMap);
 		};
 	}
 }
