@@ -160,6 +160,7 @@
     <ClInclude Include="Common\Settings.h" />
     <ClInclude Include="Common\Stack.hpp" />
     <ClInclude Include="Common\Typedefs.h" />
+    <ClInclude Include="Core\AIBehaviors.h" />
     <ClInclude Include="Core\DXCore.h" />
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\GameComponent.h" />
@@ -203,6 +204,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Core\AIBehaviors.cpp" />
     <ClCompile Include="Core\DXCore.cpp" />
     <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="Core\GameComponent.cpp" />
