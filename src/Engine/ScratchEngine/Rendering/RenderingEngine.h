@@ -1,4 +1,4 @@
-#ifndef RENDERING_ENGINE_H
+﻿#ifndef RENDERING_ENGINE_H
 #define RENDERING_ENGINE_H
 #pragma once
 

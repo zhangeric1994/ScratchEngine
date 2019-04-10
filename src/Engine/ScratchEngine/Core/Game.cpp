@@ -293,14 +293,18 @@ void ScratchEngine::Game::Draw()
 		context->RSSetState(0);
 
 
-		context->OMSetDepthStencilState(nullptr, 0);
-		renderingEngine->PerformZPrepass(vsZPrepass, context); 
+		//context->OMSetDepthStencilState(nullptr, 0);
+		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
-		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 
 		renderingEngine->DrawForward(context);
 
 		renderingEngine->RenderCubeMap(context, cubeMap);
+
+		//turn off all resources bound to shader
+		ID3D11ShaderResourceView* noSRV[16] = {};
+		context->PSSetShaderResources(0, 16, noSRV);
 
 		swapChain->Present(0, 0);
 
