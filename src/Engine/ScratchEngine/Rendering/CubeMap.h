@@ -19,15 +19,15 @@ namespace ScratchEngine {
 			void setVS(ID3D11Device* device, ID3D11DeviceContext* context, LPCWSTR path);
 			void setSRV(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* path);
 
-			ID3D11SamplerState* getSampler();
-			SimpleVertexShader* getVS();
-			SimplePixelShader* getPS();
-			ID3D11Buffer* getVB();
-			ID3D11Buffer* getIB();
-			int getIndexCount();
-			ID3D11RasterizerState* getRS();
-			ID3D11DepthStencilState* getDSS();
-			ID3D11ShaderResourceView* getSRV();
+			ID3D11SamplerState*			getSampler();
+			SimpleVertexShader*			getVS();
+			SimplePixelShader*			getPS();
+			ID3D11Buffer*				getVB();
+			ID3D11Buffer*				getIB();
+			int							getIndexCount();
+			ID3D11RasterizerState*		getRS();
+			ID3D11DepthStencilState*	getDSS();
+			ID3D11ShaderResourceView*	getSRV();
 
 		private:
 			D3D11_RASTERIZER_DESC		cubeRD;

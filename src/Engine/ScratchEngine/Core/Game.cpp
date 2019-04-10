@@ -50,6 +50,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	samplerDesc.MinLOD = 0;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//samplerDesc.MaxLOD = 2;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -158,7 +159,7 @@ void ScratchEngine::Game::CreateAllMaps() {
 	cubeMap->setUp(device);
 	cubeMap->setMesh(mesh1);
 	cubeMap->setSampler(sampler);
-	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/SunnyCubeMap.dds");
+	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox1.dds");
 	//end of cube map
 }
 
