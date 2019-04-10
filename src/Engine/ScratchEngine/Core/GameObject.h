@@ -128,7 +128,7 @@ namespace ScratchEngine
 
 		auto it = components.find(id);
 
-		delete *it;
+		delete it->second;
 
 		if (it != components.end())
 			components.erase(it);

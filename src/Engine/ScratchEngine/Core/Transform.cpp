@@ -261,7 +261,7 @@ __inline void ScratchEngine::Transform::Translate(XMVECTOR translation, Space sp
 
 
 		case SELF:
-			localPosition = XMVectorAdd(localPosition, translation);
+			localPosition = XMVectorAdd(localPosition, XMVector3Rotate(translation, localRotation));
 			break;
 		}
 

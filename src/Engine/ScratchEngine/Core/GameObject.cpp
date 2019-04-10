@@ -34,7 +34,7 @@ ScratchEngine::GameObject::~GameObject()
 		parent->__RemoveChild(this);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		delete (*it).second;
+		delete it->second;
 
 	for (auto it = children.begin(); it != children.end(); it++)
 		delete (*it);
@@ -77,7 +77,7 @@ void ScratchEngine::GameObject::SendMessage_(const Message& message)
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 }
 
 void ScratchEngine::GameObject::SendMessageUp(const Message& message, u32 level)
@@ -85,7 +85,7 @@ void ScratchEngine::GameObject::SendMessageUp(const Message& message, u32 level)
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 
 	if (level-- > 0 && parent)
 		parent->SendMessageUp(message, level);
@@ -96,7 +96,7 @@ void ScratchEngine::GameObject::SendMessageDown(const Message& message, u32 leve
 	HandleMessage(message);
 
 	for (auto it = components.begin(); it != components.end(); it++)
-		(*it).second->HandleMessage(message);
+		it->second->HandleMessage(message);
 
 	if (level-- > 0)
 		for (auto it = children.begin(); it != children.end(); it++)
@@ -107,7 +107,7 @@ __inline void ScratchEngine::GameObject::Update(f32 deltaTime, f32 currentTime)
 {
 	for (auto it = components.begin(); it != components.end(); it++)
 	{
-		GameComponent* component = (*it).second;
+		GameComponent* component = it->second;
 		if (component->IsActiveSelf())
 			component->Update(deltaTime, currentTime);
 	}
@@ -117,7 +117,7 @@ __inline void ScratchEngine::GameObject::LateUpdate(f32 deltaTime, f32 currentTi
 {
 	for (auto it = components.begin(); it != components.end(); it++)
 	{
-		GameComponent* component = (*it).second;
+		GameComponent* component = it->second;
 		if (component->IsActiveSelf())
 			component->LateUpdate(deltaTime, currentTime);
 	}
