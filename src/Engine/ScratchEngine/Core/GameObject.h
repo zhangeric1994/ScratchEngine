@@ -5,12 +5,16 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../Physics/Collider.h"
+#include "../Physics/ICollisionCallback.h"
+
 #include "GameComponent.h"
 #include "Transform.h"
 
+
 namespace ScratchEngine
 {
-	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable
+	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable, private ICollisionCallback
 	{
 		friend class Scene;
 
@@ -87,12 +91,14 @@ namespace ScratchEngine
 		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
 
-	protected:
+	private:
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);
 
+		void OnBeginOverlapping(GameObject* other);
+		void OnOverlapping(GameObject* other);
+		void OnEndOverlapping(GameObject* other);
 
-	private:
 		void HandleMessage(const Message& message) { }
 	};
 

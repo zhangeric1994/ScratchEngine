@@ -2,14 +2,11 @@
 #define PHYSICS_ENGINE_H
 
 
-#include <vector>
-
-#include "../Common/Stack.hpp"
-
 #include "Collider.h"
-#include "Collision.h"
-#include "DynamicBVH.hpp"
+//#include "Collision.h"
+//#include "DynamicBVH.hpp"
 
+using namespace ScratchEngine;
 using namespace std;
 
 
@@ -17,12 +14,15 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine : IDynamicBVHQueryCallback
+		class PhysicsEngine
 		{
+			friend class Collider;
+
+
 		private:
 			static PhysicsEngine* singleton;
 
-			static const PhysicsEngine* GetSingleton();
+			static PhysicsEngine* GetSingleton();
 			static void Initialize();
 
 

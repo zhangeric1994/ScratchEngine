@@ -1,18 +1,20 @@
 #ifndef BOUNDING_VOLUME_H
 #define BOUNDING_VOLUME_H
 
+#include <cmath>
 #include <DirectXMath.h>
 
 #include "../Common/Typedefs.h"
-#include "RigidBody.h"
 
 using namespace DirectX;
+using namespace ScratchEngine;
+
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
-		template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2, RigidBody* rigidBody1, RigidBody* rigidBody2, float currentTime);
+		template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2);
 
 		enum BoundingVolumeType
 		{
@@ -27,7 +29,7 @@ namespace ScratchEngine
 
 		struct __declspec(dllexport) AxisAlignedBoundingBox : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
 			//friend class OverlapCheck;
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
@@ -94,7 +96,7 @@ namespace ScratchEngine
 		struct OrientedBoundingBox : public BoundingVolume
 		{
 			friend bool GetSeparatingPlane(XMVECTOR, XMVECTOR, OrientedBoundingBox*, OrientedBoundingBox*);
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
 			//friend class OverlapCheck;
 
 
@@ -140,17 +142,19 @@ namespace ScratchEngine
 			};
 
 			OrientedBoundingBox() {}
-			OrientedBoundingBox(XMVECTOR size, XMVECTOR position, XMVECTOR rotation);
+			OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
 
 
 		public:
 			XMVECTOR GetHalfSize() const;
+
+			void SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
 		};
 
 
 		struct BoundingSphere : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
 			//friend class OverlapCheck;
 
 
@@ -169,7 +173,7 @@ namespace ScratchEngine
 				XMVECTOR halfSizeB = obb2->GetHalfSize();
 
 				return (abs(XMVector3Dot(RPos, Plane).m128_f32[0]) >
-					(abs(XMVector3Dot(XMVectorScale(obb1->axisX, halfSizeA.m128_f32[0]), Plane).m128_f32[0]) +
+					   (abs(XMVector3Dot(XMVectorScale(obb1->axisX, halfSizeA.m128_f32[0]), Plane).m128_f32[0]) +
 						abs(XMVector3Dot(XMVectorScale(obb1->axisY, halfSizeA.m128_f32[1]), Plane).m128_f32[0]) +
 						abs(XMVector3Dot(XMVectorScale(obb1->axisZ, halfSizeA.m128_f32[2]), Plane).m128_f32[0]) +
 						abs(XMVector3Dot(XMVectorScale(obb2->axisX, halfSizeB.m128_f32[0]), Plane).m128_f32[0]) +
@@ -179,12 +183,12 @@ namespace ScratchEngine
 
 
 		//public:
-			template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2, RigidBody* rigidBody1, RigidBody* rigidBody2, float currentTime)
+			template<class T1, class T2> bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2, RigidBody* aabbRb1, RigidBody* aabbRb2, float currentTime)
+			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2)
 			{
 				if (XMVector3Less(aabb1->max, aabb2->min) || XMVector3Less(aabb2->max, aabb1->min))
 					return false;
@@ -192,21 +196,21 @@ namespace ScratchEngine
 				return true;
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb, RigidBody* aabbRb, RigidBody* obbRb, float currentTime)
+			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere, RigidBody* aabbRb, RigidBody* sphereRb, float currentTime)
+			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2, RigidBody* obbRb1, RigidBody* obbRb2, float currentTime)
+			template<> bool TestOverlap(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)
 			{
 				XMVECTOR RPos = XMVectorSubtract(obb1->center, obb2->center);
 
-				if (!(GetSeparatingPlane(RPos, obb1->axisX, obb1, obb2) ||
+				if (GetSeparatingPlane(RPos, obb1->axisX, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb1->axisY, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb1->axisZ, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb2->axisX, obb1, obb2) ||
@@ -220,25 +224,23 @@ namespace ScratchEngine
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisY, obb2->axisZ), obb1, obb2) ||
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisX), obb1, obb2) ||
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisY), obb1, obb2) ||
-					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisZ), obb1, obb2)))
-				{
-					//XMVECTOR collisionPoint = getCollisionPoint(a, b);
+					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisZ), obb1, obb2))
+					return false;
 
-					//XMVECTOR planeA = getPlaneNormal(a, collisionPoint);
-					//XMVECTOR planeB = getPlaneNormal(b, collisionPoint);
+				//XMVECTOR collisionPoint = getCollisionPoint(a, b);
 
-					//XMVECTOR aNormal = GetCollisionNormal(b, planeB); // sphere don't need to pass the collision detail
-					//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
+				//XMVECTOR planeA = getPlaneNormal(a, collisionPoint);
+				//XMVECTOR planeB = getPlaneNormal(b, collisionPoint);
 
-					//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
+				//XMVECTOR aNormal = GetCollisionNormal(b, planeB); // sphere don't need to pass the collision detail
+				//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
 
-					return true;
-				}
+				//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
 
-				return false;
+				return true;
 			}
 
-			template<> static bool TestOverlap(OrientedBoundingBox* obb, BoundingSphere* sphere, RigidBody* obbRb, RigidBody* sphereRb, float currentTime)
+			template<> bool TestOverlap(OrientedBoundingBox* obb, BoundingSphere* sphere)
 			{
 				XMVECTOR halfDiag = XMVectorSubtract(obb->H, obb->center);
 
@@ -307,7 +309,7 @@ namespace ScratchEngine
 				return false;
 			}
 
-			template<> static bool TestOverlap(BoundingSphere* sphere1, BoundingSphere* sphere2, RigidBody* sphereRb1, RigidBody* sphereRb2, float currentTime)
+			template<> bool TestOverlap(BoundingSphere* sphere1, BoundingSphere* sphere2)
 			{
 				XMVECTOR normal = XMVectorSubtract(sphere1->center, sphere2->center);
 				float squared_distance = XMVector3LengthSq(normal).m128_f32[0];

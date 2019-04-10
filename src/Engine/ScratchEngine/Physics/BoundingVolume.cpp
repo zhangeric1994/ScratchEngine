@@ -51,7 +51,6 @@ ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxZ() con
 ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetVolume() const
 {
 	return _get_box_volume(XMVectorSubtract(max, min));
-
 }
 
 void* ScratchEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
@@ -131,7 +130,17 @@ const int ScratchEngine::Physics::OrientedBoundingBox::iEdges[12][2] = { { 0, 1 
 																		 { 6, 7 },
 																		 { 7, 3 } };
 
-ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR size, XMVECTOR position, XMVECTOR rotation)
+ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
+{
+	SetData(position, rotation, size);
+}
+
+XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfSize() const
+{
+	return XMVectorSubtract(H, center);
+}
+
+__inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
 {
 	center = position;
 
@@ -166,9 +175,4 @@ ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR size, 
 	positiveX = XMPlaneFromPoints(E, F, G);
 	positiveY = XMPlaneFromPoints(C, G, D);
 	positiveZ = XMPlaneFromPoints(F, B, H);
-}
-
-XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfSize() const
-{
-	return XMVectorSubtract(H, center);
 }
