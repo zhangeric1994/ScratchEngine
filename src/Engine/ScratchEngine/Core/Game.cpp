@@ -172,14 +172,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	//char* filename = (char*)"../Assets/Models/sphere.obj";
 
-	char* filename = (char*)"../Assets/Greninja/XY_Greninja.obj";
+	char* filename = (char*)"../Assets/Models/sphere.obj";
 	char* cubefile = (char*)"../Assets/Models/cube.obj";
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	//CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
 	
-	CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyA1.png", 0, &texture);
+	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyA1.png", 0, &texture);
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 	
 	mesh = new Mesh(device, filename);
@@ -197,13 +197,13 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go1 = new GameObject();
 	go1->SetPosition(0, -2, 10);
 	//go1->SetLocalRotation(0, 0, 0);
-	//go1->SetLocalScale(.1, .1, .1);
+	go1->SetLocalScale(10, 1, 10);
 	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
 
 	go2 = new GameObject();
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 2, 0);
-	go2->SetLocalScale(.01, .01, .01);
+	//go2->SetLocalScale(.01, .01, .01);
 	go2->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go3 = new GameObject();
