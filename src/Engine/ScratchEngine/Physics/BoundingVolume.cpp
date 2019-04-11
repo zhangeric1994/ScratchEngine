@@ -144,10 +144,10 @@ __inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR posi
 {
 	center = position;
 
-	XMVECTOR halfSize = XMVectorScale(size, 0.5f);
+	XMVECTOR halfSize = XMVector3Rotate(XMVectorScale(size, 0.5f), rotation);
 
-	XMVECTOR min = XMVector3Rotate(XMVectorSubtract(position, halfSize), rotation);
-	XMVECTOR max = XMVector3Rotate(XMVectorAdd(position, halfSize), rotation);
+	XMVECTOR min = XMVectorSubtract(position, halfSize);
+	XMVECTOR max = XMVectorAdd(position, halfSize);
 
 	axisX = XMVector3Rotate({ 1, 0, 0 }, rotation);
 	axisY = XMVector3Rotate({ 0, 1, 0 }, rotation);
