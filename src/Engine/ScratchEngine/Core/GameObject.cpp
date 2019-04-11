@@ -122,3 +122,33 @@ __inline void ScratchEngine::GameObject::LateUpdate(f32 deltaTime, f32 currentTi
 			component->LateUpdate(deltaTime, currentTime);
 	}
 }
+
+void ScratchEngine::GameObject::OnBeginOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnBeginOverlapping(other);
+	}
+}
+
+void ScratchEngine::GameObject::OnOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnOverlapping(other);
+	}
+}
+
+void ScratchEngine::GameObject::OnEndOverlapping(GameObject* other)
+{
+	for (auto it = components.begin(); it != components.end(); it++)
+	{
+		GameComponent* component = it->second;
+		if (component->IsActiveSelf())
+			component->OnEndOverlapping(other);
+	}
+}

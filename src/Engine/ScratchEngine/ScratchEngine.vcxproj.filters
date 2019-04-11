@@ -123,12 +123,6 @@
     <ClInclude Include="Physics\BoundingVolume.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Physics\BoxCollider.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\SphereCollider.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\DynamicBVHNode.hpp">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -186,6 +180,9 @@
     <ClInclude Include="Core\DXCore.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\ICollisionCallback.h">
+      <Filter>Header Files\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -231,12 +228,6 @@
       <Filter>Source Files\Memory</Filter>
     </ClCompile>
     <ClCompile Include="Physics\Collision.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\BoxCollider.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
-    <ClCompile Include="Physics\SphereCollider.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
     <ClCompile Include="Physics\BoundingVolume.cpp">

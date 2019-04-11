@@ -1,12 +1,17 @@
 #include <cstdlib>
 
+#include "../Core/GameObject.h"
+
 #include "Collider.h"
+#include "PhysicsEngine.h"
 
 using namespace DirectX;
+using namespace ScratchEngine::Physics;
+
 
 f32 collisionCheckBack = 0.00f;
 
-bool ScratchEngine::Physics::Collider::IsOverlappingWith(Collider* other, float currentTime)
+bool ScratchEngine::Collider::IsOverlappingWith(Collider* other)
 {
 	switch (type)
 	{
@@ -22,12 +27,12 @@ bool ScratchEngine::Physics::Collider::IsOverlappingWith(Collider* other, float 
 
 
 		case ScratchEngine::Physics::OBB:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<OrientedBoundingBox*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<OrientedBoundingBox*>(other->GetBoundingVolume()));
 			break;
 
 
 		case ScratchEngine::Physics::Sphere:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -41,12 +46,12 @@ bool ScratchEngine::Physics::Collider::IsOverlappingWith(Collider* other, float 
 
 
 		case ScratchEngine::Physics::OBB:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 
 
 		case ScratchEngine::Physics::Sphere:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<BoundingSphere*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()), gameObject->GetComponent<RigidBody>(), gameObject->GetComponent<RigidBody>(), currentTime);
+			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<BoundingSphere*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -55,16 +60,65 @@ bool ScratchEngine::Physics::Collider::IsOverlappingWith(Collider* other, float 
 	throw "NOT IMPLEMENTED";
 }
 
-ScratchEngine::Physics::BoundingVolumeType ScratchEngine::Physics::Collider::GetType()
+ScratchEngine::Collider::Collider()
+{
+	this->next = nullptr;
+	this->previous = nullptr;
+
+	this->boundingVolume = nullptr;
+
+	PhysicsEngine::GetSingleton()->AddCollider(this);
+}
+
+ScratchEngine::Collider::Collider(BoundingVolumeType type)
+{
+	this->next = nullptr;
+	this->previous = nullptr;
+
+	this->type = type;
+	this->boundingVolume = nullptr;
+
+	PhysicsEngine::GetSingleton()->AddCollider(this);
+}
+
+ScratchEngine::Collider::~Collider()
+{
+	PhysicsEngine::GetSingleton()->RemoveCollider(this);
+}
+
+BoundingVolumeType ScratchEngine::Collider::GetType()
 {
 	return type;
 }
 
-ScratchEngine::Physics::BoundingVolume * ScratchEngine::Physics::Collider::GetBoundingVolume()
+BoundingVolume* ScratchEngine::Collider::GetBoundingVolume()
 {
 	return boundingVolume;
 }
 
+
+ScratchEngine::BoxCollider::BoxCollider() : BoxCollider({1, 1, 1})
+{
+}
+
+ScratchEngine::BoxCollider::BoxCollider(XMVECTOR size) : Collider(OBB)
+{
+	this->size = size;
+}
+
+ScratchEngine::BoxCollider::~BoxCollider()
+{
+}
+
+
+ScratchEngine::SphereCollider::SphereCollider(f32 radius)
+{
+	this->radius = radius;
+}
+
+ScratchEngine::SphereCollider::~SphereCollider()
+{
+}
 
 //
 //bool isUnique(std::vector<XMVECTOR> points, XMVECTOR test)
