@@ -116,7 +116,7 @@ namespace ScratchEngine
 
 		template<class T> inline void DynamicStackAllocator<T>::Sort(bool(*compare)(T, T))
 		{
-			sort(memory, memory + numAllocated, compare);
+			Sort(compare, 0, numAllocated);
 		}
 
 		template<class T> inline void DynamicStackAllocator<T>::Sort(bool (*compare)(T, T), i32 begin, i32 end)
