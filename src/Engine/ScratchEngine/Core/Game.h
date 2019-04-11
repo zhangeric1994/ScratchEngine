@@ -48,16 +48,20 @@ namespace ScratchEngine
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-		Mesh* mesh;
-		Mesh* mesh1;
-
-		Material* simpleMaterial;
+		Mesh* sphereMesh;
+		Mesh* cubeMesh;
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
 		GameObject* go1;
 		GameObject* go2;
+		GameObject* go4;
 
 		Barrier frameBarrier;
+
+		
+	public:
+		static Material* greenMaterial;
+		static Material* redMaterial;
 	};
 }

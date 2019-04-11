@@ -263,6 +263,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
+		pixelShader->SetFloat4("tint", material->GetTint());
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 

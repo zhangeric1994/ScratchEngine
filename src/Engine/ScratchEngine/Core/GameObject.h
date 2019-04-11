@@ -14,7 +14,7 @@
 
 namespace ScratchEngine
 {
-	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable, private ICollisionCallback
+	class __declspec(dllexport) GameObject final : public Transform, public IUpdatable, public ICollisionCallback
 	{
 		friend class Scene;
 

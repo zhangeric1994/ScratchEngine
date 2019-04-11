@@ -79,6 +79,9 @@ void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 
 
 		case OBB:
+			if (!collider->boundingVolume)
+				collider->boundingVolume = new OrientedBoundingBox();
+
 			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), gameObject->GetRotation(), gameObject->GetScale());
 			break;
 
@@ -104,23 +107,23 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 				{
 					if (it == colliderA->contacts.end())
 					{
-						colliderA->contacts.emplace(colliderB);
-						reinterpret_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
+						colliderA->contacts.insert(colliderB);
+						static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
 
-						colliderB->contacts.emplace(colliderA);
-						reinterpret_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
+						colliderB->contacts.insert(colliderA);
+						static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
 					}
 
-					reinterpret_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
-					reinterpret_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
+					static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
+					static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
 				}
 				else if (it != colliderA->contacts.end())
 				{
 					colliderA->contacts.erase(it);
-					reinterpret_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
+					static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
 
 					colliderB->contacts.erase(colliderA);
-					reinterpret_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
+					static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
 				}
 			}
 }

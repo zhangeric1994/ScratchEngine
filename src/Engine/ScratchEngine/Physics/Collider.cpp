@@ -62,6 +62,22 @@ bool ScratchEngine::Collider::IsOverlappingWith(Collider* other)
 
 ScratchEngine::Collider::Collider()
 {
+	this->next = nullptr;
+	this->previous = nullptr;
+
+	this->boundingVolume = nullptr;
+
+	PhysicsEngine::GetSingleton()->AddCollider(this);
+}
+
+ScratchEngine::Collider::Collider(BoundingVolumeType type)
+{
+	this->next = nullptr;
+	this->previous = nullptr;
+
+	this->type = type;
+	this->boundingVolume = nullptr;
+
 	PhysicsEngine::GetSingleton()->AddCollider(this);
 }
 
@@ -81,7 +97,11 @@ BoundingVolume* ScratchEngine::Collider::GetBoundingVolume()
 }
 
 
-ScratchEngine::BoxCollider::BoxCollider(XMVECTOR size)
+ScratchEngine::BoxCollider::BoxCollider() : BoxCollider({1, 1, 1})
+{
+}
+
+ScratchEngine::BoxCollider::BoxCollider(XMVECTOR size) : Collider(OBB)
 {
 	this->size = size;
 }

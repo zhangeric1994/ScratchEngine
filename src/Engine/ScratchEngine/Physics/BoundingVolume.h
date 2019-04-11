@@ -98,6 +98,7 @@ namespace ScratchEngine
 			friend bool GetSeparatingPlane(XMVECTOR, XMVECTOR, OrientedBoundingBox*, OrientedBoundingBox*);
 			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
 			//friend class OverlapCheck;
+			friend class PhysicsEngine;
 
 
 		private:

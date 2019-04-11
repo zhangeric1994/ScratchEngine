@@ -42,6 +42,7 @@ namespace ScratchEngine
 
 
 		Collider();
+		Collider(BoundingVolumeType type);
 		~Collider();
 
 
@@ -69,6 +70,7 @@ namespace ScratchEngine
 		//std::vector<std::tuple<XMVECTOR, XMVECTOR>> edges;
 
 	public:
+		BoxCollider();
 		BoxCollider(XMVECTOR size);
 		~BoxCollider();
 	};

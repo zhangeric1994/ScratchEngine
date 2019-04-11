@@ -17,6 +17,11 @@ struct LightSource
 };
 
 
+cbuffer ShaderData : register(b0)
+{
+    float4 tint;
+}
+
 cbuffer LightSourceData : register(b1)
 {
 	LightSource light;
@@ -41,11 +46,11 @@ float4 BlinnPhong(float3 N, float3 L, float3 V, float shininess)
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    float4 albedo = float4(0, 0, 1, 1);
+    float4 albedo = tint;
 
     float3 N = normalize(input.normal);
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 
-    return Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
+    return albedo * Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
 }

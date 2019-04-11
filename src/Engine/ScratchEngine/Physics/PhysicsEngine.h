@@ -19,13 +19,14 @@ namespace ScratchEngine
 			friend class Collider;
 
 
-		private:
+		public:
 			static PhysicsEngine* singleton;
 
 			static PhysicsEngine* GetSingleton();
 			static void Initialize();
 
 
+		private:
 			Collider* colliderList;
 
 
@@ -37,8 +38,10 @@ namespace ScratchEngine
 			void RemoveCollider(Collider* collider);
 
 
+		public:
 			void UpdateBoundingVolumes();
 			void SolveCollisions();
+			void DrawColliders();
 		};
 	}
 }
