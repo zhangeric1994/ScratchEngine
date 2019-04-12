@@ -135,7 +135,7 @@ ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR positi
 	SetData(position, rotation, size);
 }
 
-XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfSize() const
+XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfDiagonalVector() const
 {
 	return XMVectorSubtract(H, center);
 }
@@ -143,31 +143,30 @@ XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfSize() const
 __inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
 {
 	center = position;
+	this->size = size;
 
-	XMVECTOR halfSize = XMVector3Rotate(XMVectorScale(size, 0.5f), rotation);
+	XMVECTOR halfDiag = XMVector3Rotate(XMVectorScale(size, 0.5f), rotation);
 
-	XMVECTOR min = XMVectorSubtract(position, halfSize);
-	XMVECTOR max = XMVectorAdd(position, halfSize);
+	axisX = XMVector3Normalize(XMVector3Rotate({ 1, 0, 0, 0 }, rotation));
+	axisY = XMVector3Normalize(XMVector3Rotate({ 0, 1, 0, 0 }, rotation));
+	axisZ = XMVector3Normalize(XMVector3Rotate({ 0, 0, 1, 0 }, rotation));
 
-	axisX = XMVector3Rotate({ 1, 0, 0 }, rotation);
-	axisY = XMVector3Rotate({ 0, 1, 0 }, rotation);
-	axisZ = XMVector3Rotate({ 0, 0, 1 }, rotation);
+	A = XMVectorSubtract(position, halfDiag);
+	H = XMVectorAdd(position, halfDiag);
 
-	f32 minX = min.m128_f32[0];
-	f32 maxX = max.m128_f32[0];
-	f32 minY = min.m128_f32[1];
-	f32 maxY = max.m128_f32[1];
-	f32 minZ = min.m128_f32[2];
-	f32 maxZ = max.m128_f32[2];
+	f32 xA = A.m128_f32[0];
+	f32 xH = H.m128_f32[0];
+	f32 yA = A.m128_f32[1];
+	f32 yH = H.m128_f32[1];
+	f32 zA = A.m128_f32[2];
+	f32 zH = H.m128_f32[2];
 
-	A = { minX, minY, minZ };
-	B = { minX, minY, maxZ };
-	C = { minX, maxY, minZ };
-	D = { minX, maxY, maxZ };
-	E = { maxX, minY, minZ };
-	F = { maxX, minY, maxZ };
-	G = { maxX, maxY, minZ };
-	H = { maxX, maxY, maxZ };
+	B = { xA, yA, zH };
+	C = { xA, yH, zA };
+	D = { xA, yH, zH };
+	E = { xH, yA, zA };
+	F = { xH, yA, zH };
+	G = { xH, yH, zA };
 
 	negativeX = XMPlaneFromPoints(B, A, D);
 	negativeZ = XMPlaneFromPoints(A, E, C);
@@ -175,4 +174,11 @@ __inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR posi
 	positiveX = XMPlaneFromPoints(E, F, G);
 	positiveY = XMPlaneFromPoints(C, G, D);
 	positiveZ = XMPlaneFromPoints(F, B, H);
+}
+
+
+void ScratchEngine::Physics::BoundingSphere::SetData(XMVECTOR position, f32 radius)
+{
+	this->center = position;
+	this->radius = radius;
 }

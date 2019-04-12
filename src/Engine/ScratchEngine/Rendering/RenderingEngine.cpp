@@ -301,7 +301,5 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 
 			++j;
 		} while (j < renderableAllocator.GetNumAllocated() && renderableAllocator[j].material == material);
-
-		++j;
 	}
 }

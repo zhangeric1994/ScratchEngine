@@ -87,6 +87,10 @@ void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 
 
 		case Sphere:
+			if (!collider->boundingVolume)
+				collider->boundingVolume = new BoundingSphere();
+
+			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
 			break;
 		}
 	}

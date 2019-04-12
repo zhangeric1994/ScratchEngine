@@ -146,15 +146,21 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
 	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	go2->AddComponent<BoxCollider>();
 
 	GameObject* go3 = new GameObject();
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
 	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go3->AddComponent<SphereCollider>();
 
 	go4 = new GameObject();
 	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
 	go4->AddComponent<BoxCollider>();
+
+	go5 = new GameObject();
+	go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go5->AddComponent<SphereCollider>();
 }
 
 void ScratchEngine::Game::OnResize()
@@ -197,6 +203,7 @@ void ScratchEngine::Game::Update()
 		go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);
 		go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
+		go5->SetLocalPosition(5 * cos(totalTime), 0, 10);
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 

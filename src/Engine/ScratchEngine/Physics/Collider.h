@@ -82,8 +82,12 @@ namespace ScratchEngine
 		f32 radius;
 
 	public:
+		SphereCollider();
 		SphereCollider(f32 radius);
 		~SphereCollider();
+
+
+		f32 GetRadius();
 	};
 
 	//bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);

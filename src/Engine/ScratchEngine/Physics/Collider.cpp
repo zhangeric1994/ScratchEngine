@@ -27,12 +27,12 @@ bool ScratchEngine::Collider::IsOverlappingWith(Collider* other)
 
 
 		case ScratchEngine::Physics::OBB:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<OrientedBoundingBox*>(other->GetBoundingVolume()));
+			return ScratchEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<OrientedBoundingBox*>(other->GetBoundingVolume()));
 			break;
 
 
 		case ScratchEngine::Physics::Sphere:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
+			return ScratchEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -46,12 +46,12 @@ bool ScratchEngine::Collider::IsOverlappingWith(Collider* other)
 
 
 		case ScratchEngine::Physics::OBB:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<OrientedBoundingBox*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
+			return ScratchEngine::Physics::TestOverlap(static_cast<OrientedBoundingBox*>(other->GetBoundingVolume()), static_cast<BoundingSphere*>(GetBoundingVolume()));
 			break;
 
 
 		case ScratchEngine::Physics::Sphere:
-			return ScratchEngine::Physics::TestOverlap(reinterpret_cast<BoundingSphere*>(GetBoundingVolume()), reinterpret_cast<BoundingSphere*>(other->GetBoundingVolume()));
+			return ScratchEngine::Physics::TestOverlap(static_cast<BoundingSphere*>(GetBoundingVolume()), static_cast<BoundingSphere*>(other->GetBoundingVolume()));
 			break;
 		}
 		break;
@@ -111,13 +111,22 @@ ScratchEngine::BoxCollider::~BoxCollider()
 }
 
 
-ScratchEngine::SphereCollider::SphereCollider(f32 radius)
+ScratchEngine::SphereCollider::SphereCollider() : SphereCollider(0.5)
+{
+}
+
+ScratchEngine::SphereCollider::SphereCollider(f32 radius) : Collider(Sphere)
 {
 	this->radius = radius;
 }
 
 ScratchEngine::SphereCollider::~SphereCollider()
 {
+}
+
+f32 ScratchEngine::SphereCollider::GetRadius()
+{
+	return radius;
 }
 
 //
