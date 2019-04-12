@@ -137,14 +137,9 @@ const int ScratchEngine::Physics::OrientedBoundingBox::iEdges[12][2] = { { 0, 1 
 																		 { 6, 7 },
 																		 { 7, 3 } };
 
-ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
+ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size, XMVECTOR offset)
 {
-	SetData(position, rotation, size);
-}
-
-ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size)
-{
-	SetData(worldMatrix, size);
+	SetData(worldMatrix, size, offset);
 }
 
 XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfDiagonalVector() const
@@ -152,65 +147,25 @@ XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfDiagonalVector() co
 	return XMVectorSubtract(H, center);
 }
 
-__inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
+void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMMATRIX worldMatrix, XMVECTOR size, XMVECTOR offset)
 {
-	center = position;
-	this->size = size;
-
-	XMVECTOR halfDiag = XMVector3Rotate(XMVectorScale(size, 0.5f), rotation);
-
-	axisX = XMVector3Normalize(XMVector3Rotate({ 1, 0, 0, 0 }, rotation));
-	axisY = XMVector3Normalize(XMVector3Rotate({ 0, 1, 0, 0 }, rotation));
-	axisZ = XMVector3Normalize(XMVector3Rotate({ 0, 0, 1, 0 }, rotation));
-
-	A = XMVectorSubtract(position, halfDiag);
-	H = XMVectorAdd(position, halfDiag);
-
-	f32 xA = A.m128_f32[0];
-	f32 xH = H.m128_f32[0];
-	f32 yA = A.m128_f32[1];
-	f32 yH = H.m128_f32[1];
-	f32 zA = A.m128_f32[2];
-	f32 zH = H.m128_f32[2];
-
-	B = { xA, yA, zH };
-	C = { xA, yH, zA };
-	D = { xA, yH, zH };
-	E = { xH, yA, zA };
-	F = { xH, yA, zH };
-	G = { xH, yH, zA };
-
-	negativeX = XMPlaneFromPoints(B, A, D);
-	negativeZ = XMPlaneFromPoints(A, E, C);
-	negativeY = XMPlaneFromPoints(E, A, F);
-	positiveX = XMPlaneFromPoints(E, F, G);
-	positiveY = XMPlaneFromPoints(C, G, D);
-	positiveZ = XMPlaneFromPoints(F, B, H);
-}
-
-void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMMATRIX worldMatrix, XMVECTOR size)
-{
-	center = XMVector3Transform({0, 0, 0}, worldMatrix);
-	this->size = size;
+	center = XMVector3Transform(offset, worldMatrix);
+	this->size = XMVectorMultiply({ XMVector3Length(worldMatrix.r[0]).m128_f32[0], XMVector3Length(worldMatrix.r[1]).m128_f32[0], XMVector3Length(worldMatrix.r[2]).m128_f32[0] }, size);
 
 	XMVECTOR halfSize = XMVectorScale(size, 0.5f);
 
-	A = XMVector3Transform(halfSize, worldMatrix);
-	H = XMVector3Transform(XMVectorNegate(halfSize), worldMatrix);
+	f32 x = halfSize.m128_f32[0];
+	f32 y = halfSize.m128_f32[1];
+	f32 z = halfSize.m128_f32[2];
 
-	f32 xA = A.m128_f32[0];
-	f32 xH = H.m128_f32[0];
-	f32 yA = A.m128_f32[1];
-	f32 yH = H.m128_f32[1];
-	f32 zA = A.m128_f32[2];
-	f32 zH = H.m128_f32[2];
-
-	B = { xA, yA, zH };
-	C = { xA, yH, zA };
-	D = { xA, yH, zH };
-	E = { xH, yA, zA };
-	F = { xH, yA, zH };
-	G = { xH, yH, zA };
+	A = XMVector3Transform({-x, -y, -z}, worldMatrix);
+	B = XMVector3Transform({-x, -y, z}, worldMatrix);
+	C = XMVector3Transform({-x, y, -z}, worldMatrix);
+	D = XMVector3Transform({-x, y, z}, worldMatrix);
+	E = XMVector3Transform({x, -y, -z}, worldMatrix);
+	F = XMVector3Transform({-x, y, -z}, worldMatrix);
+	G = XMVector3Transform({x, y, -z}, worldMatrix);
+	H = XMVector3Transform({x, y, z}, worldMatrix);
 
 	axisX = XMVector3Normalize(XMVectorSubtract(E, A));
 	axisY = XMVector3Normalize(XMVectorSubtract(C, A));

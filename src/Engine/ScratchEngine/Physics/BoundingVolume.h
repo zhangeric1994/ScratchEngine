@@ -144,15 +144,13 @@ namespace ScratchEngine
 			};
 
 			OrientedBoundingBox() {}
-			OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
-			OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size);
+			OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 
 
 		public:
 			XMVECTOR GetHalfDiagonalVector() const;
 
-			void SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
-			void SetData(XMMATRIX worldMatrix, XMVECTOR size);
+			void SetData(XMMATRIX worldMatrix, XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 		};
 
 

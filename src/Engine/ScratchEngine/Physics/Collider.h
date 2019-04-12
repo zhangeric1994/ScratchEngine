@@ -58,28 +58,22 @@ namespace ScratchEngine
 	{
 	private:
 		XMVECTOR size;
+		XMVECTOR offset;
 
-		//XMVECTOR min;
-		//XMVECTOR max;
-
-		// float minX, maxX, minY, maxY, minZ, maxZ;
-		// float defaultMinX, defaultMaxX, defaultMinY, defaultMaxY, defaultMinZ, defaultMaxZ;
-
-		//std::vector<XMVECTOR> planes;
-		//std::vector<std::tuple<XMVECTOR, XMVECTOR, XMVECTOR, XMVECTOR>> planesInfo;
-		//std::vector<std::tuple<XMVECTOR, XMVECTOR>> edges;
 
 	public:
-		BoxCollider();
 		BoxCollider(f32 x, f32 y, f32 z);
-		BoxCollider(XMVECTOR size);
+		BoxCollider(XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 		~BoxCollider();
 
 
 		XMVECTOR GetSize() const;
+		XMVECTOR GetOffset() const;
 
 		void SetSize(f32 x, f32 y, f32 z);
-		void SetSize(XMVECTOR size);
+		void SetSize(XMVECTOR xyz);
+		void SetOffset(f32 x, f32 y, f32 z);
+		void SetOffset(XMVECTOR xyz);
 	};
 
 
@@ -87,6 +81,7 @@ namespace ScratchEngine
 	{
 	private:
 		f32 radius;
+
 
 	public:
 		SphereCollider();

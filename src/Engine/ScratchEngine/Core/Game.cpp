@@ -137,7 +137,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	go1 = new GameObject();
 	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
+	go1->SetLocalRotation(45, 0, 90);
 	go1->SetLocalScale(1, 2, 1);
 	go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
 	go1->AddComponent<BoxCollider>();
@@ -152,7 +152,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
 	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go3->AddComponent<SphereCollider>();
 
 	go4 = new GameObject();
 	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
