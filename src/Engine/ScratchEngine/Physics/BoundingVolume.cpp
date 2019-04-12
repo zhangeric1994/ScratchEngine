@@ -18,95 +18,102 @@ ScratchEngine::Physics::AxisAlignedBoundingBox::AxisAlignedBoundingBox(XMVECTOR 
 	max = point2;
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinX() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinX() const
 {
 	return min.m128_f32[0];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxX() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxX() const
 {
 	return max.m128_f32[0];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinY() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinY() const
 {
 	return min.m128_f32[1];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxY() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxY() const
 {
 	return max.m128_f32[1];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinZ() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMinZ() const
 {
 	return min.m128_f32[2];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxZ() const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetMaxZ() const
 {
 	return max.m128_f32[2];
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetVolume() const
+__inline XMVECTOR ScratchEngine::Physics::AxisAlignedBoundingBox::GetCenter() const
 {
-	return _get_box_volume(XMVectorSubtract(max, min));
+	return XMVectorScale(XMVectorAdd(max, min), 0.5f);
 }
 
-void* ScratchEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
+__inline XMVECTOR ScratchEngine::Physics::AxisAlignedBoundingBox::GetHalfSize() const
+{
+	return XMVectorScale(XMVectorSubtract(max, min), 0.5f);
+}
+
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetVolume() const
+{
+	XMVECTOR lwh = XMVectorSubtract(max, min);
+	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
+}
+
+__inline void* ScratchEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
 {
 	return _aligned_malloc(size, 16);
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::operator delete(void* p)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::operator delete(void* p)
 {
 	_aligned_free(p);
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinX(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinX(f32 value)
 {
 	min.m128_f32[0] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxX(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxX(f32 value)
 {
 	max.m128_f32[0] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinY(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinY(f32 value)
 {
 	min.m128_f32[1] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxY(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxY(f32 value)
 {
 	max.m128_f32[1] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinZ(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMinZ(f32 value)
 {
 	min.m128_f32[2] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxZ(f32 value)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxZ(f32 value)
 {
 	max.m128_f32[2] = value;
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::Union(const AxisAlignedBoundingBox& other)
+__inline void ScratchEngine::Physics::AxisAlignedBoundingBox::Union(const AxisAlignedBoundingBox& other)
 {
 	min = XMVectorMin(min, other.min);
 	max = XMVectorMin(max, other.max);
 }
 
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetUnionVolume(const AxisAlignedBoundingBox & other) const
+__inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetUnionVolume(const AxisAlignedBoundingBox & other) const
 {
-	return _get_box_volume(XMVectorSubtract(XMVectorMin(max, other.max), XMVectorMin(min, other.min)));
-}
-
-ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::_get_box_volume(XMVECTOR lwh) const
-{
-	return XMVectorMultiply(lwh, XMVectorMultiply(XMVectorSwizzle(lwh, 1, 2, 0, 3), XMVectorSwizzle(lwh, 2, 0, 1, 3))).m128_f32[0];
+	XMVECTOR lwh = XMVectorSubtract(XMVectorMin(max, other.max), XMVectorMin(min, other.min));
+	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
 }
 
 
@@ -133,6 +140,11 @@ const int ScratchEngine::Physics::OrientedBoundingBox::iEdges[12][2] = { { 0, 1 
 ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size)
 {
 	SetData(position, rotation, size);
+}
+
+ScratchEngine::Physics::OrientedBoundingBox::OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size)
+{
+	SetData(worldMatrix, size);
 }
 
 XMVECTOR ScratchEngine::Physics::OrientedBoundingBox::GetHalfDiagonalVector() const
@@ -167,6 +179,42 @@ __inline void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMVECTOR posi
 	E = { xH, yA, zA };
 	F = { xH, yA, zH };
 	G = { xH, yH, zA };
+
+	negativeX = XMPlaneFromPoints(B, A, D);
+	negativeZ = XMPlaneFromPoints(A, E, C);
+	negativeY = XMPlaneFromPoints(E, A, F);
+	positiveX = XMPlaneFromPoints(E, F, G);
+	positiveY = XMPlaneFromPoints(C, G, D);
+	positiveZ = XMPlaneFromPoints(F, B, H);
+}
+
+void ScratchEngine::Physics::OrientedBoundingBox::SetData(XMMATRIX worldMatrix, XMVECTOR size)
+{
+	center = XMVector3Transform({0, 0, 0}, worldMatrix);
+	this->size = size;
+
+	XMVECTOR halfSize = XMVectorScale(size, 0.5f);
+
+	A = XMVector3Transform(halfSize, worldMatrix);
+	H = XMVector3Transform(XMVectorNegate(halfSize), worldMatrix);
+
+	f32 xA = A.m128_f32[0];
+	f32 xH = H.m128_f32[0];
+	f32 yA = A.m128_f32[1];
+	f32 yH = H.m128_f32[1];
+	f32 zA = A.m128_f32[2];
+	f32 zH = H.m128_f32[2];
+
+	B = { xA, yA, zH };
+	C = { xA, yH, zA };
+	D = { xA, yH, zH };
+	E = { xH, yA, zA };
+	F = { xH, yA, zH };
+	G = { xH, yH, zA };
+
+	axisX = XMVector3Normalize(XMVectorSubtract(E, A));
+	axisY = XMVector3Normalize(XMVectorSubtract(C, A));
+	axisZ = XMVector3Normalize(XMVectorSubtract(B, A));
 
 	negativeX = XMPlaneFromPoints(B, A, D);
 	negativeZ = XMPlaneFromPoints(A, E, C);

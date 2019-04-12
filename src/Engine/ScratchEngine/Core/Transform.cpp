@@ -80,6 +80,14 @@ __inline XMVECTOR ScratchEngine::Transform::GetScale()
 	return parent ? XMVectorMultiply(localScale, parent->GetScale()) : localScale;
 }
 
+__inline XMMATRIX ScratchEngine::Transform::GetWorldMatrix()
+{
+	if (isDirty)
+		__UpdateWorldMatrix();
+
+	return worldMatrix;
+}
+
 __inline ScratchEngine::Transform* ScratchEngine::Transform::GetParent()
 {
 	return parent;
@@ -362,14 +370,6 @@ void ScratchEngine::Transform::SendMessageDown(const Message& message, u32 level
 	if (level-- > 0)
 		for (auto it = children.begin(); it != children.end(); it++)
 			(*it)->SendMessageDown(message, level);
-}
-
-__inline XMMATRIX ScratchEngine::Transform::GetWorldMatrix()
-{
-	if (isDirty)
-		__UpdateWorldMatrix();
-
-	return worldMatrix;
 }
 
 __forceinline void ScratchEngine::Transform::__MarkDirty()

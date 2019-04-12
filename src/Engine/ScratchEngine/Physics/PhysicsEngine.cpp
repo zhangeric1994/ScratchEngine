@@ -82,7 +82,7 @@ void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 			if (!collider->boundingVolume)
 				collider->boundingVolume = new OrientedBoundingBox();
 
-			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), gameObject->GetRotation(), gameObject->GetScale());
+			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), gameObject->GetRotation(), XMVectorMultiply(gameObject->GetLocalScale(), static_cast<BoxCollider*>(collider)->GetSize()));
 			break;
 
 

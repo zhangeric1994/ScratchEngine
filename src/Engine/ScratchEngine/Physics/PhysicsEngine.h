@@ -41,7 +41,6 @@ namespace ScratchEngine
 		public:
 			void UpdateBoundingVolumes();
 			void SolveCollisions();
-			void DrawColliders();
 		};
 	}
 }

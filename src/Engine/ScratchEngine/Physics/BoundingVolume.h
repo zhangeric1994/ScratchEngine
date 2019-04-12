@@ -71,6 +71,8 @@ namespace ScratchEngine
 			f32 GetMaxY() const;
 			f32 GetMinZ() const;
 			f32 GetMaxZ() const;
+			XMVECTOR GetCenter() const;
+			XMVECTOR GetHalfSize() const;
 			f32 GetVolume() const;
 
 			void* operator new(size_t size);
@@ -88,8 +90,6 @@ namespace ScratchEngine
 			void Union(const AxisAlignedBoundingBox& other);
 
 			f32 GetUnionVolume(const AxisAlignedBoundingBox& other) const;
-
-			__forceinline f32 _get_box_volume(XMVECTOR lwh) const;
 		};
 
 
@@ -145,12 +145,14 @@ namespace ScratchEngine
 
 			OrientedBoundingBox() {}
 			OrientedBoundingBox(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
+			OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size);
 
 
 		public:
 			XMVECTOR GetHalfDiagonalVector() const;
 
 			void SetData(XMVECTOR position, XMVECTOR rotation, XMVECTOR size);
+			void SetData(XMMATRIX worldMatrix, XMVECTOR size);
 		};
 
 
@@ -196,10 +198,7 @@ namespace ScratchEngine
 
 			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2)
 			{
-				if (XMVector3Less(aabb1->max, aabb2->min) || XMVector3Less(aabb2->max, aabb1->min))
-					return false;
-
-				return true;
+				return XMVector3LessOrEqual(XMVectorAbs(XMVectorSubtract(aabb1->GetCenter(), aabb2->GetCenter())), XMVectorAdd(aabb1->GetHalfSize(), aabb2->GetHalfSize()));
 			}
 
 			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb)

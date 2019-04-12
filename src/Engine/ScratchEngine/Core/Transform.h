@@ -50,6 +50,7 @@ namespace ScratchEngine
 		XMVECTOR GetRotation();
 		XMVECTOR GetLocalScale();
 		XMVECTOR GetScale();
+		XMMATRIX GetWorldMatrix();
 		Transform* GetParent();
 		Transform* GetChild(size_t index);
 		size_t GetChildCount();
@@ -95,8 +96,6 @@ namespace ScratchEngine
 
 
 	private:
-		XMMATRIX GetWorldMatrix();
-
 		virtual void HandleMessage(const Message& message) { }
 
 		void __MarkDirty();

@@ -97,7 +97,11 @@ BoundingVolume* ScratchEngine::Collider::GetBoundingVolume()
 }
 
 
-ScratchEngine::BoxCollider::BoxCollider() : BoxCollider({1, 1, 1})
+ScratchEngine::BoxCollider::BoxCollider() : BoxCollider(XMVectorSet(1, 1, 1, 0))
+{
+}
+
+ScratchEngine::BoxCollider::BoxCollider(f32 x, f32 y, f32 z) : BoxCollider(XMVectorSet(x, y, z, 0))
 {
 }
 
@@ -108,6 +112,21 @@ ScratchEngine::BoxCollider::BoxCollider(XMVECTOR size) : Collider(OBB)
 
 ScratchEngine::BoxCollider::~BoxCollider()
 {
+}
+
+__inline XMVECTOR ScratchEngine::BoxCollider::GetSize() const
+{
+	return size;
+}
+
+__inline void ScratchEngine::BoxCollider::SetSize(f32 x, f32 y, f32 z)
+{
+	this->size = { x, y, z };
+}
+
+__inline void ScratchEngine::BoxCollider::SetSize(XMVECTOR size)
+{
+	this->size = size;
 }
 
 
@@ -124,7 +143,7 @@ ScratchEngine::SphereCollider::~SphereCollider()
 {
 }
 
-f32 ScratchEngine::SphereCollider::GetRadius()
+__inline f32 ScratchEngine::SphereCollider::GetRadius() const
 {
 	return radius;
 }

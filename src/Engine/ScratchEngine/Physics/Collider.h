@@ -54,7 +54,7 @@ namespace ScratchEngine
 	};
 
 
-	class BoxCollider : public Collider
+	class __declspec(dllexport) BoxCollider : public Collider
 	{
 	private:
 		XMVECTOR size;
@@ -71,12 +71,19 @@ namespace ScratchEngine
 
 	public:
 		BoxCollider();
+		BoxCollider(f32 x, f32 y, f32 z);
 		BoxCollider(XMVECTOR size);
 		~BoxCollider();
+
+
+		XMVECTOR GetSize() const;
+
+		void SetSize(f32 x, f32 y, f32 z);
+		void SetSize(XMVECTOR size);
 	};
 
 
-	class SphereCollider : public Collider
+	class __declspec(dllexport) SphereCollider : public Collider
 	{
 	private:
 		f32 radius;
@@ -87,7 +94,7 @@ namespace ScratchEngine
 		~SphereCollider();
 
 
-		f32 GetRadius();
+		f32 GetRadius() const;
 	};
 
 	//bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, BoxCollider* a, BoxCollider* b);
