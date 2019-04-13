@@ -9,6 +9,10 @@
 
 #include "Vertex.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 using namespace DirectX;
 
 namespace ScratchEngine
@@ -19,7 +23,6 @@ namespace ScratchEngine
 		{
 			friend class RenderingEngine;
 
-
 		private:
 			ID3D11Buffer* vertexBuffer;
 			ID3D11Buffer* indexBuffer;
@@ -29,6 +32,7 @@ namespace ScratchEngine
 		public:
 			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
 			Mesh(ID3D11Device* device, char* filename);
+			Mesh(const Mesh & mesh);
 			~Mesh();
 
 			void* operator new(size_t size);
