@@ -17,6 +17,6 @@
 #include "Core/Transform.h"
 
 #include "Memory/BlockAllocator.h"
-#include "Memory/PoolAllocator.h"
+#include "Memory/PoolAllocator.hpp"
 
 #include "Physics/DynamicBVH.hpp"

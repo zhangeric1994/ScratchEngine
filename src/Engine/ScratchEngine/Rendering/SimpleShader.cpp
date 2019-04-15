@@ -434,6 +434,14 @@ bool ISimpleShader::SetFloat4(std::string name, const DirectX::XMFLOAT4 data)
 }
 
 // --------------------------------------------------------
+// Sets a FLOAT4 variable by name in the local data buffer
+// --------------------------------------------------------
+bool ISimpleShader::SetFloat4(std::string name, const DirectX::XMVECTOR data)
+{
+	return this->SetData(name, &data, sizeof(float) * 4);
+}
+
+// --------------------------------------------------------
 // Sets a MATRIX (4x4) variable by name in the local data buffer
 // --------------------------------------------------------
 bool ISimpleShader::SetMatrix4x4(std::string name, const float data[16])
@@ -445,6 +453,14 @@ bool ISimpleShader::SetMatrix4x4(std::string name, const float data[16])
 // Sets a MATRIX (4x4) variable by name in the local data buffer
 // --------------------------------------------------------
 bool ISimpleShader::SetMatrix4x4(std::string name, const DirectX::XMFLOAT4X4 data)
+{
+	return this->SetData(name, &data, sizeof(float) * 16);
+}
+
+// --------------------------------------------------------
+// Sets a MATRIX (4x4) variable by name in the local data buffer
+// --------------------------------------------------------
+bool ISimpleShader::SetMatrix4x4(std::string name, const DirectX::XMMATRIX data)
 {
 	return this->SetData(name, &data, sizeof(float) * 16);
 }

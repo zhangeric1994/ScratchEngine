@@ -6,7 +6,8 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		struct Material {
+		struct __declspec(dllexport) Material
+		{
 		public:
 			Material(
 				SimpleVertexShader* _vertexShader,
@@ -15,15 +16,22 @@ namespace ScratchEngine
 				ID3D11SamplerState* _sampler
 			);
 
-			SimpleVertexShader* getVertexShader();
-			SimplePixelShader* getPixelShader();
+			SimpleVertexShader* GetVertexShader();
+			SimplePixelShader* GetPixelShader();
+			const float* GetTint() const;
+			ID3D11ShaderResourceView* GetTexture();
+			ID3D11SamplerState* GetSampler();
 
-			ID3D11ShaderResourceView* getTexture();
-			ID3D11SamplerState* getSampler();
+			void SetTint(float r, float g, float b);
+			void SetTint(float r, float g, float b, float a);
+			void SetTint(const float* color);
+
 
 		private:
 			SimpleVertexShader* vertexShader;
 			SimplePixelShader* pixelShader;
+
+			float tint[4];
 
 			ID3D11ShaderResourceView* texture;
 			ID3D11SamplerState* sampler;

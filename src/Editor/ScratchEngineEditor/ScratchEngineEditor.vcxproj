@@ -75,12 +75,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -115,11 +117,12 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\Engine\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"
+xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -163,43 +166,21 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\..\Engine\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\$(IntDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"
+xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="header.h" />
-    <ClInclude Include="LoadSceneFile.h" />
-    <ClInclude Include="Physics\Collider.h" />
-    <ClInclude Include="Physics\Physics.h" />
-    <ClInclude Include="Render\Camera.h" />
-    <ClInclude Include="Render\DXCore.h" />
-    <ClInclude Include="Render\Entity.h" />
-    <ClInclude Include="Render\Game.h" />
-    <ClInclude Include="Render\InputManager.h" />
-    <ClInclude Include="Render\Lights.h" />
-    <ClInclude Include="Render\Material.h" />
-    <ClInclude Include="Render\Mesh.h" />
-    <ClInclude Include="Render\SimpleShader.h" />
-    <ClInclude Include="Render\Vertex.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScratchEngineEditor.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Physics\Collider.cpp" />
-    <ClCompile Include="Physics\Physics.cpp" />
-    <ClCompile Include="Render\Camera.cpp" />
-    <ClCompile Include="Render\DXCore.cpp" />
-    <ClCompile Include="Render\Entity.cpp" />
-    <ClCompile Include="Render\Game.cpp" />
-    <ClCompile Include="Render\InputManager.cpp" />
-    <ClCompile Include="Render\Material.cpp" />
-    <ClCompile Include="Render\Mesh.cpp" />
-    <ClCompile Include="Render\SimpleShader.cpp" />
     <ClCompile Include="ScratchEngineEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -210,17 +191,12 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Render\PixelShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="Render\VertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\..\Engine\ScratchEngine\ScratchEngine.vcxproj">
+      <Project>{a1aefb90-ed2e-4c13-b496-b59ec8445500}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

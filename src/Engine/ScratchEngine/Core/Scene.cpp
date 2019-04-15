@@ -2,36 +2,88 @@
 
 #include "Scene.h"
 
-ScratchEngine::Scene::Scene()
+ScratchEngine::Scene* ScratchEngine::Scene::currentScene = nullptr;
+
+ScratchEngine::Scene* ScratchEngine::Scene::GetCurrentScene()
 {
+	if (!currentScene)
+		currentScene = new Scene();
+
+	return currentScene;
+}
+
+ScratchEngine::Scene::Scene() : roots(8)
+{
+	flag = FLAG_ACTIVE;
 }
 
 ScratchEngine::Scene::~Scene()
 {
+	isDestroyed = true;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		delete *it;
 }
 
-void ScratchEngine::Scene::AddGameObject(GameObject * gameObject)
+size_t ScratchEngine::Scene::AddRootObject(GameObject* gameObject)
 {
-	gameObjects.push_back(gameObject);
+	roots.push_back(gameObject);
+
+	return roots.size() - 1;
 }
 
-void ScratchEngine::Scene::Update()
+bool ScratchEngine::Scene::RemoveRootObject(GameObject* gameObject)
 {
-	stack<GameObject*> s;
+	if (isDestroyed)
+		return true;
 
-	for (auto it = gameObjects.begin(); it != gameObjects.end(); it++)
-		s.push(*it);
+	if (gameObject->parent)
+		return false;
 
-	GameObject* current;
-	while (!s.empty())
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		if (*it == gameObject)
+		{
+			roots.erase(it);
+			break;
+		}
+
+	return true;
+}
+
+void ScratchEngine::Scene::Update(f32 deltaTime, f32 currentTime)
+{
+	Stack<GameObject*> s;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		s.Push(*it);
+
+	while (s.GetSize())
 	{
-		current = s.top();
+		GameObject* gameObject = s.Pop();
 
-		s.pop();
+		gameObject->Update(deltaTime, currentTime);
 
-		current->Update();
+		for (auto it = gameObject->children.begin(); it != gameObject->children.end(); it++)
+			if (static_cast<GameObject*>(*it)->IsActiveSelf())
+				s.Push(static_cast<GameObject*>(*it));
+	}
+}
 
-		for (auto it = current->components.begin(); it != current->components.end(); it++)
-			(*it).second->Update();
+void ScratchEngine::Scene::LateUpdate(f32 deltaTime, f32 currentTime)
+{
+	Stack<GameObject*> s;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		s.Push(*it);
+
+	while (s.GetSize())
+	{
+		GameObject* gameObject = s.Pop();
+
+		gameObject->LateUpdate(deltaTime, currentTime);
+
+		for (auto it = gameObject->children.begin(); it != gameObject->children.end(); it++)
+			if (static_cast<GameObject*>(*it)->IsActiveSelf())
+				s.Push(static_cast<GameObject*>(*it));
 	}
 }

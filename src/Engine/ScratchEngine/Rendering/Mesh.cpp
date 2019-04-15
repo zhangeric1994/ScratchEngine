@@ -1,12 +1,8 @@
 #include "Mesh.h"
+#include "RenderingEngine.h"
 
-ScratchEngine::Rendering::Mesh::Mesh(
-	Vertex* vertices,
-	int verticesNumber,
-	unsigned int* indices,
-	int indicesNumber,
-	ID3D11Device* device) {
-
+ScratchEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
+{
 	CreateMesh(vertices, verticesNumber, indices, indicesNumber, device);
 }
 
@@ -185,6 +181,16 @@ ScratchEngine::Rendering::Mesh::~Mesh() {
 	//release vertex buffer and index buffer
 	if (vertexBuffer) { vertexBuffer->Release(); }
 	if (indexBuffer) { indexBuffer->Release(); }
+}
+
+void* ScratchEngine::Rendering::Mesh::operator new(size_t size)
+{
+	return RenderingEngine::GetSingleton()->materialAllocator.Allocate();
+}
+
+void ScratchEngine::Rendering::Mesh::operator delete(void * p)
+{
+	RenderingEngine::GetSingleton()->materialAllocator.Free(p);
 }
 
 ID3D11Buffer* ScratchEngine::Rendering::Mesh::GetVertexBuffer() { return vertexBuffer; }

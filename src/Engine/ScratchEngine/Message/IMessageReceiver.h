@@ -12,7 +12,7 @@ namespace ScratchEngine
 	class IMessageReceiver
 	{
 	public:
-		virtual void SendMessage(const Message& message) = 0;
+		virtual void SendMessage_(const Message& message) = 0;
 		virtual void SendMessageUp(const Message& message, u32 level = UINT_MAX) = 0;
 		virtual void SendMessageDown(const Message& message, u32 level = UINT_MAX) = 0;
 

@@ -1,21 +1,31 @@
 #include "GameObject.h"
 
-ScratchEngine::GameObject * ScratchEngine::GameComponent::GetGameObject()
+__inline ScratchEngine::GameObject * ScratchEngine::GameComponent::GetGameObject()
 {
 	return gameObject;
 }
 
-void ScratchEngine::GameComponent::SendMessage(const Message & message)
+__inline bool ScratchEngine::GameComponent::IsActive()
 {
-	gameObject->SendMessage(message);
+	return IsActiveSelf() && gameObject->IsActive();
 }
 
-void ScratchEngine::GameComponent::SendMessageUp(const Message & message, u32 level)
+__inline bool ScratchEngine::GameComponent::IsActiveSelf()
+{
+	return isActive;
+}
+
+__inline void ScratchEngine::GameComponent::SendMessage_(const Message & message)
+{
+	gameObject->SendMessage_(message);
+}
+
+__inline void ScratchEngine::GameComponent::SendMessageUp(const Message & message, u32 level)
 {
 	gameObject->SendMessageUp(message, level);
 }
 
-void ScratchEngine::GameComponent::SendMessageDown(const Message & message, u32 level)
+__inline void ScratchEngine::GameComponent::SendMessageDown(const Message & message, u32 level)
 {
 	gameObject->SendMessageDown(message, level);
 }

@@ -1,26 +1,89 @@
+#ifndef SCENE_H
+#define SCENE_H
 #pragma once
 
 #include <vector>
 
-#include "GameObject.h"
+#include "../Common/LinkedList.hpp"
+#include "../Common/Stack.hpp"
 
-using namespace std;
+#include "GameObject.h"
+#include "IUpdatable.h"
+
 
 namespace ScratchEngine
 {
-	class Scene
+	class Scene : private IUpdatable
 	{
-	private:
-		vector<GameObject*> gameObjects;
+		friend class Game;
+		friend class GameObject;
 
+
+	private:
+		static Scene* currentScene;
 	
+
 	public:
+		static Scene* GetCurrentScene();
+
+
+	private:
+		vector<GameObject*> roots;
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isActive : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool isDestroyed : 1;
+			};
+		};
+
 		Scene();
 		~Scene();
 
-		void AddGameObject(GameObject* gameObject);
+		size_t AddRootObject(GameObject* gameObject);
+		bool RemoveRootObject(GameObject* gameObject);
 	
-	private:
-		void Update();
+		void Update(f32 deltaTime, f32 currentTime);
+		void LateUpdate(f32 deltaTime, f32 currentTime);
 	};
 }
+#endif

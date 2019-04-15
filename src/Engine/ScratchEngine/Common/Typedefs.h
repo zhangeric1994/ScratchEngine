@@ -3,7 +3,7 @@
 namespace ScratchEngine
 {
 	typedef char i8;
-	typedef i8 byte;
+	//typedef i8 byte;
 	typedef short i16;
 	typedef int i32;
 	typedef long long i64;
@@ -34,4 +34,8 @@ namespace ScratchEngine
 	typedef void(*Callback)(void* pUserData);
 
 	#define null_index -1
+
+	#define FLAG_ACTIVE 0x1
+	#define FLAG_STATIC 0x2
+	#define FLAG_DESTROYED 0x80000000
 }

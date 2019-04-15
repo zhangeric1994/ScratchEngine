@@ -16,6 +16,7 @@ namespace ScratchEngine
 	public:
 		Stack();
 		Stack(i32 capacity);
+		~Stack();
 
 		i32 GetSize() const;
 
@@ -26,11 +27,8 @@ namespace ScratchEngine
 		void Clear();
 	};
 
-	template<class T> inline Stack<T>::Stack()
+	template<class T> inline Stack<T>::Stack() : Stack(16)
 	{
-		this->capacity = 16;
-		this->memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
-		this->top = null_index;
 	}
 
 	template<class T> inline Stack<T>::Stack(i32 capacity)
@@ -38,6 +36,11 @@ namespace ScratchEngine
 		this->capacity = capacity;
 		this->memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
 		this->top = null_index;
+	}
+
+	template<class T> inline Stack<T>::~Stack()
+	{
+		_aligned_free(memory);
 	}
 
 	template<class T> inline i32 Stack<T>::GetSize() const

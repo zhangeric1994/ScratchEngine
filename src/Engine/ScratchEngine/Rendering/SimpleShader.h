@@ -58,7 +58,7 @@ struct SimpleSampler
 // --------------------------------------------------------
 // Base abstract class for simplifying shader handling
 // --------------------------------------------------------
-class ISimpleShader
+class __declspec(dllexport) ISimpleShader
 {
 public:
 	ISimpleShader(ID3D11Device* device, ID3D11DeviceContext* context);
@@ -88,8 +88,10 @@ public:
 	bool SetFloat3(std::string name, const DirectX::XMFLOAT3 data);
 	bool SetFloat4(std::string name, const float data[4]);
 	bool SetFloat4(std::string name, const DirectX::XMFLOAT4 data);
+	bool SetFloat4(std::string name, const DirectX::XMVECTOR data);
 	bool SetMatrix4x4(std::string name, const float data[16]);
 	bool SetMatrix4x4(std::string name, const DirectX::XMFLOAT4X4 data);
+	bool SetMatrix4x4(std::string name, const DirectX::XMMATRIX data);
 
 	// Setting shader resources
 	virtual bool SetShaderResourceView(std::string name, ID3D11ShaderResourceView* srv) = 0;
@@ -148,7 +150,7 @@ protected:
 // --------------------------------------------------------
 // Derived class for VERTEX shaders ///////////////////////
 // --------------------------------------------------------
-class SimpleVertexShader : public ISimpleShader
+class __declspec(dllexport) SimpleVertexShader : public ISimpleShader
 {
 public:
 	SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext* context);
@@ -174,7 +176,7 @@ protected:
 // --------------------------------------------------------
 // Derived class for PIXEL shaders ////////////////////////
 // --------------------------------------------------------
-class SimplePixelShader : public ISimpleShader
+class __declspec(dllexport) SimplePixelShader : public ISimpleShader
 {
 public:
 	SimplePixelShader(ID3D11Device* device, ID3D11DeviceContext* context);
