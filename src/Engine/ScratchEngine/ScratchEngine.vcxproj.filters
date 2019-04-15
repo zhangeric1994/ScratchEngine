@@ -132,55 +132,6 @@
     <ClInclude Include="Common\Stack.hpp">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\RenderingEngine.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Renderer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Renderable.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\LinkedList.hpp">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\Settings.h">
-      <Filter>Header Files\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\IUpdatable.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\PoolAllocator.hpp">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Memory\StackAllocator.hpp">
-      <Filter>Header Files\Memory</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Viewer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Global.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Light.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\LightSource.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Multithreading\WorkerThread.h">
-      <Filter>Header Files\Multithreading</Filter>
-    </ClInclude>
-    <ClInclude Include="Multithreading\Barrier.h">
-      <Filter>Header Files\Multithreading</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Game.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\DXCore.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ScratchEngine.cpp">
@@ -255,7 +206,6 @@
     <ClCompile Include="Multithreading\Barrier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Core\AIBehaviors.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>

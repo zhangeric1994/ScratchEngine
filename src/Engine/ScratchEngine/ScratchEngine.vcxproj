@@ -165,12 +165,11 @@
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\GameComponent.h" />
     <ClInclude Include="Core\GameObject.h" />
-    <ClInclude Include="Core\Global.h" />
-    <ClInclude Include="Core\IUpdatable.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
     <ClInclude Include="header.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Memory\Allocator.h" />
     <ClInclude Include="Memory\Block.h" />
     <ClInclude Include="Memory\BlockAllocator.h" />
@@ -208,7 +207,6 @@
     <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
-    <ClCompile Include="Core\Global.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
