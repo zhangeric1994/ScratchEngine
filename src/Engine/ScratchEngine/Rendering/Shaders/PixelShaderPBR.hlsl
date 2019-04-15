@@ -47,7 +47,8 @@ SamplerComparisonState shadowSampler : register(s1);
 //distribution function is GGX
 float DistributionGGX(float3 n, float3 h, float a) {
 	float a2 = a * a;
-	float NdotH = max(dot(n, h), 0.0f);
+	a2 = a2 * a2;
+	float NdotH = saturate(dot(n, h));
 	float NdotH2 = NdotH * NdotH;
 
 	float nom = a2; 
@@ -66,8 +67,8 @@ float GeometrySchlickGGX(float NdotV, float k) {
 }
 
 float GeometrySmith(float3 N, float3 V, float3 L, float k) {
-	float NdotV = max(dot(N, V), 0.0f);
-	float NdotL = max(dot(N, L), 0.0f);
+	float NdotV = saturate(dot(N, V));
+	float NdotL = saturate(dot(N, L));
 
 	float ggx1 = GeometrySchlickGGX(NdotV, k);
 	float ggx2 = GeometrySchlickGGX(NdotL, k);
@@ -77,17 +78,17 @@ float GeometrySmith(float3 N, float3 V, float3 L, float k) {
 
 //calculate k parameter in geometry function
 float KIBL(float roughness) {
-	return (roughness * roughness) / 2;
+	return pow(roughness + 1, 2) / 8.0f;
 }
 
 float3 fresnelSchlick(float cosTheta, float3 f0) {
-	return f0 + (1.0f - f0) * pow(1.0f - cosTheta, 5.0f);
+	return f0 + (1.0f - f0) * pow(1.0f - cosTheta, 5);
 }
 
 //calculate f0
 float3 calculateF0(float3 surfaceColor, float metalness) {
-	float3 f0 = float3(0.04f, 0.04f, 0.04f);
-	f0 = saturate(lerp(f0, surfaceColor, metalness));
+	//float3 f0 = float3(0.04f, 0.04f, 0.04f);
+	float3 f0 = lerp(0.04f.rrr, surfaceColor, metalness);
 	return f0;
 }
 
@@ -98,16 +99,16 @@ float diffusePBR(float3 normal, float3 wi) {
 
 //Multiple kd in render equation with diffuse
 float3 DiffuseEnergyConserve(float diffuse, float3 spec, float metalness) {
-	return diffuse * ((1 - saturate(spec) * (1 - metalness)));
+	return diffuse * ((1 - saturate(spec)) * (1 - metalness));
 }
 
 //Microfacet BRDF calculation
-float3 MicrofacetBRDF(float3 normal, float3 wo, float wi, float roughness, float metalness, float3 surfaceColor) {
+float3 MicrofacetBRDF(float3 n, float3 wi, float3 wo, float roughness, float metalness, float3 surfaceColor) {
 	//halfway vector
-	float3 h = normalize(wo + wi);
+	float3 h = normalize(wi + wo);
 
 	//normal dot outgoing(view) direction wo
-	float NdotV = saturate(dot(normal, wo));
+	float NdotV = saturate(dot(n, wo));
 	
 	//f0
 	float3 f0 = calculateF0(surfaceColor, metalness);
@@ -115,11 +116,11 @@ float3 MicrofacetBRDF(float3 normal, float3 wo, float wi, float roughness, float
 	//k in geometry function
 	float k = KIBL(roughness);
 
-	float D = DistributionGGX(normal, h, roughness);
+	float D = DistributionGGX(n, h, roughness);
 	float3 F = fresnelSchlick(NdotV, f0);
-	float G = GeometrySmith(normal, wo, wi, k);
+	float G = GeometrySmith(n, wo, wi, k);
 
-	return (D * F * G) / (4 * max(dot(normal, wo), dot(normal, wi)));
+	return (D * F * G) / (4 * dot(n, wi) * dot(n, wo));
 }
 
 //function to calculate directional light pbr
@@ -131,16 +132,11 @@ float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness,
 	float diffuse = diffusePBR(normal, wi);
 	float3 diffuseColor = DiffuseEnergyConserve(diffuse, specColor, metalness);
 
-	//return (diffuseColor * surfaceColor + specColor) * light.intensity * light.ambientColor;
-	//return light.ambientColor;
-	//return diffuseColor * surfaceColor;
-
-	//return diffuseColor * surfaceColor;
-	//return specColor;
 	return (diffuseColor * surfaceColor + specColor);
 }
 
 //End of PBR functions
+
 
 float4 main(VertexToPixel input) : SV_TARGET {	
 	//normalize input normal and tangent
@@ -161,7 +157,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
 	//param for light calculation
 	float3 normal = input.normal;
-	float3 wi = -normalize(light.direction);
+	float3 wi = normalize(-light.direction);
 	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
 
 	//texture color
@@ -180,8 +176,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
 
 	//calculate light
-	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor, light) * shadowAmount;
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
 
-	//return float4(1.0f, 1.0f, 1.0f, 1.0f);
 	return float4(result, 1.0f);
 }

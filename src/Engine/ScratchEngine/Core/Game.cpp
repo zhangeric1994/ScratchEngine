@@ -48,11 +48,9 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-	samplerDesc.MinLOD = 0;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//samplerDesc.MaxLOD = 2;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
