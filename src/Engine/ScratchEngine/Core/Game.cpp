@@ -180,7 +180,9 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
 	
 	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyA1.png", 0, &texture);
+
 	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyB1.png", 0, &texture);
+
 	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
 	
 	mesh = new Mesh(device, filename);
@@ -204,7 +206,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go2 = new GameObject();
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 2, 0);
+
 	//go2->SetLocalScale(1, 1, 1);
+
+	//go2->SetLocalScale(.01, .01, .01);
 	go2->AddComponent<Renderer>(simpleMaterial, mesh);
 
 	GameObject* go3 = new GameObject();
