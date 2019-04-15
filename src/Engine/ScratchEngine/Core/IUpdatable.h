@@ -6,7 +6,7 @@
 
 namespace ScratchEngine
 {
-	struct IUpdatable
+	struct __declspec(dllexport) IUpdatable
 	{
 	private:
 		virtual void Update(f32 deltaTime, f32 currentTime) = 0;

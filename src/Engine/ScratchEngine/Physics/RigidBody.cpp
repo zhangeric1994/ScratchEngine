@@ -1,6 +1,9 @@
+#include "../Core/GameObject.h"
+
 #include "RigidBody.h"
 
-ScratchEngine::Physics::RigidBody::RigidBody()
+
+ScratchEngine::RigidBody::RigidBody()
 {
 	velocity = XMVectorZero();
 	angularVelocity = XMVectorZero();
@@ -9,7 +12,7 @@ ScratchEngine::Physics::RigidBody::RigidBody()
 	isAffectedByGravity = true;
 }
 
-ScratchEngine::Physics::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity)
+ScratchEngine::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity)
 {
 	this->velocity = velocity;
 	this->angularVelocity = angularVelocity;
@@ -18,13 +21,13 @@ ScratchEngine::Physics::RigidBody::RigidBody(XMVECTOR velocity, XMVECTOR angular
 	isAffectedByGravity = true;
 }
 
-void ScratchEngine::Physics::RigidBody::ApplyForce(XMVECTOR force)
+void ScratchEngine::RigidBody::ApplyForce(XMVECTOR force)
 {
 	if (!gameObject->IsStatic())
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));
 }
 
-void ScratchEngine::Physics::RigidBody::ApplyAngularForce(XMVECTOR force)
+void ScratchEngine::RigidBody::ApplyAngularForce(XMVECTOR force)
 {
 	if (!gameObject->IsStatic())
 		XMVectorAdd(velocity, XMVectorScale(force, 1 / mass));

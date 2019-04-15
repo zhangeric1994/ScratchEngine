@@ -14,7 +14,7 @@ namespace ScratchEngine
 			size_t size;				// 8 bytes
 			union						// 48 bytes <-- actual data starts from here
 			{
-				byte data[1];
+				i8 data[1];
 
 				struct
 				{

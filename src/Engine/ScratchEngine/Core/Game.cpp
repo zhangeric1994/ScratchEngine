@@ -4,13 +4,18 @@
 
 #include "../Core/Global.h"
 #include "../Core/Scene.h"
-
+#include "../Physics/PhysicsEngine.h"
 #include "../Rendering/RenderingEngine.h"
 #include "../Rendering/Mesh.h"
 
 using namespace DirectX;
 using namespace ScratchEngine;
+using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
+
+
+Material* ScratchEngine::Game::greenMaterial = nullptr;
+Material* ScratchEngine::Game::redMaterial = nullptr;
 
 ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true), frameBarrier(2)
 {
@@ -18,12 +23,13 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	pixelShader = nullptr;
 	vsZPrepass = nullptr;
 
-	simpleMaterial = nullptr;
+	greenMaterial = nullptr;
+	redMaterial = nullptr;
 
 	zPrepassDepthStencilState = nullptr;
 	
-	mesh = nullptr;
-	mesh1 = nullptr;
+	sphereMesh = nullptr;
+	cubeMesh = nullptr;
 
 	Global::SetScreenRatio(1280.0f / 720.0f);
 
@@ -45,19 +51,22 @@ ScratchEngine::Game::~Game()
 	if (vsZPrepass)
 		delete vsZPrepass;
 
-	if (simpleMaterial)
-		delete simpleMaterial;
+	if (greenMaterial)
+		delete greenMaterial;
+
+	if (redMaterial)
+		delete redMaterial;
 
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
 	delete Scene::GetCurrentScene();
 
-	if (mesh)
-		delete mesh;
+	if (sphereMesh)
+		delete sphereMesh;
 	
-	if (mesh1)
-		delete mesh1;
+	if (cubeMesh)
+		delete cubeMesh;
 
 	RenderingEngine::Stop();
 }
@@ -106,15 +115,16 @@ void ScratchEngine::Game::CreateMatrces()
 
 void ScratchEngine::Game::CreateBasicGeometry()
 {
-	char* filename = (char*)"../Assets/Models/sphere.obj";
-	char* cubefile = (char*)"../Assets/Models/cube.obj";
-	
-	mesh = new Mesh(device, filename);
-	mesh1 = new Mesh(device, cubefile);
+	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
+	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
-	
+	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	greenMaterial->SetTint(0, 1, 0);
+
+	redMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	redMaterial->SetTint(1, 0, 0);
+
 
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
@@ -127,21 +137,29 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	go1 = new GameObject();
 	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
+	go1->SetLocalRotation(45, 0, 90);
 	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
+	go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	go1->AddComponent<BoxCollider>();
 
 	go2 = new GameObject();
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh1);
+	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	go2->AddComponent<BoxCollider>();
 
 	GameObject* go3 = new GameObject();
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(simpleMaterial, mesh);
+	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
 
-	GameObject* go4 = new GameObject();
+	go4 = new GameObject();
+	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	go4->AddComponent<BoxCollider>();
+
+	go5 = new GameObject();
+	go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go5->AddComponent<SphereCollider>();
 }
 
 void ScratchEngine::Game::OnResize()
@@ -183,6 +201,13 @@ void ScratchEngine::Game::Update()
 
 		go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);
+		go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
+		go5->SetLocalPosition(5 * cos(totalTime), 0, 10);
+
+		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
+
+		physicsEngine->UpdateBoundingVolumes();
+		physicsEngine->SolveCollisions();
 
 		frameBarrier.Wait();
 	}

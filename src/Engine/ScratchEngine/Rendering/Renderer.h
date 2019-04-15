@@ -30,6 +30,11 @@ namespace ScratchEngine
 		Renderer();
 		Renderer(Material* material, Mesh* mesh);
 		~Renderer();
+
+
+	private:
+		void OnBeginOverlapping(GameObject* other);
+		void OnEndOverlapping(GameObject* other);
 	};
 
 

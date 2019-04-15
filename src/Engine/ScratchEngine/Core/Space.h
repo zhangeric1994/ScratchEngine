@@ -2,6 +2,7 @@
 
 enum Space
 {
-	WORLD,
 	SELF,
+	PARENT,
+	WORLD,
 };

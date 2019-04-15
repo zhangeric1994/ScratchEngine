@@ -1,3 +1,5 @@
+#include "../Core/Game.h"
+
 #include "Renderer.h"
 #include "RenderingEngine.h"
 
@@ -23,4 +25,14 @@ ScratchEngine::Renderer::~Renderer()
 		RenderingEngine::GetSingleton()->DestroyRenderable(renderable);
 
 	RenderingEngine::GetSingleton()->RemoveRenderer(this);
+}
+
+void ScratchEngine::Renderer::OnBeginOverlapping(GameObject * other)
+{
+	material = Game::redMaterial;
+}
+
+void ScratchEngine::Renderer::OnEndOverlapping(GameObject * other)
+{
+	material = Game::greenMaterial;
 }
