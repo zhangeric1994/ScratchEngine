@@ -9,37 +9,42 @@ struct VertexToPixel {
 	float4 shadowPos : SHADOW;
 };
 
-struct LightSource
-{
+struct LightSource {
 	float4 ambientColor;
 	float4 diffuseColor;
 	int type;
 	float3 position;
 	float range;
 	float3 direction;
+	//float intensity;
 };
 
-cbuffer LightSourceData : register(b1)
-{
+struct material {
+	float3 albedo;
+	float roughness;
+	float metalness;
+};
+
+cbuffer LightSourceData : register(b1) {
 	LightSource light;
 };
 
-cbuffer CameraData : register(b2)
-{
+cbuffer CameraData : register(b2) {
 	float3 cameraPosition;
 };
 
 Texture2D diffuseTexture : register(t0);
-
 Texture2D normalMap : register(t1);
-
 Texture2D ShadowMap	: register(t2);
+Texture2D roughnessMap : register(t3);
+Texture2D metalnessMap : register(t4);
 
 SamplerState basicSampler : register(s0);
 
 SamplerComparisonState shadowSampler : register(s1);
 
-//PBR functions
+//returns result of the distribution function
+//distribution function is GGX
 float DistributionGGX(float3 n, float3 h, float a) {
 	float a2 = a * a;
 	float NdotH = max(dot(n, h), 0.0f);
@@ -52,6 +57,7 @@ float DistributionGGX(float3 n, float3 h, float a) {
 	return nom / denom;
 }
 
+//returns result of the geometry function
 float GeometrySchlickGGX(float NdotV, float k) {
 	float nom = NdotV;
 	float denom = NdotV * (1.0f - k) + k;
@@ -64,17 +70,118 @@ float GeometrySmith(float3 N, float3 V, float3 L, float k) {
 	float NdotL = max(dot(N, L), 0.0f);
 
 	float ggx1 = GeometrySchlickGGX(NdotV, k);
-	float ggx2 = GEometrySchlickGGX(NdotL, k);
+	float ggx2 = GeometrySchlickGGX(NdotL, k);
 
 	return ggx1 * ggx2;
 }
 
-float fresnelSchlick(float cosTheta, float3 f0) {
+//calculate k parameter in geometry function
+float KIBL(float roughness) {
+	return (roughness * roughness) / 2;
+}
+
+float3 fresnelSchlick(float cosTheta, float3 f0) {
 	return f0 + (1.0f - f0) * pow(1.0f - cosTheta, 5.0f);
+}
+
+//calculate f0
+float3 calculateF0(float3 surfaceColor, float metalness) {
+	float3 f0 = float3(0.04f, 0.04f, 0.04f);
+	f0 = saturate(lerp(f0, surfaceColor, metalness));
+	return f0;
+}
+
+//Lambert diffuse function
+float diffusePBR(float3 normal, float3 wi) {
+	return saturate(dot(normal, wi));
+}
+
+//Multiple kd in render equation with diffuse
+float3 DiffuseEnergyConserve(float diffuse, float3 spec, float metalness) {
+	return diffuse * ((1 - saturate(spec) * (1 - metalness)));
+}
+
+//Microfacet BRDF calculation
+float3 MicrofacetBRDF(float3 normal, float3 wo, float wi, float roughness, float metalness, float3 surfaceColor) {
+	//halfway vector
+	float3 h = normalize(wo + wi);
+
+	//normal dot outgoing(view) direction wo
+	float NdotV = saturate(dot(normal, wo));
+	
+	//f0
+	float3 f0 = calculateF0(surfaceColor, metalness);
+
+	//k in geometry function
+	float k = KIBL(roughness);
+
+	float D = DistributionGGX(normal, h, roughness);
+	float3 F = fresnelSchlick(NdotV, f0);
+	float G = GeometrySmith(normal, wo, wi, k);
+
+	return (D * F * G) / (4 * max(dot(normal, wo), dot(normal, wi)));
+}
+
+//function to calculate directional light pbr
+float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness, float metalness, float3 surfaceColor, LightSource light) {
+	//spec color
+	float3 specColor = MicrofacetBRDF(normal, wo, wi, roughness, metalness, surfaceColor);
+
+	//diffuse color
+	float diffuse = diffusePBR(normal, wi);
+	float3 diffuseColor = DiffuseEnergyConserve(diffuse, specColor, metalness);
+
+	//return (diffuseColor * surfaceColor + specColor) * light.intensity * light.ambientColor;
+	//return light.ambientColor;
+	//return diffuseColor * surfaceColor;
+
+	//return diffuseColor * surfaceColor;
+	//return specColor;
+	return (diffuseColor * surfaceColor + specColor);
 }
 
 //End of PBR functions
 
-float4 main(VertexToPixel input) : SV_TARGET {
-	return float4(1.0f, 1.0f, 1.0f, 1.0f);
+float4 main(VertexToPixel input) : SV_TARGET {	
+	//normalize input normal and tangent
+	input.normal = normalize(input.normal);
+	input.tangent = normalize(input.tangent);
+
+	//normal map
+	//change the normal of each point
+	float3 textureNormal = normalMap.Sample(basicSampler, input.uv).rgb * 2 - 1;
+
+	float3 N = input.normal;
+	float3 T = input.tangent;
+	float3 B = cross(T, N);
+
+	float3x3 TBN = float3x3(T, B, N);
+
+	input.normal = normalize(mul(textureNormal, TBN));
+
+	//param for light calculation
+	float3 normal = input.normal;
+	float3 wi = -normalize(light.direction);
+	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
+
+	//texture color
+	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
+
+	//roughness
+	float roughness = roughnessMap.Sample(basicSampler, input.uv).r;
+
+	//metalness map
+	float metalness = metalnessMap.Sample(basicSampler, input.uv).r;
+
+	//shadow map
+	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
+	shadowUV.y = 1.0f - shadowUV.y;
+	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
+	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
+
+	//calculate light
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor, light) * shadowAmount;
+
+	//return float4(1.0f, 1.0f, 1.0f, 1.0f);
+	return float4(result, 1.0f);
 }

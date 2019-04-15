@@ -251,7 +251,7 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
+void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, ID3D11ShaderResourceView* roughnessMap, ID3D11ShaderResourceView* metalnessMap)
 {
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
@@ -294,6 +294,8 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
 		pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
 		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
+		pixelShader->SetShaderResourceView("roughnessMap", roughnessMap);
+		pixelShader->SetShaderResourceView("metalnessMap", metalnessMap);
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();

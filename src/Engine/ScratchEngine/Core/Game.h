@@ -78,5 +78,10 @@ namespace ScratchEngine
 
 		//cube map
 		CubeMap* cubeMap;
+
+		//PBR textures
+		ID3D11ShaderResourceView* roughnessMap;
+		ID3D11ShaderResourceView* metalnessMap;
+
 	};
 }

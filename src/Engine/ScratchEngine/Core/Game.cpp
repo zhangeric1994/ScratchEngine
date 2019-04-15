@@ -28,6 +28,8 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	sampler = 0;
 	texture = 0;
 	normalMap = 0;
+	metalnessMap = 0;
+	roughnessMap = 0;
 
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
@@ -61,30 +63,22 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 #endif
 }
 
-ScratchEngine::Game::~Game()
-{
-	if (vertexShader)
-		delete vertexShader;
+ScratchEngine::Game::~Game() {
+	if (vertexShader) delete vertexShader;
 
-	if (pixelShader)
-		delete pixelShader;
+	if (pixelShader) delete pixelShader;
 	
-	if (vsZPrepass)
-		delete vsZPrepass;
+	if (vsZPrepass) delete vsZPrepass;
 
-	if (simpleMaterial)
-		delete simpleMaterial;
+	if (simpleMaterial) delete simpleMaterial;
 
-	if (zPrepassDepthStencilState)
-		zPrepassDepthStencilState->Release();
+	if (zPrepassDepthStencilState) zPrepassDepthStencilState->Release();
 
 	delete Scene::GetCurrentScene();
 
-	if (mesh)
-		delete mesh;
+	if (mesh) delete mesh;
 	
-	if (mesh1)
-		delete mesh1;
+	if (mesh1) delete mesh1;
 
 	if (texture) texture->Release();
 
@@ -95,6 +89,10 @@ ScratchEngine::Game::~Game()
 	if (shadow) delete shadow;
 
 	if (cubeMap) delete cubeMap;
+
+	if (roughnessMap) roughnessMap->Release();
+
+	if (metalnessMap) metalnessMap->Release();
 
 	RenderingEngine::Stop();
 }
@@ -118,7 +116,7 @@ void ScratchEngine::Game::LoadShaders()
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 	std::wstring wVertex = wpath + std::wstring(L"/VertexShader.cso");
-	std::wstring wPixel = wpath + std::wstring(L"/PixelShader.cso");
+	std::wstring wPixel = wpath + std::wstring(L"/PixelShaderPBR.cso");
 	const wchar_t* vertex = wVertex.c_str();
 	const wchar_t* pixel = wPixel.c_str();
 
@@ -177,14 +175,27 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rock.jpg", 0, &texture);
+	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture);
+
+	if (FAILED(isok)) printf("load albedo texture error");
 	
 	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyA1.png", 0, &texture);
 
 	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyB1.png", 0, &texture);
 
-	CreateWICTextureFromFile(device, context, L"../Assets/Textures/WhiteMarble/rockNormals.jpg", 0, &normalMap);
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap);
+
+	if (FAILED(isok)) printf("load normal map error");
+
+	//load roughness map
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap);
+
+	if (FAILED(isok)) printf("load roughness map error");
+	//load metalness map
+	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap);
 	
+	if (FAILED(isok)) printf("load metalness map failed");
+
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 
@@ -304,7 +315,7 @@ void ScratchEngine::Game::Draw()
 
 		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);*/
 
-		renderingEngine->DrawForward(context);
+		renderingEngine->DrawForward(context, roughnessMap, metalnessMap);
 
 		renderingEngine->RenderCubeMap(context, cubeMap);
 
