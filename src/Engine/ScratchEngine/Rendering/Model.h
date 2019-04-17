@@ -3,12 +3,17 @@
 #include <fstream> 
 #include <vector>
 #include <DirectXMath.h>
-#include "Rendering/Mesh.h"
+#include "Mesh.h"
 
-#include "Common/Typedefs.h"
-#include "Rendering/Vertex.h"
+#include "../Common/Typedefs.h"
+#include "Vertex.h"
+
+#include "assimp/Importer.hpp"
+#include "assimp/postprocess.h"
+#include "assimp/scene.h"
 
 using namespace DirectX;
+using namespace ScratchEngine::Rendering;
 
 namespace ScratchEngine
 {
@@ -19,19 +24,17 @@ namespace ScratchEngine
 			friend class RenderingEngine;
 
 		private:
-			std::vector<Mesh*> meshes;
 			ID3D11Device * device;
 		public:
-			Model(const std::string & filePath,ID3D11Device* device);
+			std::vector<Model*> childModels;
+			std::vector<Mesh*> meshs;
+			Model(ID3D11Device* device);
+			Model(ID3D11Device* device, const std::string & filePath);
 			~Model();
-
-			void* operator new(size_t size);
-			void operator delete(void* p);
 
 			bool LoadModel(const std::string & filePth);
 			void ProcessNode(aiNode * node, const aiScene * scene);
 			Mesh* ProcessMesh(aiMesh * mesh, const aiScene * scene);
-			void CreateModel(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
 		};
 	}
 }

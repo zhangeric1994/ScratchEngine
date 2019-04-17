@@ -183,7 +183,7 @@
     <ClInclude Include="Physics\ICollisionCallback.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
+    <ClInclude Include="Rendering\Model.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
@@ -260,7 +260,7 @@
     <ClCompile Include="Multithreading\Barrier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
+    <ClCompile Include="Rendering\Model.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>

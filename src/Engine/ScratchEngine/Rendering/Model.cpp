@@ -1,10 +1,18 @@
 #include "Model.h"
 using namespace ScratchEngine::Rendering;
-ScratchEngine::Rendering::Model::Model(const std::string & filePath, ID3D11Device * device)
+ScratchEngine::Rendering::Model::Model(ID3D11Device * device)
 {
-	if (!this->LoadModel(filePath))
-		//can 't not read file
-		this->device = device;
+	this->device = device;
+}
+ScratchEngine::Rendering::Model::Model(ID3D11Device * device, const std::string & filePath)
+{
+	this->device = device;
+	this->LoadModel(filePath);
+	
+}
+
+ScratchEngine::Rendering::Model::~Model()
+{
 }
 
 bool ScratchEngine::Rendering::Model::LoadModel(const std::string & filePath)
@@ -24,11 +32,13 @@ void ScratchEngine::Rendering::Model::ProcessNode(aiNode * node, const aiScene *
 {
 	for (UINT i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(this->ProcessMesh(mesh, scene));
+		meshs.push_back(this->ProcessMesh(mesh, scene));
 	}
 
 	for (UINT i = 0; i < node->mNumChildren; i++) {
-		this->ProcessNode(node->mChildren[i], scene);
+		Model* child = new Model(device);
+		child->ProcessNode(node->mChildren[i], scene);
+		childModels.push_back(child);
 	}
 }
 
@@ -69,5 +79,5 @@ Mesh* ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene 
 
 	}
 
-	return &Mesh(&vertices[0],vertices.size(), &indices[0], vertices.size(), this->device);
+	return new Mesh(&vertices[0],vertices.size(), &indices[0], indices.size(), this->device);
 }

@@ -177,7 +177,7 @@
     <ClInclude Include="Memory\StackAllocator.hpp" />
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
-    <ClInclude Include="Model.h" />
+    <ClInclude Include="Rendering\Model.h" />
     <ClInclude Include="Multithreading\Barrier.h" />
     <ClInclude Include="Multithreading\WorkerThread.h" />
     <ClInclude Include="Physics\BoundingVolume.h" />
@@ -213,7 +213,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Memory\DynamicPoolAllocator.hpp" />
     <ClCompile Include="Memory\BlockAllocator.cpp" />
-    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Rendering\Model.cpp" />
     <ClCompile Include="Multithreading\Barrier.cpp" />
     <ClCompile Include="Physics\BoundingVolume.cpp" />
     <ClCompile Include="Physics\Collider.cpp" />

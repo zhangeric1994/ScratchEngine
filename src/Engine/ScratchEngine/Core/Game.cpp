@@ -117,7 +117,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-
+	model = new Model(device,(const std::string&) "../Assets/Models/anime.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -136,25 +136,23 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	
 
 	go1 = new GameObject();
-	go1->SetPosition(0, 0, 10);
-	go1->SetLocalRotation(45, 0, 0);
-	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go1->AddComponent<BoxCollider>();
+	go1->SetPosition(0, 0, 1);
+	go1->AddComponent<Renderer>(greenMaterial, model,go1);
+	//go1->AddComponent<BoxCollider>();
 
-	go2 = new GameObject();
-	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go2 = new GameObject();
+	//go2->SetParent(go1);
+	//go2->SetLocalPosition(0, 4, 0);
+	//go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
 
 	GameObject* go3 = new GameObject();
-	go3->SetParent(go2);
+	/*go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);*/
 
-	go4 = new GameObject();
-	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go4->AddComponent<BoxCollider>();
+	/*go4 = new GameObject();
+	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);*/
+	//go4->AddComponent<BoxCollider>();
 }
 
 void ScratchEngine::Game::OnResize()
@@ -194,9 +192,9 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -deltaTime, 0.0f, SELF);
 
-		go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
-		go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
+		go1->Rotate(20 * deltaTime, 0, 0);
+		//go2->Rotate(0, 0, -50 * deltaTime);
+		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 

@@ -8,6 +8,7 @@
 #include "../Rendering/Light.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"
+#include "../Rendering/Model.h"
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
@@ -50,6 +51,8 @@ namespace ScratchEngine
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
+
+		Model* model;
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
