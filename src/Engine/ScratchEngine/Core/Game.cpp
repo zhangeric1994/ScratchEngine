@@ -134,6 +134,10 @@ void ScratchEngine::Game::LoadShaders()
 	
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
+	std::wstring wVertex = wpath + std::wstring(L"/VertexShader.cso");
+	std::wstring wPixel = wpath + std::wstring(L"/PixelShaderPBR.cso");
+	const wchar_t* vertex = wVertex.c_str();
+	const wchar_t* pixel = wPixel.c_str();
 
 	vsZPrepass = new SimpleVertexShader(device, context);
 	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
@@ -142,10 +146,10 @@ void ScratchEngine::Game::LoadShaders()
 	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
 	
 	vertexShader = new SimpleVertexShader(device, context);
-	vertexShader->LoadShaderFile((wpath + std::wstring(L"/VertexShader.cso")).c_str());
+	vertexShader->LoadShaderFile(vertex);
 
 	pixelShader = new SimplePixelShader(device, context);
-	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+	pixelShader->LoadShaderFile(pixel);
 
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
@@ -192,22 +196,30 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
 	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture);
+
 	if (FAILED(isok)) printf("load albedo texture error");
+	
+	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyA1.png", 0, &texture);
+
+	//CreateWICTextureFromFile(device, context, L"../Assets/Greninja/Textures/pm0725_00_BodyB1.png", 0, &texture);
 
 	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap);
+
 	if (FAILED(isok)) printf("load normal map error");
 
 	//load roughness map
 	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap);
-	if (FAILED(isok)) printf("load roughness map error");
 
+	if (FAILED(isok)) printf("load roughness map error");
 	//load metalness map
 	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap);
+	
 	if (FAILED(isok)) printf("load metalness map failed");
 
 	mesh = new Mesh(device, filename);
 	mesh1 = new Mesh(device, cubefile);
 
+<<<<<<< HEAD
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
@@ -226,6 +238,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial->SetTint(1, 0, 0);
 
 
+=======
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
+
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 	camera = new GameObject();
 	camera->AddComponent<Camera>();
 
@@ -389,14 +405,11 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		bool hasShadowMap = false;
-
 		shadowViewport.Height = shadowMapSize;
 		shadowViewport.Width = shadowMapSize;
 		context->RSSetViewports(1, &shadowViewport);
 
-
-		hasShadowMap = renderingEngine->RenderShadowMap(context);
+		renderingEngine->RenderShadowMap(context);
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -406,14 +419,13 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//if (hasShadowMap) simpleMaterial->setShadowMap(shadow);
 
-		//context->OMSetDepthStencilState(nullptr, 0);
-		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
+		/*context->OMSetDepthStencilState(nullptr, 0);
+		renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
-		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);*/
 
-		renderingEngine->DrawForward(context);
+		renderingEngine->DrawForward(context, roughnessMap, metalnessMap);
 
 		renderingEngine->RenderCubeMap(context, cubeMap);
 

@@ -3,10 +3,13 @@
 ScratchEngine::Rendering::Material::Material(
 	SimpleVertexShader* _vertexShader,
 	SimplePixelShader* _pixelShader,
+	ID3D11ShaderResourceView* _texture,
+	ID3D11ShaderResourceView* _normalMap,
 	ID3D11SamplerState* _sampler
 ) {
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
+<<<<<<< HEAD
 
 	tint[0] = 1;
 	tint[1] = 1;
@@ -14,21 +17,12 @@ ScratchEngine::Rendering::Material::Material(
 	tint[3] = 1;
 	texture = _texture;
 
+=======
+	texture = _texture;
+	normalMap = _normalMap;
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 	sampler = _sampler;
-
-	texture = 0;
-	normalMap = 0;
-	shadowMap = 0;
-	metalnessMap = 0;
-	roughnessMap = 0;
-
-	hasTexture = 0;
-	hasNormalMap = 0;
-	hasShadowMap = 0;
-	hasMetalnessMap = 0;
-	hasRoughnessMap = 0;
 }
-
 
 SimpleVertexShader* ScratchEngine::Rendering::Material::GetVertexShader() {
 	return vertexShader;
@@ -38,30 +32,27 @@ SimplePixelShader* ScratchEngine::Rendering::Material::GetPixelShader() {
 	return pixelShader;
 }
 
+<<<<<<< HEAD
 
 void ScratchEngine::Rendering::Material::setTexture(ID3D11ShaderResourceView * _texture) {
 	texture = _texture;
 	hasTexture = 1;
+=======
+ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getTexture() {
+	return texture;
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 }
 
-void ScratchEngine::Rendering::Material::setNormalMap(ID3D11ShaderResourceView * _normalMap) {
-	normalMap = _normalMap;
-	hasNormalMap = 1;
+ID3D11SamplerState* ScratchEngine::Rendering::Material::getSampler() {
+	return sampler;
 }
 
-void ScratchEngine::Rendering::Material::setShadowMap(ShadowMap* _shadowMap) {
+ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getNormalMap() {
+	return normalMap;
+}
+
+void ScratchEngine::Rendering::Material::setShadowMap(ID3D11ShaderResourceView* _shadowMap) {
 	shadowMap = _shadowMap;
-	hasShadowMap = 1;
-}
-
-void ScratchEngine::Rendering::Material::setMetalnessMap(ID3D11ShaderResourceView * _metalnessMap) {
-	metalnessMap = _metalnessMap;
-	hasMetalnessMap = 1;
-}
-
-void ScratchEngine::Rendering::Material::setRoughnessMap(ID3D11ShaderResourceView * _roughnessMap) {
-	roughnessMap = _roughnessMap;
-	hasRoughnessMap = 1;
 }
 
 const float* ScratchEngine::Rendering::Material::GetTint() const
