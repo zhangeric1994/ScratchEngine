@@ -33,7 +33,7 @@ namespace ScratchEngine
 
 
 		public:
-			DynamicBVH() : allocator(128);
+			DynamicBVH();
 
 
 			i32 Insert(T* data, const AxisAlignedBoundingBox& aabb);
@@ -50,7 +50,7 @@ namespace ScratchEngine
 		};
 
 
-		template<class T> inline DynamicBVH<T>::DynamicBVH()
+		template<class T> inline DynamicBVH<T>::DynamicBVH() : allocator(128)
 		{
 			root = null_index;
 		}

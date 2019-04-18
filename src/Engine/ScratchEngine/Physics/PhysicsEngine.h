@@ -4,7 +4,7 @@
 
 #include "Collider.h"
 //#include "Collision.h"
-//#include "DynamicBVH.hpp"
+#include "DynamicBVH.hpp"
 
 using namespace ScratchEngine;
 using namespace std;

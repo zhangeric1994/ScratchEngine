@@ -31,6 +31,7 @@ namespace ScratchEngine
 
 
 	private:
+		i32 id;
 		Collider* next;
 		Collider* previous;
 		unordered_set<Collider*> contacts;
