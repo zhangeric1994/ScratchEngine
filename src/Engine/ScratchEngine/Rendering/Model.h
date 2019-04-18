@@ -2,11 +2,13 @@
 #include <d3d11.h>
 #include <fstream> 
 #include <vector>
+#include <map>
 #include <DirectXMath.h>
 #include "Mesh.h"
 
 #include "../Common/Typedefs.h"
 #include "Vertex.h"
+#include "../Animation/Animator.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
@@ -26,15 +28,20 @@ namespace ScratchEngine
 		private:
 			ID3D11Device * device;
 		public:
+			std::string name;
+			const aiScene * rawData;
+			Animator * anim;
+			std::map<UINT, std::vector<aiVertexWeight*> *> vertToBoneWeight;
 			std::vector<Model*> childModels;
 			std::vector<Mesh*> meshs;
-			Model(ID3D11Device* device);
+			Model(ID3D11Device* device, std::map<UINT, std::vector<aiVertexWeight*> *> vertToBone);
 			Model(ID3D11Device* device, const std::string & filePath);
 			~Model();
-
+			
 			bool LoadModel(const std::string & filePth);
 			void ProcessNode(aiNode * node, const aiScene * scene);
 			Mesh* ProcessMesh(aiMesh * mesh, const aiScene * scene);
+		    void ExtractBoneWeightsFromMesh(aiMesh* mesh);
 		};
 	}
 }
