@@ -180,6 +180,11 @@
     <ClInclude Include="Core\DXCore.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Rendering\ShadowMap.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\CubeMap.h">
+      <Filter>Header Files\Rendering</Filter>
     <ClInclude Include="Physics\ICollisionCallback.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -257,6 +262,12 @@
     <ClCompile Include="Multithreading\Barrier.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\ShadowMap.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\CubeMap.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ScratchEngine.rc">
@@ -273,5 +284,20 @@
     <FxCompile Include="Rendering\Shaders\vs_zprepass.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\cubePS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\cubeVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\PixelShaderPBR.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

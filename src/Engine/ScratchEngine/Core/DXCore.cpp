@@ -84,14 +84,14 @@ ScratchEngine::DXCore::~DXCore()
 
 	if (device)
 	{
-//#if defined(DEBUG) || defined(_DEBUG)
-//		ID3D11Debug *d3dDebug;
-//		HRESULT hr = device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug));
-//		if (SUCCEEDED(hr)) {
-//			hr = d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
-//		}
-//		if (d3dDebug != nullptr)			d3dDebug->Release();
-//#endif
+#if defined(DEBUG) || defined(_DEBUG)
+		ID3D11Debug *d3dDebug;
+		HRESULT hr = device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug));
+		if (SUCCEEDED(hr)) {
+			hr = d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+		}
+		if (d3dDebug != nullptr)			d3dDebug->Release();
+#endif
 
 		device->Release();
 	}
@@ -271,7 +271,7 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 
 	// Bind the views to the pipeline, so rendering properly 
 	// uses their underlying textures
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 
 	// Lastly, set up a viewport so we render into
 	// to correct portion of the window

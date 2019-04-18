@@ -14,7 +14,7 @@ namespace ScratchEngine
 
 
 		private:
-			XMVECTOR position;
+			XMVECTOR position = {0, 0, -5.0f};
 			XMMATRIX viewMatrix;
 			XMMATRIX projectionMatrix;
 		};

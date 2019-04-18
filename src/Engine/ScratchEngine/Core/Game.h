@@ -11,6 +11,9 @@
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
+#include "../Rendering/ShadowMap.h"
+#include <DDSTextureLoader.h>
+#include "../Rendering/CubeMap.h"
 
 #include "DXCore.h"
 
@@ -39,6 +42,7 @@ namespace ScratchEngine
 		void LoadShaders();
 		void CreateMatrces();
 		void CreateBasicGeometry();
+		void CreateAllMaps();
 
 		POINT prevMousePos;
 
@@ -50,6 +54,12 @@ namespace ScratchEngine
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
+
+		ID3D11SamplerState* sampler;
+		D3D11_SAMPLER_DESC samplerDesc;
+
+		ID3D11ShaderResourceView* texture;
+		ID3D11ShaderResourceView* normalMap;
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
@@ -63,6 +73,20 @@ namespace ScratchEngine
 		GameObject* go10;
 
 		Barrier frameBarrier;
+
+
+		//final shadow map
+		ShadowMap* shadow;
+		D3D11_VIEWPORT shadowViewport;
+		float shadowMapSize;
+		SimpleVertexShader* shadowShader;
+
+		//cube map
+		CubeMap* cubeMap;
+
+		//PBR textures
+		ID3D11ShaderResourceView* roughnessMap;
+		ID3D11ShaderResourceView* metalnessMap;
 
 		
 	public:
