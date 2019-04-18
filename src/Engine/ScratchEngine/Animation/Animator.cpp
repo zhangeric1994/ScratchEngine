@@ -2,13 +2,17 @@
 
 ScratchEngine::Animator::Animator()
 {
+	timePos = 0.0f;
 	skeleton = nullptr;
+	LoopClips = true;
 	currentAnimationIndex = -1;
 	hasSkeleton = false;
 }
 
 ScratchEngine::Animator::Animator(const aiScene * scene)
 {	
+	timePos = 0.0f;
+	LoopClips = true;
 	if (!scene->HasAnimations()) {
 		// no animation
 		skeleton = nullptr;
@@ -109,7 +113,21 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 
 void ScratchEngine::Animator::Update(float dt)
 {
-	GetTransforms(dt);
+	timePos += dt;
+
+	if (timePos > duration) {
+		if (LoopClips) {
+			timePos = 0;
+			GetTransforms(timePos);
+		}
+		else {
+			//wait 
+			GetTransforms(duration);
+		}
+	}else{
+		GetTransforms(timePos);
+	}
+	
 }
 
 void ScratchEngine::Animator::PlayAnimationForward()

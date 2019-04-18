@@ -15,10 +15,11 @@ namespace ScratchEngine
 
 
 		private:
+			XMMATRIX worldMatrix;
+
 			Mesh* mesh;
 			Material* material;
-
-			XMMATRIX worldMatrix;
+			void* bones;
 
 			Renderable();
 		};

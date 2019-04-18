@@ -48,6 +48,8 @@ namespace ScratchEngine
 		~Animator();
 
 		// current playing animation stats
+		float timePos;
+		bool LoopClips;
 		int currentAnimationIndex;
 		bool hasSkeleton;
 		string animationName;

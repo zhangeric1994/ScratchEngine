@@ -144,6 +144,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
+			//renderable.bones = renderer->gameObject->GetComponent<Animator>()
 		}
 	}
 }
@@ -282,6 +283,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
+			//vertexShader->SetData("cbSkinned",)
 
 			vertexShader->CopyAllBufferData();
 			vertexShader->SetShader();
