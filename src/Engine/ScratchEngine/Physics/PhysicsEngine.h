@@ -1,38 +1,53 @@
 #ifndef PHYSICS_ENGINE_H
 #define PHYSICS_ENGINE_H
 
-#include <vector>
-
-#include "../Common/Stack.hpp"
 
 #include "Collider.h"
-#include "Collision.h"
+//#include "Collision.h"
 #include "DynamicBVH.hpp"
 
+using namespace ScratchEngine;
 using namespace std;
+
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine : IDynamicBVHQueryCallback
+		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider *>
 		{
-		private:
+			friend class Collider;
+
+
+		public:
 			static PhysicsEngine* singleton;
 
-			static const PhysicsEngine* GetSingleton();
+			static PhysicsEngine* GetSingleton();
 			static void Initialize();
 
-			DynamicBVH<Collider> hierarchy;
-			Stack<int> movedObjects;
-			Collision* collisionList;
+
+		private:
+			DynamicBVH<Collider*> dynamicBVH;
+			Collider* colliderList;
+
 
 			PhysicsEngine();
 
-			void AddCollision(i32 node1, i32 node2);
 
-			void SolveCollision();
-			bool DynamicBVHTestOverlapCallback(i32 node1, i32 node2);
+			void AddCollider(Collider* collider);
+
+			void RemoveCollider(Collider* collider);
+
+
+		public:
+			void UpdateBoundingVolumes();
+			void SolveCollisions();
+
+
+		private:
+			bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node1, const DynamicBVHNode<Collider*>& node2);
+
+			void __UpdateBoundingVolume(GameObject* gameObject, Collider* collider);
 		};
 	}
 }

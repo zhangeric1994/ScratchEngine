@@ -10,9 +10,10 @@
 #include "GameObject.h"
 #include "IUpdatable.h"
 
+
 namespace ScratchEngine
 {
-	class Scene : IUpdatable
+	class Scene : private IUpdatable
 	{
 		friend class Game;
 		friend class GameObject;

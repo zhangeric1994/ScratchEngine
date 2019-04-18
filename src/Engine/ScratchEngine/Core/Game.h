@@ -52,10 +52,8 @@ namespace ScratchEngine
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-		Mesh* mesh;
-		Mesh* mesh1;
-
-		Material* simpleMaterial;
+		Mesh* sphereMesh;
+		Mesh* cubeMesh;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -67,8 +65,15 @@ namespace ScratchEngine
 		GameObject* camera;
 		GameObject* go1;
 		GameObject* go2;
+		GameObject* go4;
+		GameObject* go5;
+		GameObject* go6;
+		GameObject* go7;
+		GameObject* go9;
+		GameObject* go10;
 
 		Barrier frameBarrier;
+
 
 		//final shadow map
 		ShadowMap* shadow;
@@ -83,5 +88,9 @@ namespace ScratchEngine
 		ID3D11ShaderResourceView* roughnessMap;
 		ID3D11ShaderResourceView* metalnessMap;
 
+		
+	public:
+		static Material* greenMaterial;
+		static Material* redMaterial;
 	};
 }

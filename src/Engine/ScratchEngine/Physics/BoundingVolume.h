@@ -1,18 +1,24 @@
 #ifndef BOUNDING_VOLUME_H
 #define BOUNDING_VOLUME_H
 
+#include <cmath>
 #include <DirectXMath.h>
 
 #include "../Common/Typedefs.h"
-#include "RigidBody.h"
 
 using namespace DirectX;
+using namespace ScratchEngine;
+
 
 namespace ScratchEngine
 {
 	namespace Physics
 	{
-		template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2, RigidBody* rigidBody1, RigidBody* rigidBody2, float currentTime);
+		struct AxisAlignedBoundingBox;
+
+		template<class T1, class T2> static bool IsOverlapping(T1* boundingVolume1, T2* boundingVolume2);
+		template<class T> static AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement);
+
 
 		enum BoundingVolumeType
 		{
@@ -27,7 +33,8 @@ namespace ScratchEngine
 
 		struct __declspec(dllexport) AxisAlignedBoundingBox : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
@@ -69,6 +76,8 @@ namespace ScratchEngine
 			f32 GetMaxY() const;
 			f32 GetMinZ() const;
 			f32 GetMaxZ() const;
+			XMVECTOR GetCenter() const;
+			XMVECTOR GetHalfSize() const;
 			f32 GetVolume() const;
 
 			void* operator new(size_t size);
@@ -86,16 +95,16 @@ namespace ScratchEngine
 			void Union(const AxisAlignedBoundingBox& other);
 
 			f32 GetUnionVolume(const AxisAlignedBoundingBox& other) const;
-
-			__forceinline f32 _get_box_volume(XMVECTOR lwh) const;
 		};
 
 
 		struct OrientedBoundingBox : public BoundingVolume
 		{
 			friend bool GetSeparatingPlane(XMVECTOR, XMVECTOR, OrientedBoundingBox*, OrientedBoundingBox*);
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
+			friend class PhysicsEngine;
 
 
 		private:
@@ -103,6 +112,7 @@ namespace ScratchEngine
 			static const int iEdges[12][2];
 
 			XMVECTOR center;
+			XMVECTOR size;
 			XMVECTOR axisX;
 			XMVECTOR axisY;
 			XMVECTOR axisZ;
@@ -140,23 +150,30 @@ namespace ScratchEngine
 			};
 
 			OrientedBoundingBox() {}
-			OrientedBoundingBox(XMVECTOR size, XMVECTOR position, XMVECTOR rotation);
+			OrientedBoundingBox(XMMATRIX worldMatrix, XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 
 
 		public:
-			XMVECTOR GetHalfSize() const;
+			XMVECTOR GetHalfDiagonalVector() const;
+
+			void SetData(XMMATRIX worldMatrix, XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 		};
 
 
 		struct BoundingSphere : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*, RigidBody*, RigidBody*, float);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
 
 
 		private:
 			XMVECTOR center;
 			f32 radius;
+
+
+		public:
+			void SetData(XMVECTOR position, f32 radius);
 		};
 
 
@@ -165,48 +182,45 @@ namespace ScratchEngine
 		//private:
 			static bool GetSeparatingPlane(XMVECTOR RPos, XMVECTOR Plane, OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)
 			{
-				XMVECTOR halfSizeA = obb1->GetHalfSize();
-				XMVECTOR halfSizeB = obb2->GetHalfSize();
+				XMVECTOR halfDiagA = obb1->GetHalfDiagonalVector();
+				XMVECTOR halfDiagB = obb2->GetHalfDiagonalVector();
 
 				return (abs(XMVector3Dot(RPos, Plane).m128_f32[0]) >
-					(abs(XMVector3Dot(XMVectorScale(obb1->axisX, halfSizeA.m128_f32[0]), Plane).m128_f32[0]) +
-						abs(XMVector3Dot(XMVectorScale(obb1->axisY, halfSizeA.m128_f32[1]), Plane).m128_f32[0]) +
-						abs(XMVector3Dot(XMVectorScale(obb1->axisZ, halfSizeA.m128_f32[2]), Plane).m128_f32[0]) +
-						abs(XMVector3Dot(XMVectorScale(obb2->axisX, halfSizeB.m128_f32[0]), Plane).m128_f32[0]) +
-						abs(XMVector3Dot(XMVectorScale(obb2->axisY, halfSizeB.m128_f32[1]), Plane).m128_f32[0]) +
-						abs(XMVector3Dot(XMVectorScale(obb2->axisZ, halfSizeB.m128_f32[2]), Plane).m128_f32[0])));
+					   (abs(XMVector3Dot(XMVectorScale(obb1->axisX, halfDiagA.m128_f32[0]), Plane).m128_f32[0]) +
+						abs(XMVector3Dot(XMVectorScale(obb1->axisY, halfDiagA.m128_f32[1]), Plane).m128_f32[0]) +
+						abs(XMVector3Dot(XMVectorScale(obb1->axisZ, halfDiagA.m128_f32[2]), Plane).m128_f32[0]) +
+						abs(XMVector3Dot(XMVectorScale(obb2->axisX, halfDiagB.m128_f32[0]), Plane).m128_f32[0]) +
+						abs(XMVector3Dot(XMVectorScale(obb2->axisY, halfDiagB.m128_f32[1]), Plane).m128_f32[0]) +
+						abs(XMVector3Dot(XMVectorScale(obb2->axisZ, halfDiagB.m128_f32[2]), Plane).m128_f32[0])));
 			}
 
 
 		//public:
-			template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2, RigidBody* rigidBody1, RigidBody* rigidBody2, float currentTime)
+			template<class T1, class T2> bool IsOverlapping(T1* boundingVolume1, T2* boundingVolume2)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2, RigidBody* aabbRb1, RigidBody* aabbRb2, float currentTime)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2)
 			{
-				if (XMVector3Less(aabb1->max, aabb2->min) || XMVector3Less(aabb2->max, aabb1->min))
-					return false;
-
-				return true;
+				return XMVector3LessOrEqual(XMVectorAbs(XMVectorSubtract(aabb1->GetCenter(), aabb2->GetCenter())), XMVectorAdd(aabb1->GetHalfSize(), aabb2->GetHalfSize()));
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb, RigidBody* aabbRb, RigidBody* obbRb, float currentTime)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere, RigidBody* aabbRb, RigidBody* sphereRb, float currentTime)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> static bool TestOverlap(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2, RigidBody* obbRb1, RigidBody* obbRb2, float currentTime)
+			template<> bool IsOverlapping(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)
 			{
 				XMVECTOR RPos = XMVectorSubtract(obb1->center, obb2->center);
 
-				if (!(GetSeparatingPlane(RPos, obb1->axisX, obb1, obb2) ||
+				if (GetSeparatingPlane(RPos, obb1->axisX, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb1->axisY, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb1->axisZ, obb1, obb2) ||
 					GetSeparatingPlane(RPos, obb2->axisX, obb1, obb2) ||
@@ -220,94 +234,117 @@ namespace ScratchEngine
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisY, obb2->axisZ), obb1, obb2) ||
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisX), obb1, obb2) ||
 					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisY), obb1, obb2) ||
-					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisZ), obb1, obb2)))
-				{
-					//XMVECTOR collisionPoint = getCollisionPoint(a, b);
-
-					//XMVECTOR planeA = getPlaneNormal(a, collisionPoint);
-					//XMVECTOR planeB = getPlaneNormal(b, collisionPoint);
-
-					//XMVECTOR aNormal = GetCollisionNormal(b, planeB); // sphere don't need to pass the collision detail
-					//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
-
-					//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			template<> static bool TestOverlap(OrientedBoundingBox* obb, BoundingSphere* sphere, RigidBody* obbRb, RigidBody* sphereRb, float currentTime)
-			{
-				XMVECTOR halfDiag = XMVectorSubtract(obb->H, obb->center);
-
-				XMVECTOR diff = XMVectorSubtract(obb->center, sphere->center);
-
-				if (XMVector3Dot(halfDiag, halfDiag).m128_f32[0] < XMVector3Dot(diff, diff).m128_f32[0])
+					GetSeparatingPlane(RPos, XMVector3Cross(obb1->axisZ, obb2->axisZ), obb1, obb2))
 					return false;
 
-				XMVECTOR bPos = sphere->center;
+				//XMVECTOR collisionPoint = getCollisionPoint(a, b);
 
-				for (int i = 0; i < 6; i++)
-				{
-					XMVECTOR plane = obb->surfacePlanes[i];
-					float distance = XMVector3Dot(plane, bPos).m128_f32[0] + plane.m128_f32[3];
+				//XMVECTOR planeA = getPlaneNormal(a, collisionPoint);
+				//XMVECTOR planeB = getPlaneNormal(b, collisionPoint);
 
-					if (abs(distance) <= sphere->radius)
-					{
-						XMVECTOR collisionPoint = bPos - plane * distance;
+				//XMVECTOR aNormal = GetCollisionNormal(b, planeB); // sphere don't need to pass the collision detail
+				//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
 
-						if (XMVector3LessOrEqual(collisionPoint, obb->H) && XMVector3GreaterOrEqual(collisionPoint, obb->A))
-						{
-							//XMVECTOR planeA = a->surfacePlanes[i];
+				//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
 
-							//XMVECTOR aNormal = GetCollisionNormal(b);
-
-							////sphere don't need to pass the collision detail, sphere reflect everything
-							//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
-
-							//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
-
-							return true;
-						}
-					}
-				}
-
-				//edge check
-				for (int i = 0; i < 12; i++)
-				{
-					XMVECTOR start = obb->vertices[OrientedBoundingBox::iEdges[i][0]];
-					XMVECTOR end = obb->vertices[OrientedBoundingBox::iEdges[i][1]];
-
-					float distance = XMVector3LinePointDistance(start, end, bPos).m128_f32[0];
-
-					if (abs(distance) <= sphere->radius)
-					{
-						XMVECTOR AB = end - start;
-						XMVECTOR AP = bPos - start;
-						XMVECTOR collisionPoint = start + XMVector3Dot(AP, AB) / XMVector3Dot(AB, AB) * AB;
-
-						if (XMVector3LessOrEqual(collisionPoint, obb->H) && XMVector3GreaterOrEqual(collisionPoint, obb->A))
-						{
-							//XMVECTOR planeA = { 1, 1, 1 };
-
-							//XMVECTOR aNormal = GetCollisionNormal(a, planeA);
-
-							////sphere don't need to pass the collision detail, sphere reflect everything
-							//XMVECTOR bNormal = GetCollisionNormal(b);
-
-							//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
-
-							return true;
-						}
-					}
-				}
-
-				return false;
+				return true;
 			}
 
-			template<> static bool TestOverlap(BoundingSphere* sphere1, BoundingSphere* sphere2, RigidBody* sphereRb1, RigidBody* sphereRb2, float currentTime)
+			template<> bool IsOverlapping(OrientedBoundingBox* obb, BoundingSphere* sphere)
+			{
+				XMMATRIX changeOfBasis = XMMatrixTranspose(XMMATRIX(obb->axisX, obb->axisY, obb->axisZ, XMVectorZero()));
+
+				XMVECTOR S = XMVector3Transform(XMVectorSubtract(sphere->center, obb->A), changeOfBasis);
+				XMVECTOR C1 = XMVectorZero();
+				XMVECTOR C2 = obb->size;
+
+				float D = sphere->radius * sphere->radius;
+				for (int i = 0; i < 3; i++)
+				{
+					float s = S.m128_f32[i];
+					float c1 = C1.m128_f32[i];
+					float c2 = C2.m128_f32[i];
+
+					float d = 0;
+
+					if (s < c1)
+						d = s - c1;
+					else if (s > c2)
+						d = s - c2;
+
+					D -= d * d;
+				}
+
+				return D > 0;
+
+				//XMVECTOR halfDiag = obb->GetHalfDiagonalVector();
+				//XMVECTOR diff = XMVectorSubtract(obb->center, sphere->center);
+
+
+				//if (XMVector3LengthSq(halfDiag).m128_f32[0] < XMVector3LengthSq(diff).m128_f32[0])
+				//	return false;
+
+				//XMVECTOR bPos = sphere->center;
+
+				//for (int i = 0; i < 6; i++)
+				//{
+				//	XMVECTOR plane = obb->surfacePlanes[i];
+				//	float distance = XMVector3Dot(plane, bPos).m128_f32[0] + plane.m128_f32[3];
+
+				//	if (abs(distance) <= sphere->radius)
+				//	{
+				//		XMVECTOR collisionPoint = bPos - plane * distance;
+
+				//		if (XMVector3LessOrEqual(collisionPoint, obb->H) && XMVector3GreaterOrEqual(collisionPoint, obb->A))
+				//		{
+				//			//XMVECTOR planeA = a->surfacePlanes[i];
+
+				//			//XMVECTOR aNormal = GetCollisionNormal(b);
+
+				//			////sphere don't need to pass the collision detail, sphere reflect everything
+				//			//XMVECTOR bNormal = GetCollisionNormal(a, planeA);
+
+				//			//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
+
+				//			return true;
+				//		}
+				//	}
+				//}
+
+				////edge check
+				//for (int i = 0; i < 12; i++)
+				//{
+				//	XMVECTOR start = obb->vertices[OrientedBoundingBox::iEdges[i][0]];
+				//	XMVECTOR end = obb->vertices[OrientedBoundingBox::iEdges[i][1]];
+
+				//	float distance = XMVector3LinePointDistance(start, end, bPos).m128_f32[0];
+
+				//	if (abs(distance) <= sphere->radius)
+				//	{
+				//		XMVECTOR AB = end - start;
+				//		XMVECTOR AP = bPos - start;
+				//		XMVECTOR collisionPoint = start + XMVector3Dot(AP, AB) / XMVector3Dot(AB, AB) * AB;
+
+				//		if (XMVector3LessOrEqual(collisionPoint, obb->H) && XMVector3GreaterOrEqual(collisionPoint, obb->A))
+				//		{
+				//			//XMVECTOR planeA = { 1, 1, 1 };
+
+				//			//XMVECTOR aNormal = GetCollisionNormal(a, planeA);
+
+				//			////sphere don't need to pass the collision detail, sphere reflect everything
+				//			//XMVECTOR bNormal = GetCollisionNormal(b);
+
+				//			//ForceCalculation(a, b, aNormal, bNormal, collisionPoint, totalTime);
+
+				//			return true;
+				//		}
+				//	}
+				//}
+
+				//return false;
+			}
+
+			template<> bool IsOverlapping(BoundingSphere* sphere1, BoundingSphere* sphere2)
 			{
 				XMVECTOR normal = XMVectorSubtract(sphere1->center, sphere2->center);
 				float squared_distance = XMVector3LengthSq(normal).m128_f32[0];
@@ -330,6 +367,35 @@ namespace ScratchEngine
 
 				return false;
 			}
+
+			template<class T> AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement)
+			{
+				throw "NOT IMPLEMENTED";
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(AxisAlignedBoundingBox* aabb, f32 enlargement)
+			{
+				XMVECTOR v = XMVectorSet(enlargement, enlargement, enlargement, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(aabb->min, v), XMVectorAdd(aabb->max, v));
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(OrientedBoundingBox* obb, f32 enlargement)
+			{
+				f32 r = XMVector3LengthEst(obb->size).m128_f32[0] + enlargement;
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(obb->center, v), XMVectorAdd(obb->center, v));
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(BoundingSphere* sphere, f32 enlargement)
+			{
+				f32 r = sphere->radius + enlargement;
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(sphere->center, v), XMVectorAdd(sphere->center, v));
+			}
+
 		//};
 
 		//template<VolumeType T> XMVECTOR GetCollisionNormal(OrientedBoundingBox* a, XMVECTOR plane = { 0, 0, 0, 0 })

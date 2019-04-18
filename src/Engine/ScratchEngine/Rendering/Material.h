@@ -20,6 +20,14 @@ namespace ScratchEngine
 
 			SimpleVertexShader* GetVertexShader();
 			SimplePixelShader* GetPixelShader();
+			const float* GetTint() const;
+			ID3D11ShaderResourceView* GetTexture();
+			ID3D11SamplerState* GetSampler();
+
+			void SetTint(float r, float g, float b);
+			void SetTint(float r, float g, float b, float a);
+			void SetTint(const float* color);
+
 
 			ID3D11ShaderResourceView* getTexture() const { return texture; }
 			ID3D11ShaderResourceView* getNormalMap() const { return normalMap; }
@@ -45,6 +53,8 @@ namespace ScratchEngine
 		private:
 			SimpleVertexShader* vertexShader;
 			SimplePixelShader* pixelShader;
+
+			float tint[4];
 
 			ID3D11ShaderResourceView* texture;
 			ID3D11ShaderResourceView* normalMap;

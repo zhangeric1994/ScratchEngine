@@ -5,17 +5,22 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../Physics/Collider.h"
+#include "../Physics/ICollisionCallback.h"
+
 #include "GameComponent.h"
 #include "Transform.h"
 
+
 namespace ScratchEngine
 {
-	class __declspec(dllexport) GameObject final : public Transform, private IUpdatable
+	class __declspec(dllexport) GameObject final : public Transform, public IUpdatable, public ICollisionCallback
 	{
 		friend class Scene;
 
 
 	private:
+		string name;
 		unordered_map<type_index, GameComponent*> components;
 		union
 		{
@@ -71,6 +76,7 @@ namespace ScratchEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
+		string GetName();
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
 		template<class T> T* GetComponent();
@@ -78,6 +84,7 @@ namespace ScratchEngine
 		bool IsActiveSelf();
 		bool IsStatic();
 
+		void SetName(string name);
 		void SetParent(GameObject* other);
 		template<class T, class... argTs> T* AddComponent(argTs... args);
 		template<class T> void RemoveComponent();
@@ -87,12 +94,14 @@ namespace ScratchEngine
 		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
 
 
-	protected:
+	private:
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);
 
+		void OnBeginOverlapping(GameObject* other);
+		void OnOverlapping(GameObject* other);
+		void OnEndOverlapping(GameObject* other);
 
-	private:
 		void HandleMessage(const Message& message) { }
 	};
 
@@ -128,7 +137,7 @@ namespace ScratchEngine
 
 		auto it = components.find(id);
 
-		delete *it;
+		delete it->second;
 
 		if (it != components.end())
 			components.erase(it);

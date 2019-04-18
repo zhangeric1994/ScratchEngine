@@ -51,39 +51,12 @@ namespace ScratchEngine
 			DynamicPoolAllocator(i32 capacity);
 			~DynamicPoolAllocator();
 
-			i32 Allocate()
-			{
-				if (freeList == null_index)
-				{
-					i32 previousCapacity = capacity;
 
-					if (capacity == 0)
-						capacity = DEFAULT_DYNAMIC_POOL_ALLOCATOR_CAPACITY;
-					else
-						capacity *= 2;
+			T& operator[](i32 id);
+			T operator[](i32 id) const;
 
-					memory = reinterpret_cast<T*>(_aligned_realloc(memory, capacity * sizeof(T), 16));
 
-					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
-					reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
-
-					for (i32 id = capacity - 2; id >= previousCapacity; --id)
-					{
-						reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
-						reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
-					}
-
-					freeList = previousCapacity;
-				}
-
-				i32 id = freeList;
-				reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = ALLOCATED;
-
-				freeList = reinterpret_cast<DynamicPoolBlock*>(memory + id)->next;
-				++numAllocated;
-
-				return id;
-			}
+			i32 Allocate();
 
 			//DynamicPoolPointer<T> AllocateDynamicPoolPointer()
 			//{
@@ -119,31 +92,8 @@ namespace ScratchEngine
 
 			//	return { this, id };
 			//}
-				
-			__inline T& operator[](i32 id)
-			{
-				if (reinterpret_cast<DynamicPoolBlock*>(memory + id)->status == FREED)
-					throw "[DynamicPoolAllocator] Invalid Access!";
 
-				return memory[id];
-			}
-
-			__inline T operator[](i32 id) const
-			{
-				if (reinterpret_cast<DynamicPoolBlock*>(memory + id)->status == FREED)
-					throw "[DynamicPoolAllocator] Invalid Access!";
-
-				return memory[id];
-			}
-
-			void Free(i32 id)
-			{
-				reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
-				reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = freeList;
-
-				freeList = id;
-				--numAllocated;
-			}
+			void Free(i32 id);
 		};
 
 		template<class T>inline T * DynamicPoolPointer<T>::operator->()
@@ -158,7 +108,7 @@ namespace ScratchEngine
 		template<class T> inline DynamicPoolAllocator<T>::DynamicPoolAllocator(i32 capacity)
 		{
 			if (capacity == 0)
-				memory == nullptr;
+				memory = nullptr;
 			else
 			{
 				memory = reinterpret_cast<T*>(_aligned_malloc(capacity * sizeof(T), 16));
@@ -181,6 +131,65 @@ namespace ScratchEngine
 		template<class T> inline DynamicPoolAllocator<T>::~DynamicPoolAllocator()
 		{
 			_aligned_free(memory);
+		}
+
+		template<class T> inline T & DynamicPoolAllocator<T>::operator[](i32 id)
+		{
+			if (reinterpret_cast<DynamicPoolBlock*>(memory + id)->status == FREED)
+				throw "[DynamicPoolAllocator] Invalid Access!";
+
+			return memory[id];
+		}
+
+		template<class T> inline T DynamicPoolAllocator<T>::operator[](i32 id) const
+		{
+			if (reinterpret_cast<DynamicPoolBlock*>(memory + id)->status == FREED)
+				throw "[DynamicPoolAllocator] Invalid Access!";
+
+			return memory[id];
+		}
+
+		template<class T> inline i32 DynamicPoolAllocator<T>::Allocate()
+		{
+			if (freeList == null_index)
+			{
+				i32 previousCapacity = capacity;
+
+				if (capacity == 0)
+					capacity = DEFAULT_DYNAMIC_POOL_ALLOCATOR_CAPACITY;
+				else
+					capacity *= 2;
+
+				memory = reinterpret_cast<T*>(_aligned_realloc(memory, capacity * sizeof(T), 16));
+
+				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->status = FREED;
+				reinterpret_cast<DynamicPoolBlock*>(memory + capacity - 1)->next = null_index;
+
+				for (i32 id = capacity - 2; id >= previousCapacity; --id)
+				{
+					reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
+					reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = id + 1;
+				}
+
+				freeList = previousCapacity;
+			}
+
+			i32 id = freeList;
+			reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = ALLOCATED;
+
+			freeList = reinterpret_cast<DynamicPoolBlock*>(memory + id)->next;
+			++numAllocated;
+
+			return id;
+		}
+
+		template<class T> inline void DynamicPoolAllocator<T>::Free(i32 id)
+		{
+			reinterpret_cast<DynamicPoolBlock*>(memory + id)->status = FREED;
+			reinterpret_cast<DynamicPoolBlock*>(memory + id)->next = freeList;
+
+			freeList = id;
+			--numAllocated;
 		}
 	}
 }

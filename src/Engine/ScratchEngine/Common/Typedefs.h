@@ -3,7 +3,7 @@
 namespace ScratchEngine
 {
 	typedef char i8;
-	typedef i8 byte;
+	//typedef i8 byte;
 	typedef short i16;
 	typedef int i32;
 	typedef long long i64;

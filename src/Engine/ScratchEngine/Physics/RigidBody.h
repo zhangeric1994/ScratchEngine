@@ -1,38 +1,36 @@
 #ifndef RIGIDBODY_H
 #define RIGIDBODY_H
-
 #pragma once
+
 
 #include <DirectXMath.h>
 
 #include "../Common/Typedefs.h"
-#include "../Core/GameObject.h"
+#include "../Core/GameComponent.h"
 
 using namespace DirectX;
 
 namespace ScratchEngine
 {
-	namespace Physics
+	class RigidBody : public GameComponent
 	{
-		struct RigidBody : public GameComponent
-		{
-			friend class Collider;
-
-		private:
-			XMVECTOR velocity;
-			XMVECTOR angularVelocity;
-
-			f32 mass;
-			bool isAffectedByGravity;
+		friend class Collider;
 
 
-		public:
-			RigidBody();
-			RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity);
+	private:
+		XMVECTOR velocity;
+		XMVECTOR angularVelocity;
 
-			void ApplyForce(XMVECTOR force);
-			void ApplyAngularForce(XMVECTOR force);
-		};
-	}
+		f32 mass;
+		bool isAffectedByGravity;
+
+
+	public:
+		RigidBody();
+		RigidBody(XMVECTOR velocity, XMVECTOR angularVelocity);
+
+		void ApplyForce(XMVECTOR force);
+		void ApplyAngularForce(XMVECTOR force);
+	};
 }
 #endif
