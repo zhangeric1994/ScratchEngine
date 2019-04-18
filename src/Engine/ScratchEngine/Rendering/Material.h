@@ -24,11 +24,14 @@ namespace ScratchEngine
 			ID3D11ShaderResourceView* GetTexture();
 			ID3D11SamplerState* GetSampler();
 
+<<<<<<< HEAD
 			void SetTint(float r, float g, float b);
 			void SetTint(float r, float g, float b, float a);
 			void SetTint(const float* color);
 
 
+=======
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 			ID3D11ShaderResourceView* getTexture();
 			ID3D11ShaderResourceView* getNormalMap();
 			ID3D11SamplerState* getSampler();

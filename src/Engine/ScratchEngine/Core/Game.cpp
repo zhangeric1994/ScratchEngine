@@ -220,6 +220,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mesh1 = new Mesh(device, cubefile);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
@@ -238,6 +239,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial->SetTint(1, 0, 0);
 
 
+=======
+	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
+
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 =======
 	simpleMaterial = new Material(vertexShader, pixelShader, texture, normalMap, sampler);
 
