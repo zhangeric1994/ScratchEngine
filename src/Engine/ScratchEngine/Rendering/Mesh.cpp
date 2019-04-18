@@ -6,9 +6,8 @@ ScratchEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsig
 	CreateMesh(vertices, verticesNumber, indices, indicesNumber, device);
 }
 
-ScratchEngine::Rendering::Mesh::Mesh(
-	ID3D11Device* device,
-	char* filename) {
+ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device* device, char* filename)
+{
 	// File input object
 	std::ifstream obj(filename);
 
@@ -177,10 +176,14 @@ ScratchEngine::Rendering::Mesh::Mesh(
 	CreateMesh(&verts[0], verticesNumber, &indices[0], indicesNumber, device);
 }
 
-ScratchEngine::Rendering::Mesh::~Mesh() {
+ScratchEngine::Rendering::Mesh::~Mesh()
+{
 	//release vertex buffer and index buffer
-	if (vertexBuffer) { vertexBuffer->Release(); }
-	if (indexBuffer) { indexBuffer->Release(); }
+	if (vertexBuffer)
+		vertexBuffer->Release();
+
+	if (indexBuffer)
+		indexBuffer->Release();
 }
 
 void* ScratchEngine::Rendering::Mesh::operator new(size_t size)
@@ -193,17 +196,23 @@ void ScratchEngine::Rendering::Mesh::operator delete(void * p)
 	RenderingEngine::GetSingleton()->materialAllocator.Free(p);
 }
 
-ID3D11Buffer* ScratchEngine::Rendering::Mesh::GetVertexBuffer() { return vertexBuffer; }
-ID3D11Buffer* ScratchEngine::Rendering::Mesh::GetIndexBuffer() { return indexBuffer; }
+ID3D11Buffer* ScratchEngine::Rendering::Mesh::GetVertexBuffer()
+{
+	return vertexBuffer;
+}
 
-int ScratchEngine::Rendering::Mesh::GetIndexCount() { return indicesNum; }
+ID3D11Buffer* ScratchEngine::Rendering::Mesh::GetIndexBuffer()
+{
+	return indexBuffer;
+}
 
-void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices,
-	int verticesNumber,
-	unsigned int* indices,
-	int indicesNumber,
-	ID3D11Device* device) {
+int ScratchEngine::Rendering::Mesh::GetIndexCount()
+{
+	return indicesNum;
+}
 
+void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
+{
 	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
 
 	//initialize vertex buffer
@@ -238,7 +247,8 @@ void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices,
 	indicesNum = indicesNumber;
 }
 
-void ScratchEngine::Rendering::Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber) {
+void ScratchEngine::Rendering::Mesh::ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber)
+{
 	for (int i = 0; i < verticesNumber; i++) {
 		vertices[i].tangent = XMFLOAT3(0, 0, 0);
 	}

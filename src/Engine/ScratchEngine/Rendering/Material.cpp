@@ -1,10 +1,7 @@
 #include "Material.h"
 
-ScratchEngine::Rendering::Material::Material(
-	SimpleVertexShader* _vertexShader,
-	SimplePixelShader* _pixelShader,
-	ID3D11SamplerState* _sampler
-) {
+ScratchEngine::Rendering::Material::Material(SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, ID3D11SamplerState* _sampler)
+{
 	vertexShader = _vertexShader;
 	pixelShader = _pixelShader;
 
@@ -12,7 +9,6 @@ ScratchEngine::Rendering::Material::Material(
 	tint[1] = 1;
 	tint[2] = 1;
 	tint[3] = 1;
-	texture = _texture;
 
 	sampler = _sampler;
 

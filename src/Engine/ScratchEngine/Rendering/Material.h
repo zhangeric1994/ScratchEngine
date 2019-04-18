@@ -11,11 +11,7 @@ namespace ScratchEngine
 		struct __declspec(dllexport) Material
 		{
 		public:
-			Material(
-				SimpleVertexShader* _vertexShader,
-				SimplePixelShader* _pixelShader,
-				ID3D11SamplerState* _sampler
-			);
+			Material(SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, ID3D11SamplerState* _sampler);
 
 
 			SimpleVertexShader* GetVertexShader();

@@ -52,6 +52,8 @@ namespace ScratchEngine
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
+		Material* simpleMaterial;
+
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
 

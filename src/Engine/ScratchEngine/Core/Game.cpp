@@ -68,14 +68,17 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 }
 
 ScratchEngine::Game::~Game() {
-	if (vertexShader) delete vertexShader;
+	if (vertexShader)
+		delete vertexShader;
 
-	if (pixelShader) delete pixelShader;
+	if (pixelShader)
+		delete pixelShader;
 	
-	if (vsZPrepass) delete vsZPrepass;
+	if (vsZPrepass)
+		delete vsZPrepass;
 
-
-	if (simpleMaterial) delete simpleMaterial;
+	if (simpleMaterial)
+		delete simpleMaterial;
 
 	if (greenMaterial)
 		delete greenMaterial;
@@ -83,35 +86,38 @@ ScratchEngine::Game::~Game() {
 	if (redMaterial)
 		delete redMaterial;
 
-
-	if (zPrepassDepthStencilState) zPrepassDepthStencilState->Release();
+	if (zPrepassDepthStencilState)
+		zPrepassDepthStencilState->Release();
 
 	delete Scene::GetCurrentScene();
 
-
-	if (mesh) delete mesh;
-	
-	if (mesh1) delete mesh1;
-
-	if (texture) texture->Release();
-
-	if (sampler) sampler->Release();
-
-	if (normalMap) normalMap->Release();
-
-	if (shadow) delete shadow;
-
-	if (cubeMap) delete cubeMap;
-
-	if (roughnessMap) roughnessMap->Release();
-
-	if (metalnessMap) metalnessMap->Release();
-
-	if (sphereMesh)
-		delete sphereMesh;
-	
 	if (cubeMesh)
 		delete cubeMesh;
+	
+	if (sphereMesh)
+		delete sphereMesh;
+
+	if (texture)
+		texture->Release();
+
+	if (sampler)
+		sampler->Release();
+
+	if (normalMap)
+		normalMap->Release();
+
+	if (shadow)
+		delete shadow;
+
+	if (cubeMap)
+		delete cubeMap;
+
+	if (roughnessMap)
+		roughnessMap->Release();
+
+	if (metalnessMap)
+		metalnessMap->Release();
+
 
 	RenderingEngine::Stop();
 }
@@ -145,7 +151,7 @@ void ScratchEngine::Game::LoadShaders()
 	vertexShader->LoadShaderFile((wpath + std::wstring(L"/VertexShader.cso")).c_str());
 
 	pixelShader = new SimplePixelShader(device, context);
-	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
 
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
@@ -170,7 +176,7 @@ void ScratchEngine::Game::CreateAllMaps() {
 
 	//cube map
 	cubeMap->setUp(device);
-	cubeMap->setMesh(mesh1);
+	cubeMap->setMesh(cubeMesh);
 	cubeMap->setSampler(sampler);
 	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox1.dds");
 	//end of cube map
@@ -183,12 +189,6 @@ void ScratchEngine::Game::CreateMatrces()
 
 void ScratchEngine::Game::CreateBasicGeometry()
 {
-
-	//char* filename = (char*)"../Assets/Models/sphere.obj";
-
-	char* filename = (char*)"../Assets/Models/sphere.obj";
-	char* cubefile = (char*)"../Assets/Models/cube.obj";
-
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
 	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture);
@@ -205,8 +205,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap);
 	if (FAILED(isok)) printf("load metalness map failed");
 
-	mesh = new Mesh(device, filename);
-	mesh1 = new Mesh(device, cubefile);
 
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
@@ -219,10 +217,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	simpleMaterial->setRoughnessMap(roughnessMap);
 	//simpleMaterial->setShadowMap(shadow);
 
-	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	greenMaterial = new Material(vertexShader, pixelShader, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
 
-	redMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
+	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
 
@@ -234,12 +232,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 	go1 = new GameObject();
-
-	go1->SetPosition(0, -2, 10);
-	//go1->SetLocalRotation(0, 0, 0);
-	go1->SetLocalScale(10, 1, 10);
-	go1->AddComponent<Renderer>(simpleMaterial, mesh1);
-
 	go1->SetName("1");
 	go1->SetPosition(0, 0, 15);
 	go1->SetLocalRotation(45, 0, 90);
@@ -251,14 +243,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go2 = new GameObject();
 	go2->SetName("2");
 	go2->SetParent(go1);
-
-	go2->SetLocalPosition(0, 2, 0);
-
-	//go2->SetLocalScale(1, 1, 1);
-
-	//go2->SetLocalScale(.01, .01, .01);
-	go2->AddComponent<Renderer>(simpleMaterial, mesh);
-
 	go2->SetLocalPosition(0, 4, 0);
 	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
 	go2->AddComponent<BoxCollider>();
@@ -324,30 +308,32 @@ void ScratchEngine::Game::Update()
 	while (isRunning)
 	{
 		UpdateTimer();
+
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
 		frameBarrier.Wait();
 
-		if (GetAsyncKeyState(VK_ESCAPE)) Quit();
-
-
-			camera->Translate(0.0f, 0.0f, 10 * deltaTime, SELF);
+		if (GetAsyncKeyState(VK_ESCAPE))
+			Quit();
+			
+		if (GetAsyncKeyState('W') & 0x8000)
+			camera->Translate(0.0f, 0.0f, 10 * deltaTime);
 
 		if (GetAsyncKeyState('A') & 0x8000)
-			camera->Translate(-10 * deltaTime, 0.0f, 0.0f, SELF);
+			camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
 
 		if (GetAsyncKeyState('S') & 0x8000)
-			camera->Translate(0.0f, 0.0f, -10 * deltaTime, SELF);
+			camera->Translate(0.0f, 0.0f, -10 * deltaTime);
 
 		if (GetAsyncKeyState('D') & 0x8000)
-			camera->Translate(10 * deltaTime, 0.0f, 0.0f, SELF);
+			camera->Translate(10 * deltaTime, 0.0f, 0.0f);
 
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-			camera->Translate(0.0f, 10 * deltaTime, 0.0f, SELF);
+			camera->Translate(0.0f, 10 * deltaTime, 0.0f);
 
 		if (GetAsyncKeyState('X') & 0x8000)
-			camera->Translate(0.0f, -10 * deltaTime, 0.0f, SELF);
+			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
 		go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);
