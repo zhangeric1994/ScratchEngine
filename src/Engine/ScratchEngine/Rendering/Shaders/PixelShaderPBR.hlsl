@@ -25,6 +25,14 @@ struct material {
 	float metalness;
 };
 
+cbuffer EnableMaps : register(b0) {
+	int hasTexture;
+	int hasNormalMap;
+	int hasShadowMap;
+	int hasMetalnessMap;
+	int hasRoughnessMap;
+}
+
 cbuffer LightSourceData : register(b1) {
 	LightSource light;
 };
@@ -153,21 +161,25 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
 	float3x3 TBN = float3x3(T, B, N);
 
-	input.normal = normalize(mul(textureNormal, TBN));
+	float3 normal = normalize(mul(textureNormal, TBN));
+	input.normal = lerp(input.normal, normal, hasNormalMap);
 
 	//param for light calculation
-	float3 normal = input.normal;
+	normal = input.normal;
 	float3 wi = normalize(-light.direction);
 	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
 
 	//texture color
-	float4 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
+	float3 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
+	surfaceColor = lerp(float3(1, 1, 1), surfaceColor, hasTexture);
 
 	//roughness
 	float roughness = roughnessMap.Sample(basicSampler, input.uv).r;
+	roughness = lerp(0.0f, roughness, hasRoughnessMap);
 
 	//metalness map
 	float metalness = metalnessMap.Sample(basicSampler, input.uv).r;
+	metalness = lerp(0.0f, metalness, hasMetalnessMap);
 
 	//shadow map
 	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
@@ -175,8 +187,10 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
 	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
 
+	shadowAmount = lerp(1.0f, shadowAmount, 1);
+
 	//calculate light
-	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light);
 
 	return float4(result, 1.0f);
 }

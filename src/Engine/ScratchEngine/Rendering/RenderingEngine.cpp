@@ -251,7 +251,7 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context, ID3D11ShaderResourceView* roughnessMap, ID3D11ShaderResourceView* metalnessMap)
+void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
 {
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
@@ -289,13 +289,35 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 
-		pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
+		if (material->HasTexture()) {
+			pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
+		}
+
 		pixelShader->SetSamplerState("basicSampler", material->getSampler());
-		pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
-		pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
-		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
-		pixelShader->SetShaderResourceView("roughnessMap", roughnessMap);
-		pixelShader->SetShaderResourceView("metalnessMap", metalnessMap);
+
+		if (material->HasNormalMap()) {
+			pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
+		}
+
+		if (material->HasShadowMap()) {
+			pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());	
+		}
+		
+		pixelShader->SetSamplerState("shadowSampler", material->getSampler());
+
+		if (material->HasRoughnessMap()) {
+			pixelShader->SetShaderResourceView("roughnessMap", material->getRoughnessMap());
+		}
+
+		if (material->HasMetalnessMap()) {
+			pixelShader->SetShaderResourceView("metalnessMap", material->getMetalnessMap());
+		}
+
+		pixelShader->SetInt("hasTexture", material->HasTexture());
+		pixelShader->SetInt("hasNormalMap", material->HasNormalMap());
+		pixelShader->SetInt("hasShadowMap", material->HasShadowMap());
+		pixelShader->SetInt("hasRoughnessMap", material->HasRoughnessMap());
+		pixelShader->SetInt("hasMetalnessMap", material->HasMetalnessMap());
 
 		pixelShader->CopyAllBufferData();
 		pixelShader->SetShader();
@@ -337,7 +359,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	}
 }
 
-void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* context) {
+bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* context) {
 	context->OMSetRenderTargets(0, 0, shadow->getShadowDSV());
 	context->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	context->RSSetState(shadow->getRasterizerState());
@@ -406,6 +428,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceCont
 		++j;
 	}
 	
+	return true;
 }
 
 void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow) {
