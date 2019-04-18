@@ -112,7 +112,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\scratch-engine\src\Engine\Externals\include;..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\Engine\Externals\include;..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
