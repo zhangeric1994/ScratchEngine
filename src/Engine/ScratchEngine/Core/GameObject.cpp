@@ -7,6 +7,7 @@ using namespace ScratchEngine;
 
 ScratchEngine::GameObject::GameObject() : Transform(), components(4)
 {
+	name = "";
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
 	flag = FLAG_ACTIVE;
@@ -14,6 +15,7 @@ ScratchEngine::GameObject::GameObject() : Transform(), components(4)
 
 ScratchEngine::GameObject::GameObject(float x, float y, float z) : Transform(x, y, z), components(4)
 {
+	name = "";
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
 	flag = FLAG_ACTIVE;
@@ -21,6 +23,7 @@ ScratchEngine::GameObject::GameObject(float x, float y, float z) : Transform(x, 
 
 ScratchEngine::GameObject::GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale) : Transform(position, rotation, scale), components(4)
 {
+	name = "";
 	index = Scene::GetCurrentScene()->AddRootObject(this);
 
 	flag = FLAG_ACTIVE;
@@ -38,6 +41,11 @@ ScratchEngine::GameObject::~GameObject()
 
 	for (auto it = children.begin(); it != children.end(); it++)
 		delete (*it);
+}
+
+__inline string ScratchEngine::GameObject::GetName()
+{
+	return name;
 }
 
 __inline GameObject* ScratchEngine::GameObject::GetParent()
@@ -63,6 +71,11 @@ __inline bool ScratchEngine::GameObject::IsActiveSelf()
 __inline bool ScratchEngine::GameObject::IsStatic()
 {
 	return isStatic;
+}
+
+void ScratchEngine::GameObject::SetName(string name)
+{
+	this->name = name;
 }
 
 __inline void ScratchEngine::GameObject::SetParent(GameObject* other)

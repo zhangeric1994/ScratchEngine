@@ -69,67 +69,43 @@ void ScratchEngine::Physics::PhysicsEngine::RemoveCollider(Collider* collider)
 void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 {
 	for (Collider* collider = colliderList; collider; collider = collider->next)
-	{
-		GameObject* gameObject = collider->GetGameObject();
-
-		switch (collider->type)
-		{
-		case AABB:
-			break;
-
-
-		case OBB:
-			if (!collider->boundingVolume)
-				collider->boundingVolume = new OrientedBoundingBox();
-
-			static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
-			break;
-
-
-		case Sphere:
-			if (!collider->boundingVolume)
-				collider->boundingVolume = new BoundingSphere();
-
-			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
-			break;
-		}
-	}
+		__UpdateBoundingVolume(collider->GetGameObject(), collider);
 }
 
 void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 {
 	for (Collider* colliderA = colliderList; colliderA; colliderA = colliderA->next)
-		if (colliderA)
-			for (Collider* colliderB = colliderA->next; colliderB; colliderB = colliderB->next)
-			{
-				auto it = colliderA->contacts.find(colliderB);
+		dynamicBVH.Query(colliderA->id, this);
+		//for (Collider* colliderB = colliderA->next; colliderB; colliderB = colliderB->next)
+		//{
+		//	auto it = colliderA->contacts.find(colliderB);
 
-				GameObject* gameObjectA = colliderA->GetGameObject();
-				GameObject* gameObjectB = colliderB->GetGameObject();
+		//	GameObject* gameObjectA = colliderA->GetGameObject();
+		//	GameObject* gameObjectB = colliderB->GetGameObject();
 
-				if (colliderA->IsOverlappingWith(colliderB))
-				{
-					if (it == colliderA->contacts.end())
-					{
-						colliderA->contacts.insert(colliderB);
-						static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
+		//	if (colliderA->IsOverlappingWith(colliderB))
+		//	{
+		//		if (it == colliderA->contacts.end())
+		//		{
+		//			colliderA->contacts.insert(colliderB);
+		//			static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
 
-						colliderB->contacts.insert(colliderA);
-						static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
-					}
+		//			colliderB->contacts.insert(colliderA);
+		//			static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
+		//		}
 
-					static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
-					static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
-				}
-				else if (it != colliderA->contacts.end())
-				{
-					colliderA->contacts.erase(it);
-					static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
+		//		static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
+		//		static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
+		//	}
+		//	else if (it != colliderA->contacts.end())
+		//	{
+		//		colliderA->contacts.erase(it);
+		//		static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
 
-					colliderB->contacts.erase(colliderA);
-					static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
-				}
-			}
+		//		colliderB->contacts.erase(colliderA);
+		//		static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
+		//	}
+		//}
 }
 
 //
@@ -142,3 +118,74 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 //
 //	return true;
 //}
+
+bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& nodeA, const DynamicBVHNode<Collider*>& nodeB)
+{
+	Collider* colliderA = nodeA.data;
+	Collider* colliderB = nodeB.data;
+	
+	if (colliderA->id < colliderB->id)
+	{
+		printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
+		auto it = colliderA->contacts.find(colliderB);
+
+		GameObject* gameObjectA = colliderA->GetGameObject();
+		GameObject* gameObjectB = colliderB->GetGameObject();
+
+		if (colliderA->IsOverlappingWith(colliderB))
+		{
+			if (it == colliderA->contacts.end())
+			{
+				colliderA->contacts.insert(colliderB);
+				static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
+
+				colliderB->contacts.insert(colliderA);
+				static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
+			}
+
+			static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
+			static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
+		}
+		else if (it != colliderA->contacts.end())
+		{
+			colliderA->contacts.erase(it);
+			static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
+
+			colliderB->contacts.erase(colliderA);
+			static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
+		}
+	}
+
+	return true;
+}
+
+__forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume(GameObject* gameObject, Collider* collider)
+{
+	switch (collider->type)
+	{
+	case AABB:
+		break;
+
+
+	case OBB:
+		if (!collider->boundingVolume)
+			collider->boundingVolume = new OrientedBoundingBox();
+
+		static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
+
+		if (collider->id == null_index)
+			collider->id = dynamicBVH.Insert(collider, GetBoundingAABB(static_cast<OrientedBoundingBox*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
+		break;
+
+
+	case Sphere:
+		if (!collider->boundingVolume)
+			collider->boundingVolume = new BoundingSphere();
+
+		static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
+
+		if (collider->id == null_index)
+			collider->id = dynamicBVH.Insert(collider, GetBoundingAABB(static_cast<BoundingSphere*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
+		break;
+	}
+}

@@ -14,7 +14,11 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		template<class T1, class T2> static bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2);
+		struct AxisAlignedBoundingBox;
+
+		template<class T1, class T2> static bool IsOverlapping(T1* boundingVolume1, T2* boundingVolume2);
+		template<class T> static AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement);
+
 
 		enum BoundingVolumeType
 		{
@@ -29,7 +33,8 @@ namespace ScratchEngine
 
 		struct __declspec(dllexport) AxisAlignedBoundingBox : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
@@ -96,7 +101,8 @@ namespace ScratchEngine
 		struct OrientedBoundingBox : public BoundingVolume
 		{
 			friend bool GetSeparatingPlane(XMVECTOR, XMVECTOR, OrientedBoundingBox*, OrientedBoundingBox*);
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
 			friend class PhysicsEngine;
 
@@ -156,7 +162,8 @@ namespace ScratchEngine
 
 		struct BoundingSphere : public BoundingVolume
 		{
-			template<class T1, class T2> friend bool TestOverlap(T1*, T2*);
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
 			//friend class OverlapCheck;
 
 
@@ -189,27 +196,27 @@ namespace ScratchEngine
 
 
 		//public:
-			template<class T1, class T2> bool TestOverlap(T1* boundingVolume1, T2* boundingVolume2)
+			template<class T1, class T2> bool IsOverlapping(T1* boundingVolume1, T2* boundingVolume2)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb1, AxisAlignedBoundingBox* aabb2)
 			{
 				return XMVector3LessOrEqual(XMVectorAbs(XMVectorSubtract(aabb1->GetCenter(), aabb2->GetCenter())), XMVectorAdd(aabb1->GetHalfSize(), aabb2->GetHalfSize()));
 			}
 
-			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, OrientedBoundingBox* obb)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> bool TestOverlap(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere)
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> bool TestOverlap(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)
+			template<> bool IsOverlapping(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)
 			{
 				XMVECTOR RPos = XMVectorSubtract(obb1->center, obb2->center);
 
@@ -243,7 +250,7 @@ namespace ScratchEngine
 				return true;
 			}
 
-			template<> bool TestOverlap(OrientedBoundingBox* obb, BoundingSphere* sphere)
+			template<> bool IsOverlapping(OrientedBoundingBox* obb, BoundingSphere* sphere)
 			{
 				XMMATRIX changeOfBasis = XMMatrixTranspose(XMMATRIX(obb->axisX, obb->axisY, obb->axisZ, XMVectorZero()));
 
@@ -337,7 +344,7 @@ namespace ScratchEngine
 				//return false;
 			}
 
-			template<> bool TestOverlap(BoundingSphere* sphere1, BoundingSphere* sphere2)
+			template<> bool IsOverlapping(BoundingSphere* sphere1, BoundingSphere* sphere2)
 			{
 				XMVECTOR normal = XMVectorSubtract(sphere1->center, sphere2->center);
 				float squared_distance = XMVector3LengthSq(normal).m128_f32[0];
@@ -360,6 +367,35 @@ namespace ScratchEngine
 
 				return false;
 			}
+
+			template<class T> AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement)
+			{
+				throw "NOT IMPLEMENTED";
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(AxisAlignedBoundingBox* aabb, f32 enlargement)
+			{
+				XMVECTOR v = XMVectorSet(enlargement, enlargement, enlargement, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(aabb->min, v), XMVectorAdd(aabb->max, v));
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(OrientedBoundingBox* obb, f32 enlargement)
+			{
+				f32 r = XMVector3LengthEst(obb->size).m128_f32[0] + enlargement;
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(obb->center, v), XMVectorAdd(obb->center, v));
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(BoundingSphere* sphere, f32 enlargement)
+			{
+				f32 r = sphere->radius + enlargement;
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(sphere->center, v), XMVectorAdd(sphere->center, v));
+			}
+
 		//};
 
 		//template<VolumeType T> XMVECTOR GetCollisionNormal(OrientedBoundingBox* a, XMVECTOR plane = { 0, 0, 0, 0 })

@@ -20,6 +20,7 @@ namespace ScratchEngine
 
 
 	private:
+		string name;
 		unordered_map<type_index, GameComponent*> components;
 		union
 		{
@@ -75,6 +76,7 @@ namespace ScratchEngine
 		GameObject(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale);
 		~GameObject();
 
+		string GetName();
 		GameObject* GetParent();
 		GameObject* GetChild(size_t index);
 		template<class T> T* GetComponent();
@@ -82,6 +84,7 @@ namespace ScratchEngine
 		bool IsActiveSelf();
 		bool IsStatic();
 
+		void SetName(string name);
 		void SetParent(GameObject* other);
 		template<class T, class... argTs> T* AddComponent(argTs... args);
 		template<class T> void RemoveComponent();
