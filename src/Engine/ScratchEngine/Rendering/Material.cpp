@@ -11,6 +11,7 @@ ScratchEngine::Rendering::Material::Material(
 	pixelShader = _pixelShader;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 	tint[0] = 1;
 	tint[1] = 1;
@@ -18,6 +19,10 @@ ScratchEngine::Rendering::Material::Material(
 	tint[3] = 1;
 	texture = _texture;
 
+=======
+	texture = _texture;
+	normalMap = _normalMap;
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 =======
 	texture = _texture;
 	normalMap = _normalMap;
@@ -39,10 +44,15 @@ SimplePixelShader* ScratchEngine::Rendering::Material::GetPixelShader() {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 void ScratchEngine::Rendering::Material::setTexture(ID3D11ShaderResourceView * _texture) {
 	texture = _texture;
 	hasTexture = 1;
+=======
+ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getTexture() {
+	return texture;
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 =======
 ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getTexture() {
 	return texture;
@@ -56,10 +66,14 @@ ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getTexture() {
 ID3D11SamplerState* ScratchEngine::Rendering::Material::getSampler() {
 	return sampler;
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
 }
 
 ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getNormalMap() {
 	return normalMap;
+<<<<<<< HEAD
 }
 
 void ScratchEngine::Rendering::Material::setShadowMap(ID3D11ShaderResourceView* _shadowMap) {
@@ -100,6 +114,12 @@ __inline void ScratchEngine::Rendering::Material::SetTint(const float* color)
 
 ID3D11ShaderResourceView* ScratchEngine::Rendering::Material::getNormalMap() {
 	return normalMap;
+}
+
+void ScratchEngine::Rendering::Material::setShadowMap(ID3D11ShaderResourceView* _shadowMap) {
+	shadowMap = _shadowMap;
+>>>>>>> parent of 6cda99c... put metalness map and roughness map into material class. Shadow map occured some unknown bug. It is disabled for now.
+=======
 }
 
 void ScratchEngine::Rendering::Material::setShadowMap(ID3D11ShaderResourceView* _shadowMap) {
