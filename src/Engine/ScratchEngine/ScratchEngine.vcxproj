@@ -165,6 +165,8 @@
     <ClInclude Include="Core\Game.h" />
     <ClInclude Include="Core\GameComponent.h" />
     <ClInclude Include="Core\GameObject.h" />
+    <ClInclude Include="Core\InputEvent.h" />
+    <ClInclude Include="Core\InputManager.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
@@ -209,6 +211,8 @@
     <ClCompile Include="Core\Game.cpp" />
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
+    <ClCompile Include="Core\InputEvent.cpp" />
+    <ClCompile Include="Core\InputManager.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
     <ClCompile Include="dllmain.cpp" />
