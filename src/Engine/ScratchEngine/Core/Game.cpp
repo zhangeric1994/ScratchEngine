@@ -153,6 +153,9 @@ void ScratchEngine::Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
 
+	pixelShaderPBR = new SimplePixelShader(device, context);
+	pixelShaderPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
 	cubeMap->setVS(device, context, (wpath + std::wstring(L"/cubeVS.cso")).c_str());
@@ -210,7 +213,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, sampler);
+	simpleMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
 	simpleMaterial->setTexture(texture);
 	simpleMaterial->setMetalnessMap(metalnessMap);
 	simpleMaterial->setNormalMap(normalMap);
@@ -252,7 +255,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->SetName("3");
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go3->AddComponent<Renderer>(simpleMaterial, sphereMesh);
 
 	go4 = new GameObject();
 	go4->SetName("4");
@@ -283,7 +286,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go8->SetName("8");
 	go8->SetParent(go7);
 	go8->SetLocalPosition(0, 2, 0);
-	go8->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go8->AddComponent<Renderer>(simpleMaterial, sphereMesh);
 
 	go9 = new GameObject();
 	go9->SetName("9");

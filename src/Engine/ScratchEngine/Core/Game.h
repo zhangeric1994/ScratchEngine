@@ -49,6 +49,7 @@ namespace ScratchEngine
 		SimpleVertexShader* vsZPrepass;
 		SimpleVertexShader* vertexShader;
 		SimplePixelShader* pixelShader;
+		SimplePixelShader* pixelShaderPBR;
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
