@@ -43,11 +43,14 @@ VertexToPixel main(VertexShaderInput vin)
 	float weight1 = vin.weight.y;
 	float weight2 = vin.weight.z;
 	float weight3 = vin.weight.w;
+
 	float sum = weight0 + weight1 + weight2 + weight3;
+
 	weight0 /= sum;
 	weight1 /= sum;
 	weight2 /= sum;
 	weight3 /= sum;
+
 	// offset position by bone matrices, using weights to scale
 	float4 p = weight0 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
 	p += weight1 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[1]]);
@@ -70,7 +73,7 @@ VertexToPixel main(VertexShaderInput vin)
 	//t.w = 0.0f;
 
 
-	// Transform to world space space.
+	// Transform to world space.
 	vout.position = mul(p, world);
 	vout.normal = normalize(mul(n.xyz, (float3x3)world));
 	//vout.TangentW = float4(mul(t, (float3x3)gWorld), vin.Tan.w);
