@@ -99,13 +99,13 @@
     <ClCompile Include="Physics\RigidBody.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Core\AIBehaviors.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Core\InputEvent.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\InputManager.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\AIBehaviors.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,16 +242,13 @@
     <ClInclude Include="Physics\DynamicBVHNode.hpp">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Core\AIBehaviors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InputManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Core\InputEvent.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\InputManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AIBehaviors.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
