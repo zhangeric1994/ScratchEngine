@@ -44,8 +44,8 @@ namespace ScratchEngine
 		POINT prevMousePos;
 
 		SimpleVertexShader* vsZPrepass;
-		SimpleVertexShader* vsSkeleton;
 		SimpleVertexShader* vertexShader;
+		SimpleVertexShader* vsSkeleton;
 		SimplePixelShader* pixelShader;
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;

@@ -64,7 +64,7 @@ namespace ScratchEngine
 		void PlayAnimationBackward();
 		void AdjustAnimationSpeedBy(float prc);
 		void AdjustAnimationSpeedTo(float ticksPerSec);
-		std::vector<XMMATRIX> GetTransforms(float dt);
+		std::vector<XMMATRIX> GetTransforms();
 		int GetBoneIndex(string name);
 	};
 }

@@ -20,7 +20,7 @@ ScratchEngine::Animator::Animator(const aiScene * scene)
 		hasSkeleton = false;
 		return;
 	}
-
+	hasSkeleton = true;
 	skeleton = CreateBoneTree(scene->mRootNode, nullptr);
 
 	for (UINT i = 0; i < scene->mNumMeshes; i++){
@@ -118,14 +118,13 @@ void ScratchEngine::Animator::Update(float dt)
 	if (timePos > duration) {
 		if (LoopClips) {
 			timePos = 0;
-			GetTransforms(timePos);
 		}
 		else {
 			//wait 
-			GetTransforms(duration);
+			timePos = duration;
 		}
 	}else{
-		GetTransforms(timePos);
+		// ok state
 	}
 	
 }
@@ -150,9 +149,9 @@ void ScratchEngine::Animator::AdjustAnimationSpeedTo(float ticksPerSec)
 	animations[currentAnimationIndex]->ticksPerSecond = ticksPerSec;
 }
 
-std::vector<XMMATRIX> ScratchEngine::Animator::GetTransforms(float dt)
+std::vector<XMMATRIX> ScratchEngine::Animator::GetTransforms()
 {
-	return animations[currentAnimationIndex]->GetTransforms(dt);
+	return animations[currentAnimationIndex]->GetTransforms(timePos);
 }
 
 int ScratchEngine::Animator::GetBoneIndex(string name)

@@ -19,8 +19,8 @@ namespace ScratchEngine
 
 			Mesh* mesh;
 			Material* material;
-			void* bones;
-
+			XMMATRIX* bones;
+			int bonesCount;
 			Renderable();
 		};
 	}

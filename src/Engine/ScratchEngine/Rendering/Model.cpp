@@ -41,15 +41,15 @@ void ScratchEngine::Rendering::Model::ProcessNode(aiNode * node, const aiScene *
 		meshs.push_back(this->ProcessMesh(mesh, scene));
 	}
 
-	//for (UINT i = 0; i < node->mNumChildren; i++) {
-	//	this->ProcessNode(node->mChildren[i], scene);
-	//	//childModels.push_back(this);
-	//}
-
 	for (UINT i = 0; i < node->mNumChildren; i++) {
+		this->ProcessNode(node->mChildren[i], scene);
+		//childModels.push_back(this);
+	}
+
+	/*for (UINT i = 0; i < node->mNumChildren; i++) {
 		Model* child = new Model(device, this->vertToBoneWeight);
 		child->ProcessNode(node->mChildren[i], scene);
-		childModels.push_back(child);
+		childModels.push_back(child);*/
 	}
 }
 
@@ -84,8 +84,26 @@ Mesh* ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene 
 					break;
 				}
 				else {
-					vertex.Bones.IDs[j] = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
-					vertex.Bones.Weights[j] = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
+					switch (j)
+					{
+					case 0:
+						vertex.IDs.x = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
+						vertex.Weights.x = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
+						break;
+					case 1:
+						vertex.IDs.y = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
+						vertex.Weights.y = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
+						break;
+					case 2:
+						vertex.IDs.z = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
+						vertex.Weights.z = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
+						break;
+					case 3:
+						vertex.IDs.w = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
+						vertex.Weights.w = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
+						break;
+					}
+					
 				}
 			}
 		}

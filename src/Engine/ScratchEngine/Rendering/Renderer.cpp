@@ -19,6 +19,15 @@ ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh)
 	RenderingEngine::GetSingleton()->AddRenderer(this);
 }
 
+ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh, Animator* Anim)
+{
+	this->mesh = mesh;
+	this->material = material;
+	this->renderable = null_index;
+	this->anim = Anim;
+	RenderingEngine::GetSingleton()->AddRenderer(this);
+}
+
 ScratchEngine::Renderer::Renderer(Material * material, Model * model, GameObject * Obj)
 {
 	this->model = model;
@@ -28,12 +37,13 @@ ScratchEngine::Renderer::Renderer(Material * material, Model * model, GameObject
 	for (UINT i = 0; i < model->meshs.size(); i++) {
 		Mesh* meshObj = model->meshs.at(i);
 		GameObject* go = new GameObject();
-		go->AddComponent<Renderer>(material, meshObj);
+		go->AddComponent<Renderer>(material, meshObj, model->anim);
 		go->SetParent(Obj);
 	}
 
 	for (UINT i = 0; i < model->childModels.size(); i++) {
 		Model* modelObj = model->childModels.at(i);
+		modelObj->anim = model->anim;
 		GameObject* go1 = new GameObject();
 		go1->AddComponent<Renderer>(material, modelObj,go1);
 		go1->SetParent(Obj);

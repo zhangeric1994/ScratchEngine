@@ -22,6 +22,7 @@ namespace ScratchEngine
 		Material* material;
 		Mesh* mesh; // renderer can draw a single a mesh  or a complicated model with multiple mesh
 		Model* model;
+		Animator * anim;
 		i32 renderable;
 
 		Renderer* next;
@@ -31,6 +32,7 @@ namespace ScratchEngine
 	public:
 		Renderer();
 		Renderer(Material * material, Mesh * mesh);
+		Renderer(Material * material, Mesh * mesh, Animator * Animator);
 		Renderer(Material * material, Model * model, GameObject * Obj);
 		~Renderer();
 
