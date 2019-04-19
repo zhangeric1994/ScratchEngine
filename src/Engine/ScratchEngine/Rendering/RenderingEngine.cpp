@@ -146,8 +146,13 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 			renderable.mesh = renderer->mesh;
 			if (renderer->anim) {
 				std::vector<XMMATRIX> temp = renderer->anim->GetTransforms();
-				renderable.bones = temp.data();
-				renderable.bonesCount = sizeof(XMMATRIX) * temp.size();
+				XMMATRIX* array;
+				array = new XMMATRIX[temp.size()];
+				for (UINT i = 0; i < temp.size(); i++) {
+					array[i] = temp[i];
+				}
+				renderable.bones = array;
+				renderable.boneSize = sizeof(float) * 16 * temp.size();
 			}
 		}
 	}
@@ -244,7 +249,6 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
-
 		indexCount += mesh->GetIndexCount();
 
 		++j;
@@ -287,8 +291,8 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
-			//vertexShader->SetData("cbSkinned",)
-			vertexShader->SetData("cbSkinned", renderable.bones, renderable.bonesCount);
+			vertexShader->SetData("gBoneTransforms", renderable.bones,renderable.boneSize);
+
 			vertexShader->CopyAllBufferData();
 			vertexShader->SetShader();
 

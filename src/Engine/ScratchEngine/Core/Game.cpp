@@ -12,6 +12,7 @@ using namespace DirectX;
 using namespace ScratchEngine;
 using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
+using namespace ScratchEngine::Animation;
 
 
 Material* ScratchEngine::Game::greenMaterial = nullptr;
@@ -139,7 +140,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	
 
 	go1 = new GameObject();
-	go1->AddComponent<Renderer>(redMaterial, model,go1);
+	go1->AddComponent<Renderer>(redMaterial, model);
 	go1->SetPosition(0, 0, 6);
 	go1->SetLocalScale(0.01, 0.01, 0.01);
 	//go1->AddComponent<BoxCollider>();
@@ -168,6 +169,7 @@ void ScratchEngine::Game::OnResize()
 
 void ScratchEngine::Game::Update()
 {
+	model->anim->Update(0.1f);
 	while (isRunning)
 	{
 		UpdateTimer();
@@ -201,10 +203,9 @@ void ScratchEngine::Game::Update()
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
-
+		
 		physicsEngine->UpdateBoundingVolumes();
 		physicsEngine->SolveCollisions();
-
 		frameBarrier.Wait();
 	}
 

@@ -32,12 +32,20 @@ ScratchEngine::Animator::Animator(const aiScene * scene)
 				// can not find the correspond bones in structure
 				continue;
 			}
+			bool skip = false;
+			for (int i = 0; i < bones.size(); i++) {
+				Bone* t = bones[i];
+				if (t->name == bone->mName.C_Str()) {
+					skip = true;
+					break;
+				}
+			}
+			if (skip) continue;
 			Bone * found = it->second;
 			found->offset = XMMatrixTranspose(ToMatrix(bone->mOffsetMatrix));
 			bones.push_back(found);
 			bonesToIndex[found->name] = bones.size()-1;
 		}
-
 		// TODO may come back if any bone is missing
 
 	}

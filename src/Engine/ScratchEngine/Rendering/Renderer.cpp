@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "RenderingEngine.h"
+#include "../Animation/AnimationEngine.h"
 
 ScratchEngine::Renderer::Renderer()
 {
@@ -15,39 +16,20 @@ ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh)
 	this->mesh = mesh;
 	this->material = material;
 	this->renderable = null_index;
-
+	this->anim = nullptr;
+	this->model = nullptr; 
 	RenderingEngine::GetSingleton()->AddRenderer(this);
 }
 
-ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh, Animator* Anim)
-{
-	this->mesh = mesh;
-	this->material = material;
-	this->renderable = null_index;
-	this->anim = Anim;
-	RenderingEngine::GetSingleton()->AddRenderer(this);
-}
-
-ScratchEngine::Renderer::Renderer(Material * material, Model * model, GameObject * Obj)
+ScratchEngine::Renderer::Renderer(Material * material, Model * model)
 {
 	this->model = model;
+	this->mesh = model->mesh;
 	this->material = material;
 	this->renderable = null_index;
-
-	for (UINT i = 0; i < model->meshs.size(); i++) {
-		Mesh* meshObj = model->meshs.at(i);
-		GameObject* go = new GameObject();
-		go->AddComponent<Renderer>(material, meshObj, model->anim);
-		go->SetParent(Obj);
-	}
-
-	for (UINT i = 0; i < model->childModels.size(); i++) {
-		Model* modelObj = model->childModels.at(i);
-		modelObj->anim = model->anim;
-		GameObject* go1 = new GameObject();
-		go1->AddComponent<Renderer>(material, modelObj,go1);
-		go1->SetParent(Obj);
-	}
+	this->anim = model->anim;
+	//AnimationEngine::GetSingleton()->AddAnimator(this->anim);
+	RenderingEngine::GetSingleton()->AddRenderer(this);
 }
 
 ScratchEngine::Renderer::~Renderer()

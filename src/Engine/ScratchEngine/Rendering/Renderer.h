@@ -32,8 +32,7 @@ namespace ScratchEngine
 	public:
 		Renderer();
 		Renderer(Material * material, Mesh * mesh);
-		Renderer(Material * material, Mesh * mesh, Animator * Animator);
-		Renderer(Material * material, Model * model, GameObject * Obj);
+		Renderer(Material * material, Model * model);
 		~Renderer();
 
 

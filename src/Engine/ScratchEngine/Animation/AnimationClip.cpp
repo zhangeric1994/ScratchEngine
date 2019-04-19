@@ -21,6 +21,7 @@ ScratchEngine::Animation::AnimationClip::AnimationClip(aiAnimation * anim)
 		XMFLOAT3 zero = { 0,0,0 };
 		lastPositions.push_back(zero);
 	}
+	transforms.clear();
 	playAnimationForward = true;
 }
 
@@ -62,21 +63,21 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 		// interpolate position keyframes
 		XMFLOAT3 pPosition;
 		if (channel->positionKeys.size() > 0) {
-			float frame = (time >= lastTime) ? lastPositions[i].x : 0.0f;
+			int frame = (time >= lastTime) ? (int)lastPositions[i].x : 0;
 			while (frame < channel->positionKeys.size() - 1) {
-				if (time < channel->positionKeys[(int)frame + 1].mTime) {
+				if (time < channel->positionKeys[frame + 1].mTime) {
 					break;
 				}
 				frame++;
 			}
 			if (frame >= channel->positionKeys.size()) {
-				frame = 0.0f;
+				frame = 0;
 			}
 
-			float nextFrame = (int)(frame + 1.0f) % channel->positionKeys.size();
+			int nextFrame = (frame + 1) % channel->positionKeys.size();
 
-			aiVectorKey key = channel->positionKeys[(int)frame];
-			aiVectorKey nextKey = channel->positionKeys[(int)nextFrame];
+			aiVectorKey key = channel->positionKeys[frame];
+			aiVectorKey nextKey = channel->positionKeys[nextFrame];
 			float diffTime = nextKey.mTime - key.mTime;
 			if (diffTime < 0.0) {
 				diffTime += duration;
@@ -95,9 +96,9 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 		// interpolate rotation keyframes
 		XMFLOAT4 pRot = { 0, 0, 0, 1 };
 		if (channel->rotationKeys.size() > 0) {
-			float frame = (time >= lastTime) ? lastPositions[i].y : 0;
+			int frame = (time >= lastTime) ? (int)lastPositions[i].y : 0;
 			while (frame < channel->rotationKeys.size() - 1) {
-				if (time < channel->rotationKeys[(int)frame + 1].mTime) {
+				if (time < channel->rotationKeys[frame + 1].mTime) {
 					break;
 				}
 				frame++;
@@ -105,10 +106,10 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 			if (frame >= channel->rotationKeys.size()) {
 				frame = 0;
 			}
-			float nextFrame = (int)(frame + 1) % channel->rotationKeys.size();
+			int nextFrame = (frame + 1) % channel->rotationKeys.size();
 
-			aiQuatKey key = channel->rotationKeys[(int)frame];
-			aiQuatKey nextKey = channel->rotationKeys[(int)nextFrame];
+			aiQuatKey key = channel->rotationKeys[frame];
+			aiQuatKey nextKey = channel->rotationKeys[nextFrame];
 			key.mValue.Normalize();
 			nextKey.mValue.Normalize();
 			float diffTime = nextKey.mTime - key.mTime;
@@ -131,9 +132,9 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 		// interpolate scale keyframes
 		XMFLOAT3 pscale = { 1, 1, 1};
 		if (channel->scalingKeys.size() > 0) {
-			float frame = (time >= lastTime) ? lastPositions[i].z : 0;
+			int frame = (time >= lastTime) ? (int)lastPositions[i].z : 0;
 			while (frame < channel->scalingKeys.size() - 1) {
-				if (time < channel->scalingKeys[(int)frame + 1].mTime) {
+				if (time < channel->scalingKeys[frame + 1].mTime) {
 					break;
 				}
 				frame++;
@@ -145,9 +146,9 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 		}
 
 
-		XMMATRIX mat = XMMatrixScalingFromVector(XMLoadFloat3(&pPosition))
+		XMMATRIX mat = XMMatrixScalingFromVector(XMLoadFloat3(&pscale))
 			* XMMatrixRotationQuaternion(XMLoadFloat4(&pRot))
-			* XMMatrixTranslationFromVector(XMLoadFloat3(&pscale));
+			* XMMatrixTranslationFromVector(XMLoadFloat3(&pPosition));
 
 		bonesByName[channel->name]->localTransform = mat;
 	}

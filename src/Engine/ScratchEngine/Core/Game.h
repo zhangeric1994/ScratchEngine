@@ -12,11 +12,13 @@
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
+#include "../Animation/AnimationEngine.h"
 
 #include "DXCore.h"
 
 using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Multithreading;
+using namespace ScratchEngine::Animation;
 
 namespace ScratchEngine
 {

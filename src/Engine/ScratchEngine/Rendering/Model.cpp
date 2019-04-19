@@ -18,6 +18,9 @@ ScratchEngine::Rendering::Model::~Model()
 
 bool ScratchEngine::Rendering::Model::LoadModel(const std::string & filePath)
 {
+	vertices.clear();
+	indices.clear();
+
 	Assimp::Importer importer;
 	const aiScene* pScene = importer.ReadFile(filePath,
 		aiProcess_Triangulate|
@@ -30,6 +33,8 @@ bool ScratchEngine::Rendering::Model::LoadModel(const std::string & filePath)
 	anim = new Animator(rawData);
 	name = std::string(rawData->mRootNode->mName.C_Str());
 	this->ProcessNode(rawData->mRootNode, rawData);
+
+	mesh = new Mesh(&vertices[0], vertices.size(), & indices[0], indices.size(), device);
 	return true;
 }
 
@@ -38,7 +43,7 @@ void ScratchEngine::Rendering::Model::ProcessNode(aiNode * node, const aiScene *
 	for (UINT i = 0; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		if(anim&&anim->hasSkeleton)ExtractBoneWeightsFromMesh(mesh);
-		meshs.push_back(this->ProcessMesh(mesh, scene));
+		this->ProcessMesh(mesh, scene);
 	}
 
 	for (UINT i = 0; i < node->mNumChildren; i++) {
@@ -49,15 +54,13 @@ void ScratchEngine::Rendering::Model::ProcessNode(aiNode * node, const aiScene *
 	/*for (UINT i = 0; i < node->mNumChildren; i++) {
 		Model* child = new Model(device, this->vertToBoneWeight);
 		child->ProcessNode(node->mChildren[i], scene);
-		childModels.push_back(child);*/
-	}
+		childModels.push_back(child);
+	}*/
 }
 
-Mesh* ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
+void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
 {
-	// Data to fill
-	std::vector<Vertex> vertices;
-	std::vector<UINT> indices;
+	int verterxStart = vertices.size();
 
 	//Get vertices
 	for (UINT i = 0; i < mesh->mNumVertices; i++)
@@ -117,11 +120,9 @@ Mesh* ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene 
 		aiFace face = mesh->mFaces[i];
 
 		for (UINT j = 0; j < face.mNumIndices; j++)
-			indices.push_back(face.mIndices[j]);
-
+			indices.push_back(face.mIndices[j] + verterxStart);
 	}
 
-	return new Mesh(&vertices[0],vertices.size(), &indices[0], indices.size(), this->device);
 }
 
 void ScratchEngine::Rendering::Model::ExtractBoneWeightsFromMesh(aiMesh* mesh)
