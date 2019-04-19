@@ -149,7 +149,7 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 		XMMATRIX mat = XMMatrixScalingFromVector(XMLoadFloat3(&pscale))
 			* XMMatrixRotationQuaternion(XMLoadFloat4(&pRot))
 			* XMMatrixTranslationFromVector(XMLoadFloat3(&pPosition));
-
+		
 		bonesByName[channel->name]->localTransform = mat;
 	}
 	lastTime = time;

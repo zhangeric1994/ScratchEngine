@@ -62,6 +62,7 @@ ScratchEngine::Animator::Animator(const aiScene * scene)
 			std::vector<XMMATRIX> trans;
 			for (UINT a = 0; a < bones.size(); a++) {
 				XMMATRIX rotMat = bones[a]->offset * bones[a]->globalTransform;
+				rotMat = XMMatrixTranspose(rotMat);
 				trans.push_back(rotMat);
 			}
 			animations[i]->transforms.push_back(trans);
@@ -117,6 +118,7 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 		animationNameToId[animations[i]->name] = i;
 	}
 	currentAnimationIndex = 0;
+	duration = animations[currentAnimationIndex]->duration;
 }
 
 void ScratchEngine::Animator::Update(float dt)

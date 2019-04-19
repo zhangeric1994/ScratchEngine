@@ -141,7 +141,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	go1 = new GameObject();
 	go1->AddComponent<Renderer>(redMaterial, model);
-	go1->SetPosition(0, 0, 6);
+	go1->SetPosition(0, -1, 6);
+	go1->SetRotation(90, 0, 0);
 	go1->SetLocalScale(0.01, 0.01, 0.01);
 	//go1->AddComponent<BoxCollider>();
 
@@ -169,7 +170,6 @@ void ScratchEngine::Game::OnResize()
 
 void ScratchEngine::Game::Update()
 {
-	model->anim->Update(0.1f);
 	while (isRunning)
 	{
 		UpdateTimer();
@@ -201,7 +201,7 @@ void ScratchEngine::Game::Update()
 		//go1->Rotate(20 * deltaTime, 0, 0);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
-
+		model->anim->Update(0.0002f);
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 		
 		physicsEngine->UpdateBoundingVolumes();
