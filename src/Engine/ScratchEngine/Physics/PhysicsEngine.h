@@ -4,7 +4,7 @@
 
 #include "Collider.h"
 //#include "Collision.h"
-//#include "DynamicBVH.hpp"
+#include "DynamicBVH.hpp"
 
 using namespace ScratchEngine;
 using namespace std;
@@ -14,7 +14,7 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine
+		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider *>
 		{
 			friend class Collider;
 
@@ -27,6 +27,7 @@ namespace ScratchEngine
 
 
 		private:
+			DynamicBVH<Collider*> dynamicBVH;
 			Collider* colliderList;
 
 
@@ -41,6 +42,12 @@ namespace ScratchEngine
 		public:
 			void UpdateBoundingVolumes();
 			void SolveCollisions();
+
+
+		private:
+			bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node1, const DynamicBVHNode<Collider*>& node2);
+
+			void __UpdateBoundingVolume(GameObject* gameObject, Collider* collider);
 		};
 	}
 }

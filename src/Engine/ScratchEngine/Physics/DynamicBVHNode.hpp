@@ -9,12 +9,14 @@ namespace ScratchEngine
 	{
 		template<class T> class DynamicBVHNode
 		{
-			template<class T> friend class DynamicBVH;
+			friend class DynamicBVH<T>;
+			friend class PhysicsEngine;
+
 
 		private:
 			AxisAlignedBoundingBox aabb;
 
-			T* data;
+			T data;
 
 			i32 height : 32;
 			i32 parent : 32;

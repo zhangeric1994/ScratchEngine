@@ -107,7 +107,7 @@ __inline void ScratchEngine::Physics::AxisAlignedBoundingBox::SetMaxZ(f32 value)
 __inline void ScratchEngine::Physics::AxisAlignedBoundingBox::Union(const AxisAlignedBoundingBox& other)
 {
 	min = XMVectorMin(min, other.min);
-	max = XMVectorMin(max, other.max);
+	max = XMVectorMax(max, other.max);
 }
 
 __inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetUnionVolume(const AxisAlignedBoundingBox & other) const
