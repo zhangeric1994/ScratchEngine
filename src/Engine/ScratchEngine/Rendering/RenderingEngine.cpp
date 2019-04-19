@@ -291,7 +291,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
-			vertexShader->SetData("gBoneTransforms", renderable.bones,renderable.boneSize);
+			vertexShader->SetData("gBoneTransforms", renderable.bones, renderable.boneSize);
 
 			vertexShader->CopyAllBufferData();
 			vertexShader->SetShader();

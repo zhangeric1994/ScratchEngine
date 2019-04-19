@@ -232,10 +232,10 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		context->OMSetDepthStencilState(nullptr, 0);
-		renderingEngine->PerformZPrepass(vsZPrepass, context);
+		//context->OMSetDepthStencilState(nullptr, 0);
+		//renderingEngine->PerformZPrepass(vsZPrepass, context);
 
-		context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
+		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
 		renderingEngine->DrawForward(context);
 
 		swapChain->Present(0, 0);

@@ -71,7 +71,7 @@ VertexToPixel main(VertexShaderInput vin)
 	//t.w = 0.0f;
 
 
-	// Transform to world space space.
+	// Transform to world space.
 	vout.position = mul(p, world);
 	vout.normal = normalize(mul(n.xyz, (float3x3)world));
 	//vout.TangentW = float4(mul(t, (float3x3)gWorld), vin.Tan.w);
