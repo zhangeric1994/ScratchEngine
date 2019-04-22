@@ -18,6 +18,7 @@ namespace ScratchEngine
 			XMFLOAT3 position;
 			float range;
 			XMFLOAT3 direction;
+			//int shadowMapID;
 		};
 	}
 }

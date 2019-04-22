@@ -5,9 +5,11 @@
 #include "../Core/GameComponent.h"
 
 #include "Mesh.h"
+#include "Texture.h"
 #include "Viewer.h"
 
 using namespace ScratchEngine::Rendering;
+
 
 namespace ScratchEngine
 {

@@ -191,6 +191,7 @@
     <ClInclude Include="Rendering\CubeMap.h" />
     <ClInclude Include="Rendering\LightSource.h" />
     <ClInclude Include="Rendering\ShadowMap.h" />
+    <ClInclude Include="Rendering\Texture.h" />
     <ClInclude Include="Rendering\Viewer.h" />
     <ClInclude Include="Rendering\Renderable.h" />
     <ClInclude Include="Rendering\Renderer.h" />
@@ -229,6 +230,7 @@
     <ClCompile Include="Rendering\RenderingEngine.cpp" />
     <ClCompile Include="Rendering\ShadowMap.cpp" />
     <ClCompile Include="Rendering\SimpleShader.cpp" />
+    <ClCompile Include="Rendering\Texture.cpp" />
     <ClCompile Include="ScratchEngine.cpp" />
   </ItemGroup>
   <ItemGroup>

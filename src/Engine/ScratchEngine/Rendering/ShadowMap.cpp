@@ -63,7 +63,7 @@ ScratchEngine::Rendering::ShadowMap::~ShadowMap() {
 	if (shadowDepthStencilView) shadowDepthStencilView->Release();
 	if (shadowResourceView) shadowResourceView->Release();
 	if (shadowRasterizerState) shadowRasterizerState->Release();
-	if (shadowShader) delete shadowShader;
+	// if (shadowShader) delete shadowShader;
 }
 
 void ScratchEngine::Rendering::ShadowMap::setUp(ID3D11Device* device) {

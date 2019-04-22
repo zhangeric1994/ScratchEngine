@@ -40,7 +40,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
 
-	shadowMapSize = 1024;
+	shadowMapSize = 2048;
 
 	shadowViewport = {};
 	shadowViewport.Height = shadowMapSize;
@@ -77,8 +77,8 @@ ScratchEngine::Game::~Game() {
 	if (vsZPrepass)
 		delete vsZPrepass;
 
-	if (simpleMaterial)
-		delete simpleMaterial;
+	if (pbrMaterial)
+		delete pbrMaterial;
 
 	if (greenMaterial)
 		delete greenMaterial;
@@ -119,11 +119,14 @@ ScratchEngine::Game::~Game() {
 		metalnessMap->Release();
 
 
-	RenderingEngine::Stop();
+	RenderingEngine::Terminate();
 }
 
 void ScratchEngine::Game::Init()
 {
+	PhysicsEngine::Initialize();
+	RenderingEngine::Initialize(device, context);
+
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
@@ -141,8 +144,8 @@ void ScratchEngine::Game::LoadShaders()
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 
-	vsZPrepass = new SimpleVertexShader(device, context);
-	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+	//vsZPrepass = new SimpleVertexShader(device, context);
+	//vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
 
 	shadowShader = new SimpleVertexShader(device, context);
 	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
@@ -172,7 +175,7 @@ void ScratchEngine::Game::LoadShaders()
 void ScratchEngine::Game::CreateAllMaps() {
 	//shadow map setup
 	shadow->setUp(device);
-	shadow->setShader(shadowShader);
+	shadow->setShader(vsZPrepass);
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map
@@ -213,12 +216,12 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	simpleMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
-	simpleMaterial->setTexture(texture);
-	simpleMaterial->setMetalnessMap(metalnessMap);
-	simpleMaterial->setNormalMap(normalMap);
-	simpleMaterial->setRoughnessMap(roughnessMap);
-	//simpleMaterial->setShadowMap(shadow);
+	pbrMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
+	pbrMaterial->setTexture(texture);
+	pbrMaterial->setMetalnessMap(metalnessMap);
+	pbrMaterial->setNormalMap(normalMap);
+	pbrMaterial->setRoughnessMap(roughnessMap);
+	//pbrMaterial->setShadowMap(shadow);
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -231,8 +234,13 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	camera->AddComponent<Camera>();
 
 	GameObject* directionalLightObject = new GameObject();
-	//directionalLightObject->SetRotation(90, 0, 0);
+	directionalLightObject->SetLocalRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
+
+	GameObject* go0 = new GameObject();
+	go0->SetLocalPosition(0, -10, 0);
+	go0->SetLocalScale(100, 1, 100);
+	go0->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 	go1 = new GameObject();
 	go1->SetName("1");
@@ -255,7 +263,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->SetName("3");
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+	go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
 	go4 = new GameObject();
 	go4->SetName("4");
@@ -286,7 +294,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go8->SetName("8");
 	go8->SetParent(go7);
 	go8->SetLocalPosition(0, 2, 0);
-	go8->AddComponent<Renderer>(simpleMaterial, sphereMesh);
+	go8->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
 	go9 = new GameObject();
 	go9->SetName("9");
@@ -385,7 +393,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 
 
-		hasShadowMap = renderingEngine->RenderShadowMap(context);
+		hasShadowMap = renderingEngine->RenderShadowMap();
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -395,16 +403,9 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//if (hasShadowMap) simpleMaterial->setShadowMap(shadow);
-
-		//context->OMSetDepthStencilState(nullptr, 0);
-		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
-
-		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-
-		renderingEngine->DrawForward(context);
-
-		renderingEngine->RenderCubeMap(context, cubeMap);
+		renderingEngine->PerformZPrepass();
+		renderingEngine->DrawForward();
+		renderingEngine->RenderCubeMap(cubeMap);
 
 		//turn off all resources bound to shader
 		ID3D11ShaderResourceView* noSRV[16] = {};
