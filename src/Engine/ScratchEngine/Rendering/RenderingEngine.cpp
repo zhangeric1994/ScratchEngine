@@ -184,7 +184,6 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
 
 			viewer.position = gameObject->GetPosition();
-			//viewer.position = XMVectorSet(0, 0, -5.0f, 0);
 			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
 			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
 		}
@@ -275,8 +274,8 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass()
 
 void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 {
-	/*if (hasZPrepass)
-		deviceContext->OMSetDepthStencilState(dssLessEqual, 0);*/
+	if (hasZPrepass)
+		deviceContext->OMSetDepthStencilState(dssLessEqual, 0);
 
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
@@ -286,9 +285,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 	XMMATRIX projectionMatrix = viewer.projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
 	XMVECTOR cameraPosition = viewer.position;
-
-	/*XMMATRIX shadowView = XMMatrixLookToLH(XMVectorSet(0, 100, 10, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 1, 0, 0));
-	XMMATRIX shadowProjection = XMMatrixOrthographicLH(10, 10, 0.1f, 150);*/
 
 	i32 j = 0;
 
@@ -377,9 +373,6 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	deviceContext->RSSetState(shadow->getRasterizerState());
 
-	/*XMMATRIX shadowView = XMMatrixLookToLH(XMVectorSet(0, 100, 10, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 1, 0, 0));
-	XMMATRIX shadowProjection = XMMatrixOrthographicLH(10, 10, 0.1f, 150);*/
-
 	//SimpleVertexShader* shader = vsDepthOnly;
 
 	SimpleVertexShader* shader = shadow->getShadowShader();
@@ -402,9 +395,6 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 
 		isOK = shader->SetMatrix4x4("shadowProjection", shdaowProjectionMat);
 		if (!isOK) printf("shadow projection matrix error");
-
-		/*	matrix shadowView;
-		matrix shadowProjection;*/
 
 		isOK = shader->SetMatrix4x4("world", renderable.worldMatrix);
 		if (!isOK) printf("world matrix in shadow map error");
@@ -430,8 +420,6 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 
 		++j;
 	}
-
-	//deviceContext->OMSetRenderTargets(0, nullptr, nullptr);
 	
 	return true;
 }

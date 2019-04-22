@@ -415,7 +415,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//renderingEngine->PerformZPrepass();
+		renderingEngine->PerformZPrepass();
 		renderingEngine->DrawForward();
 
 

@@ -187,15 +187,10 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
 	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
 
-	//shadowAmount = lerp(1.0f, shadowAmount, 1);
+	shadowAmount = lerp(1.0f, shadowAmount, 1);
 
 	//calculate light
-	//float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
-
-	//Debug for shadow map
-	//float3 result = ShadowMap.Sample(basicSampler, input.uv).rrr;
-	float3 result = shadowAmount.rrr;
-
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
 
 	return float4(result, 1.0f);
 }
