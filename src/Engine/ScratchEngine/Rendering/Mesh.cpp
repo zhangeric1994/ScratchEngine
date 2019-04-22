@@ -211,6 +211,41 @@ int ScratchEngine::Rendering::Mesh::GetIndexCount()
 	return indicesNum;
 }
 
+//use assimp lib to load obj & mtl files
+bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device * device, const std::string & filename) {
+	Assimp::Importer import;
+	const aiScene *scene = import.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+		printf("ERROR::ASSIMP::%s", import.GetErrorString());
+		return false;
+	}
+
+	//// process all the node's meshes (if any)
+	//for (unsigned int i = 0; i < node->mNumMeshes; i++)
+	//{
+	//	aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+	//	meshes.push_back(processMesh(mesh, scene));
+	//}
+	//// then do the same for each of its children
+	//for (unsigned int i = 0; i < node->mNumChildren; i++)
+	//{
+	//	processNode(node->mChildren[i], scene);
+	//}
+
+	/*aiNode* node = scene->mRootNode;
+
+	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+		aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
+		
+	}*/
+	
+	
+	
+	
+	return false;
+}
+
 void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
 {
 	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
