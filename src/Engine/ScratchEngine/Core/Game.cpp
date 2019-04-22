@@ -118,6 +118,12 @@ ScratchEngine::Game::~Game() {
 	if (metalnessMap)
 		metalnessMap->Release();
 
+	if (pixelShaderPBR)
+		delete pixelShaderPBR;
+
+	if (shadowShader)
+		delete shadowShader;
+
 
 	RenderingEngine::Terminate();
 }

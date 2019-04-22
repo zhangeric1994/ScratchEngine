@@ -49,6 +49,10 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
 	singleton = nullptr;
+
+	if (vsDepthOnly) delete vsDepthOnly;
+
+	if (dssLessEqual) dssLessEqual->Release();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::AddRenderer(Renderer* renderer)
@@ -377,15 +381,6 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 	XMMATRIX shadowProjection = XMMatrixOrthographicLH(10, 10, 0.1f, 150);*/
 
 	//SimpleVertexShader* shader = vsDepthOnly;
-
-	/*D3D11_VIEWPORT vp = {};
-	vp.TopLeftX = 0;
-	vp.TopLeftY = 0;
-	vp.Width = 1024;
-	vp.Height = 1024;
-	vp.MinDepth = 0.0f;
-	vp.MaxDepth = 1.0f;
-	deviceContext->RSSetViewports(1, &vp);*/
 
 	SimpleVertexShader* shader = shadow->getShadowShader();
 
