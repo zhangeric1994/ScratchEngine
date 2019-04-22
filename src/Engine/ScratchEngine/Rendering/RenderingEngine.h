@@ -100,6 +100,11 @@ namespace ScratchEngine
 			void DestroyRenderable(i32 id);
 			void DestroyViewer(i32 id);
 
+			/*XMMATRIX shadowView;
+			XMMATRIX shadowProjection;*/
+			XMFLOAT4X4 shadowViewMat;
+			XMFLOAT4X4 shdaowProjectionMat;
+
 
 		public:
 			void UpdateRenderables();
@@ -126,6 +131,8 @@ namespace ScratchEngine
 			config.deviceContext = deviceContext;
 
 			singleton = new RenderingEngine(config);
+
+			
 		}
 
 		inline void RenderingEngine::Initialize(RenderingEngineConfig config)

@@ -40,7 +40,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
 
-	shadowMapSize = 2048;
+	shadowMapSize = 1024;
 
 	shadowViewport = {};
 	shadowViewport.Height = shadowMapSize;
@@ -175,7 +175,8 @@ void ScratchEngine::Game::LoadShaders()
 void ScratchEngine::Game::CreateAllMaps() {
 	//shadow map setup
 	shadow->setUp(device);
-	shadow->setShader(vsZPrepass);
+	//shadow->setShader(vsZPrepass);
+	shadow->setShader(shadowShader);
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map
@@ -238,11 +239,16 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 	GameObject* go0 = new GameObject();
-	go0->SetLocalPosition(0, -10, 0);
-	go0->SetLocalScale(100, 1, 100);
+	go0->SetLocalPosition(0, -2, 10);
+	go0->SetLocalScale(10, 1, 10);
 	go0->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
-	go1 = new GameObject();
+	GameObject* go1 = new GameObject();
+	go1->SetLocalPosition(0, 0, 10);
+	go1->SetParent(go0);
+	go1->AddComponent<Renderer>(pbrMaterial, sphereMesh);
+
+	/*go1 = new GameObject();
 	go1->SetName("1");
 	go1->SetPosition(0, 0, 15);
 	go1->SetLocalRotation(45, 0, 90);
@@ -256,26 +262,26 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go2->SetParent(go1);
 	go2->SetLocalPosition(0, 4, 0);
 	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go2->AddComponent<BoxCollider>();
+	go2->AddComponent<BoxCollider>();*/
 
 
-	GameObject* go3 = new GameObject();
+	/*GameObject* go3 = new GameObject();
 	go3->SetName("3");
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
+	go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);*/
 
-	go4 = new GameObject();
-	go4->SetName("4");
+	//go4 = new GameObject();
+	/*go4->SetName("4");
 	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go4->AddComponent<BoxCollider>();
+	go4->AddComponent<BoxCollider>();*/
 
-	go5 = new GameObject();
+	/*go5 = new GameObject();
 	go5->SetName("5");
 	go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go5->AddComponent<SphereCollider>();
+	go5->AddComponent<SphereCollider>();*/
 
-	go6 = new GameObject();
+	/*go6 = new GameObject();
 	go6->SetName("6");
 	go6->SetPosition(0, 0, -15);
 	go6->SetLocalRotation(45, 0, 90);
@@ -304,7 +310,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go10 = new GameObject();
 	go10->SetName("10");
 	go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go10->AddComponent<SphereCollider>();
+	go10->AddComponent<SphereCollider>();*/
 }
 
 void ScratchEngine::Game::OnResize()
@@ -320,8 +326,8 @@ void ScratchEngine::Game::Update()
 	{
 		UpdateTimer();
 
-		if (titleBarStats)
-			UpdateTitleBarStats();
+		/*if (titleBarStats)
+			UpdateTitleBarStats();*/
 
 		frameBarrier.Wait();
 
@@ -346,7 +352,7 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
-		go1->Rotate(0, 0, 20 * deltaTime);
+		/*go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);
 		go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
 		go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
@@ -354,7 +360,7 @@ void ScratchEngine::Game::Update()
 		go6->Rotate(0, 0, 20 * deltaTime);
 		go7->Rotate(0, 0, -50 * deltaTime);
 		go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
-		go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
+		go10->SetLocalPosition(5 * cos(totalTime), 0, -15);*/
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 
@@ -403,8 +409,10 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		renderingEngine->PerformZPrepass();
+		//renderingEngine->PerformZPrepass();
 		renderingEngine->DrawForward();
+
+
 		renderingEngine->RenderCubeMap(cubeMap);
 
 		//turn off all resources bound to shader
