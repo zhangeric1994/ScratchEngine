@@ -21,8 +21,8 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	shadow = nullptr;
 	hasZPrepass = false;
 
-	XMMATRIX shadowView = XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 1, 0), XMVectorSet(0, 1, 0, 0));
-	XMMATRIX shadowProjection = XMMatrixOrthographicLH(10, 10, 0.1f, 50);
+	XMMATRIX shadowView = XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0));
+	XMMATRIX shadowProjection = XMMatrixOrthographicLH(10, 10, 0.1f, 100);
 
 	XMStoreFloat4x4(&shadowViewMat, XMMatrixTranspose(shadowView));
 
@@ -369,7 +369,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 {
 	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
-	ID3D11DepthStencilView * test = shadow->getShadowDSV();
 	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	deviceContext->RSSetState(shadow->getRasterizerState());
 
