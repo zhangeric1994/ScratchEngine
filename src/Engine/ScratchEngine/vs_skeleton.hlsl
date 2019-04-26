@@ -45,20 +45,20 @@ VertexToPixel main(VertexShaderInput vin)
 	float weight3 = vin.weight.w;
 	float sum = weight0 + weight1;
 		//+ weight2 + weight3;
-	weight0 /= sum;
-	weight1 /= sum;
+	//weight0 /= sum;
+	//weight1 /= sum;
 	//weight2 /= sum;
 	//weight3 /= sum;
 	// offset position by bone matrices, using weights to scale
 	float4 p = weight0 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
-	p += weight1 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[1]]);
+	p += (1 - weight0) * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[1]]);
 	//p += weight2 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[2]]);
 	//p += weight3 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[3]]);
 	p.w = 1.0f;
 
 	// offset normal by bone matrices, using weights to scale
 	float4 n = weight0 * mul(float4(vin.normal, 0.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
-	n += weight1 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[1]]);
+	n += (1 - weight0) * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[1]]);
 	//n += weight2 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[2]]);
 	//n += weight3 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[3]]);
 	n.w = 0.0f;
@@ -73,7 +73,7 @@ VertexToPixel main(VertexShaderInput vin)
 
 	// Transform to world space.
 	vout.position = mul(p, world);
-	vout.normal = normalize(mul(n.xyz, (float3x3)world));
+	vout.normal = normalize(mul((float3x3)world,n.xyz));
 	//vout.TangentW = float4(mul(t, (float3x3)gWorld), vin.Tan.w);
 
 	matrix WVP = mul(world, viewProjection);

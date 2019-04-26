@@ -9,6 +9,7 @@ ScratchEngine::Animator::Animator()
 	hasSkeleton = false;
 }
 
+
 ScratchEngine::Animator::Animator(const aiScene * scene)
 {	
 	timePos = 0.0f;
@@ -180,11 +181,26 @@ Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
 	if (internalNode->name == "") {
 		internalNode->name = "foo" + _i++;
 	}
+	
 
 	bonesByName[internalNode->name] = internalNode;
 	XMMATRIX trans = ToMatrix(node->mTransformation);
 	trans = XMMatrixTranspose(trans);
+
+	// TODO: to find the rotation problem 
+	// TEMP FIX for bones rotation problem, now multiply with a identity matrix with 90 degree roration on X - axis
+	if (!Parent) {
+		// root
+		XMFLOAT3 pScale = { 1,1,1 };
+		XMFLOAT4 pRot = { 0.7071,0,0,0.7071 };
+		XMFLOAT3 pPosition = { 0,0,0 };
+		XMMATRIX mat = XMMatrixScalingFromVector(XMLoadFloat3(&pScale))
+			* XMMatrixRotationQuaternion(XMLoadFloat4(&pRot))
+			* XMMatrixTranslationFromVector(XMLoadFloat3(&pPosition));
+		trans = trans * mat;
+	}
 	internalNode->localTransform = trans;
+
 	internalNode->originalLocalTransform = internalNode->localTransform;
 	CalculateBoneToWorldTransform(internalNode);
 	for (UINT i = 0; i < node->mNumChildren; i++) {

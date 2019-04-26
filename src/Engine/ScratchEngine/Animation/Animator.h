@@ -28,8 +28,6 @@ namespace ScratchEngine
 		std::vector<Bone *> bones;
 		std::vector<AnimationClip *> animations;
 
-
-
 		void CalculateBoneToWorldTransform(Bone *child);
 		void SetAnimationIndex(int animIndex);
 		void UpdateTransforms(Bone * node); 

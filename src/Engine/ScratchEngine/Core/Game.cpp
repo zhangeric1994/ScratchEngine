@@ -142,8 +142,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go1 = new GameObject();
 	go1->AddComponent<Renderer>(redMaterial, model);
 	go1->SetPosition(0, -1, 6);
-	go1->SetRotation(90, 0, 0);
-	go1->SetLocalScale(0.01, 0.01, 0.01);
+	//go1->SetRotation(90, 0, 0);
+	go1->SetLocalScale(0.01,0.01,0.01);
 	//go1->AddComponent<BoxCollider>();
 
 	//go2 = new GameObject();

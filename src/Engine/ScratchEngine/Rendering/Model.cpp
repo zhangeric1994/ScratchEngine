@@ -74,7 +74,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 		if (mesh->mTextureCoords[0])
 		{
 			vertex.UV.x = (float)mesh->mTextureCoords[0][i].x;
-			vertex.UV.y = (float)mesh->mTextureCoords[0][i].y;
+			vertex.UV.y = 1.0f - (float)mesh->mTextureCoords[0][i].y;
 		}
 
 		vertex.Normal.x = (float)mesh->mNormals[i].x;
@@ -138,7 +138,7 @@ void ScratchEngine::Rendering::Model::ExtractBoneWeightsFromMesh(aiMesh* mesh)
 				vertToBoneWeight.at((UINT)weight->mVertexId)->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
 			}
 			else {
-				vertToBoneWeight[(UINT)weight->mVertexId] = new std::vector<aiVertexWeight* >();
+				vertToBoneWeight[(UINT)weight->mVertexId] = new std::vector<aiVertexWeight*>();
 				vertToBoneWeight.at((UINT)weight->mVertexId)->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
 			}
 		}

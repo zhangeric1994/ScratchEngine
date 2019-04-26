@@ -15,6 +15,7 @@ namespace ScratchEngine
 		{
 		public:
 			Bone();
+			~Bone();
 			Bone(std::string Name,Bone * parent);
 			std::string name;
 				// Bind space transform

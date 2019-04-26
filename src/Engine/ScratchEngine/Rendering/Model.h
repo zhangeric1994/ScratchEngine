@@ -16,6 +16,7 @@
 
 using namespace DirectX;
 using namespace ScratchEngine::Rendering;
+using namespace ScratchEngine::Animation;
 
 namespace ScratchEngine
 {
@@ -32,7 +33,9 @@ namespace ScratchEngine
 			std::vector<Vertex> vertices;
 			std::vector<UINT> indices;
 			const aiScene * rawData;
+
 			Animator * anim;
+			
 			std::map<UINT, std::vector<aiVertexWeight*> *> vertToBoneWeight;
 			//std::vector<Model*> childModels;
 			Mesh* mesh;
