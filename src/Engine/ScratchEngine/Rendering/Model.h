@@ -17,6 +17,7 @@
 using namespace DirectX;
 using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Animation;
+using namespace std;
 
 namespace ScratchEngine
 {
@@ -29,21 +30,22 @@ namespace ScratchEngine
 		private:
 			ID3D11Device * device;
 		public:
-			std::string name;
-			std::vector<Vertex> vertices;
-			std::vector<UINT> indices;
+			string name;
+			vector<Vertex> vertices;
+			vector<UINT> indices;
 			const aiScene * rawData;
 
 			Animator * anim;
 			
-			std::map<UINT, std::vector<aiVertexWeight*> *> vertToBoneWeight;
+			map<UINT, vector<aiVertexWeight*> *> vertToBoneWeight;
 			//std::vector<Model*> childModels;
 			Mesh* mesh;
-			Model(ID3D11Device* device, std::map<UINT, std::vector<aiVertexWeight*> *> vertToBone);
-			Model(ID3D11Device* device, const std::string & filePath);
+			Model(ID3D11Device* device, map<UINT, vector<aiVertexWeight*> *> vertToBone);
+			Model(ID3D11Device* device, const string & filePath);
 			~Model();
 			
-			bool LoadModel(const std::string & filePth);
+			bool LoadAnimation(const string& filePath);
+			bool LoadModel(const string & filePth);
 			void ProcessNode(aiNode * node, const aiScene * scene);
 			void ProcessMesh(aiMesh * mesh, const aiScene * scene);
 		    void ExtractBoneWeightsFromMesh(aiMesh* mesh);

@@ -121,7 +121,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-	model = new Model(device,(const std::string&) "../Assets/Models/001.fbx");
+	model = new Model(device, "../Assets/Sword and Shield Pack/paladin_prop_j_nordstrom.fbx");
+	model->LoadAnimation("../Assets/Sword and Shield Pack/sword and shield attack.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -143,7 +144,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go1->AddComponent<Renderer>(redMaterial, model);
 	go1->SetPosition(0, -1, 6);
 	//go1->SetRotation(90, 0, 0);
-	go1->SetLocalScale(0.01,0.01,0.01);
+	go1->SetLocalScale(0.01f, 0.01f, 0.01f);
 	//go1->AddComponent<BoxCollider>();
 
 	//go2 = new GameObject();

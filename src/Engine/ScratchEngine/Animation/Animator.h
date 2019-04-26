@@ -32,7 +32,8 @@ namespace ScratchEngine
 		void SetAnimationIndex(int animIndex);
 		void UpdateTransforms(Bone * node); 
 		bool SetAnimation(string animation);
-		void ExtractAnimations(const aiScene * scene);
+		void ExtractAnimations(const aiScene* scene);
+		
 		void  Calculate(float dt);
 		Bone * CreateBoneTree(aiNode * rootNode, Bone *Parent);
 		XMMATRIX ToMatrix(aiMatrix4x4 transform);
@@ -42,7 +43,7 @@ namespace ScratchEngine
 
 	public:
 		Animator();
-		Animator(const aiScene * scene);
+		Animator(const aiScene* scene);
 		~Animator();
 
 		// current playing animation stats
@@ -64,5 +65,7 @@ namespace ScratchEngine
 		void AdjustAnimationSpeedTo(float ticksPerSec);
 		std::vector<XMMATRIX> GetTransforms();
 		int GetBoneIndex(string name);
+
+		bool LoadAnimations(const aiScene* scene);
 	};
 }

@@ -10,7 +10,7 @@ ScratchEngine::Animator::Animator()
 }
 
 
-ScratchEngine::Animator::Animator(const aiScene * scene)
+ScratchEngine::Animator::Animator(const aiScene* scene)
 {	
 	timePos = 0.0f;
 	LoopClips = true;
@@ -50,25 +50,9 @@ ScratchEngine::Animator::Animator(const aiScene * scene)
 		// TODO may come back if any bone is missing
 
 	}
-	ExtractAnimations(scene);
 
-	const float timestep = 1.0f / 30.0f;
+	LoadAnimations(scene);
 
-	for (UINT i = 0; i < animations.size(); i++) {
-		SetAnimationIndex(i);
-		float dt = 0.0f;
-		for (float ticks = 0.0f; ticks < animations[i]->duration; ticks += animations[i]->ticksPerSecond / 30.0f) {
-			dt += timestep;
-			Calculate(dt);
-			std::vector<XMMATRIX> trans;
-			for (UINT a = 0; a < bones.size(); a++) {
-				XMMATRIX rotMat = bones[a]->offset * bones[a]->globalTransform;
-				rotMat = XMMatrixTranspose(rotMat);
-				trans.push_back(rotMat);
-			}
-			animations[i]->transforms.push_back(trans);
-		}
-	}
 	printf("Finished loading animations with %d bones", bones.size());
 }
 
@@ -106,6 +90,31 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 		return oldIndex != currentAnimationIndex;
 	}
 	return false;
+}
+
+bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
+{
+	ExtractAnimations(scene);
+
+	const float timestep = 1.0f / 30.0f;
+
+	for (UINT i = 0; i < animations.size(); i++) {
+		SetAnimationIndex(i);
+		float dt = 0.0f;
+		for (float ticks = 0.0f; ticks < animations[i]->duration; ticks += animations[i]->ticksPerSecond / 30.0f) {
+			dt += timestep;
+			Calculate(dt);
+			std::vector<XMMATRIX> trans;
+			for (UINT a = 0; a < bones.size(); a++) {
+				XMMATRIX rotMat = bones[a]->offset * bones[a]->globalTransform;
+				rotMat = XMMatrixTranspose(rotMat);
+				trans.push_back(rotMat);
+			}
+			animations[i]->transforms.push_back(trans);
+		}
+	}
+
+	return true;
 }
 
 void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)

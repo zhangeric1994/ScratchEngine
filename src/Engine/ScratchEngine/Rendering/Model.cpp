@@ -16,6 +16,20 @@ ScratchEngine::Rendering::Model::~Model()
 {
 }
 
+bool ScratchEngine::Rendering::Model::LoadAnimation(const string & filePath)
+{
+	Assimp::Importer importer;
+	const aiScene* pScene = importer.ReadFile(filePath,
+		aiProcess_Triangulate |
+		aiProcess_GenSmoothNormals |
+		aiProcess_ConvertToLeftHanded
+	);
+	if (pScene == NULL)
+		return false;
+
+	return anim->LoadAnimations(pScene);
+}
+
 bool ScratchEngine::Rendering::Model::LoadModel(const std::string & filePath)
 {
 	vertices.clear();
@@ -29,6 +43,7 @@ bool ScratchEngine::Rendering::Model::LoadModel(const std::string & filePath)
 	);
 	if (pScene == NULL)
 		return false;
+
 	rawData = pScene;
 	anim = new Animator(rawData);
 	name = std::string(rawData->mRootNode->mName.C_Str());
