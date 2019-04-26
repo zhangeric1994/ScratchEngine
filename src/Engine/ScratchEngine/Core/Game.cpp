@@ -40,7 +40,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
 
-	shadowMapSize = 2048;
+	shadowMapSize = 1024;
 
 	shadowViewport = {};
 	shadowViewport.Height = shadowMapSize;
@@ -118,6 +118,12 @@ ScratchEngine::Game::~Game() {
 	if (metalnessMap)
 		metalnessMap->Release();
 
+	if (pixelShaderPBR)
+		delete pixelShaderPBR;
+
+	if (shadowShader)
+		delete shadowShader;
+
 
 	RenderingEngine::Terminate();
 }
@@ -175,7 +181,8 @@ void ScratchEngine::Game::LoadShaders()
 void ScratchEngine::Game::CreateAllMaps() {
 	//shadow map setup
 	shadow->setUp(device);
-	shadow->setShader(vsZPrepass);
+	//shadow->setShader(vsZPrepass);
+	shadow->setShader(shadowShader);
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map
@@ -236,11 +243,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetLocalRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
-
-	GameObject* go0 = new GameObject();
-	go0->SetLocalPosition(0, -10, 0);
-	go0->SetLocalScale(100, 1, 100);
-	go0->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 	go1 = new GameObject();
 	go1->SetName("1");
@@ -305,6 +307,16 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go10->SetName("10");
 	go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	go10->AddComponent<SphereCollider>();
+
+	GameObject* go11 = new GameObject();
+	go11->SetLocalPosition(0, -5, 0);
+	go11->SetLocalScale(10, 1, 10);
+	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
+	GameObject* go12 = new GameObject();
+	go12->SetParent(go11);
+	go12->SetLocalPosition(0, 10, 0);
+	go12->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -405,6 +417,8 @@ void ScratchEngine::Game::Draw()
 
 		renderingEngine->PerformZPrepass();
 		renderingEngine->DrawForward();
+
+
 		renderingEngine->RenderCubeMap(cubeMap);
 
 		//turn off all resources bound to shader

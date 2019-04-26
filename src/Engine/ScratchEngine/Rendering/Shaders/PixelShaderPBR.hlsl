@@ -190,7 +190,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	shadowAmount = lerp(1.0f, shadowAmount, 1);
 
 	//calculate light
-	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light);
+	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light) * shadowAmount;
 
 	return float4(result, 1.0f);
 }
