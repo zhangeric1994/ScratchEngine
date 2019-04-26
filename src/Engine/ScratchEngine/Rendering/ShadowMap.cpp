@@ -51,7 +51,6 @@ ScratchEngine::Rendering::ShadowMap::ShadowMap() {
 
 	shadowTexture = 0;
 	shadowSampler = 0;
-	shadowShader = 0;
 	shadowDepthStencilView = 0;
 	shadowResourceView = 0;
 	shadowRasterizerState = 0;
@@ -76,10 +75,6 @@ void ScratchEngine::Rendering::ShadowMap::setUp(ID3D11Device* device) {
 	shadowTexture->Release();
 }
 
-void ScratchEngine::Rendering::ShadowMap::setShader(SimpleVertexShader* _shadowShader) {
-	shadowShader = _shadowShader;
-}
-
 //void ScratchEngine::Rendering::ShadowMap::setViewport(float height, float width) {
 //	shadowViewport.Height = height;
 //	shadowViewport.Width = width;
@@ -99,10 +94,6 @@ ID3D11RasterizerState * ScratchEngine::Rendering::ShadowMap::getRasterizerState(
 
 ID3D11ShaderResourceView * ScratchEngine::Rendering::ShadowMap::getShadowSRV() {
 	return shadowResourceView;
-}
-
-SimpleVertexShader * ScratchEngine::Rendering::ShadowMap::getShadowShader() {
-	return shadowShader;
 }
 
 ID3D11SamplerState * ScratchEngine::Rendering::ShadowMap::getSampler() {

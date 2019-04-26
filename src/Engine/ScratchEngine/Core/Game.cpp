@@ -181,11 +181,11 @@ void ScratchEngine::Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void ScratchEngine::Game::CreateAllMaps() {
+void ScratchEngine::Game::CreateAllMaps()
+{
 	//shadow map setup
 	shadow->setUp(device);
-	//shadow->setShader(vsZPrepass);
-	shadow->setShader(shadowShader);
+
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map

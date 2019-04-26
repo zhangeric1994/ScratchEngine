@@ -101,8 +101,7 @@ namespace ScratchEngine
 
 			/*XMMATRIX shadowView;
 			XMMATRIX shadowProjection;*/
-			XMFLOAT4X4 shadowViewMat;
-			XMFLOAT4X4 shdaowProjectionMat;
+			XMFLOAT4X4 shadowViewProjectionMat;
 
 
 		public:

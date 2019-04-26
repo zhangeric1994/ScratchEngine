@@ -21,8 +21,7 @@ cbuffer CameraData : register(b2)
 	matrix view;
 	matrix projection;
     matrix viewProjection;
-	matrix shadowProjection;
-	matrix shadowView;
+    matrix shadowViewProjection;
 };
 
 cbuffer ObjectData : register(b3)
@@ -34,7 +33,7 @@ VertexToPixel main(VertexShaderInput input)
 {
     VertexToPixel output;
 
-	matrix shadowWVP = mul(mul(world, shadowView), shadowProjection);
+    matrix shadowWVP = mul(world, shadowViewProjection);
 	output.shadowPos = mul(float4(input.position, 1.0f), shadowWVP);
 
 	matrix WVP = mul(world, viewProjection);
