@@ -121,12 +121,12 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-	model = new Model(device,(const std::string&) "../Assets/Models/001.fbx");
+	model = new Model(device,(const std::string&) "../Assets/Models/Pack/paladin.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
 
-	redMaterial = new Material(vsSkeleton, pixelShader, nullptr, nullptr);
+	redMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
 
@@ -201,7 +201,7 @@ void ScratchEngine::Game::Update()
 		//go1->Rotate(20 * deltaTime, 0, 0);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
-		model->anim->Update(0.0002f);
+		//model->anim->Update(0.0002f);
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 		
 		physicsEngine->UpdateBoundingVolumes();

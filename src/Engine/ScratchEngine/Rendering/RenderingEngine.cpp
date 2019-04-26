@@ -144,7 +144,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
-			if (renderer->anim) {
+			if (renderer->anim && renderer->anim->currentAnimationIndex >= 0) {
 				std::vector<XMMATRIX> temp = renderer->anim->GetTransforms();
 				XMMATRIX* array;
 				array = new XMMATRIX[temp.size()];
