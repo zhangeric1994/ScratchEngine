@@ -6,35 +6,51 @@
 
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
 
-ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::GetSingleton()
-{
-	if (!singleton)
-		Initialize();
 
-	return singleton;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::Initialize(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumViews)
+ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes), renderableAllocator(config.initialNumRenderables), viewerAllocator(config.initialNumRenderables), lightSourceAllocator(config.initialNumLightSources)
 {
-	singleton = new RenderingEngine(maxNumMeshes, maxNumMeshes, defaultNumRenderables, defaultNumViews);
-}
+	assert(config.device);
+	device = config.device;
 
-void ScratchEngine::Rendering::RenderingEngine::Stop()
-{
-	if (singleton)
-		delete singleton;
-}
+	assert(config.deviceContext);
+	deviceContext = config.deviceContext;
 
-ScratchEngine::Rendering::RenderingEngine::RenderingEngine(i32 maxNumMaterials, i32 maxNumMeshes, i32 defaultNumRenderables, i32 defaultNumCameraProxies) : materialAllocator(maxNumMeshes), meshAllocator(maxNumMeshes), renderableAllocator(defaultNumRenderables), viewerAllocator(defaultNumCameraProxies)
-{
 	rendererList = nullptr;
 	cameraList = nullptr;
 	lightList = nullptr;
+	shadow = nullptr;
+	hasZPrepass = false;
+
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(10, 10, 0.1f, 100));
+
+	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
+
+	char buffer[MAX_PATH];
+	GetModuleFileName(NULL, buffer, MAX_PATH);
+	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
+
+	std::string spath = std::string(buffer).substr(0, pos).c_str();
+	std::wstring wpath = std::wstring(spath.begin(), spath.end());
+
+	vsDepthOnly = new SimpleVertexShader(device, deviceContext);
+	vsDepthOnly->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+	device->CreateDepthStencilState(&depthStencilDesc, &dssLessEqual);
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
 	singleton = nullptr;
+
+	if (vsDepthOnly) delete vsDepthOnly;
+
+	if (dssLessEqual) dssLessEqual->Release();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::AddRenderer(Renderer* renderer)
@@ -166,7 +182,6 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
 			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
 
 			viewer.position = gameObject->GetPosition();
-			//viewer.position = XMVectorSet(0, 0, -5.0f, 0);
 			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
 			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
 		}
@@ -188,10 +203,14 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
 			lightSource.diffuseColor = light->diffuseColor;
 			lightSource.type = light->type;
 			lightSource.range = 0;
-			lightSource.direction = XMFLOAT3(0, -1.0f, 0);
 
-			XMStoreFloat3(&lightSource.position, light->GetPosition());
-			//XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetDirection());
+			XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
+			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
+
+			//if (light->DoCastShadow())
+			//	lightSource.shadowMapID = null_index;
+			//else
+			//	lightSource.shadowMapID = null_index;
 		}
 	}
 }
@@ -207,9 +226,10 @@ void ScratchEngine::Rendering::RenderingEngine::SortRenderables()
 	});
 }
 
-void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShader* shader, ID3D11DeviceContext* context)
+void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass()
 {
-	context->PSSetShader(nullptr, nullptr, 0);
+	deviceContext->OMSetDepthStencilState(nullptr, 0);
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
 
@@ -221,11 +241,11 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 	{
 		Renderable& renderable = renderableAllocator[j];
 
-		shader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-		shader->SetMatrix4x4("world", renderable.worldMatrix);
+		vsDepthOnly->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+		vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
 
-		shader->CopyAllBufferData();
-		shader->SetShader();
+		vsDepthOnly->CopyAllBufferData();
+		vsDepthOnly->SetShader();
 
 		Mesh* mesh = renderable.mesh;
 
@@ -236,20 +256,25 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(SimpleVertexShad
 		UINT offset = 0;
 		UINT indexCount = 0;
 
-		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		indexCount += mesh->GetIndexCount();
 
 		++j;
 	}
+
+	hasZPrepass = true;
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext* context)
+void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 {
+	if (hasZPrepass)
+		deviceContext->OMSetDepthStencilState(dssLessEqual, 0);
+
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
@@ -258,22 +283,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	XMMATRIX projectionMatrix = viewer.projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
 	XMVECTOR cameraPosition = viewer.position;
-
-	XMFLOAT4X4 shadowViewMatrix;
-	XMFLOAT4X4 shadowProjectionMatrix;
-
-	XMMATRIX shadowView = XMMatrixLookToLH(
-		XMVectorSet(0, 10, 0, 0),
-		XMVectorSet(0, -1, 1, 0), 
-		XMVectorSet(0, 1, 0, 0));
-	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
-
-	XMMATRIX shadowProjection = XMMatrixOrthographicLH(
-		10,
-		10,
-		0.1f,
-		50);
-	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
 
 	i32 j = 0;
 
@@ -284,7 +293,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
 		pixelShader->SetFloat4("tint", material->GetTint());
-		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), sizeof(LightSource));
+		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), lightSourceAllocator.GetNumAllocated() * sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 
 		if (material->HasTexture()) {
@@ -297,11 +306,11 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
 		}
 
-		if (material->HasShadowMap()) {
-			pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());	
-		}
+		//if (material->HasShadowMap()) {
+			pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
+		//}
 		
-		pixelShader->SetSamplerState("shadowSampler", material->getSampler());
+		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
 
 		if (material->HasRoughnessMap()) {
 			pixelShader->SetShaderResourceView("roughnessMap", material->getRoughnessMap());
@@ -332,8 +341,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
-			vertexShader->SetMatrix4x4("shadowView", shadowViewMatrix);
-			vertexShader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
+			vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
 
 			vertexShader->CopyAllBufferData();
 			vertexShader->SetShader();
@@ -343,10 +351,10 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
 
-			context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-			context->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+			deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-			context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+			deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 			indexCount += mesh->GetIndexCount();
 
@@ -355,37 +363,18 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(ID3D11DeviceContext*
 	}
 }
 
-bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceContext* context) {
-	context->OMSetRenderTargets(0, 0, shadow->getShadowDSV());
-	context->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
-	context->RSSetState(shadow->getRasterizerState());
+bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
+{
+	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
+	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+	deviceContext->RSSetState(shadow->getRasterizerState());
 
-	XMFLOAT4X4 shadowViewMatrix;
-	XMFLOAT4X4 shadowProjectionMatrix;
-
-	XMMATRIX shadowView = XMMatrixLookToLH(
-		XMVectorSet(0, 10, 0, 0),
-		XMVectorSet(0, -1, 1, 0), 
-		XMVectorSet(0, 1, 0, 0));
-	XMStoreFloat4x4(&shadowViewMatrix, XMMatrixTranspose(shadowView));
-
-	XMMATRIX shadowProjection = XMMatrixOrthographicLH(
-		10,
-		10,
-		0.1f,
-		50);
-	XMStoreFloat4x4(&shadowProjectionMatrix, XMMatrixTranspose(shadowProjection));
-
-	SimpleVertexShader* shader = shadow->getShadowShader();
+	SimpleVertexShader* shader = vsDepthOnly;
+	//SimpleVertexShader* shader = shadow->getShadowShader();
 
 	shader->SetShader();
-	shader->SetMatrix4x4("shadowView", shadowViewMatrix);
-	shader->SetMatrix4x4("shadowProjection", shadowProjectionMatrix);
 
-	context->PSSetShader(0, 0, 0);
-
-	u32 stride = sizeof(Vertex);
-	u32 offset = 0;
+	deviceContext->PSSetShader(0, 0, 0);
 
 	i32 j = 0;
 
@@ -393,33 +382,34 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceCont
 	{
 		Renderable& renderable = renderableAllocator[j];
 
+		bool isOK = shader->SetMatrix4x4("viewProjection", shadowViewProjectionMat);
+		//bool isOK = shader->SetMatrix4x4("shadowView", shadowViewProjectionMat);
+		if (!isOK) printf("shadow view matrix error");
+
+		//isOK = shader->SetMatrix4x4("shadowProjection", shdaowProjectionMat);
+		//if (!isOK) printf("shadow projection matrix error");
+
+		isOK = shader->SetMatrix4x4("world", renderable.worldMatrix);
+		if (!isOK) printf("world matrix in shadow map error");
+
+		shader->CopyAllBufferData();
+
 		Mesh* mesh = renderable.mesh;
 
 		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
 
-		context->IASetVertexBuffers(
-			0,
-			1,
-			&vertexBuffer,
-			&stride,
-			&offset
-		);
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		UINT indexCount = 0;
 
-		context->IASetIndexBuffer(
-			indexBuffer,
-			DXGI_FORMAT_R32_UINT, 
-			0
-		);
+		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		//set up constant buffer
-		shader->SetMatrix4x4("world", renderable.worldMatrix);
-		shader->CopyAllBufferData();
-		
-		//......
+		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
-		context->DrawIndexed(mesh->GetIndexCount(), 0, 0);
-
+		indexCount += mesh->GetIndexCount();
 
 		++j;
 	}
@@ -427,19 +417,21 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(ID3D11DeviceCont
 	return true;
 }
 
-void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow) {
+void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow)
+{
 	shadow = _shadow;
 }
 
-void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(ID3D11DeviceContext * context, CubeMap* cubeMap) {
+void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap)
+{
 	ID3D11Buffer* cubeVB = cubeMap->getVB();
 	ID3D11Buffer* cubeIB = cubeMap->getIB();
 
 	u32 stride = sizeof(Vertex);
 	u32 offset = 0;
 
-	context->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
-	context->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
+	deviceContext->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
+	deviceContext->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
 
 	Viewer& viewer = viewerAllocator[cameraList->viewer];
 
@@ -458,8 +450,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(ID3D11DeviceContex
 	cubePS->SetSamplerState("basicSampler", cubeMap->getSampler());
 	cubePS->SetShader();
 
-	context->RSSetState(cubeMap->getRS());
-	context->OMSetDepthStencilState(cubeMap->getDSS(), 0);
+	deviceContext->RSSetState(cubeMap->getRS());
+	deviceContext->OMSetDepthStencilState(cubeMap->getDSS(), 0);
 
-	context->DrawIndexed(cubeMap->getIndexCount(), 0, 0);
+	deviceContext->DrawIndexed(cubeMap->getIndexCount(), 0, 0);
 }

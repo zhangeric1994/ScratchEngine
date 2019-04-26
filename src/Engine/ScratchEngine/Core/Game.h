@@ -1,5 +1,6 @@
 #pragma once
 
+#include <DDSTextureLoader.h>
 #include <DirectXMath.h>
 #include <vector>
 
@@ -12,7 +13,6 @@
 #include "../Rendering/Vertex.h"
 #include "../Multithreading/Barrier.h"
 #include "../Rendering/ShadowMap.h"
-#include <DDSTextureLoader.h>
 #include "../Rendering/CubeMap.h"
 
 #include "DXCore.h"
@@ -46,13 +46,17 @@ namespace ScratchEngine
 
 		POINT prevMousePos;
 
+		f32 camX;
+		f32 camY;
+
 		SimpleVertexShader* vsZPrepass;
 		SimpleVertexShader* vertexShader;
 		SimplePixelShader* pixelShader;
+		SimplePixelShader* pixelShaderPBR;
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-		Material* simpleMaterial;
+		Material* pbrMaterial;
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;

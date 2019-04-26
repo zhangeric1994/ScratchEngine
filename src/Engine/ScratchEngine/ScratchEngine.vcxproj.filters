@@ -102,6 +102,9 @@
     <ClCompile Include="Physics\RigidBody.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+    <ClCompile Include="Rendering\Texture.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -241,6 +244,9 @@
     </ClInclude>
     <ClInclude Include="Physics\DynamicBVHNode.hpp">
       <Filter>Header Files\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Texture.h">
+      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

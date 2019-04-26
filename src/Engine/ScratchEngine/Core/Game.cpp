@@ -77,8 +77,8 @@ ScratchEngine::Game::~Game() {
 	if (vsZPrepass)
 		delete vsZPrepass;
 
-	if (simpleMaterial)
-		delete simpleMaterial;
+	if (pbrMaterial)
+		delete pbrMaterial;
 
 	if (greenMaterial)
 		delete greenMaterial;
@@ -118,18 +118,30 @@ ScratchEngine::Game::~Game() {
 	if (metalnessMap)
 		metalnessMap->Release();
 
+	if (pixelShaderPBR)
+		delete pixelShaderPBR;
 
-	RenderingEngine::Stop();
+	if (shadowShader)
+		delete shadowShader;
+
+
+	RenderingEngine::Terminate();
 }
 
 void ScratchEngine::Game::Init()
 {
+	PhysicsEngine::Initialize();
+	RenderingEngine::Initialize(device, context);
+
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
 	CreateAllMaps();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	camX = 0;
+	camY = 0;
 }
 
 void ScratchEngine::Game::LoadShaders()
@@ -141,8 +153,8 @@ void ScratchEngine::Game::LoadShaders()
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 
-	vsZPrepass = new SimpleVertexShader(device, context);
-	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+	//vsZPrepass = new SimpleVertexShader(device, context);
+	//vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
 
 	shadowShader = new SimpleVertexShader(device, context);
 	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
@@ -152,6 +164,9 @@ void ScratchEngine::Game::LoadShaders()
 
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
+
+	pixelShaderPBR = new SimplePixelShader(device, context);
+	pixelShaderPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
 
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
@@ -166,10 +181,11 @@ void ScratchEngine::Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void ScratchEngine::Game::CreateAllMaps() {
+void ScratchEngine::Game::CreateAllMaps()
+{
 	//shadow map setup
 	shadow->setUp(device);
-	shadow->setShader(shadowShader);
+
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	renderingEngine->SetShadowMap(shadow);
 	//End of shadow map
@@ -210,12 +226,12 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, sampler);
-	simpleMaterial->setTexture(texture);
-	simpleMaterial->setMetalnessMap(metalnessMap);
-	simpleMaterial->setNormalMap(normalMap);
-	simpleMaterial->setRoughnessMap(roughnessMap);
-	//simpleMaterial->setShadowMap(shadow);
+	pbrMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
+	pbrMaterial->setTexture(texture);
+	pbrMaterial->setMetalnessMap(metalnessMap);
+	pbrMaterial->setNormalMap(normalMap);
+	pbrMaterial->setRoughnessMap(roughnessMap);
+	//pbrMaterial->setShadowMap(shadow);
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -228,7 +244,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	camera->AddComponent<Camera>();
 
 	GameObject* directionalLightObject = new GameObject();
-	//directionalLightObject->SetRotation(90, 0, 0);
+	directionalLightObject->SetLocalRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 	go1 = new GameObject();
@@ -252,7 +268,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go3->SetName("3");
 	go3->SetParent(go2);
 	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
 	go4 = new GameObject();
 	go4->SetName("4");
@@ -283,7 +299,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go8->SetName("8");
 	go8->SetParent(go7);
 	go8->SetLocalPosition(0, 2, 0);
-	go8->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	go8->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
 	go9 = new GameObject();
 	go9->SetName("9");
@@ -294,6 +310,16 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go10->SetName("10");
 	go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	go10->AddComponent<SphereCollider>();
+
+	GameObject* go11 = new GameObject();
+	go11->SetLocalPosition(0, -5, 0);
+	go11->SetLocalScale(10, 1, 10);
+	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
+	GameObject* go12 = new GameObject();
+	go12->SetParent(go11);
+	go12->SetLocalPosition(0, 10, 0);
+	go12->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -382,7 +408,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 
 
-		hasShadowMap = renderingEngine->RenderShadowMap(context);
+		hasShadowMap = renderingEngine->RenderShadowMap();
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -392,16 +418,11 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//if (hasShadowMap) simpleMaterial->setShadowMap(shadow);
+		renderingEngine->PerformZPrepass();
+		renderingEngine->DrawForward();
 
-		//context->OMSetDepthStencilState(nullptr, 0);
-		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
 
-		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-
-		renderingEngine->DrawForward(context);
-
-		renderingEngine->RenderCubeMap(context, cubeMap);
+		renderingEngine->RenderCubeMap(cubeMap);
 
 		//turn off all resources bound to shader
 		ID3D11ShaderResourceView* noSRV[16] = {};
@@ -456,15 +477,14 @@ void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 // --------------------------------------------------------
 void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
-	// Add any custom code here...
-	if (buttonState & 0x0001)
-	{
-		//camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-		//camera->SetRotationY((x - prevMousePos.x) * 0.001f);
-	}
-
 	if (buttonState & 0x0002)
-		camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f , (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
+	{
+		// camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f, (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
+		camX += (y - prevMousePos.y) * 0.1f;
+		camY += (x - prevMousePos.x) * 0.1f;
+
+		camera->SetLocalRotation(camX, camY, 0);
+	}
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

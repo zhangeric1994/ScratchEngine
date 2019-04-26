@@ -51,6 +51,7 @@ namespace ScratchEngine
 		XMVECTOR GetLocalScale();
 		XMVECTOR GetScale();
 		XMMATRIX GetWorldMatrix();
+		XMVECTOR GetForwardVector();
 		Transform* GetParent();
 		Transform* GetChild(size_t index);
 		size_t GetChildCount();
@@ -105,4 +106,10 @@ namespace ScratchEngine
 
 		void __UpdateWorldMatrix();
 	};
+
+
+	inline XMVECTOR Transform::GetForwardVector()
+	{
+		return XMVector3Normalize(XMVector3Rotate({ 0, 0, 1 }, GetRotation()));
+	}
 }
