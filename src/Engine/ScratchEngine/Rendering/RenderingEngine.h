@@ -73,7 +73,6 @@ namespace ScratchEngine
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
-			DynamicPoolAllocator<RenderTexture> textureAllocator;
 
 			DynamicStackAllocator<Renderable> renderableAllocator;
 			DynamicPoolAllocator<Viewer> viewerAllocator;
