@@ -1,10 +1,11 @@
 #pragma once
 
 #include <d3d11.h>
-#include <fstream> 
+#include <fstream>
 #include <vector>
-#include <DirectXMath.h>   
-#include "assimp/scene.h"  
+#include <DirectXMath.h>
+
+#include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "assimp/Importer.hpp"
 
