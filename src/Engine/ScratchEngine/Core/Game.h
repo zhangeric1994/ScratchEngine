@@ -46,6 +46,9 @@ namespace ScratchEngine
 
 		POINT prevMousePos;
 
+		f32 camX;
+		f32 camY;
+
 		SimpleVertexShader* vsZPrepass;
 		SimpleVertexShader* vertexShader;
 		SimplePixelShader* pixelShader;

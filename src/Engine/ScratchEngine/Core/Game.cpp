@@ -139,6 +139,9 @@ void ScratchEngine::Game::Init()
 	CreateAllMaps();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	camX = 0;
+	camY = 0;
 }
 
 void ScratchEngine::Game::LoadShaders()
@@ -474,15 +477,14 @@ void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 // --------------------------------------------------------
 void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
-	// Add any custom code here...
-	if (buttonState & 0x0001)
-	{
-		//camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-		//camera->SetRotationY((x - prevMousePos.x) * 0.001f);
-	}
-
 	if (buttonState & 0x0002)
-		camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f , (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
+	{
+		// camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f, (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
+		camX += (y - prevMousePos.y) * 0.1f;
+		camY += (x - prevMousePos.x) * 0.1f;
+
+		camera->SetLocalRotation(camX, camY, 0);
+	}
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
