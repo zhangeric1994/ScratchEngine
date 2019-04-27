@@ -17,7 +17,8 @@ namespace ScratchEngine
 		struct AxisAlignedBoundingBox;
 
 		template<class T1, class T2> static bool IsOverlapping(T1* boundingVolume1, T2* boundingVolume2);
-		template<class T> static AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement);
+		template<class T> static AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume);
+		template<class T> static AxisAlignedBoundingBox GetEnlargedAABB(T* boundingVolume, f32 enlargement);
 
 
 		enum BoundingVolumeType
@@ -34,7 +35,8 @@ namespace ScratchEngine
 		struct __declspec(dllexport) AxisAlignedBoundingBox : public BoundingVolume
 		{
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
-			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
+			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
 			//friend class OverlapCheck;
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
@@ -70,6 +72,11 @@ namespace ScratchEngine
 			AxisAlignedBoundingBox(f32 minX, f32 minY, f32 minZ, f32 maxX, f32 maxY, f32 maxZ);
 			AxisAlignedBoundingBox(XMVECTOR point1, XMVECTOR point2);
 
+
+			void* operator new(size_t size);
+			void operator delete(void* p);
+
+
 			f32 GetMinX() const;
 			f32 GetMaxX() const;
 			f32 GetMinY() const;
@@ -80,9 +87,11 @@ namespace ScratchEngine
 			XMVECTOR GetHalfSize() const;
 			f32 GetVolume() const;
 
-			void* operator new(size_t size);
-			void operator delete(void* p);
+			void SetCenter(f32 x, f32 y, f32 z);
+			void SetCenter(XMVECTOR center);
 
+			bool DoesContain(const AxisAlignedBoundingBox& other) const;
+			bool DoesContain(AxisAlignedBoundingBox* other) const;
 
 		private:
 			void SetMinX(f32 value);
@@ -102,7 +111,8 @@ namespace ScratchEngine
 		{
 			friend bool GetSeparatingPlane(XMVECTOR, XMVECTOR, OrientedBoundingBox*, OrientedBoundingBox*);
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
-			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
+			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
 			//friend class OverlapCheck;
 			friend class PhysicsEngine;
 
@@ -163,7 +173,8 @@ namespace ScratchEngine
 		struct BoundingSphere : public BoundingVolume
 		{
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
-			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*, f32);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
+			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
 			//friend class OverlapCheck;
 
 
@@ -368,19 +379,45 @@ namespace ScratchEngine
 				return false;
 			}
 
-			template<class T> AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume, f32 enlargement)
+			template<class T> AxisAlignedBoundingBox GetBoundingAABB(T* boundingVolume)
 			{
 				throw "NOT IMPLEMENTED";
 			}
 
-			template<> AxisAlignedBoundingBox GetBoundingAABB(AxisAlignedBoundingBox* aabb, f32 enlargement)
+			template<> AxisAlignedBoundingBox GetBoundingAABB(AxisAlignedBoundingBox* aabb)
+			{
+				return AxisAlignedBoundingBox(aabb->min, aabb->max);
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(OrientedBoundingBox* obb)
+			{
+				f32 r = XMVector3LengthEst(obb->size).m128_f32[0];
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(obb->center, v), XMVectorAdd(obb->center, v));
+			}
+
+			template<> AxisAlignedBoundingBox GetBoundingAABB(BoundingSphere* sphere)
+			{
+				f32 r = sphere->radius;
+				XMVECTOR v = XMVectorSet(r, r, r, 0);
+
+				return AxisAlignedBoundingBox(XMVectorSubtract(sphere->center, v), XMVectorAdd(sphere->center, v));
+			}
+
+			template<class T> AxisAlignedBoundingBox GetEnlargedAABB(T* boundingVolume, f32 enlargement)
+			{
+				throw "NOT IMPLEMENTED";
+			}
+
+			template<> AxisAlignedBoundingBox GetEnlargedAABB(AxisAlignedBoundingBox* aabb, f32 enlargement)
 			{
 				XMVECTOR v = XMVectorSet(enlargement, enlargement, enlargement, 0);
 
 				return AxisAlignedBoundingBox(XMVectorSubtract(aabb->min, v), XMVectorAdd(aabb->max, v));
 			}
 
-			template<> AxisAlignedBoundingBox GetBoundingAABB(OrientedBoundingBox* obb, f32 enlargement)
+			template<> AxisAlignedBoundingBox GetEnlargedAABB(OrientedBoundingBox* obb, f32 enlargement)
 			{
 				f32 r = XMVector3LengthEst(obb->size).m128_f32[0] + enlargement;
 				XMVECTOR v = XMVectorSet(r, r, r, 0);
@@ -388,7 +425,7 @@ namespace ScratchEngine
 				return AxisAlignedBoundingBox(XMVectorSubtract(obb->center, v), XMVectorAdd(obb->center, v));
 			}
 
-			template<> AxisAlignedBoundingBox GetBoundingAABB(BoundingSphere* sphere, f32 enlargement)
+			template<> AxisAlignedBoundingBox GetEnlargedAABB(BoundingSphere* sphere, f32 enlargement)
 			{
 				f32 r = sphere->radius + enlargement;
 				XMVECTOR v = XMVectorSet(r, r, r, 0);

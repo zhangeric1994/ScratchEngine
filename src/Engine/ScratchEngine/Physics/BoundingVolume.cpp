@@ -64,6 +64,29 @@ __inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetV
 	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
 }
 
+void ScratchEngine::Physics::AxisAlignedBoundingBox::SetCenter(f32 x, f32 y, f32 z)
+{
+	SetCenter({ x, y, z });
+}
+
+void ScratchEngine::Physics::AxisAlignedBoundingBox::SetCenter(XMVECTOR center)
+{
+	XMVECTOR halfSize = GetHalfSize();
+
+	min = XMVectorSubtract(center, halfSize);
+	max = XMVectorAdd(center, halfSize);
+}
+
+__inline bool ScratchEngine::Physics::AxisAlignedBoundingBox::DoesContain(const AxisAlignedBoundingBox& other) const
+{
+	return XMVector3GreaterOrEqual(max, other.max) && XMVector3LessOrEqual(min, other.min);
+}
+
+__inline bool ScratchEngine::Physics::AxisAlignedBoundingBox::DoesContain(AxisAlignedBoundingBox* other) const
+{
+	return XMVector3GreaterOrEqual(max, other->max) && XMVector3LessOrEqual(min, other->min);
+}
+
 __inline void* ScratchEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
 {
 	return _aligned_malloc(size, 16);

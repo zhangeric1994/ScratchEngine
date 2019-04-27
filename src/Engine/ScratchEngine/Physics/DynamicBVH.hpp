@@ -22,6 +22,7 @@ namespace ScratchEngine
 			virtual bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<T>& node1, const DynamicBVHNode<T>& node2) = 0;
 		};
 
+
 		template<class T> class __declspec(dllexport) DynamicBVH
 		{
 			friend class PhysicsEngine;
@@ -37,16 +38,18 @@ namespace ScratchEngine
 
 
 			i32 Insert(T data, const AxisAlignedBoundingBox& aabb);
-			i32 Update(i32 id, const AxisAlignedBoundingBox& aabb);
+			bool Update(i32 id, const AxisAlignedBoundingBox& aabb);
 			T Remove(i32 id);
 			
 
-		private:
 			void Query(int targetID, IDynamicBVHQueryCallback<T>* callback);
 
 
-			i32 __Balance(i32 id);
-			void __UpdateBoxAndHeight(DynamicBVHNode<T>& node);
+		private:
+			void __InsertLeaf(i32 iLeaf, DynamicBVHNode<T>& leaf);
+			void __RemoveLeaf(i32 id);
+			i32 __BalanceNode(i32 id);
+			void __UpdateNode(DynamicBVHNode<T>& node);
 		};
 
 
@@ -55,20 +58,87 @@ namespace ScratchEngine
 			root = null_index;
 		}
 
-		template<class T> inline i32 DynamicBVH<T>::Insert(T data, const AxisAlignedBoundingBox & aabb)
+		template<class T> inline i32 DynamicBVH<T>::Insert(T data, const AxisAlignedBoundingBox& aabb)
 		{
 			assert(data);
 
-			i32 iLeaf = allocator.Allocate();
-			DynamicBVHNode<T>& leaf = allocator[iLeaf];
+			i32 id = allocator.Allocate();
+			DynamicBVHNode<T>& node = allocator[id];
 
-			leaf.aabb = aabb;
-			leaf.data = data;
-			leaf.height = 0;
-			leaf.parent = null_index;
-			leaf.left = null_index;
-			leaf.right = null_index;
+			node.aabb = aabb;
+			node.data = data;
+			node.height = 0;
+			node.parent = null_index;
+			node.left = null_index;
+			node.right = null_index;
 
+			__InsertLeaf(id, node);
+
+			return id;
+		}
+
+		template<class T> inline bool DynamicBVH<T>::Update(i32 id, const AxisAlignedBoundingBox& aabb)
+		{
+			DynamicBVHNode<T>& node = allocator[id];
+
+			if (node.aabb.DoesContain(aabb))
+				return false;
+
+			__RemoveLeaf(id);
+
+			node.aabb.SetCenter(aabb.GetCenter());
+
+			__InsertLeaf(id, node);
+
+			return true;
+		}
+
+		template<class T> inline T DynamicBVH<T>::Remove(i32 id)
+		{
+			__RemoveLeaf(id);
+
+			T data = allocator[id].data;
+			allocator.Free(id);
+
+			return data;
+		}
+
+		template<class T> inline void DynamicBVH<T>::Query(int targetID, IDynamicBVHQueryCallback<T>* callback)
+		{
+			DynamicBVHNode<T>& targetNode = allocator[targetID];
+
+			stack<int> s;
+
+			s.push(root);
+
+			while (!s.empty())
+			{
+				int id = s.top();
+				s.pop();
+
+				if (id == null_index || id == targetID)
+					continue;
+
+				DynamicBVHNode<T>& node = allocator[id];
+
+				if (ScratchEngine::Physics::IsOverlapping(&targetNode.aabb, &node.aabb))
+				{
+					if (node.IsLeaf())
+					{
+						if (!callback->DynamicBVHTestOverlapCallback(targetNode, node))
+							return;
+					}
+					else
+					{
+						s.push(node.left);
+						s.push(node.right);
+					}
+				}
+			}
+		}
+
+		template<class T> __forceinline void DynamicBVH<T>::__InsertLeaf(i32 iLeaf, DynamicBVHNode<T>& leaf)
+		{
 			if (root == null_index)
 				root = iLeaf;
 			else
@@ -116,7 +186,7 @@ namespace ScratchEngine
 				node.left = iCurrentNode;
 				node.right = iLeaf;
 
-				__UpdateBoxAndHeight(node);
+				__UpdateNode(node);
 
 				if (node.parent == null_index)
 					root = iNode;
@@ -133,20 +203,13 @@ namespace ScratchEngine
 
 				for (iCurrentNode = iNode; iCurrentNode != null_index; iCurrentNode = allocator[iCurrentNode].parent)
 				{
-					iCurrentNode = __Balance(iCurrentNode);
-					__UpdateBoxAndHeight(allocator[iCurrentNode]);
+					iCurrentNode = __BalanceNode(iCurrentNode);
+					__UpdateNode(allocator[iCurrentNode]);
 				}
 			}
-
-			return iLeaf;
 		}
 
-		template<class T> inline i32 DynamicBVH<T>::Update(i32 id, const AxisAlignedBoundingBox & aabb)
-		{
-			return Insert(Remove(id), aabb);
-		}
-
-		template<class T> inline T DynamicBVH<T>::Remove(i32 id)
+		template<class T> __forceinline void DynamicBVH<T>::__RemoveLeaf(i32 id)
 		{
 			if (id == root)
 				root = null_index;
@@ -167,60 +230,20 @@ namespace ScratchEngine
 					if (allocator[iGrandParent].left == iParent)
 						allocator[iGrandParent].left = iSibling;
 					else
-						allocator[iGrandParent].left = iSibling;
+						allocator[iGrandParent].right = iSibling;
 
 					for (i32 iCurrentNode = iGrandParent; iCurrentNode != null_index; iCurrentNode = allocator[iCurrentNode].parent)
 					{
-						iCurrentNode = __Balance(iCurrentNode);
-						__UpdateBoxAndHeight(allocator[iCurrentNode]);
+						iCurrentNode = __BalanceNode(iCurrentNode);
+						__UpdateNode(allocator[iCurrentNode]);
 					}
 				}
 
 				allocator.Free(iParent);
 			}
-
-			T data = allocator[id].data;
-
-			allocator.Free(id);
-
-			return data;
 		}
 
-		template<class T> inline void DynamicBVH<T>::Query(int targetID, IDynamicBVHQueryCallback<T>* callback)
-		{
-			DynamicBVHNode<T>& targetNode = allocator[targetID];
-
-			stack<int> s;
-
-			s.push(root);
-
-			while (!s.empty())
-			{
-				int id = s.top();
-				s.pop();
-
-				if (id == null_index || id == targetID)
-					continue;
-
-				DynamicBVHNode<T>& node = allocator[id];
-
-				if (ScratchEngine::Physics::IsOverlapping(&targetNode.aabb, &node.aabb))
-				{
-					if (node.IsLeaf())
-					{
-						if (!callback->DynamicBVHTestOverlapCallback(targetNode, node))
-							return;
-					}
-					else
-					{
-						s.push(node.left);
-						s.push(node.right);
-					}
-				}
-			}
-		}
-
-		template<class T> __forceinline i32 DynamicBVH<T>::__Balance(i32 id)
+		template<class T> __forceinline i32 DynamicBVH<T>::__BalanceNode(i32 id)
 		{
 			DynamicBVHNode<T>& node = allocator[id];
 
@@ -271,8 +294,8 @@ namespace ScratchEngine
 						l2.parent = id;
 					}
 
-					__UpdateBoxAndHeight(node);
-					__UpdateBoxAndHeight(r1);
+					__UpdateNode(node);
+					__UpdateNode(r1);
 
 					return iR1;
 				}
@@ -315,8 +338,8 @@ namespace ScratchEngine
 						l2.parent = id;
 					}
 
-					__UpdateBoxAndHeight(node);
-					__UpdateBoxAndHeight(l1);
+					__UpdateNode(node);
+					__UpdateNode(l1);
 
 					return iL1;
 				}
@@ -325,7 +348,7 @@ namespace ScratchEngine
 			return id;
 		}
 
-		template<class T> __forceinline void DynamicBVH<T>::__UpdateBoxAndHeight(DynamicBVHNode<T>& node)
+		template<class T> __forceinline void DynamicBVH<T>::__UpdateNode(DynamicBVHNode<T>& node)
 		{
 			DynamicBVHNode<T>& l = allocator[node.left];
 			DynamicBVHNode<T>& r = allocator[node.right];
