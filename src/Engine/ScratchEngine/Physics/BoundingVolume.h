@@ -26,6 +26,7 @@ namespace ScratchEngine
 			AABB,
 			OBB,
 			Sphere,
+			Frustum,
 		};
 
 
@@ -37,7 +38,6 @@ namespace ScratchEngine
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
 			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
 			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
-			//friend class OverlapCheck;
 			friend class DynamicAABBTree;
 			friend class DynamicAABBTreeNode;
 			template<typename T> friend class DynamicBVH;
@@ -113,7 +113,6 @@ namespace ScratchEngine
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
 			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
 			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
-			//friend class OverlapCheck;
 			friend class PhysicsEngine;
 
 
@@ -175,7 +174,6 @@ namespace ScratchEngine
 			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
 			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
 			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
-			//friend class OverlapCheck;
 
 
 		private:
@@ -185,6 +183,32 @@ namespace ScratchEngine
 
 		public:
 			void SetData(XMVECTOR position, f32 radius);
+		};
+
+
+		struct BoundingFrustum : public BoundingVolume
+		{
+			template<class T1, class T2> friend bool IsOverlapping(T1*, T2*);
+			template<class T> friend AxisAlignedBoundingBox GetBoundingAABB(T*);
+			template<class T> friend AxisAlignedBoundingBox GetEnlargedAABB(T*, f32);
+
+
+		private:
+			XMVECTOR surfacePlanes[6];
+
+			struct
+			{
+				XMVECTOR leftPlane;
+				XMVECTOR rightPlane;
+				XMVECTOR bottomPlane;
+				XMVECTOR topPlane;
+				XMVECTOR nearPlane;
+				XMVECTOR farPlane;
+			};
+
+
+		public:
+			void SetData(XMMATRIX viewProjection);
 		};
 
 
@@ -225,6 +249,54 @@ namespace ScratchEngine
 			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, BoundingSphere* sphere)
 			{
 				throw "NOT IMPLEMENTED";
+			}
+
+			template<> bool IsOverlapping(AxisAlignedBoundingBox* aabb, BoundingFrustum* frustum)
+			{
+				// This algorithum has false-positive cases
+
+				//bool output = true;
+
+				//XMVECTOR min = XMVectorZero();
+				//XMVECTOR max = XMVectorZero();
+				
+				XMVECTOR center = XMVectorAdd(aabb->max, aabb->min);
+				XMVECTOR size = XMVectorSubtract(aabb->max, aabb->min);
+
+				XMVECTOR signMask = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 };
+
+				for (int i = 0; i < 6; ++i)
+				{
+					XMVECTOR plane = frustum->surfacePlanes[i];
+
+					//for (int j = 0; j < 3; ++j)
+					//{
+					//	if (plane.m128_f32[j] > 0)
+					//	{
+					//		min.m128_f32[j] = aabb->min.m128_f32[j];
+					//		max.m128_f32[j] = aabb->max.m128_f32[j];
+					//	}
+					//	else
+					//	{
+					//		min.m128_f32[j] = aabb->max.m128_f32[j];
+					//		max.m128_f32[j] = aabb->min.m128_f32[j];
+					//	}
+					//}
+
+					//if (XMVector3Dot(plane, min).m128_f32[0] + plane.m128_f32[3] > 0)
+					//	return false;
+
+					////if (XMVector3Dot(plane, max).m128_f32[0] + plane.m128_f32[3] >= 0)
+					////	output = true;
+
+
+					XMVECTOR signFlip = XMVectorAndInt(plane, signMask);
+
+					if (XMVector3Dot(XMVectorAdd(center, XMVectorXorInt(size, signFlip)), plane).m128_f32[0] <= -plane.m128_f32[3])
+						return false;
+				}
+
+				return true;
 			}
 
 			template<> bool IsOverlapping(OrientedBoundingBox* obb1, OrientedBoundingBox* obb2)

@@ -19,6 +19,7 @@ namespace ScratchEngine
 
 
 		private:
+			virtual bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<T>& node) = 0;
 			virtual bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<T>& node1, const DynamicBVHNode<T>& node2) = 0;
 		};
 
@@ -43,6 +44,7 @@ namespace ScratchEngine
 			
 
 			void Query(int targetID, IDynamicBVHQueryCallback<T>* callback);
+			void Query(BoundingVolume volume, IDynamicBVHQueryCallback<T>* callback);
 
 
 		private:
@@ -126,6 +128,35 @@ namespace ScratchEngine
 					if (node.IsLeaf())
 					{
 						if (!callback->DynamicBVHTestOverlapCallback(targetNode, node))
+							return;
+					}
+					else
+					{
+						s.push(node.left);
+						s.push(node.right);
+					}
+				}
+			}
+		}
+
+		template<class T> inline void DynamicBVH<T>::Query(BoundingVolume volume, IDynamicBVHQueryCallback<T>* callback)
+		{
+			stack<int> s;
+
+			s.push(root);
+
+			while (!s.empty())
+			{
+				int id = s.top();
+				s.pop();
+
+				DynamicBVHNode<T>& node = allocator[id];
+
+				if (ScratchEngine::Physics::IsOverlapping(volume, &node.aabb))
+				{
+					if (node.IsLeaf())
+					{
+						if (!callback->DynamicBVHTestOverlapCallback(node))
 							return;
 					}
 					else

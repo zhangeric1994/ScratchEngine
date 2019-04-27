@@ -121,6 +121,11 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 //	return true;
 //}
 
+bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node)
+{
+	return true;
+}
+
 bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& nodeA, const DynamicBVHNode<Collider*>& nodeB)
 {
 	Collider* colliderA = nodeA.data;

@@ -208,3 +208,16 @@ void ScratchEngine::Physics::BoundingSphere::SetData(XMVECTOR position, f32 radi
 	this->center = position;
 	this->radius = radius;
 }
+
+
+void ScratchEngine::Physics::BoundingFrustum::SetData(XMMATRIX viewProjection)
+{
+	viewProjection = XMMatrixTranspose(viewProjection);
+
+	leftPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[0]);
+	rightPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[0]);
+	bottomPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[1]);
+	topPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[1]);
+	nearPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[2]);
+	farPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[2]);
+}
