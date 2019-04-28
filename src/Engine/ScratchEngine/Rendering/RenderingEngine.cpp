@@ -34,7 +34,7 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 
 	vsDepthOnly = new SimpleVertexShader(device, deviceContext);
-	vsDepthOnly->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+	vsDepthOnly->LoadShaderFile((wpath + std::wstring(L"/VS_DepthOnly.cso")).c_str());
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
 	depthStencilDesc.DepthEnable = true;

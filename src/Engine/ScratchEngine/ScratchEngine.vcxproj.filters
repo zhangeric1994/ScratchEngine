@@ -16,10 +16,10 @@
     <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\vs_zprepass.hlsl">
+    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
+    <FxCompile Include="Rendering\Shaders\VS_DepthOnly.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
