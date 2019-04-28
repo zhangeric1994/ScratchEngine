@@ -101,6 +101,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 			auto vertexWeight = vertToBoneWeight[(u32)i];
 
 			int numBones = vertexWeight->size();
+			f32 w = 0;
 
 			for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
 			{
@@ -108,6 +109,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 				{
 					vertex.IDs[j] = vertexWeight->at(j)->mVertexId;
 					vertex.Weights[j] = vertexWeight->at(j)->mWeight;
+					w += vertex.Weights[j];
 				}
 				else
 				{
@@ -115,6 +117,12 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 					vertex.Weights[j] = 0;
 				}
 			}
+
+			if (w > 1.5f)
+				printf("BONE WEIGHT ERROR!!\n");
+
+			//for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
+			//	vertex.Weights[j] /= w;
 		}
 
 		vertices.push_back(vertex);
@@ -133,20 +141,25 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 
 void ScratchEngine::Rendering::Model::ExtractBoneWeightsFromMesh(aiMesh* mesh)
 {
-	for (UINT i = 0; i < mesh->mNumBones;i++) {
-		aiBone * bone = mesh->mBones[i];
+	for (UINT i = 0; i < mesh->mNumBones;i++)
+	{
+		aiBone* bone = mesh->mBones[i];
 		int boneIndex = anim->GetBoneIndex(bone->mName.C_Str());
 
 		for (UINT j = 0; j < bone->mNumWeights; j++) {
-			aiVertexWeight * weight = &(bone->mWeights[j]);
-			std::map<UINT, std::vector<aiVertexWeight*>*>::iterator it = vertToBoneWeight.find((UINT)weight->mVertexId);
-			if (it != vertToBoneWeight.end()) {
-				vertToBoneWeight.at((UINT)weight->mVertexId)->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
+			aiVertexWeight* weight = &(bone->mWeights[j]);
+
+			std::map<UINT, std::vector<aiVertexWeight*>*>::iterator it = vertToBoneWeight.find(weight->mVertexId);
+			
+			if (it == vertToBoneWeight.end())
+			{
+				vector<aiVertexWeight*>* v = new std::vector<aiVertexWeight*>();
+				v->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
+
+				vertToBoneWeight[(UINT)weight->mVertexId] = v;
 			}
-			else {
-				vertToBoneWeight[(UINT)weight->mVertexId] = new std::vector<aiVertexWeight*>();
-				vertToBoneWeight.at((UINT)weight->mVertexId)->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
-			}
+			else
+				it->second->push_back(new aiVertexWeight(boneIndex, weight->mWeight));
 		}
 	}
 }

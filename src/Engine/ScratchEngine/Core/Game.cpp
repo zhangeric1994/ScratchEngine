@@ -121,8 +121,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-	model = new Model(device, "../Assets/Sword and Shield Pack/paladin_prop_j_nordstrom.fbx");
-	model->LoadAnimation("../Assets/Sword and Shield Pack/sword and shield attack.fbx");
+	model = new Model(device, "../Assets/Great Sword Pack/maria_prop_j_j_ong.fbx");
+	model->LoadAnimation("../Assets/Great Sword Pack/great sword slash.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);

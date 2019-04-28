@@ -1,5 +1,3 @@
-
-
 struct VertexShaderInput
 {
 	float3 position : POSITION;
@@ -23,7 +21,7 @@ cbuffer ObjectData : register(b3)
 
 cbuffer cbSkinned : register(b4)
 {
-	matrix gBoneTransforms[54];
+	matrix gBoneTransforms[128];
 };
 
 struct VertexToPixel
