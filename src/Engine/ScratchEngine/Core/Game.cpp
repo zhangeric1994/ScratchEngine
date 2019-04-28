@@ -202,7 +202,7 @@ void ScratchEngine::Game::Update()
 		//go1->Rotate(20 * deltaTime, 0, 0);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
-		model->anim->Update(0.0002f);
+		model->anim->Update(deltaTime);
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 		
 		physicsEngine->UpdateBoundingVolumes();

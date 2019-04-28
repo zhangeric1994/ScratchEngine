@@ -5,8 +5,8 @@ struct VertexShaderInput
 	float3 position : POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
-	float4 boneIndex : BLENDINDICES;
-	float4 weight : BLENDWEIGHT;
+	uint4 boneIndices : BLENDINDICES;
+	float4 boneWeights : BLENDWEIGHT;
 };
 
 cbuffer CameraData : register(b2)
@@ -38,30 +38,47 @@ VertexToPixel main(VertexShaderInput vin)
 {
 	VertexToPixel vout;
 
-	// balance the bone weight
-	float weight0 = vin.weight.x;
-	float weight1 = vin.weight.y;
-	float weight2 = vin.weight.z;
-	float weight3 = vin.weight.w;
-	float sum = weight0 + weight1;
-		//+ weight2 + weight3;
-	//weight0 /= sum;
-	//weight1 /= sum;
-	//weight2 /= sum;
-	//weight3 /= sum;
-	// offset position by bone matrices, using weights to scale
-	float4 p = weight0 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
-	p += (1 - weight0) * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[1]]);
+    float4 p = float4(0, 0, 0, 0);
+    float4 n = float4(0, 0, 0, 0);
+
+    for (int i = 0; i < 4; ++i)
+    {
+        float weight = vin.boneWeights[i];
+        float4x4 m = gBoneTransforms[vin.boneIndices[i]];
+        p += weight * mul(float4(vin.position, 1.0f), m);
+        n += weight * mul(float4(vin.normal, 0.0f), m);
+    }
+
+    p.w = 1;
+    n.w = 0;
+        
+
+	//// balance the bone weight
+ //   float weight0 = vin.weight.x;
+	//float weight1 = vin.weight.y;
+	//float weight2 = vin.weight.z;
+	//float weight3 = vin.weight.w;
+
+	////float sum = weight0 + weight1 + weight2 + weight3;
+	
+ //   //weight0 /= sum;
+	////weight1 /= sum;
+	////weight2 /= sum;
+	////weight3 /= sum;
+	
+ //   // offset position by bone matrices, using weights to scale
+	//float4 p = weight0 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
+	//p += weight1 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[1]]);
 	//p += weight2 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[2]]);
 	//p += weight3 * mul(float4(vin.position, 1.0f), gBoneTransforms[(int)vin.boneIndex[3]]);
-	p.w = 1.0f;
+	//p.w = 1.0f;
 
-	// offset normal by bone matrices, using weights to scale
-	float4 n = weight0 * mul(float4(vin.normal, 0.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
-	n += (1 - weight0) * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[1]]);
+	//// offset normal by bone matrices, using weights to scale
+	//float4 n = weight0 * mul(float4(vin.normal, 0.0f), gBoneTransforms[(int)vin.boneIndex[0]]);
+	//n += weight1 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[1]]);
 	//n += weight2 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[2]]);
 	//n += weight3 * mul(float4(vin.normal, 0.0f), gBoneTransforms[vin.boneIndex[3]]);
-	n.w = 0.0f;
+	//n.w = 0.0f;
 
 	// offset tangent by bone matrices, using weights to scale
 	//float4 t = weight0 * mul(float4(vin.Tan.xyz, 0.0f), gBoneTransforms[vin.BoneIndex[0]]);
@@ -73,11 +90,10 @@ VertexToPixel main(VertexShaderInput vin)
 
 	// Transform to world space.
 	vout.position = mul(p, world);
-	vout.normal = normalize(mul((float3x3)world,n.xyz));
+    vout.normal = normalize(mul(n.xyz, (float3x3)world));
 	//vout.TangentW = float4(mul(t, (float3x3)gWorld), vin.Tan.w);
 
 	matrix WVP = mul(world, viewProjection);
-
 
 	vout.svPosition = mul(p, WVP);
 

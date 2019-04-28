@@ -96,32 +96,23 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 		vertex.Normal.y = (float)mesh->mNormals[i].y;
 		vertex.Normal.y = (float)mesh->mNormals[i].z;
 
-		if (anim && anim->hasSkeleton) {
-			for (UINT j = 0; j < vertToBoneWeight[(UINT)i]->size(); j++) {
-				if (j > NUM_BONES_PER_VEREX - 1) {
-					break;
+		if (anim && anim->hasSkeleton)
+		{
+			auto vertexWeight = vertToBoneWeight[(u32)i];
+
+			int numBones = vertexWeight->size();
+
+			for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
+			{
+				if (j < numBones)
+				{
+					vertex.IDs[j] = vertexWeight->at(j)->mVertexId;
+					vertex.Weights[j] = vertexWeight->at(j)->mWeight;
 				}
-				else {
-					switch (j)
-					{
-					case 0:
-						vertex.IDs.x = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
-						vertex.Weights.x = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
-						break;
-					case 1:
-						vertex.IDs.y = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
-						vertex.Weights.y = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
-						break;
-					case 2:
-						vertex.IDs.z = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
-						vertex.Weights.z = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
-						break;
-					case 3:
-						vertex.IDs.w = vertToBoneWeight[(UINT)i]->at(j)->mVertexId;
-						vertex.Weights.w = vertToBoneWeight[(UINT)i]->at(j)->mWeight;
-						break;
-					}
-					
+				else
+				{
+					vertex.IDs[j] = 0;
+					vertex.Weights[j] = 0;
 				}
 			}
 		}
@@ -145,7 +136,7 @@ void ScratchEngine::Rendering::Model::ExtractBoneWeightsFromMesh(aiMesh* mesh)
 	for (UINT i = 0; i < mesh->mNumBones;i++) {
 		aiBone * bone = mesh->mBones[i];
 		int boneIndex = anim->GetBoneIndex(bone->mName.C_Str());
-		
+
 		for (UINT j = 0; j < bone->mNumWeights; j++) {
 			aiVertexWeight * weight = &(bone->mWeights[j]);
 			std::map<UINT, std::vector<aiVertexWeight*>*>::iterator it = vertToBoneWeight.find((UINT)weight->mVertexId);

@@ -135,18 +135,13 @@ void ScratchEngine::Animator::Update(float dt)
 {
 	timePos += dt;
 
-	if (timePos > duration) {
-		if (LoopClips) {
-			timePos = 0;
-		}
-		else {
-			//wait 
+	if (timePos > duration)
+	{
+		if (LoopClips)
+			timePos -= duration;
+		else
 			timePos = duration;
-		}
-	}else{
-		// ok state
 	}
-	
 }
 
 void ScratchEngine::Animator::PlayAnimationForward()

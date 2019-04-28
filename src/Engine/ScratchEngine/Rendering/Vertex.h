@@ -26,8 +26,8 @@ namespace ScratchEngine
 			//DirectX::XMFLOAT4 Color;        // The color of the vertex
 			DirectX::XMFLOAT3 Normal;
 			DirectX::XMFLOAT2 UV;
-			DirectX::XMFLOAT4 IDs;
-			DirectX::XMFLOAT4 Weights;
+			u32 IDs[NUM_BONES_PER_VEREX];
+			f32 Weights[NUM_BONES_PER_VEREX];
 		};
 	}
 }
