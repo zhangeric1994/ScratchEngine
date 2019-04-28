@@ -1,7 +1,8 @@
-#include "../Core/Game.h"
+#include "../Rendering/RenderingEngine.h"
 
+#include "Game.h"
 #include "Renderer.h"
-#include "RenderingEngine.h"
+
 
 ScratchEngine::Renderer::Renderer()
 {

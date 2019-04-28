@@ -1,5 +1,7 @@
+#include "../Rendering/RenderingEngine.h"
+
 #include "Camera.h"
-#include "RenderingEngine.h"
+
 
 ScratchEngine::Camera::Camera()
 {

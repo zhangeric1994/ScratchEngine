@@ -2,11 +2,11 @@
 #define CAMERA_H
 #pragma once
 
-#include "../Core/GameComponent.h"
+#include "../Rendering/Mesh.h"
+#include "../Rendering/Texture.h"
+#include "../Rendering/Viewer.h"
 
-#include "Mesh.h"
-#include "Texture.h"
-#include "Viewer.h"
+#include "GameComponent.h"
 
 using namespace ScratchEngine::Rendering;
 

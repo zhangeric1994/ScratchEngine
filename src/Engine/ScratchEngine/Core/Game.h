@@ -4,21 +4,22 @@
 #include <DirectXMath.h>
 #include <vector>
 
-#include "../Core/GameObject.h"
-#include "../Rendering/Camera.h"
-#include "../Rendering/Light.h"
+#include "../Multithreading/Barrier.h"
+#include "../Rendering/CubeMap.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"
+#include "../Rendering/ShadowMap.h"
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
-#include "../Multithreading/Barrier.h"
-#include "../Rendering/ShadowMap.h"
-#include "../Rendering/CubeMap.h"
 
+#include "Camera.h"
 #include "DXCore.h"
+#include "GameObject.h"
+#include "Light.h"
 
 using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Multithreading;
+
 
 namespace ScratchEngine
 {
