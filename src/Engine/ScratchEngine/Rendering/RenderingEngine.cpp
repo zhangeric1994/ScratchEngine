@@ -152,7 +152,7 @@ void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
 					array[i] = temp[i];
 				}
 				renderable.bones = array;
-				renderable.boneSize = sizeof(float) * 16 * temp.size();
+				renderable.boneSize = sizeof(XMMATRIX) * temp.size();
 			}
 		}
 	}

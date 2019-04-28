@@ -23,7 +23,7 @@ cbuffer ObjectData : register(b3)
 
 cbuffer cbSkinned : register(b4)
 {
-	matrix gBoneTransforms[69];
+	matrix gBoneTransforms[54];
 };
 
 struct VertexToPixel
