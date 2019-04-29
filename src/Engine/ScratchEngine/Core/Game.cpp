@@ -121,8 +121,8 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-	model = new Model(device, "../Assets/Great Sword Pack/maria_prop_j_j_ong.fbx");
-	model->LoadAnimation("../Assets/Great Sword Pack/great sword slash.fbx");
+	model = new Model(device, "../Assets/Great Sword Pack/kachujin_g_rosales.fbx");
+	model->LoadAnimation("../Assets/Great Sword Pack/Samba Dancing.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -202,7 +202,7 @@ void ScratchEngine::Game::Update()
 		//go1->Rotate(20 * deltaTime, 0, 0);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
-		model->anim->Update(deltaTime);
+		model->anim->Update(deltaTime*0.8);
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 		
 		physicsEngine->UpdateBoundingVolumes();

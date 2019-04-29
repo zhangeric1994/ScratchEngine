@@ -8,6 +8,7 @@ ScratchEngine::Renderer::Renderer()
 {
 	this->mesh = nullptr;
 	this->material = nullptr;
+	this->anim = nullptr;
 	this->renderable = null_index;
 }
 
