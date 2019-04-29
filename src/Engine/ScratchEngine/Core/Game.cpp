@@ -205,19 +205,19 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture);
-	if (FAILED(isok)) printf("load albedo texture error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture)))
+		printf("load albedo texture error");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap);
-	if (FAILED(isok)) printf("load normal map error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap)))
+		printf("load normal map error");
 
 	//load roughness map
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap);
-	if (FAILED(isok)) printf("load roughness map error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap)))
+		printf("load roughness map error");
 
 	//load metalness map
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap);
-	if (FAILED(isok)) printf("load metalness map failed");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap)))
+		printf("load metalness map failed");
 
 
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");

@@ -101,7 +101,8 @@
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\Externals\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -121,7 +122,8 @@
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\Externals\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -145,7 +147,8 @@
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\Externals\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -169,7 +172,8 @@
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /y /d "..\..\Engine\Externals\*.dll" "$(OutDir)"</Command>
+      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
