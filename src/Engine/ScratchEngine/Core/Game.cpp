@@ -28,7 +28,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	redMaterial = nullptr;
 
 	zPrepassDepthStencilState = nullptr;
-	
+
 	sphereMesh = nullptr;
 	cubeMesh = nullptr;
 
@@ -48,7 +48,7 @@ ScratchEngine::Game::~Game()
 
 	if (pixelShader)
 		delete pixelShader;
-	
+
 	if (vsZPrepass)
 		delete vsZPrepass;
 
@@ -65,7 +65,7 @@ ScratchEngine::Game::~Game()
 
 	if (sphereMesh)
 		delete sphereMesh;
-	
+
 	if (cubeMesh)
 		delete cubeMesh;
 
@@ -84,7 +84,7 @@ void ScratchEngine::Game::LoadShaders()
 	char buffer[MAX_PATH];
 	GetModuleFileName(NULL, buffer, MAX_PATH);
 	std::string::size_type pos = std::string(buffer).find_last_of("\\/");
-	
+
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 	std::wstring wVertex = wpath + std::wstring(L"/VertexShader.cso");
@@ -121,14 +121,9 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Idle_1.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Idle_0.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Walking.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx");
-	model->anim->SetAnimationIndex(4);
+	model = new Model(device, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing run forward.fbx");
+
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
 
@@ -143,7 +138,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetRotation(-90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
-	
+
 
 	go1 = new GameObject();
 	go1->AddComponent<Renderer>(redMaterial, model);
@@ -209,7 +204,7 @@ void ScratchEngine::Game::Update()
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 10);
 		model->anim->Update(deltaTime);
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
-		
+
 		physicsEngine->UpdateBoundingVolumes();
 		physicsEngine->SolveCollisions();
 		frameBarrier.Wait();
@@ -288,7 +283,7 @@ void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 
 // --------------------------------------------------------
 // Helper method for mouse movement.  We only get this message
-// if the mouse is currently over the window, or if we're 
+// if the mouse is currently over the window, or if we're
 // currently capturing the mouse.
 // --------------------------------------------------------
 void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
@@ -309,8 +304,8 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 }
 
 // --------------------------------------------------------
-// Helper method for mouse wheel scrolling.  
-// WheelDelta may be positive or negative, depending 
+// Helper method for mouse wheel scrolling.
+// WheelDelta may be positive or negative, depending
 // on the direction of the scroll
 // --------------------------------------------------------
 void ScratchEngine::Game::OnMouseWheel(float wheelDelta, int x, int y)
@@ -318,4 +313,3 @@ void ScratchEngine::Game::OnMouseWheel(float wheelDelta, int x, int y)
 	// Add any custom code here...
 }
 #pragma endregion
-
