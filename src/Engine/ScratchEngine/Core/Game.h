@@ -29,7 +29,7 @@ namespace ScratchEngine
 		Game(HINSTANCE hInstance, char* name);
 		~Game();
 
-		void Init();
+		void Initialize();
 		void OnResize();
 		void Update();
 		void Draw();

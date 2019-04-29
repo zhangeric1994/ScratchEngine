@@ -167,6 +167,9 @@
     <ClInclude Include="Core\GameComponent.h" />
     <ClInclude Include="Core\GameObject.h" />
     <ClInclude Include="Core\Global.h" />
+    <ClInclude Include="Core\IInputEventReceiver.h" />
+    <ClInclude Include="Core\InputEvent.h" />
+    <ClInclude Include="Core\InputManager.h" />
     <ClInclude Include="Core\IUpdatable.h" />
     <ClInclude Include="Core\Light.h" />
     <ClInclude Include="Core\Renderer.h" />
@@ -213,6 +216,8 @@
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
     <ClCompile Include="Core\Global.cpp" />
+    <ClCompile Include="Core\InputEvent.cpp" />
+    <ClCompile Include="Core\InputManager.cpp" />
     <ClCompile Include="Core\Light.cpp" />
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Scene.cpp" />

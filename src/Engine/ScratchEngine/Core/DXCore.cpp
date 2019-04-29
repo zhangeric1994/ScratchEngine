@@ -4,6 +4,7 @@
 
 #include "DXCore.h"
 #include "Game.h"
+#include "InputManager.h"
 
 using namespace std;
 
@@ -373,7 +374,7 @@ HRESULT ScratchEngine::DXCore::Run()
 	previousTime = now;
 
 	// Give subclass a chance to initialize
-	Init();
+	Initialize();
 
 	thread updatingThread(&Game::Update, static_cast<Game*>(this));
 	thread renderingThread(&Game::Draw, static_cast<Game*>(this));
@@ -569,17 +570,43 @@ LRESULT ScratchEngine::DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wPara
 
 		return 0;
 
+	case WM_KEYDOWN:
+		InputManager::singleton->OnKeyDown(wParam);
+		return 0;
+
+	case WM_KEYUP:
+		InputManager::singleton->OnKeyUp(wParam);
+		return 0;
+
 	// Mouse button being pressed (while the cursor is currently over our window)
 	case WM_LBUTTONDOWN:
+		InputManager::singleton->OnKeyDown(VK_LBUTTON);
+		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+
 	case WM_MBUTTONDOWN:
+		InputManager::singleton->OnKeyDown(VK_MBUTTON);
+		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+
 	case WM_RBUTTONDOWN:
+		InputManager::singleton->OnKeyDown(VK_RBUTTON);
 		OnMouseDown(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 
 	// Mouse button being released (while the cursor is currently over our window)
 	case WM_LBUTTONUP:
+		InputManager::singleton->OnKeyUp(VK_LBUTTON);
+		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+
 	case WM_MBUTTONUP:
+		InputManager::singleton->OnKeyUp(VK_MBUTTON);
+		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+
 	case WM_RBUTTONUP:
+		InputManager::singleton->OnKeyUp(VK_RBUTTON);
 		OnMouseUp(wParam, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 

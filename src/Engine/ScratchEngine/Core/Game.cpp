@@ -6,11 +6,13 @@
 
 #include "Game.h"
 #include "Global.h"
+#include "InputManager.h"
 #include "Renderer.h"
 #include "Scene.h"
 #include "Transform.h"
 
 using namespace ScratchEngine::Physics;
+using namespace ScratchEngine::Rendering;
 
 
 Material* ScratchEngine::Game::greenMaterial = nullptr;
@@ -66,7 +68,8 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 #endif
 }
 
-ScratchEngine::Game::~Game() {
+ScratchEngine::Game::~Game()
+{
 	if (vertexShader)
 		delete vertexShader;
 
@@ -124,13 +127,14 @@ ScratchEngine::Game::~Game() {
 		delete shadowShader;
 
 
-	Rendering::RenderingEngine::Terminate();
+	RenderingEngine::Terminate();
 }
 
-void ScratchEngine::Game::Init()
+void ScratchEngine::Game::Initialize()
 {
+	InputManager::Initialize();
 	PhysicsEngine::Initialize();
-	Rendering::RenderingEngine::Initialize(device, context);
+	RenderingEngine::Initialize(device, context);
 
 	LoadShaders();
 	CreateMatrces();
@@ -185,7 +189,7 @@ void ScratchEngine::Game::CreateAllMaps()
 	//shadow map setup
 	shadow->setUp(device);
 
-	Rendering::RenderingEngine::GetSingleton()->SetShadowMap(shadow);
+	RenderingEngine::GetSingleton()->SetShadowMap(shadow);
 	//End of shadow map
 
 	//cube map
@@ -336,6 +340,8 @@ void ScratchEngine::Game::Update()
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
+		InputManager::singleton->Capture();
+
 		frameBarrier.Wait();
 
 		if (GetAsyncKeyState(VK_ESCAPE))
@@ -384,7 +390,7 @@ void ScratchEngine::Game::Update()
 void ScratchEngine::Game::Draw()
 {
 	Scene* scene = Scene::GetCurrentScene();
-	Rendering::RenderingEngine* renderingEngine = Rendering::RenderingEngine::GetSingleton();
+	RenderingEngine* renderingEngine = Rendering::RenderingEngine::GetSingleton();
 
 	while (isRunning)
 	{

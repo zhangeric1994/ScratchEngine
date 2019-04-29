@@ -107,7 +107,7 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 		//	}
 		//}
 
-	printf("\n\n");
+	//printf("\n\n");
 }
 
 //
@@ -133,7 +133,7 @@ bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const 
 	
 	if (colliderA->id < colliderB->id)
 	{
-		printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
+		//printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
 		auto it = colliderA->contacts.find(colliderB);
 
 		GameObject* gameObjectA = colliderA->GetGameObject();

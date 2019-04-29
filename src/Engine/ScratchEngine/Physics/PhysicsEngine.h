@@ -14,7 +14,7 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider *>
+		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider*>
 		{
 			friend class Collider;
 
