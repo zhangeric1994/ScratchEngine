@@ -9,6 +9,7 @@ ScratchEngine::Rendering::Model::Model(ID3D11Device * device, std::map<UINT, std
 ScratchEngine::Rendering::Model::Model(ID3D11Device * device, const std::string & filePath)
 {
 	this->device = device;
+	this->anim = nullptr;
 	this->LoadModel(filePath);
 }
 
@@ -94,7 +95,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 
 		vertex.Normal.x = (float)mesh->mNormals[i].x;
 		vertex.Normal.y = (float)mesh->mNormals[i].y;
-		vertex.Normal.y = (float)mesh->mNormals[i].z;
+		vertex.Normal.z = (float)mesh->mNormals[i].z;
 
 		if (anim && anim->hasSkeleton)
 		{
@@ -108,6 +109,16 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 				if (j < numBones)
 				{
 					vertex.IDs[j] = vertexWeight->at(j)->mVertexId;
+					//if (vertexWeight->at(j)->mWeight + w > 1) {
+					//	/*printf("size : %f \n", numBones);
+					//	printf("previous weight : %f \n",w);
+					//	printf("BONE WEIGHT ERROR!!  weight : %f \n", vertexWeight->at(j)->mWeight);*/
+					//	vertex.Weights[j] = 1;
+					//	
+					//}else {
+					//	vertex.Weights[j] = vertexWeight->at(j)->mWeight;
+					//	w += vertex.Weights[j];
+					//}
 					vertex.Weights[j] = vertexWeight->at(j)->mWeight;
 					w += vertex.Weights[j];
 				}
@@ -118,13 +129,13 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 				}
 			}
 
-			if (w > 1.5f)
-				printf("BONE WEIGHT ERROR!!\n");
-
+			for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++) {
+				vertex.Weights[j] /= w;
+			}
 			//for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
 			//	vertex.Weights[j] /= w;
 		}
-
+		
 		vertices.push_back(vertex);
 	}
 

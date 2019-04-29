@@ -128,7 +128,7 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 		animationNameToId[animations[i]->name] = i;
 	}
 	currentAnimationIndex = 0;
-	duration = animations[currentAnimationIndex]->duration;
+	duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::Update(float dt)
@@ -137,9 +137,8 @@ void ScratchEngine::Animator::Update(float dt)
 
 	if (timePos > duration)
 	{
-		if (LoopClips)
-			timePos -= duration;
-		else
+		if (!LoopClips)
+			// no need to reduce time
 			timePos = duration;
 	}
 }
