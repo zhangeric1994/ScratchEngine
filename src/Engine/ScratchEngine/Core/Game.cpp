@@ -122,7 +122,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 	model = new Model(device, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/unarmed run back.fbx");
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing run forward.fbx");
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -144,7 +144,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go1->AddComponent<Renderer>(redMaterial, model);
 	go1->SetPosition(0, -1, 6);
 	//go1->SetRotation(90, 0, 0);
-	go1->SetLocalScale(0.1f, 0.1f, 0.1f);
+	go1->SetLocalScale(0.01f, 0.01f, 0.01f);
 	//go1->AddComponent<BoxCollider>();
 
 	//go2 = new GameObject();
