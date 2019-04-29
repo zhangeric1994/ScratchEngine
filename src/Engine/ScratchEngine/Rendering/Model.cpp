@@ -94,7 +94,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 
 		vertex.Normal.x = (float)mesh->mNormals[i].x;
 		vertex.Normal.y = (float)mesh->mNormals[i].y;
-		vertex.Normal.y = (float)mesh->mNormals[i].z;
+		vertex.Normal.z = (float)mesh->mNormals[i].z;
 
 		if (anim && anim->hasSkeleton)
 		{
