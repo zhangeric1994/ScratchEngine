@@ -12,11 +12,11 @@ namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		enum LightType : i32
+		enum class LightType
 		{
-			Directional = 0,
-			Point = 1,
-			Spot = 2,
+			DIRECTIONAL,
+			POINT,
+			SPOT,
 		};
 
 

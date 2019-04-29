@@ -8,6 +8,7 @@
 #include "Global.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "Transform.h"
 
 using namespace ScratchEngine::Physics;
 

@@ -193,6 +193,7 @@
     <ClInclude Include="Physics\RigidBody.h" />
     <ClInclude Include="Rendering\CubeMap.h" />
     <ClInclude Include="Rendering\LightSource.h" />
+    <ClInclude Include="Rendering\prerequisites.h" />
     <ClInclude Include="Rendering\ShadowMap.h" />
     <ClInclude Include="Rendering\Texture.h" />
     <ClInclude Include="Rendering\Viewer.h" />

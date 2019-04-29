@@ -9,7 +9,6 @@
 #include "assimp/postprocess.h"
 #include "assimp/Importer.hpp"
 
-
 #include "../Common/Typedefs.h"
 
 #include "Vertex.h"

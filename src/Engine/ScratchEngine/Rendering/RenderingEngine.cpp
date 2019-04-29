@@ -1,11 +1,14 @@
-//#include "../Core/GameObject.h"
-//#include "../Core/Global.h"
-
+#include "CubeMap.h"
+#include "LightSource.h"
+#include "Renderable.h"
 #include "RenderingEngine.h"
+#include "ShadowMap.h"
 #include "SimpleShader.h"
+#include "Texture.h"
+#include "Viewer.h"
+
 
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
-
 
 ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes)
 {

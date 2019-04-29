@@ -2,20 +2,19 @@
 #define RENDERING_ENGINE_H
 #pragma once
 
+#include <DirectXMath.h>
 #include <string>
 
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
 #include "../Memory/PoolAllocator.hpp"
 
-#include "CubeMap.h"
-#include "LightSource.h"
-#include "Mesh.h"
-#include "Renderable.h"
-#include "ShadowMap.h"
-#include "Texture.h"
-#include "Viewer.h"
+#include "prerequisites.h"
 
+#include "Material.h"
+#include "Mesh.h"
+
+using namespace DirectX;
 using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;
 
@@ -66,8 +65,6 @@ namespace ScratchEngine
 			ShadowMap* shadow;
 			bool hasZPrepass;
 
-			//XMMATRIX shadowView;
-			//XMMATRIX shadowProjection;
 			XMFLOAT4X4 shadowViewProjectionMat;
 
 

@@ -8,6 +8,9 @@
 #include "../Common/Stack.hpp"
 #include "../Memory/DynamicPoolAllocator.hpp"
 #include "../Memory/StackAllocator.hpp"
+#include "../Rendering/LightSource.h"
+#include "../Rendering/Renderable.h"
+#include "../Rendering/Viewer.h"
 
 #include "GameObject.h"
 #include "IUpdatable.h"

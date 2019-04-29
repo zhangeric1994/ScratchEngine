@@ -206,9 +206,6 @@
     <ClInclude Include="Rendering\ShadowMap.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Space.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Stack.hpp">
       <Filter>Header Files\Common</Filter>
     </ClInclude>
@@ -246,6 +243,12 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Renderer.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\prerequisites.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Space.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

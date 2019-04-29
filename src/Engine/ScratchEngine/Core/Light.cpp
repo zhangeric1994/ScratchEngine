@@ -27,30 +27,30 @@ ScratchEngine::Light::~Light()
 }
 
 
-ScratchEngine::DirectionalLight::DirectionalLight() : Light(Directional)
+ScratchEngine::DirectionalLight::DirectionalLight() : Light(LightType::DIRECTIONAL)
 {
 }
 
-ScratchEngine::DirectionalLight::DirectionalLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(Directional, ambientColor, diffuseColor)
-{
-}
-
-
-ScratchEngine::PointLight::PointLight() : Light(Point)
-{
-}
-
-ScratchEngine::PointLight::PointLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(Point, ambientColor, diffuseColor)
+ScratchEngine::DirectionalLight::DirectionalLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(LightType::DIRECTIONAL, ambientColor, diffuseColor)
 {
 }
 
 
-ScratchEngine::SpotLight::SpotLight() : Light(Spot)
+ScratchEngine::PointLight::PointLight() : Light(LightType::POINT)
+{
+}
+
+ScratchEngine::PointLight::PointLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(LightType::POINT, ambientColor, diffuseColor)
+{
+}
+
+
+ScratchEngine::SpotLight::SpotLight() : Light(LightType::SPOT)
 {
 	this->angle = 30.0f;
 }
 
-ScratchEngine::SpotLight::SpotLight(XMVECTOR ambientColor, XMVECTOR diffuseColor, f32 angle) : Light(Spot, ambientColor, diffuseColor)
+ScratchEngine::SpotLight::SpotLight(XMVECTOR ambientColor, XMVECTOR diffuseColor, f32 angle) : Light(LightType::SPOT, ambientColor, diffuseColor)
 {
 	this->angle = angle;
 }
