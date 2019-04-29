@@ -1,5 +1,5 @@
-#include "../Core/GameObject.h"
-#include "../Core/Global.h"
+//#include "../Core/GameObject.h"
+//#include "../Core/Global.h"
 
 #include "RenderingEngine.h"
 #include "SimpleShader.h"
@@ -7,7 +7,7 @@
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 
-ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes), renderableAllocator(config.initialNumRenderables), viewerAllocator(config.initialNumRenderables), lightSourceAllocator(config.initialNumLightSources)
+ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes)
 {
 	assert(config.device);
 	device = config.device;
@@ -15,9 +15,6 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	assert(config.deviceContext);
 	deviceContext = config.deviceContext;
 
-	rendererList = nullptr;
-	cameraList = nullptr;
-	lightList = nullptr;
 	shadow = nullptr;
 	hasZPrepass = false;
 
@@ -48,204 +45,30 @@ ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 {
 	singleton = nullptr;
 
-	if (vsDepthOnly) delete vsDepthOnly;
+	if (vsDepthOnly)
+		delete vsDepthOnly;
 
-	if (dssLessEqual) dssLessEqual->Release();
+	if (dssLessEqual)
+		dssLessEqual->Release();
 }
 
-void ScratchEngine::Rendering::RenderingEngine::AddRenderer(Renderer* renderer)
-{
-	renderer->next = rendererList;
-	renderer->previous = nullptr;
-
-	if (rendererList)
-		rendererList->previous = renderer;
-	
-	rendererList = renderer;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::AddCamera(Camera* camera)
-{
-	camera->next = cameraList;
-	camera->previous = nullptr;
-
-	if (cameraList)
-		cameraList->previous = camera;
-	
-	cameraList = camera;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::AddLight(Light* light)
-{
-	light->next = lightList;
-	light->previous = nullptr;
-
-	if (lightList)
-		lightList->previous = light;
-	
-	lightList = light;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::RemoveRenderer(Renderer* renderer)
-{
-	if (!rendererList)
-		return;
-
-	Renderer* next = renderer->next;
-	Renderer* previous = renderer->previous;
-
-	if (previous)
-		previous->next = next;
-	else
-		rendererList = next;
-
-	if (next)
-		next->previous = previous;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::RemoveCamera(Camera * camera)
-{
-	if (!rendererList)
-		return;
-
-	Camera* next = camera->next;
-	Camera* previous = camera->previous;
-
-	if (previous)
-		previous->next = next;
-	else
-		cameraList = next;
-
-	if (next)
-		next->previous = previous;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::RemoveLight(Light* light)
-{
-	if (!rendererList)
-		return;
-
-	Light* next = light->next;
-	Light* previous = light->previous;
-
-	if (previous)
-		previous->next = next;
-	else
-		lightList = next;
-
-	if (next)
-		next->previous = previous;
-}
-
-void ScratchEngine::Rendering::RenderingEngine::DestroyRenderable(i32 id)
-{
-	// renderableAllocator.Free(id);
-}
-
-void ScratchEngine::Rendering::RenderingEngine::DestroyViewer(i32 id)
-{
-	viewerAllocator.Free(id);
-}
-
-void ScratchEngine::Rendering::RenderingEngine::UpdateRenderables()
-{
-	renderableAllocator.Flush();
-
-	for (Renderer* renderer = rendererList; renderer; renderer = renderer->next)
-	{
-		if (renderer->IsActive())
-		{
-			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
-
-			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
-			renderable.material = renderer->material;
-			renderable.mesh = renderer->mesh;
-		}
-	}
-}
-
-void ScratchEngine::Rendering::RenderingEngine::UpdateViewers()
-{
-	f32 screenRatio = ScratchEngine::Global::GetScreenRatio();
-
-	for (Camera* camera = cameraList; camera; camera = camera->next)
-	{
-		if (camera->IsActive())
-		{
-			if (camera->viewer == null_index)
-				camera->viewer = viewerAllocator.Allocate();
-
-			Viewer& viewer = viewerAllocator[camera->viewer];
-
-			GameObject* gameObject = camera->GetGameObject();
-
-			XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(gameObject->GetRotation());
-
-			viewer.position = gameObject->GetPosition();
-			viewer.viewMatrix = XMMatrixTranspose(XMMatrixLookToLH(viewer.position, XMVector3Transform({ 0, 0, 1 }, rotationMatrix), { 0, 1, 0 }));
-			viewer.projectionMatrix = XMMatrixTranspose(XMMatrixPerspectiveFovLH(camera->fov, screenRatio, camera->nearZ, camera->farZ));
-		}
-		else
-			RenderingEngine::GetSingleton()->DestroyViewer(camera->viewer);
-	}
-}
-
-void ScratchEngine::Rendering::RenderingEngine::UpdateLightSources()
-{
-	lightSourceAllocator.Flush();
-
-	for (Light* light = lightList; light; light = light->next)
-	{
-		if (light->IsActive())
-		{
-			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
-			lightSource.ambientColor = light->ambientColor;
-			lightSource.diffuseColor = light->diffuseColor;
-			lightSource.type = light->type;
-			lightSource.range = 0;
-
-			XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
-			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
-
-			//if (light->DoCastShadow())
-			//	lightSource.shadowMapID = null_index;
-			//else
-			//	lightSource.shadowMapID = null_index;
-		}
-	}
-}
-
-void ScratchEngine::Rendering::RenderingEngine::SortRenderables()
-{
-	renderableAllocator.Sort([](Renderable a, Renderable b)
-	{
-		uptr ma = reinterpret_cast<uptr>(a.material);
-		uptr mb = reinterpret_cast<uptr>(b.material);
-
-		return ma < mb;
-	});
-}
-
-void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass()
+void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables)
 {
 	deviceContext->OMSetDepthStencilState(nullptr, 0);
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
-	Viewer& viewer = viewerAllocator[cameraList->viewer];
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(viewer->projectionMatrix, viewer->viewMatrix);
+	
+	vsDepthOnly->SetShader();
 
-	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(viewer.projectionMatrix, viewer.viewMatrix);
-
-	i32 j = 0;
-
-	while (j < renderableAllocator.GetNumAllocated())
+	for (int j = 0; j < numRenderables; ++j)
 	{
-		Renderable& renderable = renderableAllocator[j];
+		Renderable& renderable = renderables[j];
 
 		vsDepthOnly->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 		vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
 
 		vsDepthOnly->CopyAllBufferData();
-		vsDepthOnly->SetShader();
 
 		Mesh* mesh = renderable.mesh;
 
@@ -263,37 +86,35 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass()
 		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		indexCount += mesh->GetIndexCount();
-
-		++j;
 	}
 
 	hasZPrepass = true;
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawForward()
+void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources)
 {
 	if (hasZPrepass)
 		deviceContext->OMSetDepthStencilState(dssLessEqual, 0);
+	else
+		deviceContext->OMSetDepthStencilState(nullptr, 0);
 
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
-	Viewer& viewer = viewerAllocator[cameraList->viewer];
-	
-	XMMATRIX viewMatrix = viewer.viewMatrix;
-	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+	XMMATRIX viewMatrix = viewer->viewMatrix;
+	XMMATRIX projectionMatrix = viewer->projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
-	XMVECTOR cameraPosition = viewer.position;
+	XMVECTOR cameraPosition = viewer->position;
 
 	i32 j = 0;
 
-	while (j < renderableAllocator.GetNumAllocated())
+	while (j < numRenderables)
 	{
-		Material* material = renderableAllocator[j].material;
+		Material* material = renderables[j].material;
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
 		pixelShader->SetFloat4("tint", material->GetTint());
-		pixelShader->SetData("light", lightSourceAllocator.GetMemoryAddress(), lightSourceAllocator.GetNumAllocated() * sizeof(LightSource));
+		pixelShader->SetData("light", lightSources, numLightSources * sizeof(LightSource));
 		pixelShader->SetFloat4("cameraPosition", cameraPosition);
 
 		if (material->HasTexture()) {
@@ -320,6 +141,8 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 			pixelShader->SetShaderResourceView("metalnessMap", material->getMetalnessMap());
 		}
 
+		vertexShader->SetShader();
+
 		pixelShader->SetInt("hasTexture", material->HasTexture());
 		pixelShader->SetInt("hasNormalMap", material->HasNormalMap());
 		pixelShader->SetInt("hasShadowMap", material->HasShadowMap());
@@ -335,7 +158,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 
 		do
 		{
-			Renderable& renderable = renderableAllocator[j];
+			Renderable& renderable = renderables[j];
 
 			vertexShader->SetMatrix4x4("view", viewMatrix);
 			vertexShader->SetMatrix4x4("projection", projectionMatrix);
@@ -344,7 +167,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 			vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
 
 			vertexShader->CopyAllBufferData();
-			vertexShader->SetShader();
 
 			Mesh* mesh = renderable.mesh;
 
@@ -359,40 +181,31 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward()
 			indexCount += mesh->GetIndexCount();
 
 			++j;
-		} while (j < renderableAllocator.GetNumAllocated() && renderableAllocator[j].material == material);
+		} while (j < numRenderables && renderables[j].material == material);
 	}
 }
 
-bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
+bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(Renderable* renderables, int numToDraw)
 {
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
 	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
+
 	deviceContext->ClearDepthStencilView(shadow->getShadowDSV(), D3D11_CLEAR_DEPTH, 1.0f, 0);
 	deviceContext->RSSetState(shadow->getRasterizerState());
 
-	SimpleVertexShader* shader = vsDepthOnly;
-	//SimpleVertexShader* shader = shadow->getShadowShader();
+	vsDepthOnly->SetShader();
 
-	shader->SetShader();
-
-	deviceContext->PSSetShader(0, 0, 0);
-
-	i32 j = 0;
-
-	while (j < renderableAllocator.GetNumAllocated())
+	for (int j = 0; j < numToDraw; ++j)
 	{
-		Renderable& renderable = renderableAllocator[j];
+		Renderable& renderable = renderables[j];
 
-		bool isOK = shader->SetMatrix4x4("viewProjection", shadowViewProjectionMat);
-		//bool isOK = shader->SetMatrix4x4("shadowView", shadowViewProjectionMat);
-		if (!isOK) printf("shadow view matrix error");
+		if (!vsDepthOnly->SetMatrix4x4("viewProjection", shadowViewProjectionMat))
+			printf("shadow view matrix error");
 
-		//isOK = shader->SetMatrix4x4("shadowProjection", shdaowProjectionMat);
-		//if (!isOK) printf("shadow projection matrix error");
+		if (!vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix))
+			printf("world matrix in shadow map error");
 
-		isOK = shader->SetMatrix4x4("world", renderable.worldMatrix);
-		if (!isOK) printf("world matrix in shadow map error");
-
-		shader->CopyAllBufferData();
+		vsDepthOnly->CopyAllBufferData();
 
 		Mesh* mesh = renderable.mesh;
 
@@ -410,8 +223,6 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap()
 		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
 
 		indexCount += mesh->GetIndexCount();
-
-		++j;
 	}
 	
 	return true;
@@ -422,7 +233,7 @@ void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow
 	shadow = _shadow;
 }
 
-void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap)
+void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap, Viewer* viewer)
 {
 	ID3D11Buffer* cubeVB = cubeMap->getVB();
 	ID3D11Buffer* cubeIB = cubeMap->getIB();
@@ -433,10 +244,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap)
 	deviceContext->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
 	deviceContext->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
 
-	Viewer& viewer = viewerAllocator[cameraList->viewer];
-
-	XMMATRIX viewMatrix = viewer.viewMatrix;
-	XMMATRIX projectionMatrix = viewer.projectionMatrix;
+	XMMATRIX viewMatrix = viewer->viewMatrix;
+	XMMATRIX projectionMatrix = viewer->projectionMatrix;
 
 	SimpleVertexShader* cubeVS = cubeMap->getVS();
 	SimplePixelShader* cubePS = cubeMap->getPS();

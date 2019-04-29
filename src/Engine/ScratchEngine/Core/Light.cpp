@@ -2,6 +2,8 @@
 
 #include "GameObject.h"
 #include "Light.h"
+#include "Scene.h"
+
 
 ScratchEngine::Light::Light(LightType type) : Light(type, XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f), XMVectorSet(0.6f, 0.6f, 0.6f, 1.0f))
 {
@@ -16,12 +18,12 @@ ScratchEngine::Light::Light(LightType type, XMVECTOR ambientColor, XMVECTOR diff
 	this->next = nullptr;
 	this->previous = nullptr;
 
-	RenderingEngine::GetSingleton()->AddLight(this);
+	Scene::GetCurrentScene()->AddLight(this);
 }
 
 ScratchEngine::Light::~Light()
 {
-	RenderingEngine::GetSingleton()->RemoveLight(this);
+	Scene::GetCurrentScene()->RemoveLight(this);
 }
 
 

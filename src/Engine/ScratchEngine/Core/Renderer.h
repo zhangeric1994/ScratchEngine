@@ -5,16 +5,20 @@
 #include "../Common/Typedefs.h"
 #include "../Core/GameComponent.h"
 
-#include "Material.h"
-#include "Mesh.h"
-
-using namespace ScratchEngine::Rendering;
 
 namespace ScratchEngine
 {
+	namespace Rendering
+	{
+		class Material;
+		class Mesh;
+	}
+
+	using namespace ScratchEngine::Rendering;
+
 	class __declspec(dllexport) Renderer : public GameComponent
 	{
-		friend class RenderingEngine;
+		friend class Scene;
 
 
 	protected:

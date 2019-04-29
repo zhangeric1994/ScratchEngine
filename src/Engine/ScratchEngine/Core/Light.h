@@ -4,9 +4,10 @@
 
 #include <DirectXMath.h>
 
-#include "../Core/GameComponent.h"
+#include "../Rendering/LightSource.h"
+#include "../Rendering/Texture.h"
 
-#include "Mesh.h"
+#include "GameComponent.h"
 
 using namespace DirectX;
 using namespace ScratchEngine::Rendering;
@@ -14,17 +15,9 @@ using namespace ScratchEngine::Rendering;
 
 namespace ScratchEngine
 {
-	enum LightType : i32
-	{
-		Directional = 0,
-		Point = 1,
-		Spot = 2,
-	};
-
-
 	class __declspec(dllexport) Light : public GameComponent
 	{
-		friend class RenderingEngine;
+		friend class Scene;
 
 
 	protected:

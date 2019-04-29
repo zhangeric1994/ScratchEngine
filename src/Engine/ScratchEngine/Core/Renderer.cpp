@@ -2,6 +2,7 @@
 
 #include "Game.h"
 #include "Renderer.h"
+#include "Scene.h"
 
 
 ScratchEngine::Renderer::Renderer()
@@ -17,15 +18,12 @@ ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh)
 	this->material = material;
 	this->renderable = null_index;
 
-	RenderingEngine::GetSingleton()->AddRenderer(this);
+	Scene::GetCurrentScene()->AddRenderer(this);
 }
 
 ScratchEngine::Renderer::~Renderer()
 {
-	if (renderable != null_index)
-		RenderingEngine::GetSingleton()->DestroyRenderable(renderable);
-
-	RenderingEngine::GetSingleton()->RemoveRenderer(this);
+	Scene::GetCurrentScene()->RemoveRenderer(this);
 }
 
 void ScratchEngine::Renderer::OnBeginOverlapping(GameObject * other)

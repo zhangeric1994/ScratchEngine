@@ -1,17 +1,15 @@
 ﻿#include <string>
 
-#include "Game.h"
-
-#include "../Core/Global.h"
-#include "../Core/Scene.h"
 #include "../Physics/PhysicsEngine.h"
 #include "../Rendering/RenderingEngine.h"
 #include "../Rendering/Mesh.h"
 
-using namespace DirectX;
-using namespace ScratchEngine;
+#include "Game.h"
+#include "Global.h"
+#include "Renderer.h"
+#include "Scene.h"
+
 using namespace ScratchEngine::Physics;
-using namespace ScratchEngine::Rendering;
 
 
 Material* ScratchEngine::Game::greenMaterial = nullptr;
@@ -125,13 +123,13 @@ ScratchEngine::Game::~Game() {
 		delete shadowShader;
 
 
-	RenderingEngine::Terminate();
+	Rendering::RenderingEngine::Terminate();
 }
 
 void ScratchEngine::Game::Init()
 {
 	PhysicsEngine::Initialize();
-	RenderingEngine::Initialize(device, context);
+	Rendering::RenderingEngine::Initialize(device, context);
 
 	LoadShaders();
 	CreateMatrces();
@@ -186,8 +184,7 @@ void ScratchEngine::Game::CreateAllMaps()
 	//shadow map setup
 	shadow->setUp(device);
 
-	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
-	renderingEngine->SetShadowMap(shadow);
+	Rendering::RenderingEngine::GetSingleton()->SetShadowMap(shadow);
 	//End of shadow map
 
 	//cube map
@@ -385,14 +382,12 @@ void ScratchEngine::Game::Update()
 
 void ScratchEngine::Game::Draw()
 {
-	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	Scene* scene = Scene::GetCurrentScene();
+	Rendering::RenderingEngine* renderingEngine = Rendering::RenderingEngine::GetSingleton();
 
 	while (isRunning)
 	{
-		renderingEngine->UpdateRenderables();
-		renderingEngine->UpdateViewers();
-		renderingEngine->UpdateLightSources();
-		renderingEngine->SortRenderables();
+		scene->CacheRenderingData();
 
 		frameBarrier.Wait();
 
@@ -405,10 +400,10 @@ void ScratchEngine::Game::Draw()
 
 		shadowViewport.Height = shadowMapSize;
 		shadowViewport.Width = shadowMapSize;
+
 		context->RSSetViewports(1, &shadowViewport);
 
-
-		hasShadowMap = renderingEngine->RenderShadowMap();
+		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -418,11 +413,9 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		renderingEngine->PerformZPrepass();
-		renderingEngine->DrawForward();
-
-
-		renderingEngine->RenderCubeMap(cubeMap);
+		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 
 		//turn off all resources bound to shader
 		ID3D11ShaderResourceView* noSRV[16] = {};

@@ -27,6 +27,7 @@ namespace ScratchEngine
 
 			T& operator[](i32 id);
 			T operator[](i32 id) const;
+			operator T*() const;
 
 			i32 GetCapacity() const;
 			i32 GetNumAllocated() const;
@@ -72,6 +73,11 @@ namespace ScratchEngine
 				throw "[DynamicStackAllocator] Invalid Access!";
 
 			return memory[id];
+		}
+
+		template<class T> inline DynamicStackAllocator<T>::operator T*() const
+		{
+			return memory;
 		}
 
 		template<class T> inline i32 DynamicStackAllocator<T>::GetCapacity() const

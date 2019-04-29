@@ -15,7 +15,7 @@ namespace ScratchEngine
 {
 	class __declspec(dllexport)  Camera : public GameComponent
 	{
-		friend class RenderingEngine;
+		friend class Scene;
 
 
 	private:

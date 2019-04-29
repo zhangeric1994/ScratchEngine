@@ -1,6 +1,7 @@
 #include "../Rendering/RenderingEngine.h"
 
 #include "Camera.h"
+#include "Scene.h"
 
 
 ScratchEngine::Camera::Camera()
@@ -11,15 +12,15 @@ ScratchEngine::Camera::Camera()
 
 	viewer = null_index;
 
-	RenderingEngine::GetSingleton()->AddCamera(this);
+	Scene::GetCurrentScene()->AddCamera(this);
 }
 
 ScratchEngine::Camera::~Camera()
 {
 	if (viewer != null_index)
-		RenderingEngine::GetSingleton()->DestroyViewer(viewer);
+		Scene::GetCurrentScene()->DestroyViewer(viewer);
 
-	RenderingEngine::GetSingleton()->RemoveCamera(this);
+	Scene::GetCurrentScene()->RemoveCamera(this);
 }
 
 //void Camera::SetRotationX(float _rotationX) {

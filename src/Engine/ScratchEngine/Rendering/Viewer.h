@@ -4,16 +4,16 @@
 
 #include <DirectXMath.h>
 
+using namespace DirectX;
+
+
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
 		struct Viewer
 		{
-			friend class RenderingEngine;
-
-
-		private:
+		public:
 			XMVECTOR position = {0, 0, -5.0f};
 			XMMATRIX viewMatrix;
 			XMMATRIX projectionMatrix;
