@@ -51,7 +51,7 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 
 	}
 
-	LoadAnimations(scene);
+	//LoadAnimations(scene);
 
 	printf("Finished loading animations with %d bones", bones.size());
 }
@@ -67,8 +67,11 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 	if (animIndex >= animations.size()) {
 		return;
 	}
+
 	int oldIndex = currentAnimationIndex;
 	currentAnimationIndex = animIndex;
+	timePos = 0;
+	duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::UpdateTransforms(Bone * node)
@@ -87,6 +90,8 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 	if (it != animationNameToId.end()) {
 		int oldIndex = currentAnimationIndex;
 		currentAnimationIndex = it->second;
+		timePos = 0;
+		duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
 		return oldIndex != currentAnimationIndex;
 	}
 	return false;
