@@ -50,7 +50,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
     float4 albedo = tint;
 
-	float3 N = input.normal;
+    float3 N = normalize(input.normal);
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 

@@ -418,6 +418,14 @@ bool ISimpleShader::SetFloat3(std::string name, const DirectX::XMFLOAT3 data)
 }
 
 // --------------------------------------------------------
+// Sets a FLOAT3 variable by name in the local data buffer
+// --------------------------------------------------------
+bool ISimpleShader::SetFloat3(std::string name, const DirectX::XMVECTOR data)
+{
+	return this->SetData(name, &data, sizeof(float) * 3);
+}
+
+// --------------------------------------------------------
 // Sets a FLOAT4 variable by name in the local data buffer
 // --------------------------------------------------------
 bool ISimpleShader::SetFloat4(std::string name, const float data[4])

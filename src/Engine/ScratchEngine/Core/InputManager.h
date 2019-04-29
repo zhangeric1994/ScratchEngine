@@ -20,7 +20,7 @@ namespace ScratchEngine
 	}
 
 
-	namespace FrameInput
+	namespace Input
 	{
 		bool IsKeyPressed(int keyCode);
 		bool IsKeyDown(int keyCode);
@@ -53,11 +53,11 @@ namespace ScratchEngine
 		friend bool AsyncInput::IsKeyUp(int);
 		friend int AsyncInput::GetMouseX();
 		friend int AsyncInput::GetMouseY();
-		friend bool FrameInput::IsKeyPressed(int);
-		friend bool FrameInput::IsKeyDown(int);
-		friend bool FrameInput::IsKeyUp(int);
-		friend int FrameInput::GetMouseX();
-		friend int FrameInput::GetMouseY();
+		friend bool Input::IsKeyPressed(int);
+		friend bool Input::IsKeyDown(int);
+		friend bool Input::IsKeyUp(int);
+		friend int Input::GetMouseX();
+		friend int Input::GetMouseY();
 
 
 	private:
@@ -131,27 +131,27 @@ inline int ScratchEngine::AsyncInput::GetMouseY()
 	return InputManager::GetSingleton()->GetMouseYAsync();
 }
 
-inline bool ScratchEngine::FrameInput::IsKeyPressed(int keyCode)
+inline bool ScratchEngine::Input::IsKeyPressed(int keyCode)
 {
 	return InputManager::GetSingleton()->IsKeyPressed(keyCode);
 }
 
-inline bool ScratchEngine::FrameInput::IsKeyDown(int keyCode)
+inline bool ScratchEngine::Input::IsKeyDown(int keyCode)
 {
 	return InputManager::GetSingleton()->IsKeyDown(keyCode);
 }
 
-inline bool ScratchEngine::FrameInput::IsKeyUp(int keyCode)
+inline bool ScratchEngine::Input::IsKeyUp(int keyCode)
 {
 	return !IsKeyDown(keyCode);
 }
 
-inline int ScratchEngine::FrameInput::GetMouseX()
+inline int ScratchEngine::Input::GetMouseX()
 {
 	return InputManager::GetSingleton()->GetMouseX();
 }
 
-inline int ScratchEngine::FrameInput::GetMouseY()
+inline int ScratchEngine::Input::GetMouseY()
 {
 	return InputManager::GetSingleton()->GetMouseY();
 }

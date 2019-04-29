@@ -118,7 +118,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 
 		pixelShader->SetFloat4("tint", material->GetTint());
 		pixelShader->SetData("light", lightSources, numLightSources * sizeof(LightSource));
-		pixelShader->SetFloat4("cameraPosition", cameraPosition);
+		pixelShader->SetFloat3("cameraPosition", cameraPosition);
 
 		if (material->HasTexture()) {
 			pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
