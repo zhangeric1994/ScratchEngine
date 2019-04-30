@@ -29,9 +29,7 @@ namespace ScratchEngine
 		std::vector<AnimationClip *> animations;
 
 		void CalculateBoneToWorldTransform(Bone *child);
-		void SetAnimationIndex(int animIndex);
 		void UpdateTransforms(Bone * node); 
-		bool SetAnimation(string animation);
 		void ExtractAnimations(const aiScene* scene);
 		
 		void  Calculate(float dt);
@@ -59,6 +57,8 @@ namespace ScratchEngine
 		Animator* previous;
 
 		void Update(float dt);
+		bool SetAnimation(string animation);
+		void SetAnimationIndex(int animIndex);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();
 		void AdjustAnimationSpeedBy(float prc);

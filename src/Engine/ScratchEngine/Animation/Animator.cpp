@@ -67,8 +67,11 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 	if (animIndex >= animations.size()) {
 		return;
 	}
+
 	int oldIndex = currentAnimationIndex;
 	currentAnimationIndex = animIndex;
+	timePos = 0;
+	duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::UpdateTransforms(Bone * node)
@@ -87,6 +90,8 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 	if (it != animationNameToId.end()) {
 		int oldIndex = currentAnimationIndex;
 		currentAnimationIndex = it->second;
+		timePos = 0;
+		duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
 		return oldIndex != currentAnimationIndex;
 	}
 	return false;
@@ -119,16 +124,17 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 
 void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 {
-	for (UINT i = 0; i < scene->mNumAnimations;i++) {
+	for (UINT i = 0; i < scene->mNumAnimations;i++)
+	{
 		aiAnimation * animation = scene->mAnimations[i];
 		animations.push_back(new AnimationClip(animation));
 	}
 
-	for (UINT i = 0; i < animations.size(); i++) {
+	for (UINT i = 0; i < animations.size(); i++)
 		animationNameToId[animations[i]->name] = i;
-	}
+	
 	currentAnimationIndex = 0;
-	duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
+	duration = animations[currentAnimationIndex]->duration * animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::Update(float dt)
@@ -137,7 +143,9 @@ void ScratchEngine::Animator::Update(float dt)
 
 	if (timePos > duration)
 	{
-		if (!LoopClips)
+		if (LoopClips)
+			timePos -= duration;
+		else
 			// no need to reduce time
 			timePos = duration;
 	}
