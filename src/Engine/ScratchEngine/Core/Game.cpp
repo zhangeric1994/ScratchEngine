@@ -439,7 +439,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
 		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 

@@ -1,6 +1,11 @@
 struct VertexShaderInput
 {
-    float3 position : POSITION;
+    float4 position : POSITION;
+    float3 normal : NORMAL;
+    float2 uv : TEXCOORD;
+    float3 tangent : TANGENT;
+    uint4 boneIndices : BLENDINDICES;
+    float4 boneWeights : BLENDWEIGHT;
 };
 
 struct VertexToPixel
@@ -11,9 +16,10 @@ struct VertexToPixel
 
 cbuffer CameraData : register(b2)
 {
-	matrix view;
-	matrix projection;
+    matrix view;
+    matrix projection;
     matrix viewProjection;
+    matrix shadowViewProjection;
 };
 
 cbuffer ObjectData : register(b3)
@@ -21,12 +27,27 @@ cbuffer ObjectData : register(b3)
     matrix world;
 };
 
-
-VertexToPixel main(VertexShaderInput input)
+cbuffer cbSkinned : register(b4)
 {
-	VertexToPixel output;
+    matrix gBoneTransforms[128];
+};
 
-    output.svPosition = mul(float4(input.position, 1.0f), mul(world, viewProjection));
 
-	return output;
+float4 main(VertexShaderInput input) : SV_POSITION
+{
+    float4 p;
+    
+    if (input.position.w == 0)
+        p = float4(input.position.xyz, 1.0f);
+    else
+    {
+        p = float4(0, 0, 0, 0);
+
+        for (int i = 0; i < 4; ++i)
+            p += input.boneWeights[i] * mul(float4(input.position.xyz, 1.0f), gBoneTransforms[input.boneIndices[i]]);
+
+        p.w = 1;
+    }
+
+    return mul(p, mul(world, viewProjection));
 }

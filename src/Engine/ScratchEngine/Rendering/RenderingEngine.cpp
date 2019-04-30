@@ -70,6 +70,7 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(Viewer* viewer, 
 
 		vsDepthOnly->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 		vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
+		vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
 
 		vsDepthOnly->CopyAllBufferData();
 
@@ -203,11 +204,9 @@ bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(Renderable* rend
 	{
 		Renderable& renderable = renderables[j];
 
-		if (!vsDepthOnly->SetMatrix4x4("viewProjection", shadowViewProjectionMat))
-			printf("shadow view matrix error");
-
-		if (!vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix))
-			printf("world matrix in shadow map error");
+		vsDepthOnly->SetMatrix4x4("viewProjection", shadowViewProjectionMat);
+		vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
+		vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
 
 		vsDepthOnly->CopyAllBufferData();
 

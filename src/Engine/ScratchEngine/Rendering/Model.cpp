@@ -74,7 +74,7 @@ void ScratchEngine::Rendering::Model::ProcessNode(aiNode * node, const aiScene *
 	}*/
 }
 
-void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene * scene)
+void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* scene)
 {
 	int verterxStart = vertices.size();
 
@@ -86,6 +86,8 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh * mesh, const aiScene *
 		vertex.Position.x = mesh->mVertices[i].x;
 		vertex.Position.y = mesh->mVertices[i].y;
 		vertex.Position.z = mesh->mVertices[i].z;
+
+		vertex.hasBones = mesh->HasBones() ? 1 : 0;
 
 		if (mesh->mTextureCoords[0])
 		{
