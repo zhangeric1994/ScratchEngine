@@ -87,7 +87,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 		vertex.Position.y = mesh->mVertices[i].y;
 		vertex.Position.z = mesh->mVertices[i].z;
 
-		vertex.hasBones = mesh->HasBones() ? 1 : 0;
+		vertex.hasBones = mesh->HasBones() ? 1.0f : 0.0f;
 
 		if (mesh->mTextureCoords[0])
 		{
@@ -106,7 +106,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 			int numBones = vertexWeight->size();
 			f32 w = 0;
 
-			for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
+			for (int j = 0; j < NUM_BONES_PER_VEREX; j++)
 			{
 				if (j < numBones)
 				{
@@ -131,7 +131,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 				}
 			}
 
-			for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++) {
+			for (int j = 0; j < NUM_BONES_PER_VEREX; j++) {
 				vertex.Weights[j] /= w;
 			}
 			//for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)

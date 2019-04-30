@@ -53,7 +53,7 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 
 	LoadAnimations(scene);
 
-	printf("Finished loading animations with %d bones", bones.size());
+	printf("Finished loading animations with %zd bones", bones.size());
 }
 
 ScratchEngine::Animator::~Animator()
@@ -85,7 +85,6 @@ void ScratchEngine::Animator::UpdateTransforms(Bone * node)
 
 bool ScratchEngine::Animator::SetAnimation(string animation)
 {
-	int index;
 	std::map<std::string, int>::iterator it = animationNameToId.find(animation);
 	if (it != animationNameToId.end()) {
 		int oldIndex = currentAnimationIndex;
