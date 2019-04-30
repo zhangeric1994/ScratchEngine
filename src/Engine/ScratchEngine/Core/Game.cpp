@@ -239,7 +239,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 
 	model = new Model(device, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing run forward.fbx");
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");
 
 
 	pbrMaterial = new Material(vertexShader, pixelShaderPBR, sampler);

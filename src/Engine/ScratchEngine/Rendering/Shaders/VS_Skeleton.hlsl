@@ -1,6 +1,6 @@
 struct VertexShaderInput
 {
-	float3 position : POSITION;
+	float4 position : POSITION;
 	float3 normal : NORMAL;
 	float2 uv : TEXCOORD;
     float3 tangent : TANGENT;
@@ -47,7 +47,7 @@ VertexToPixel main(VertexShaderInput vin)
     {
         float weight = vin.boneWeights[i];
         float4x4 m = gBoneTransforms[vin.boneIndices[i]];
-        p += weight * mul(float4(vin.position, 1.0f), m);
+        p += weight * mul(float4(vin.position.xyz, 1.0f), m);
         n += weight * mul(float4(vin.normal, 0.0f), m);
     }
 

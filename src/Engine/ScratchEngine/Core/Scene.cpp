@@ -170,6 +170,9 @@ void ScratchEngine::Scene::UpdateRenderables()
 				for (UINT i = 0; i < temp.size(); ++i)
 					renderable.bones[i] = temp[i];
 			}
+			else
+				for (UINT i = 0; i < MAX_NUM_BONES_PER_MODEL; ++i)
+					renderable.bones[i] = XMMatrixIdentity();
 		}
 	}
 }
