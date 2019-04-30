@@ -4,7 +4,7 @@
 ScratchEngine::Animation::AnimationClip::AnimationClip(aiAnimation * anim)
 {
 	lastTime = 0.0f;
-	ticksPerSecond = anim->mTicksPerSecond > 0.0f ? (float)anim->mTicksPerSecond : 460.0f;
+	ticksPerSecond = anim->mTicksPerSecond > 0.0f ? (float)anim->mTicksPerSecond : 920.0f;
 	duration = (float)anim->mDuration;
 	for (UINT i = 0; i < anim->mNumChannels; i++) {
 		auto channel = anim->mChannels[i];
@@ -32,6 +32,7 @@ std::vector<XMMATRIX> ScratchEngine::Animation::AnimationClip::GetTransforms(flo
 
 int ScratchEngine::Animation::AnimationClip::GetFrameIndexAt(float dt)
 {
+	//printf("animation frame time : %f  * %f\n", dt , ticksPerSecond);
 	dt *= ticksPerSecond;
 	float time = 0.0f;
 	if (duration > 0.0f) {

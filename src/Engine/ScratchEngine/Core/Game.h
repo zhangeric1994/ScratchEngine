@@ -77,6 +77,8 @@ namespace ScratchEngine
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
+		GameObject* cameraHolder;
+		GameObject* Character;
 		GameObject* go1;
 		GameObject* go2;
 		GameObject* go4;
@@ -88,6 +90,8 @@ namespace ScratchEngine
 
 		Barrier frameBarrier;
 
+
+		float lastInputTime;
 
 		//final shadow map
 		ShadowMap* shadow;

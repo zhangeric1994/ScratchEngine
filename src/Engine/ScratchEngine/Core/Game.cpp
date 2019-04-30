@@ -244,9 +244,17 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	model = new Model(device, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");
+	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
+	model->LoadAnimation("../Assets/Models/Pack/Idle_0.fbx"); // 1
+	model->LoadAnimation("../Assets/Models/Pack/Idle_1.fbx"); // 2
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");	// 3
+	model->LoadAnimation("../Assets/Models/Pack/Walking.fbx");	// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx"); // 5
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx"); // 6
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx"); // 7
 
+	model->anim->SetAnimationIndex(1);
+	model->anim->AdjustAnimationSpeedTo(15);
 
 	pbrMaterial = new Material(vertexShader, psPBR, sampler);
 	pbrMaterial->setTexture(texture);
@@ -261,90 +269,95 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
-	skeletonMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
+	skeletonMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 
 
 	camera = new GameObject();
-	camera->SetLocalPosition(0, 5, -10);
+	camera->SetLocalPosition(0, 3, -5.5f);
+	camera->SetLocalRotation(15, 0, 0);
 	camera->AddComponent<Camera>();
+	cameraHolder = new GameObject();
 
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetLocalRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
-	go1 = new GameObject();
-	go1->SetName("1");
-	go1->SetPosition(0, 0, 15);
-	go1->SetLocalRotation(45, 0, 90);
-	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go1->AddComponent<BoxCollider>();
+	//go1 = new GameObject();
+	//go1->SetName("1");
+	//go1->SetPosition(0, 0, 15);
+	//go1->SetLocalRotation(45, 0, 90);
+	//go1->SetLocalScale(1, 2, 1);
+	//go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go1->AddComponent<BoxCollider>();
 
 
-	go2 = new GameObject();
-	go2->SetName("2");
-	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go2->AddComponent<BoxCollider>();
+	//go2 = new GameObject();
+	//go2->SetName("2");
+	//go2->SetParent(go1);
+	//go2->SetLocalPosition(0, 4, 0);
+	//go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go2->AddComponent<BoxCollider>();
 
 
-	GameObject* go3 = new GameObject();
-	go3->SetName("3");
-	go3->SetParent(go2);
-	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
+	//GameObject* go3 = new GameObject();
+	//go3->SetName("3");
+	//go3->SetParent(go2);
+	//go3->SetLocalPosition(0, 2, 0);
+	//go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
-	go4 = new GameObject();
-	go4->SetName("4");
-	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go4->AddComponent<BoxCollider>();
+	//go4 = new GameObject();
+	//go4->SetName("4");
+	//go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go4->AddComponent<BoxCollider>();
 
-	go5 = new GameObject();
-	go5->SetName("5");
-	go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go5->AddComponent<SphereCollider>();
+	//go5 = new GameObject();
+	//go5->SetName("5");
+	//go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//go5->AddComponent<SphereCollider>();
 
-	go6 = new GameObject();
-	go6->SetName("6");
-	go6->SetPosition(0, 0, -15);
-	go6->SetLocalRotation(45, 0, 90);
-	go6->SetLocalScale(1, 2, 1);
-	go6->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go6->AddComponent<BoxCollider>();
+	//go6 = new GameObject();
+	//go6->SetName("6");
+	//go6->SetPosition(0, 0, -15);
+	//go6->SetLocalRotation(45, 0, 90);
+	//go6->SetLocalScale(1, 2, 1);
+	//go6->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go6->AddComponent<BoxCollider>();
 
-	go7 = new GameObject();
-	go7->SetName("7");
-	go7->SetParent(go6);
-	go7->SetLocalPosition(0, 4, 0);
-	go7->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go7->AddComponent<BoxCollider>();
+	//go7 = new GameObject();
+	//go7->SetName("7");
+	//go7->SetParent(go6);
+	//go7->SetLocalPosition(0, 4, 0);
+	//go7->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go7->AddComponent<BoxCollider>();
 
-	GameObject* go8 = new GameObject();
-	go8->SetName("8");
-	go8->SetParent(go7);
-	go8->SetLocalPosition(0, 2, 0);
-	go8->AddComponent<Renderer>(pbrMaterial, sphereMesh);
+	//GameObject* go8 = new GameObject();
+	//go8->SetName("8");
+	//go8->SetParent(go7);
+	//go8->SetLocalPosition(0, 2, 0);
+	//go8->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
-	go9 = new GameObject();
-	go9->SetName("9");
-	go9->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go9->AddComponent<BoxCollider>();
+	//go9 = new GameObject();
+	//go9->SetName("9");
+	//go9->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go9->AddComponent<BoxCollider>();
 
-	go10 = new GameObject();
-	go10->SetName("10");
-	go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go10->AddComponent<SphereCollider>();
+	//go10 = new GameObject();
+	//go10->SetName("10");
+	//go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//go10->AddComponent<SphereCollider>();
 
 	GameObject* go11 = new GameObject();
 	go11->SetLocalPosition(0, -0.5f, 0);
-	go11->SetLocalScale(10, 1, 10);
+	go11->SetLocalScale(100, 1, 100);
 	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
-	GameObject* go12 = new GameObject();
-	go12->SetLocalPosition(0, 0, 0);
-	go12->SetLocalScale(0.01f);
-	go12->AddComponent<Renderer>(skeletonMaterial, model);
+	Character = new GameObject();
+	Character->SetLocalPosition(0, 0, 0);
+	Character->SetLocalRotation(0, 180, 0);
+	Character->SetLocalScale(0.01f);
+	Character->AddComponent<Renderer>(skeletonMaterial, model);
+	camera->SetParent(cameraHolder);
+	cameraHolder->SetParent(Character);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -369,36 +382,100 @@ void ScratchEngine::Game::Update()
 
 		if (GetAsyncKeyState(VK_ESCAPE))
 			Quit();
+		
+		float speed = 1.0f;
+		bool animationChanged = false;
+		if (GetAsyncKeyState('W') & 0x8000) {
+			if (!animationChanged) {
+				model->anim->SetAnimationIndex(4);
+				//model->anim->AdjustAnimationSpeedTo(15);
+				animationChanged = true;
+			}
+
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos,Character->GetLocalPosition());
+			Character->SetLocalPosition(pos.x, pos.y, pos.z + speed * deltaTime);
+			lastInputTime = totalTime;
+		}
 			
-		if (GetAsyncKeyState('W') & 0x8000)
-			camera->Translate(0.0f, 0.0f, 10 * deltaTime);
+			//camera->Translate(0.0f, 0.0f, 10 * deltaTime);
 
-		if (GetAsyncKeyState('A') & 0x8000)
-			camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
+		if (GetAsyncKeyState('A') & 0x8000) {
+			if (!animationChanged) {
+				model->anim->SetAnimationIndex(6);
+				//model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
 
-		if (GetAsyncKeyState('S') & 0x8000)
-			camera->Translate(0.0f, 0.0f, -10 * deltaTime);
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos, Character->GetLocalPosition());
+			Character->SetLocalPosition(pos.x - speed * deltaTime, pos.y , pos.z);
+			lastInputTime = totalTime;
+		}
+			//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
 
-		if (GetAsyncKeyState('D') & 0x8000)
-			camera->Translate(10 * deltaTime, 0.0f, 0.0f);
+		 if (GetAsyncKeyState('S') & 0x8000) {
 
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-			camera->Translate(0.0f, 10 * deltaTime, 0.0f);
+			if (!animationChanged) {
+				model->anim->SetAnimationIndex(5);
+				//model->anim->AdjustAnimationSpeedTo(15);
+				animationChanged = true;
+			}
+
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos, Character->GetLocalPosition());
+			Character->SetLocalPosition(pos.x, pos.y, pos.z -speed * deltaTime);
+			lastInputTime = totalTime;
+		}
+			
+			//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
+
+		if (GetAsyncKeyState('D') & 0x8000) {
+
+			if (!animationChanged) {
+				model->anim->SetAnimationIndex(7);
+				//model->anim->AdjustAnimationSpeedTo(48);
+				animationChanged = true;
+			}
+			XMFLOAT3 pos;
+			XMStoreFloat3(&pos, Character->GetLocalPosition());
+			Character->SetLocalPosition(pos.x + speed * deltaTime, pos.y, pos.z );
+			lastInputTime = totalTime;
+		}
+
+		if (lastInputTime < totalTime - 3) {
+			model->anim->SetAnimationIndex(2);
+			//model->anim->AdjustAnimationSpeedTo(15);
+		}
+		else if (lastInputTime < totalTime - 0.1) {
+			model->anim->SetAnimationIndex(1);
+			//model->anim->AdjustAnimationSpeedTo(15);
+		}
+
+		else 
+			//camera->Translate(10 * deltaTime, 0.0f, 0.0f);
+
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+			model->anim->SetAnimationIndex(3);
+			//model->anim->AdjustAnimationSpeedTo(15);
+		}
+			//camera->Translate(0.0f, 10 * deltaTime, 0.0f);
 
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
+			//model->anim->AdjustAnimationSpeedTo(15);
 
-		model->anim->Update(deltaTime);
+		model->anim->Update(deltaTime*0.5);
 
-		go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
-		go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
-		go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
+		//go1->Rotate(0, 0, 20 * deltaTime);
+		//go2->Rotate(0, 0, -50 * deltaTime);
+		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
+		//go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
 
-		go6->Rotate(0, 0, 20 * deltaTime);
-		go7->Rotate(0, 0, -50 * deltaTime);
-		go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
-		go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
+		//go6->Rotate(0, 0, 20 * deltaTime);
+		//go7->Rotate(0, 0, -50 * deltaTime);
+		//go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
+		//go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 

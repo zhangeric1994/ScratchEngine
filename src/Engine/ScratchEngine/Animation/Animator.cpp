@@ -70,8 +70,12 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 
 	int oldIndex = currentAnimationIndex;
 	currentAnimationIndex = animIndex;
-	timePos = 0;
-	duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
+	if (oldIndex != currentAnimationIndex) {
+		timePos = 0;
+		duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
+	}
+
+	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
 }
 
 void ScratchEngine::Animator::UpdateTransforms(Bone * node)
@@ -143,9 +147,7 @@ void ScratchEngine::Animator::Update(float dt)
 
 	if (timePos > duration)
 	{
-		if (LoopClips)
-			timePos -= duration;
-		else
+		if (!LoopClips)
 			// no need to reduce time
 			timePos = duration;
 	}
