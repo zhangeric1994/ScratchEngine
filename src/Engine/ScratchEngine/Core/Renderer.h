@@ -3,18 +3,22 @@
 #pragma once
 
 #include "../Common/Typedefs.h"
-#include "../Core/GameComponent.h"
+
+#include "GameComponent.h"
 
 
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		class Material;
-		class Mesh;
+		struct Material;
+		struct Mesh;
+		struct Model;
 	}
 
 	using namespace ScratchEngine::Rendering;
+
+	class Animator;
 
 	class __declspec(dllexport) Renderer : public GameComponent
 	{
@@ -23,7 +27,9 @@ namespace ScratchEngine
 
 	protected:
 		Material* material;
-		Mesh* mesh;
+		Mesh* mesh; // renderer can draw a single a mesh  or a complicated model with multiple mesh
+		Model* model;
+		Animator* anim;
 		i32 renderable;
 
 		Renderer* next;
@@ -33,6 +39,7 @@ namespace ScratchEngine
 	public:
 		Renderer();
 		Renderer(Material* material, Mesh* mesh);
+		Renderer(Material* material, Model* model);
 		~Renderer();
 
 

@@ -68,6 +68,7 @@ namespace ScratchEngine
 		void SetRotation(f32 x, f32 y, f32 z);
 		void SetRotation(XMFLOAT4 rotation);
 		void SetRotation(XMVECTOR rotation);
+		void SetLocalScale(f32 size);
 		void SetLocalScale(f32 x, f32 y, f32 z);
 		void SetLocalScale(XMFLOAT3 scale);
 		void SetLocalScale(XMVECTOR scale);

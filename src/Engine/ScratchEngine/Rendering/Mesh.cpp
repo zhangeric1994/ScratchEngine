@@ -176,6 +176,13 @@ ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device* device, char* filename)
 	CreateMesh(&verts[0], verticesNumber, &indices[0], indicesNumber, device);
 }
 
+ScratchEngine::Rendering::Mesh::Mesh(const Mesh& mesh)
+{
+	this->vertexBuffer = mesh.vertexBuffer;
+	this->indexBuffer = mesh.indexBuffer;
+	indicesNum = mesh.indicesNum;
+}
+
 ScratchEngine::Rendering::Mesh::~Mesh()
 {
 	//release vertex buffer and index buffer

@@ -173,6 +173,11 @@ __inline void ScratchEngine::Transform::SetRotation(XMVECTOR rotation)
 	SetLocalRotation(parent ? XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())) : rotation);
 }
 
+__inline void ScratchEngine::Transform::SetLocalScale(f32 size)
+{
+	SetLocalScale(XMVectorSet(size, size, size, 0));
+}
+
 __inline void ScratchEngine::Transform::SetLocalScale(f32 x, f32 y, f32 z)
 {
 	SetLocalScale(XMVectorSet(x, y, z, 0));

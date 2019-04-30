@@ -79,6 +79,9 @@ ScratchEngine::Game::~Game()
 	if (vsZPrepass)
 		delete vsZPrepass;
 
+	if (vsSkeleton)
+		delete vsSkeleton;
+
 	if (pbrMaterial)
 		delete pbrMaterial;
 
@@ -87,6 +90,9 @@ ScratchEngine::Game::~Game()
 
 	if (redMaterial)
 		delete redMaterial;
+
+	if (skeletonMaterial)
+		delete skeletonMaterial;
 
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
@@ -165,11 +171,15 @@ void ScratchEngine::Game::LoadShaders()
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile((wpath + std::wstring(L"/VertexShader.cso")).c_str());
 
+	vsSkeleton = new SimpleVertexShader(device, context);
+	vsSkeleton->LoadShaderFile((wpath + std::wstring(L"/VS_Skeleton.cso")).c_str());
+
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
 
 	pixelShaderPBR = new SimplePixelShader(device, context);
 	pixelShaderPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+
 
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
@@ -228,6 +238,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
+	model = new Model(device, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing run forward.fbx");
+
+
 	pbrMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
 	pbrMaterial->setTexture(texture);
 	pbrMaterial->setMetalnessMap(metalnessMap);
@@ -241,8 +255,11 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
+	skeletonMaterial = new Material(vsSkeleton, pixelShader, nullptr);
+
 
 	camera = new GameObject();
+	camera->SetLocalPosition(0, 5, -10);
 	camera->AddComponent<Camera>();
 
 	GameObject* directionalLightObject = new GameObject();
@@ -314,14 +331,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	go10->AddComponent<SphereCollider>();
 
 	GameObject* go11 = new GameObject();
-	go11->SetLocalPosition(0, -5, 0);
+	go11->SetLocalPosition(0, -0.5f, 0);
 	go11->SetLocalScale(10, 1, 10);
 	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 	GameObject* go12 = new GameObject();
-	go12->SetParent(go11);
-	go12->SetLocalPosition(0, 10, 0);
-	go12->AddComponent<Renderer>(pbrMaterial, sphereMesh);
+	go12->SetLocalPosition(0, 0, 0);
+	go12->SetLocalScale(0.01f);
+	go12->AddComponent<Renderer>(skeletonMaterial, model);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -364,6 +381,8 @@ void ScratchEngine::Game::Update()
 
 		if (GetAsyncKeyState('X') & 0x8000)
 			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
+
+		model->anim->Update(deltaTime);
 
 		go1->Rotate(0, 0, 20 * deltaTime);
 		go2->Rotate(0, 0, -50 * deltaTime);
@@ -420,7 +439,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		//renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
 		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 

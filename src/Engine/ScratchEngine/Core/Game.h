@@ -8,6 +8,7 @@
 #include "../Rendering/CubeMap.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"
+#include "../Rendering/Model.h"
 #include "../Rendering/ShadowMap.h"
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
@@ -52,15 +53,19 @@ namespace ScratchEngine
 
 		SimpleVertexShader* vsZPrepass;
 		SimpleVertexShader* vertexShader;
+		SimpleVertexShader* vsSkeleton;
 		SimplePixelShader* pixelShader;
 		SimplePixelShader* pixelShaderPBR;
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
 		Material* pbrMaterial;
+		Material* skeletonMaterial;
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
+
+		Model* model;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;

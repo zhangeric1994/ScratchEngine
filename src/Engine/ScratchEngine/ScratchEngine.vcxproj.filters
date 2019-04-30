@@ -16,10 +16,10 @@
     <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
+    <FxCompile Include="Rendering\Shaders\VS_DepthOnly.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\VS_DepthOnly.hlsl">
+    <FxCompile Include="Rendering\Shaders\VS_Skeleton.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -110,6 +110,24 @@
     </ClCompile>
     <ClCompile Include="Core\InputManager.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationChannel.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationClip.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationEngine.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Bone.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Animator.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Model.cpp">
+      <Filter>Source Files\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -266,6 +284,24 @@
     <ClInclude Include="Core\IInputEventReceiver.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Animation\AnimationChannel.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationClip.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationEngine.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Bone.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animator.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Model.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -328,6 +364,12 @@
     </Filter>
     <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{7a76a8bb-207a-4251-8450-d16846e6c3a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Animation">
+      <UniqueIdentifier>{b1bf2dc7-749c-42bd-b92b-07aadad3824a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Animation">
+      <UniqueIdentifier>{2d3a9684-7570-4c48-871c-fd0a51b0b7ca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

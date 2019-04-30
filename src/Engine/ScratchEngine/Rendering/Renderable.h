@@ -4,6 +4,8 @@
 
 #include <DirectXMath.h>
 
+#include "../Common/Settings.h"
+
 #include "Material.h"
 #include "Mesh.h"
 
@@ -16,11 +18,10 @@ namespace ScratchEngine
 	{
 		struct Renderable
 		{
-		public:
+			XMMATRIX worldMatrix;
 			Mesh* mesh;
 			Material* material;
-
-			XMMATRIX worldMatrix;
+			XMMATRIX bones[MAX_NUM_BONES_PER_MODEL];
 		};
 	}
 }

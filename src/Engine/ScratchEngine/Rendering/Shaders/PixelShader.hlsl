@@ -3,9 +3,9 @@ struct VertexToPixel
     float4 svPosition : SV_POSITION;
     float4 position : POSITION;
     float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+    float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
-	float4 shadowPos : SHADOW;
+    float4 shadowPos : SHADOW;
 };
 
 struct LightSource

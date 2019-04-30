@@ -168,6 +168,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 			vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
 			vertexShader->SetMatrix4x4("world", renderable.worldMatrix);
 			vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
+			vertexShader->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
 
 			vertexShader->CopyAllBufferData();
 

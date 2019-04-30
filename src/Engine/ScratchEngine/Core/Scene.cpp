@@ -1,5 +1,6 @@
 #include <stack>
 
+#include "../Animation/Animator.h"
 #include "../Common/Settings.h"
 #include "../Rendering/LightSource.h"
 #include "../Rendering/Renderable.h"
@@ -161,6 +162,14 @@ void ScratchEngine::Scene::UpdateRenderables()
 			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
+
+			if (renderer->anim != nullptr && renderer->anim->currentAnimationIndex > 0)
+			{
+				std::vector<XMMATRIX> temp = renderer->anim->GetTransforms();
+
+				for (UINT i = 0; i < temp.size(); ++i)
+					renderable.bones[i] = temp[i];
+			}
 		}
 	}
 }
