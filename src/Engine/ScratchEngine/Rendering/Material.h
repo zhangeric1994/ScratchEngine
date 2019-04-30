@@ -1,8 +1,12 @@
 #pragma once
 
-#include "SimpleShader.h"
-#include <WICTextureLoader.h>
+#include <string>
+
 #include "ShadowMap.h"
+#include "SimpleShader.h"
+
+using namespace std;
+
 
 namespace ScratchEngine
 {
@@ -12,6 +16,7 @@ namespace ScratchEngine
 		{
 		public:
 			Material(SimpleVertexShader* _vertexShader, SimplePixelShader* _pixelShader, ID3D11SamplerState* _sampler);
+			Material(SimpleVertexShader* vertexShader, SimplePixelShader* pixelShader, ID3D11SamplerState* sampler, const string& filePath);
 
 
 			SimpleVertexShader* GetVertexShader();
@@ -25,7 +30,7 @@ namespace ScratchEngine
 			void SetTint(const float* color);
 
 
-			ID3D11ShaderResourceView* getTexture() const { return texture; }
+			ID3D11ShaderResourceView* getTexture() const { return diffuseMap; }
 			ID3D11ShaderResourceView* getNormalMap() const { return normalMap; }
 			ID3D11SamplerState* getSampler() const { return sampler;  }
 			ID3D11ShaderResourceView* getMetalnessMap() const { return metalnessMap; }
@@ -52,7 +57,7 @@ namespace ScratchEngine
 
 			float tint[4];
 
-			ID3D11ShaderResourceView* texture;
+			ID3D11ShaderResourceView* diffuseMap;
 			ID3D11ShaderResourceView* normalMap;
 			ShadowMap * shadowMap;
 			ID3D11ShaderResourceView* metalnessMap;

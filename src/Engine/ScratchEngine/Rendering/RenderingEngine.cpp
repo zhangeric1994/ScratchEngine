@@ -122,7 +122,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 		pixelShader->SetFloat3("cameraPosition", cameraPosition);
 
 		if (material->HasTexture()) {
-			pixelShader->SetShaderResourceView("diffuseTexture", material->getTexture());
+			pixelShader->SetShaderResourceView("diffuseMap", material->getTexture());
 		}
 
 		pixelShader->SetSamplerState("basicSampler", material->getSampler());

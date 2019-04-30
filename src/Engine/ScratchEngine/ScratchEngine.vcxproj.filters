@@ -22,6 +22,9 @@
     <FxCompile Include="Rendering\Shaders\VS_Skeleton.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\PS_BlinnPhong.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\DynamicPoolAllocator.hpp">

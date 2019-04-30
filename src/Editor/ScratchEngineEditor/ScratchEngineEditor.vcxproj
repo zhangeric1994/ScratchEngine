@@ -122,7 +122,7 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+      <Command>xcopy "..\..\Engine\Externals\bin\*.dll" "$(OutDir)" /y /d
 xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -172,7 +172,7 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
+      <Command>xcopy "..\..\Engine\Externals\bin\*.dll" "$(OutDir)" /y /d
 xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

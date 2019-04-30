@@ -73,14 +73,20 @@ ScratchEngine::Game::~Game()
 	if (vertexShader)
 		delete vertexShader;
 
-	if (pixelShader)
-		delete pixelShader;
-	
 	if (vsZPrepass)
 		delete vsZPrepass;
 
 	if (vsSkeleton)
 		delete vsSkeleton;
+
+	if (pixelShader)
+		delete pixelShader;
+
+	if (psPBR)
+		delete psPBR;
+
+	if (psBlinnPhong)
+		delete psBlinnPhong;
 
 	if (pbrMaterial)
 		delete pbrMaterial;
@@ -125,9 +131,6 @@ ScratchEngine::Game::~Game()
 
 	if (metalnessMap)
 		metalnessMap->Release();
-
-	if (pixelShaderPBR)
-		delete pixelShaderPBR;
 
 	if (shadowShader)
 		delete shadowShader;
@@ -177,8 +180,11 @@ void ScratchEngine::Game::LoadShaders()
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
 
-	pixelShaderPBR = new SimplePixelShader(device, context);
-	pixelShaderPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+	psPBR = new SimplePixelShader(device, context);
+	psPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+
+	psBlinnPhong = new SimplePixelShader(device, context);
+	psBlinnPhong->LoadShaderFile((wpath + std::wstring(L"/PS_BlinnPhong.cso")).c_str());
 
 
 	//cube map shader load
@@ -242,7 +248,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");
 
 
-	pbrMaterial = new Material(vertexShader, pixelShaderPBR, sampler);
+	pbrMaterial = new Material(vertexShader, psPBR, sampler);
 	pbrMaterial->setTexture(texture);
 	pbrMaterial->setMetalnessMap(metalnessMap);
 	pbrMaterial->setNormalMap(normalMap);
@@ -255,7 +261,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
-	skeletonMaterial = new Material(vsSkeleton, pixelShader, nullptr);
+	skeletonMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Pro Melee Axe Pack/nightshade_j_friedrich.fbx");
 
 
 	camera = new GameObject();

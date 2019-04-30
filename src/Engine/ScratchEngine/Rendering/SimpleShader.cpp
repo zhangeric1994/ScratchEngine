@@ -168,7 +168,7 @@ bool ISimpleShader::LoadShaderFile(LPCWSTR shaderFile)
 		// Create this constant buffer
 		D3D11_BUFFER_DESC newBuffDesc;
 		newBuffDesc.Usage = D3D11_USAGE_DEFAULT;
-		newBuffDesc.ByteWidth = max(bufferDesc.Size, 16); // NEW: Must be multiple of 16
+		newBuffDesc.ByteWidth = __max(bufferDesc.Size, 16); // NEW: Must be multiple of 16
 		newBuffDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		newBuffDesc.CPUAccessFlags = 0;
 		newBuffDesc.MiscFlags = 0;
@@ -1668,9 +1668,9 @@ void SimpleComputeShader::DispatchByGroups(unsigned int groupsX, unsigned int gr
 void SimpleComputeShader::DispatchByThreads(unsigned int threadsX, unsigned int threadsY, unsigned int threadsZ)
 {
 	deviceContext->Dispatch(
-		max((unsigned int)ceil((float)threadsX / this->threadsX), 1),
-		max((unsigned int)ceil((float)threadsY / this->threadsY), 1),
-		max((unsigned int)ceil((float)threadsZ / this->threadsZ), 1));
+		__max((unsigned int)ceil((float)threadsX / this->threadsX), 1),
+		__max((unsigned int)ceil((float)threadsY / this->threadsY), 1),
+		__max((unsigned int)ceil((float)threadsZ / this->threadsZ), 1));
 }
 
 // --------------------------------------------------------

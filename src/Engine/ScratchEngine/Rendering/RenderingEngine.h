@@ -35,7 +35,9 @@ namespace ScratchEngine
 
 		class RenderingEngine
 		{
+			friend struct Material;
 			friend struct Mesh;
+
 			friend class RenderTexture;
 			friend class Texture;
 

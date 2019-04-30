@@ -41,7 +41,7 @@ cbuffer CameraData : register(b2) {
 	float3 cameraPosition;
 };
 
-Texture2D diffuseTexture : register(t0);
+Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D ShadowMap	: register(t2);
 Texture2D roughnessMap : register(t3);
@@ -170,7 +170,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
 
 	//texture color
-	float3 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
+    float3 surfaceColor = diffuseMap.Sample(basicSampler, input.uv);
 	surfaceColor = lerp(float3(1, 1, 1), surfaceColor, hasTexture);
 
 	//roughness
