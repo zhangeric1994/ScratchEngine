@@ -3,6 +3,7 @@
 #include <DDSTextureLoader.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <Winuser.h>
 
 #include "../Multithreading/Barrier.h"
 #include "../Rendering/CubeMap.h"
@@ -92,6 +93,7 @@ namespace ScratchEngine
 
 
 		float lastInputTime;
+		bool isMouseDown;
 
 		//final shadow map
 		ShadowMap* shadow;

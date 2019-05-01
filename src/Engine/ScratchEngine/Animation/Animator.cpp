@@ -67,12 +67,15 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 	if (animIndex >= animations.size()) {
 		return;
 	}
-
 	int oldIndex = currentAnimationIndex;
 	currentAnimationIndex = animIndex;
+	animationNameToId;
+
+
 	if (oldIndex != currentAnimationIndex) {
+		LoopClips = true;
 		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
+		duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
 	}
 
 	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
@@ -95,10 +98,25 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 		int oldIndex = currentAnimationIndex;
 		currentAnimationIndex = it->second;
 		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration *animations[currentAnimationIndex]->ticksPerSecond;
+		duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
 		return oldIndex != currentAnimationIndex;
 	}
 	return false;
+}
+
+void ScratchEngine::Animator::SetSingleAnimation(int current)
+{
+	if (current >= animations.size()) {
+		return;
+	}
+
+	int oldIndex = currentAnimationIndex;
+	currentAnimationIndex = current;
+	if (oldIndex != currentAnimationIndex) {
+		LoopClips = false;
+		timePos = 0;
+		duration = animations[currentAnimationIndex]->duration /animations[currentAnimationIndex]->ticksPerSecond;
+	}
 }
 
 bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
@@ -138,18 +156,20 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 		animationNameToId[animations[i]->name] = i;
 	
 	currentAnimationIndex = 0;
-	duration = animations[currentAnimationIndex]->duration * animations[currentAnimationIndex]->ticksPerSecond;
+	duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::Update(float dt)
 {
-	timePos += dt;
-
-	if (timePos > duration)
-	{
-		if (!LoopClips)
-			// no need to reduce time
-			timePos = duration;
+	isPlaying = false;
+	if (!LoopClips && timePos + dt < duration) {
+			timePos += dt;
+			isPlaying = true;
+			//SetAnimationIndex(nextAnimation);
+	}
+	else if(LoopClips){
+			timePos += dt;
+			isPlaying = true;
 	}
 }
 
@@ -166,11 +186,13 @@ void ScratchEngine::Animator::PlayAnimationBackward()
 void ScratchEngine::Animator::AdjustAnimationSpeedBy(float prc)
 {
 	animations[currentAnimationIndex]->ticksPerSecond *= prc;
+	duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 void ScratchEngine::Animator::AdjustAnimationSpeedTo(float ticksPerSec)
 {
 	animations[currentAnimationIndex]->ticksPerSecond = ticksPerSec;
+	duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 }
 
 std::vector<XMMATRIX> ScratchEngine::Animator::GetTransforms()
@@ -200,18 +222,6 @@ Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
 	XMMATRIX trans = ToMatrix(node->mTransformation);
 	trans = XMMatrixTranspose(trans);
 
-	//// TODO: to find the rotation problem 
-	//// TEMP FIX for bones rotation problem, now multiply with a identity matrix with 90 degree roration on X - axis
-	//if (!Parent) {
-	//	// root
-	//	XMFLOAT3 pScale = { 1,1,1 };
-	//	XMFLOAT4 pRot = { 0.7071,0,0,0.7071 };
-	//	XMFLOAT3 pPosition = { 0,0,0 };
-	//	XMMATRIX mat = XMMatrixScalingFromVector(XMLoadFloat3(&pScale))
-	//		* XMMatrixRotationQuaternion(XMLoadFloat4(&pRot))
-	//		* XMMatrixTranslationFromVector(XMLoadFloat3(&pPosition));
-	//	trans = trans * mat;
-	//}
 	internalNode->localTransform = trans;
 
 	internalNode->originalLocalTransform = internalNode->localTransform;

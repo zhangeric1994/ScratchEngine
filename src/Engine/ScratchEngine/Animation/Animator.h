@@ -49,6 +49,7 @@ namespace ScratchEngine
 		bool LoopClips;
 		int currentAnimationIndex;
 		bool hasSkeleton;
+		bool isPlaying;
 		string animationName;
 		float animationSpeed;
 		float duration;
@@ -58,6 +59,7 @@ namespace ScratchEngine
 
 		void Update(float dt);
 		bool SetAnimation(string animation);
+		void SetSingleAnimation(int current);
 		void SetAnimationIndex(int animIndex);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();

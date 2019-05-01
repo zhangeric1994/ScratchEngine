@@ -38,6 +38,10 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	metalnessMap = 0;
 	roughnessMap = 0;
 
+	isMouseDown = false;
+	lastInputTime = 0.0f;
+
+
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
 
@@ -245,13 +249,20 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
-	model->LoadAnimation("../Assets/Models/Pack/Idle_0.fbx"); // 1
-	model->LoadAnimation("../Assets/Models/Pack/Idle_1.fbx"); // 2
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");	// 3
-	model->LoadAnimation("../Assets/Models/Pack/Walking.fbx");	// 4
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx"); // 5
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx"); // 6
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx"); // 7
+	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");			// 2
+	model->LoadAnimation("../Assets/Models/Pack/Turn.fbx");							// 3 
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4			// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");			// 5
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx");			// 6
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx");			// 7
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Forward.fbx");			// 8			// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Back.fbx");			// 9
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Left.fbx");			// 10
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Right.fbx");			// 11
+	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 02.fbx");				// 12
+	model->LoadAnimation("../Assets/Models/Pack/standing idle looking ver. 1.fbx"); // 13
+	
 
 	model->anim->SetAnimationIndex(1);
 	model->anim->AdjustAnimationSpeedTo(15);
@@ -383,89 +394,123 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState(VK_ESCAPE))
 			Quit();
 		
-		float speed = 1.0f;
+		float speed = 1.5f;
 		bool animationChanged = false;
-		if (GetAsyncKeyState('W') & 0x8000) {
-			if (!animationChanged) {
+		if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
+			animationChanged = true;
+			// press left and right together will not update animation
+		}
+		if (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000) {
+			animationChanged = true;
+			// same
+		}
+
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+			model->anim->SetSingleAnimation(2);
+			model->anim->AdjustAnimationSpeedTo(10);
+			lastInputTime = totalTime + 1.35f;
+			animationChanged = true;
+		}
+
+		if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+			if (!animationChanged && lastInputTime < totalTime) {
+				model->anim->SetAnimationIndex(6);
+				model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
+			Character->Translate(speed * deltaTime, 0, 0);
+			lastInputTime = totalTime;
+		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
+			// left sprint
+			if (!animationChanged && lastInputTime < totalTime) {
+				model->anim->SetAnimationIndex(10);
+				model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
+			Character->Translate(speed * deltaTime * 2.0f, 0, 0);
+			lastInputTime = totalTime;
+		}
+
+		if (GetAsyncKeyState('D') & 0x8000 &&!GetAsyncKeyState(VK_LSHIFT)) {
+
+			if (!animationChanged && lastInputTime < totalTime) {
+				model->anim->SetAnimationIndex(7);
+				model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
+			Character->Translate(-speed * deltaTime, 0,	0);
+			lastInputTime = totalTime;
+		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
+			// right sprint
+			if (!animationChanged && lastInputTime < totalTime) {
+				model->anim->SetAnimationIndex(11);
+				model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
+			Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
+			lastInputTime = totalTime;
+		}
+
+		if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+			if (!animationChanged && lastInputTime < totalTime) {
 				model->anim->SetAnimationIndex(4);
-				//model->anim->AdjustAnimationSpeedTo(15);
+				model->anim->AdjustAnimationSpeedTo(20);
 				animationChanged = true;
 			}
 
-			XMFLOAT3 pos;
-			XMStoreFloat3(&pos,Character->GetLocalPosition());
-			Character->SetLocalPosition(pos.x, pos.y, pos.z + speed * deltaTime);
+			Character->Translate(0, 0, -speed * deltaTime * 1.0f);
+			lastInputTime = totalTime;
+		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
+			// forward sprint
+			if (!animationChanged && lastInputTime < totalTime) {
+				model->anim->SetAnimationIndex(8);
+				model->anim->AdjustAnimationSpeedTo(20);
+				animationChanged = true;
+			}
+			Character->Translate(0, 0, -speed * deltaTime * 2.0f);
 			lastInputTime = totalTime;
 		}
 			
-			//camera->Translate(0.0f, 0.0f, 10 * deltaTime);
 
-		if (GetAsyncKeyState('A') & 0x8000) {
-			if (!animationChanged) {
-				model->anim->SetAnimationIndex(6);
-				//model->anim->AdjustAnimationSpeedTo(20);
-				animationChanged = true;
-			}
-
-			XMFLOAT3 pos;
-			XMStoreFloat3(&pos, Character->GetLocalPosition());
-			Character->SetLocalPosition(pos.x - speed * deltaTime, pos.y , pos.z);
-			lastInputTime = totalTime;
-		}
 			//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
 
-		 if (GetAsyncKeyState('S') & 0x8000) {
+		 if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 
-			if (!animationChanged) {
+			if (!animationChanged && lastInputTime < totalTime) {
 				model->anim->SetAnimationIndex(5);
-				//model->anim->AdjustAnimationSpeedTo(15);
+				model->anim->AdjustAnimationSpeedTo(20);
 				animationChanged = true;
 			}
-
-			XMFLOAT3 pos;
-			XMStoreFloat3(&pos, Character->GetLocalPosition());
-			Character->SetLocalPosition(pos.x, pos.y, pos.z -speed * deltaTime);
+			Character->Translate(0, 0, speed * deltaTime);
 			lastInputTime = totalTime;
-		}
+		} else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
+			 // forward sprint
+			 if (!animationChanged && lastInputTime < totalTime) {
+				 model->anim->SetAnimationIndex(9);
+				 model->anim->AdjustAnimationSpeedTo(20);
+				 animationChanged = true;
+			 }
+			 Character->Translate(0, 0, speed * deltaTime * 2.0f);
+			 lastInputTime = totalTime;
+		 }
 			
 			//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
 
-		if (GetAsyncKeyState('D') & 0x8000) {
 
-			if (!animationChanged) {
-				model->anim->SetAnimationIndex(7);
-				//model->anim->AdjustAnimationSpeedTo(48);
-				animationChanged = true;
-			}
-			XMFLOAT3 pos;
-			XMStoreFloat3(&pos, Character->GetLocalPosition());
-			Character->SetLocalPosition(pos.x + speed * deltaTime, pos.y, pos.z );
-			lastInputTime = totalTime;
+		if (lastInputTime < totalTime - 5) {
+			model->anim->SetSingleAnimation(12);
+			
+			lastInputTime = totalTime + 5;
 		}
-
-		if (lastInputTime < totalTime - 3) {
-			model->anim->SetAnimationIndex(2);
-			//model->anim->AdjustAnimationSpeedTo(15);
-		}
-		else if (lastInputTime < totalTime - 0.1) {
+		else if (lastInputTime < totalTime - 0.2f) {
 			model->anim->SetAnimationIndex(1);
-			//model->anim->AdjustAnimationSpeedTo(15);
+			model->anim->AdjustAnimationSpeedTo(20);
 		}
 
-		else 
-			//camera->Translate(10 * deltaTime, 0.0f, 0.0f);
+		//if (GetAsyncKeyState('X') & 0x8000)
+			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			model->anim->SetAnimationIndex(3);
-			//model->anim->AdjustAnimationSpeedTo(15);
-		}
-			//camera->Translate(0.0f, 10 * deltaTime, 0.0f);
-
-		if (GetAsyncKeyState('X') & 0x8000)
-			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
-			//model->anim->AdjustAnimationSpeedTo(15);
-
-		model->anim->Update(deltaTime*0.5);
+		model->anim->Update(deltaTime*0.3);
 
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);
@@ -553,7 +598,7 @@ void ScratchEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
-
+	isMouseDown = true;
 	// Caputure the mouse so we keep getting mouse move
 	// events even if the mouse leaves the window.  we'll be
 	// releasing the capture once a mouse button is released
@@ -566,9 +611,10 @@ void ScratchEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-
+	isMouseDown = false;
 	// We don't care about the tracking the cursor outside
 	// the window anymore (we're not dragging if the mouse is up)
+	
 	ReleaseCapture();
 }
 
@@ -581,12 +627,27 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
 	if (buttonState & 0x0002)
 	{
-		// camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f, (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
-		camX += (y - prevMousePos.y) * 0.1f;
-		camY += (x - prevMousePos.x) * 0.1f;
-
-		camera->SetLocalRotation(camX, camY, 0);
+		camX = (y - prevMousePos.y) * 0.05f;
+		camY = (x - prevMousePos.x) * 0.05f;
+		cameraHolder->SetLocalRotation(0, 180, 0);
+		Character->Rotate(0, camY, 0.0f);
+		if (model->anim->currentAnimationIndex == 1||
+			model->anim->currentAnimationIndex == 12||
+			model->anim->currentAnimationIndex == 13
+			) {
+			model->anim->SetSingleAnimation(3);
+			model->anim->AdjustAnimationSpeedTo(10);
+			lastInputTime = totalTime + 0.6f;
+		}
 	}
+	// the code for rotating camera, not done yet
+	//else{
+	//	camX = (y - prevMousePos.y) * 0.1f;
+	//	camY = (x - prevMousePos.x) * 0.1f;
+	//	cameraHolder->Rotate(0, camY, 0.0f);
+	//	//SetCursorPos(3440/2, 1440/2);
+	//}
+
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

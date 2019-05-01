@@ -4,6 +4,7 @@
 ScratchEngine::Animation::AnimationClip::AnimationClip(aiAnimation * anim)
 {
 	lastTime = 0.0f;
+	name = anim->mName.C_Str();
 	ticksPerSecond = anim->mTicksPerSecond > 0.0f ? (float)anim->mTicksPerSecond : 920.0f;
 	duration = (float)anim->mDuration;
 	for (UINT i = 0; i < anim->mNumChannels; i++) {
@@ -43,6 +44,7 @@ int ScratchEngine::Animation::AnimationClip::GetFrameIndexAt(float dt)
 		percent = (percent - 1.0f) * -1.0f;
 	}
 	int frameIndexAt = (int)(transforms.size() * percent);
+	
 	return frameIndexAt;
 }
 
