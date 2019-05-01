@@ -406,7 +406,7 @@ void ScratchEngine::Game::Update()
 		}
 
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			model->anim->SetSingleAnimation(2);
+			model->anim->SetAnimationIndex(2);
 			model->anim->AdjustAnimationSpeedTo(10);
 			lastInputTime = totalTime + 1.35f;
 			animationChanged = true;
@@ -498,7 +498,7 @@ void ScratchEngine::Game::Update()
 
 
 		if (lastInputTime < totalTime - 5) {
-			model->anim->SetSingleAnimation(12);
+			model->anim->SetAnimationIndex(12);
 			
 			lastInputTime = totalTime + 5;
 		}
@@ -635,7 +635,7 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 			model->anim->currentAnimationIndex == 12||
 			model->anim->currentAnimationIndex == 13
 			) {
-			model->anim->SetSingleAnimation(3);
+			model->anim->SetAnimationIndex(3);
 			model->anim->AdjustAnimationSpeedTo(10);
 			lastInputTime = totalTime + 0.6f;
 		}

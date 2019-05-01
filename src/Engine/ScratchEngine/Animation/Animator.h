@@ -47,12 +47,18 @@ namespace ScratchEngine
 		// current playing animation stats
 		float timePos;
 		bool LoopClips;
+
+		int previousAnimationIndex;
 		int currentAnimationIndex;
+		
 		bool hasSkeleton;
 		bool isPlaying;
 		string animationName;
 		float animationSpeed;
 		float duration;
+		
+		float blendFactor;
+		float blendSpeed;
 
 		Animator* next;
 		Animator* previous;

@@ -5,8 +5,12 @@ ScratchEngine::Animator::Animator()
 	timePos = 0.0f;
 	skeleton = nullptr;
 	LoopClips = true;
-	currentAnimationIndex = -1;
+	previousAnimationIndex = null_index;
+	currentAnimationIndex = null_index;
 	hasSkeleton = false;
+
+	blendFactor = 1;
+	blendSpeed = 10;
 }
 
 
@@ -14,10 +18,17 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 {	
 	timePos = 0.0f;
 	LoopClips = true;
+
+	previousAnimationIndex = null_index;
+	currentAnimationIndex = null_index;
+
+	blendFactor = 1;
+	blendSpeed = 10;
+
 	if (!scene->HasAnimations()) {
 		// no animation
 		skeleton = nullptr;
-		currentAnimationIndex = -1;
+		currentAnimationIndex = null_index;
 		hasSkeleton = false;
 		return;
 	}
@@ -64,18 +75,26 @@ ScratchEngine::Animator::~Animator()
 
 void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 {
-	if (animIndex >= animations.size()) {
+	animIndex = __max(null_index, animIndex);
+
+	if (animIndex >= animations.size())
 		return;
+
+	if (animIndex == null_index)
+	{
+		previousAnimationIndex = null_index;
+		currentAnimationIndex = null_index;
 	}
-	int oldIndex = currentAnimationIndex;
-	currentAnimationIndex = animIndex;
-	animationNameToId;
+	else if (animIndex != currentAnimationIndex)
+	{
+		previousAnimationIndex = currentAnimationIndex;
+		currentAnimationIndex = animIndex;
 
-
-	if (oldIndex != currentAnimationIndex) {
 		LoopClips = true;
 		timePos = 0;
 		duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
+	
+		blendFactor = 0;
 	}
 
 	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
@@ -92,15 +111,14 @@ void ScratchEngine::Animator::UpdateTransforms(Bone * node)
 
 bool ScratchEngine::Animator::SetAnimation(string animation)
 {
-	int index;
 	std::map<std::string, int>::iterator it = animationNameToId.find(animation);
-	if (it != animationNameToId.end()) {
-		int oldIndex = currentAnimationIndex;
-		currentAnimationIndex = it->second;
-		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
-		return oldIndex != currentAnimationIndex;
+
+	if (it != animationNameToId.end() && it->second != currentAnimationIndex)
+	{
+		SetAnimationIndex(it->second);
+		return true;
 	}
+
 	return false;
 }
 
@@ -115,7 +133,7 @@ void ScratchEngine::Animator::SetSingleAnimation(int current)
 	if (oldIndex != currentAnimationIndex) {
 		LoopClips = false;
 		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration /animations[currentAnimationIndex]->ticksPerSecond;
+		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 	}
 }
 
@@ -127,17 +145,22 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 
 	for (UINT i = 0; i < animations.size(); i++) {
 		SetAnimationIndex(i);
+
+		AnimationClip* animation = animations[i];
+
 		float dt = 0.0f;
 		for (float ticks = 0.0f; ticks < animations[i]->duration; ticks += animations[i]->ticksPerSecond / 30.0f) {
 			dt += timestep;
 			Calculate(dt);
-			std::vector<XMMATRIX> trans;
-			for (UINT a = 0; a < bones.size(); a++) {
-				XMMATRIX rotMat = bones[a]->offset * bones[a]->globalTransform;
-				rotMat = XMMatrixTranspose(rotMat);
-				trans.push_back(rotMat);
+
+			vector<XMMATRIX> Ws;
+			for (UINT a = 0; a < bones.size(); a++)
+			{
+				XMMATRIX W = bones[a]->offset * bones[a]->globalTransform;
+				Ws.push_back(XMMatrixTranspose(W));
 			}
-			animations[i]->transforms.push_back(trans);
+			
+			animation->transforms.push_back(Ws);
 		}
 	}
 
@@ -161,6 +184,12 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 
 void ScratchEngine::Animator::Update(float dt)
 {
+	if (blendFactor < 1)
+		blendFactor += blendSpeed * dt;
+	else
+		blendFactor = 1;
+
+
 	isPlaying = false;
 	if (!LoopClips && timePos + dt < duration) {
 			timePos += dt;
@@ -197,7 +226,27 @@ void ScratchEngine::Animator::AdjustAnimationSpeedTo(float ticksPerSec)
 
 std::vector<XMMATRIX> ScratchEngine::Animator::GetTransforms()
 {
-	return animations[currentAnimationIndex]->GetTransforms(timePos);
+	//if (blendFactor == 1 || previousAnimationIndex == null_index)
+		return animations[currentAnimationIndex]->GetTransforms(timePos);
+
+	//vector<XMMATRIX> currentWorldMatrices = animations[currentAnimationIndex]->GetTransforms(timePos);
+	//vector<XMMATRIX> previousWorldMatrices = animations[previousAnimationIndex]->GetTransforms(timePos);
+
+	//for (int i = 0; i < currentWorldMatrices.size(); ++i)
+	//{
+	//	XMMATRIX currentWorldMatrix = XMMatrixTranspose(currentWorldMatrices[i]);
+	//	XMMATRIX previousWorldMatrix = XMMatrixTranspose(previousWorldMatrices[i]);
+
+	//	XMVECTOR currentTranslation = currentWorldMatrix.r[0];
+	//	XMVECTOR currentRotation = XMQuaternionRotationMatrix(currentWorldMatrix);
+
+	//	XMVECTOR previousTranslation = previousWorldMatrix.r[0];
+	//	XMVECTOR previousRotation = XMQuaternionRotationMatrix(previousWorldMatrix);
+
+	//	currentWorldMatrices[i] = XMMatrixTranspose(XMMatrixRotationQuaternion(XMQuaternionSlerp(previousRotation, currentRotation, blendFactor)) * XMMatrixTranslationFromVector(XMVectorLerp(previousTranslation, currentTranslation, blendFactor)));
+	//}
+
+	//return currentWorldMatrices;
 }
 
 int ScratchEngine::Animator::GetBoneIndex(string name)
@@ -237,7 +286,7 @@ Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
 
 void ScratchEngine::Animator::Calculate(float dt)
 {
-	if ((currentAnimationIndex < 0) | (currentAnimationIndex >= animations.size())) {
+	if ((currentAnimationIndex == null_index) | (currentAnimationIndex >= animations.size())) {
 		return;
 	}
 	animations[currentAnimationIndex]->Evaluate(dt, bonesByName);
