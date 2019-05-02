@@ -136,13 +136,16 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 		previousAnimationIndex = currentAnimationIndex;
 		currentAnimationIndex = animIndex;
 
-		if (previousAnimationIndex != null_index)
+		if (blendFactor < 1)
+			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(0));
+		else if (previousAnimationIndex != null_index)
+		{
 			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(0));
+			blendFactor = 0;
+		}
 
 		timePos = 0;
 		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
-	
-		blendFactor = 0;
 	}
 
 	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
