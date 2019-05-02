@@ -112,7 +112,7 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 
 	LoadAnimations(scene);
 
-	printf("Finished loading animations with %d bones", bones.size());
+	printf("Finished loading animations with %zd bones", bones.size());
 }
 
 ScratchEngine::Animator::~Animator()
