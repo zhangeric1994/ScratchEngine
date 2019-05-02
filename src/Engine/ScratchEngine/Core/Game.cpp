@@ -38,7 +38,8 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	metalnessMap = 0;
 	roughnessMap = 0;
 
-	isMouseDown = false;
+	isMouseDownL = false;
+	isMouseDownR = false;
 	lastInputTime = 0.0f;
 
 
@@ -262,9 +263,11 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	model->LoadAnimation("../Assets/Models/Pack/Standing Run Right.fbx");			// 11
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 02.fbx");				// 12
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 03.fbx");				// 13
-	model->anim->SetAnimationIndex(1);
-	model->anim->AdjustAnimationSpeedTo(15);
-	model->anim->PlayAnimationForward();
+
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_0.fbx");				// 14
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_1.fbx");				// 15
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_2.fbx");				// 16
+	model->LoadAnimation("../Assets/Models/Pack/Kick_0.fbx");				// 17
 
 	pbrMaterial = new Material(vertexShader, psPBR, sampler);
 	pbrMaterial->setTexture(texture);
@@ -395,6 +398,39 @@ void ScratchEngine::Game::Update()
 		
 		float speed = 1.5f;
 		bool animationChanged = false;
+		if ((GetKeyState('F') & 0x8000) != 0) {
+			//attacking
+			if (!animationChanged&& lastAttackTime < totalTime) {
+				float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
+				attacking = true;
+				animationChanged = true;
+				lastInputTime = totalTime + duration;
+				lastAttackTime = totalTime + duration - 0.2f;
+				comboCounter++;
+				if (comboCounter > 4) {
+					lastAttackTime = totalTime + duration + 0.5f;
+				}
+				comboCounter %= 5;
+			}
+		}
+
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+			if (!animationChanged&& lastAttackTime < totalTime) {
+				float duration = model->anim->SetAnimationIndex(2, false);
+				lastInputTime = totalTime + model->anim->duration;
+				attacking = true;
+				animationChanged = true;
+				lastInputTime = totalTime + duration;
+				lastAttackTime = totalTime + duration - 0.2f;
+			}
+		}
+
+		if (attacking && lastInputTime < totalTime) {
+			// the attacking interval is gone
+			comboCounter = 0;
+			attacking = false;
+		}
+
 		if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
 			animationChanged = true;
 			// press left and right together will not update animation
@@ -404,96 +440,98 @@ void ScratchEngine::Game::Update()
 			// same
 		}
 
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			model->anim->SetAnimationIndex(2);
-			lastInputTime = totalTime + model->anim->duration;
-		}
-
-		if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(6);
-				animationChanged = true;
+		if (!attacking) {
+			if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(6, true);
+					animationChanged = true;
+				}
+				Character->Translate(speed * deltaTime, 0, 0);
+				lastInputTime = totalTime;
 			}
-			Character->Translate(speed * deltaTime, 0, 0);
-			lastInputTime = totalTime;
-		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
-			// left sprint
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(10);
-				animationChanged = true;
-			}
-			Character->Translate(speed * deltaTime * 2.0f, 0, 0);
-			lastInputTime = totalTime;
-		}
-
-		if (GetAsyncKeyState('D') & 0x8000 &&!GetAsyncKeyState(VK_LSHIFT)) {
-
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(7);
-				animationChanged = true;
-			}
-			Character->Translate(-speed * deltaTime, 0,	0);
-			lastInputTime = totalTime;
-		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
-			// right sprint
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(11);
-				animationChanged = true;
-			}
-			Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
-			lastInputTime = totalTime;
-		}
-
-		if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(4);
-				animationChanged = true;
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
+				// left sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(10, true);
+					animationChanged = true;
+				}
+				Character->Translate(speed * deltaTime * 2.0f, 0, 0);
+				lastInputTime = totalTime;
 			}
 
-			Character->Translate(0, 0, -speed * deltaTime * 1.0f);
-			lastInputTime = totalTime;
-		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
-			// forward sprint
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(8);
-				animationChanged = true;
+			if (GetAsyncKeyState('D') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(7, true);
+					animationChanged = true;
+				}
+				Character->Translate(-speed * deltaTime, 0, 0);
+				lastInputTime = totalTime;
 			}
-			Character->Translate(0, 0, -speed * deltaTime * 2.0f);
-			lastInputTime = totalTime;
-		}
-			
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
+				// right sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(11, true);
+					animationChanged = true;
+				}
+				Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
+				lastInputTime = totalTime;
+			}
+
+			if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(4, true);
+					animationChanged = true;
+				}
+
+				Character->Translate(0, 0, -speed * deltaTime * 1.0f);
+				lastInputTime = totalTime;
+			}
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
+				// forward sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(8, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, -speed * deltaTime * 2.0f);
+				lastInputTime = totalTime;
+			}
+
 
 			//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
 
-		 if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+			if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 
-			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(5);
-				animationChanged = true;
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(5, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, speed * deltaTime);
+				lastInputTime = totalTime;
 			}
-			Character->Translate(0, 0, speed * deltaTime);
-			lastInputTime = totalTime;
-		} else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
-			 // forward sprint
-			 if (!animationChanged && lastInputTime < totalTime) {
-				 model->anim->SetAnimationIndex(9);
-				 animationChanged = true;
-			 }
-			 Character->Translate(0, 0, speed * deltaTime * 2.0f);
-			 lastInputTime = totalTime;
-		 }
-			
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
+				// forward sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(9, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, speed * deltaTime * 2.0f);
+				lastInputTime = totalTime;
+			}
+
 			//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
 
 
-		if (lastInputTime < totalTime - 5) {
-			int idleIndex = rand() % 2 + 12;
-			model->anim->SetAnimationIndex(idleIndex);
-			lastInputTime = totalTime + model->anim->duration;
+			if (lastInputTime < totalTime - 5) {
+				int idleIndex = rand() % 2 + 12;
+				model->anim->SetAnimationIndex(idleIndex, false);
+				lastInputTime = totalTime + model->anim->duration;
+			}
+			else if (lastInputTime < totalTime - 0.2f) {
+				model->anim->SetAnimationIndex(1, true);
+			}
 		}
-		else if (lastInputTime < totalTime - 0.2f) {
-			model->anim->SetAnimationIndex(1);
-		}
+	
 
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
@@ -586,7 +624,7 @@ void ScratchEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;
 	prevMousePos.y = y;
-	isMouseDown = true;
+
 	// Caputure the mouse so we keep getting mouse move
 	// events even if the mouse leaves the window.  we'll be
 	// releasing the capture once a mouse button is released
@@ -599,7 +637,7 @@ void ScratchEngine::Game::OnMouseDown(WPARAM buttonState, int x, int y)
 void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 {
 	// Add any custom code here...
-	isMouseDown = false;
+
 	// We don't care about the tracking the cursor outside
 	// the window anymore (we're not dragging if the mouse is up)
 	
@@ -619,14 +657,20 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 		camY = (x - prevMousePos.x) * 0.05f;
 		cameraHolder->SetLocalRotation(0, 180, 0);
 		Character->Rotate(0, camY, 0.0f);
-		if (model->anim->currentAnimationIndex == 1||
-			model->anim->currentAnimationIndex == 12||
+		if (model->anim->currentAnimationIndex == 1 ||
+			model->anim->currentAnimationIndex == 12 ||
 			model->anim->currentAnimationIndex == 13
 			) {
-			model->anim->SetAnimationIndex(3);
+			model->anim->SetAnimationIndex(3, false);
 			lastInputTime = totalTime + model->anim->duration;
 		}
 	}
+	else if (buttonState & 0x0001) {
+		camX = (y - prevMousePos.y) * 0.05f;
+		camY = (x - prevMousePos.x) * 0.05f;
+		cameraHolder->Rotate(0, camY, 0.0f);
+	}
+
 	// the code for rotating camera, not done yet
 	//else{
 	//	camX = (y - prevMousePos.y) * 0.1f;

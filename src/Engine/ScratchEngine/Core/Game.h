@@ -91,9 +91,14 @@ namespace ScratchEngine
 
 		Barrier frameBarrier;
 
+		int comboCounter = 0;
+		int combo[5] ={ 14,14,15,16,17 };
+		bool attacking = false;
 
 		float lastInputTime;
-		bool isMouseDown;
+		float lastAttackTime;
+		bool isMouseDownL;
+		bool isMouseDownR;
 
 		//final shadow map
 		ShadowMap* shadow;

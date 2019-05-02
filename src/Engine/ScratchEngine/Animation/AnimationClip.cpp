@@ -129,7 +129,6 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 				pRot = TOXMFLOAT4(key.mValue);
 			}
 			lastPositions[i].y = frame;
-			//TODO change y to x if not work
 
 		}
 		// interpolate scale keyframes
