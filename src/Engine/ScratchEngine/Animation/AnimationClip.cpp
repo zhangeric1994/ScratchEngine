@@ -60,7 +60,7 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 
 		std::map<std::string, Bone*>::iterator it = bonesByName.find(channel->name);
 		if (it == bonesByName.end()) {
-			printf("Did not find the bone node %s", channel->name);
+			printf("Did not find the bone node %s", channel->name.c_str());
 			continue;
 		}
 		// interpolate position keyframes
@@ -81,19 +81,19 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 
 			aiVectorKey key = channel->positionKeys[frame];
 			aiVectorKey nextKey = channel->positionKeys[nextFrame];
-			float diffTime = nextKey.mTime - key.mTime;
+			double diffTime = nextKey.mTime - key.mTime;
 			if (diffTime < 0.0) {
 				diffTime += duration;
 			}
 			if (diffTime > 0.0) {
-				float factor = (float)((time - key.mTime) / diffTime);
+				float factor = (time - key.mTime) / diffTime;
 				pPosition = TOXMFLOAT3(key.mValue + (nextKey.mValue - key.mValue) * factor);
 			}
 			else {
 				pPosition = TOXMFLOAT3(key.mValue);
 			}
-			lastPositions[i].x = frame;
 
+			lastPositions[i].x = frame;
 		}
 
 		// interpolate rotation keyframes
@@ -129,7 +129,6 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 				pRot = TOXMFLOAT4(key.mValue);
 			}
 			lastPositions[i].y = frame;
-			//TODO change y to x if not work
 
 		}
 		// interpolate scale keyframes

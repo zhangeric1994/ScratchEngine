@@ -87,9 +87,9 @@ namespace ScratchEngine
 		AnimationBlender blender;
 
 		void Update(float dt);
-		bool SetAnimation(string animation);
+		bool SetAnimation(string animation, bool loop);
 		//void SetSingleAnimation(int current);
-		void SetAnimationIndex(int animIndex);
+		float SetAnimationIndex(int animIndex,bool loop);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();
 		void AdjustAnimationSpeedBy(float prc);
