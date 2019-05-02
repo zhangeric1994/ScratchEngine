@@ -263,9 +263,9 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 02.fbx");				// 12
 	model->LoadAnimation("../Assets/Models/Pack/standing idle looking ver. 1.fbx"); // 13
 	
-
 	model->anim->SetAnimationIndex(1);
 	model->anim->AdjustAnimationSpeedTo(15);
+	model->anim->PlayAnimationForward();
 
 	pbrMaterial = new Material(vertexShader, psPBR, sampler);
 	pbrMaterial->setTexture(texture);

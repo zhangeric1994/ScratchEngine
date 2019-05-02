@@ -163,7 +163,7 @@ void ScratchEngine::Scene::UpdateRenderables()
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
 
-			if (renderer->anim != nullptr && renderer->anim->currentAnimationIndex > 0)
+			if (renderer->anim != nullptr && renderer->anim->currentAnimationIndex != null_index)
 			{
 				std::vector<XMMATRIX> temp = renderer->anim->GetTransforms();
 

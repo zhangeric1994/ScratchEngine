@@ -1,5 +1,51 @@
 #include "Animator.h"
 
+
+ScratchEngine::AnimationBlender::AnimationBlender()
+{
+}
+
+ScratchEngine::AnimationBlender::AnimationBlender(vector<XMMATRIX> first, vector<XMMATRIX> second)
+{
+	SetData(first, second);
+}
+
+vector<XMMATRIX> ScratchEngine::AnimationBlender::operator()(f32 blendFactor)
+{
+	vector<XMMATRIX> output;
+
+	for (int i = 0; i < firstTranslation.size(); ++i)
+		output.push_back(XMMatrixTranspose(XMMatrixScalingFromVector(XMVectorLerp(firstScale[i], secondScale[i], blendFactor)) * XMMatrixRotationQuaternion(XMQuaternionSlerp(firstRotation[i], secondRotation[i], blendFactor)) * XMMatrixTranslationFromVector(XMVectorLerp(firstTranslation[i], secondTranslation[i], blendFactor))));
+
+	return output;
+}
+
+__forceinline void ScratchEngine::AnimationBlender::SetData(vector<XMMATRIX> first, vector<XMMATRIX> second)
+{
+	assert(first.size() == second.size());
+
+	firstTranslation.clear();
+	firstRotation.clear();
+	firstScale.clear();
+	secondTranslation.clear();
+	secondRotation.clear();
+	secondScale.clear();
+
+	for (int i = 0; i < first.size(); ++i)
+	{
+		XMMATRIX firstWorldMatrix = XMMatrixTranspose(first[i]);
+		firstTranslation.push_back(firstWorldMatrix.r[3]);
+		firstRotation.push_back(XMQuaternionRotationMatrix(firstWorldMatrix));
+		firstScale.push_back(XMVectorSet(1, 1, 1, 1));
+
+		XMMATRIX secondWorldMatrix = XMMatrixTranspose(second[i]);
+		secondTranslation.push_back(secondWorldMatrix.r[3]);
+		secondRotation.push_back(XMQuaternionRotationMatrix(secondWorldMatrix));
+		secondScale.push_back(XMVectorSet(1, 1, 1, 1));
+	}
+}
+
+
 ScratchEngine::Animator::Animator()
 {
 	timePos = 0.0f;
@@ -90,9 +136,11 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 		previousAnimationIndex = currentAnimationIndex;
 		currentAnimationIndex = animIndex;
 
-		LoopClips = true;
+		if (previousAnimationIndex != null_index)
+			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(0));
+
 		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
+		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 	
 		blendFactor = 0;
 	}
@@ -122,20 +170,19 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 	return false;
 }
 
-void ScratchEngine::Animator::SetSingleAnimation(int current)
-{
-	if (current >= animations.size()) {
-		return;
-	}
-
-	int oldIndex = currentAnimationIndex;
-	currentAnimationIndex = current;
-	if (oldIndex != currentAnimationIndex) {
-		LoopClips = false;
-		timePos = 0;
-		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
-	}
-}
+//void ScratchEngine::Animator::SetSingleAnimation(int current)
+//{
+//	if (current >= animations.size())
+//		return;
+//
+//	int oldIndex = currentAnimationIndex;
+//	currentAnimationIndex = current;
+//	if (oldIndex != currentAnimationIndex) {
+//		LoopClips = false;
+//		timePos = 0;
+//		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
+//	}
+//}
 
 bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 {
@@ -143,8 +190,9 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 
 	const float timestep = 1.0f / 30.0f;
 
-	for (UINT i = 0; i < animations.size(); i++) {
-		SetAnimationIndex(i);
+	for (UINT i = 0; i < animations.size(); i++)
+	{
+		currentAnimationIndex = i;
 
 		AnimationClip* animation = animations[i];
 
@@ -163,6 +211,8 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 			animation->transforms.push_back(Ws);
 		}
 	}
+
+	currentAnimationIndex = null_index;
 
 	return true;
 }
@@ -187,28 +237,31 @@ void ScratchEngine::Animator::Update(float dt)
 	if (blendFactor < 1)
 		blendFactor += blendSpeed * dt;
 	else
-		blendFactor = 1;
-
-
-	isPlaying = false;
-	if (!LoopClips && timePos + dt < duration) {
+	{
+		if (!LoopClips)
+		{
+			if (timePos >= duration)
+				isPlaying = false;
+			else
+			{
+				timePos += dt;
+				isPlaying = true;
+			}
+		}
+		else if (LoopClips)
 			timePos += dt;
-			isPlaying = true;
-			//SetAnimationIndex(nextAnimation);
-	}
-	else if(LoopClips){
-			timePos += dt;
-			isPlaying = true;
 	}
 }
 
 void ScratchEngine::Animator::PlayAnimationForward()
 {
+	isPlaying = true;
 	animations[currentAnimationIndex]->playAnimationForward = true;
 }
 
 void ScratchEngine::Animator::PlayAnimationBackward()
 {
+	isPlaying = true;
 	animations[currentAnimationIndex]->playAnimationForward = false;
 }
 
@@ -224,29 +277,12 @@ void ScratchEngine::Animator::AdjustAnimationSpeedTo(float ticksPerSec)
 	duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 }
 
-std::vector<XMMATRIX> ScratchEngine::Animator::GetTransforms()
+vector<XMMATRIX> ScratchEngine::Animator::GetTransforms()
 {
-	//if (blendFactor == 1 || previousAnimationIndex == null_index)
+	if (blendFactor >= 1 || previousAnimationIndex == null_index)
 		return animations[currentAnimationIndex]->GetTransforms(timePos);
 
-	//vector<XMMATRIX> currentWorldMatrices = animations[currentAnimationIndex]->GetTransforms(timePos);
-	//vector<XMMATRIX> previousWorldMatrices = animations[previousAnimationIndex]->GetTransforms(timePos);
-
-	//for (int i = 0; i < currentWorldMatrices.size(); ++i)
-	//{
-	//	XMMATRIX currentWorldMatrix = XMMatrixTranspose(currentWorldMatrices[i]);
-	//	XMMATRIX previousWorldMatrix = XMMatrixTranspose(previousWorldMatrices[i]);
-
-	//	XMVECTOR currentTranslation = currentWorldMatrix.r[0];
-	//	XMVECTOR currentRotation = XMQuaternionRotationMatrix(currentWorldMatrix);
-
-	//	XMVECTOR previousTranslation = previousWorldMatrix.r[0];
-	//	XMVECTOR previousRotation = XMQuaternionRotationMatrix(previousWorldMatrix);
-
-	//	currentWorldMatrices[i] = XMMatrixTranspose(XMMatrixRotationQuaternion(XMQuaternionSlerp(previousRotation, currentRotation, blendFactor)) * XMMatrixTranslationFromVector(XMVectorLerp(previousTranslation, currentTranslation, blendFactor)));
-	//}
-
-	//return currentWorldMatrices;
+	return blender(blendFactor);
 }
 
 int ScratchEngine::Animator::GetBoneIndex(string name)
@@ -258,15 +294,13 @@ int ScratchEngine::Animator::GetBoneIndex(string name)
 	return -1;
 }
 
-Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
+Bone* ScratchEngine::Animator::CreateBoneTree(aiNode* node, Bone* parent)
 {
-	Bone * internalNode = new Bone(std::string(node->mName.C_Str()), Parent);
+	Bone* internalNode = new Bone(std::string(node->mName.C_Str()), parent);
 
-	if (internalNode->name == "") {
-		internalNode->name = "foo" + _i++;
-	}
+	if (internalNode->name == "")
+		internalNode->name = "bone" + _i++;
 	
-
 	bonesByName[internalNode->name] = internalNode;
 	XMMATRIX trans = ToMatrix(node->mTransformation);
 	trans = XMMatrixTranspose(trans);
@@ -286,9 +320,9 @@ Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
 
 void ScratchEngine::Animator::Calculate(float dt)
 {
-	if ((currentAnimationIndex == null_index) | (currentAnimationIndex >= animations.size())) {
+	if ((currentAnimationIndex == null_index) | (currentAnimationIndex >= animations.size()))
 		return;
-	}
+	
 	animations[currentAnimationIndex]->Evaluate(dt, bonesByName);
 	UpdateTransforms(skeleton);
 }

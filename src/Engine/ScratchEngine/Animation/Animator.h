@@ -13,27 +13,48 @@
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
+using namespace std;
 using namespace ScratchEngine::Animation;
 
 namespace ScratchEngine
 {
+	struct AnimationBlender
+	{
+	private:
+		vector<XMVECTOR> firstTranslation;
+		vector<XMVECTOR> firstRotation;
+		vector<XMVECTOR> firstScale;
+		vector<XMVECTOR> secondTranslation;
+		vector<XMVECTOR> secondRotation;
+		vector<XMVECTOR> secondScale;
+
+
+	public:
+		AnimationBlender();
+		AnimationBlender(vector<XMMATRIX> first, vector<XMMATRIX> second);
+
+		vector<XMMATRIX> operator()(f32 blendFactor);
+
+		void SetData(vector<XMMATRIX> first, vector<XMMATRIX> second);
+	};
+
 	class __declspec(dllexport) Animator : public GameComponent
 	{
 	protected:
 		int _i;
-		Bone * skeleton;
-		std::map<std::string, Bone *> bonesByName;
-		std::map<std::string, int> bonesToIndex;
-		std::map<string, int> animationNameToId;
-		std::vector<Bone *> bones;
-		std::vector<AnimationClip *> animations;
+		Bone* skeleton;
+		map<string, Bone*> bonesByName;
+		map<string, int> bonesToIndex;
+		map<string, int> animationNameToId;
+		vector<Bone*> bones;
+		vector<AnimationClip *> animations;
 
-		void CalculateBoneToWorldTransform(Bone *child);
-		void UpdateTransforms(Bone * node); 
+		void CalculateBoneToWorldTransform(Bone* child);
+		void UpdateTransforms(Bone* node); 
 		void ExtractAnimations(const aiScene* scene);
 		
 		void  Calculate(float dt);
-		Bone * CreateBoneTree(aiNode * rootNode, Bone *Parent);
+		Bone* CreateBoneTree(aiNode* rootNode, Bone* Parent);
 		XMMATRIX ToMatrix(aiMatrix4x4 transform);
 	//private:
 	//	Animator* next;
@@ -63,9 +84,11 @@ namespace ScratchEngine
 		Animator* next;
 		Animator* previous;
 
+		AnimationBlender blender;
+
 		void Update(float dt);
 		bool SetAnimation(string animation);
-		void SetSingleAnimation(int current);
+		//void SetSingleAnimation(int current);
 		void SetAnimationIndex(int animIndex);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();
