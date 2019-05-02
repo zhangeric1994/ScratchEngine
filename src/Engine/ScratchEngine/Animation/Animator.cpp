@@ -159,7 +159,7 @@ void ScratchEngine::Animator::UpdateTransforms(Bone * node)
 
 bool ScratchEngine::Animator::SetAnimation(string animation)
 {
-	std::map<std::string, int>::iterator it = animationNameToId.find(animation);
+	map<std::string, int>::iterator it = animationNameToId.find(animation);
 
 	if (it != animationNameToId.end() && it->second != currentAnimationIndex)
 	{
@@ -191,11 +191,13 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 
 	const float timestep = 1.0f / 30.0f;
 
-	for (UINT i = previous; i < after; i++) {
+	for (UINT i = previous; i < after; i++)
+	{
 		AnimationClip* animation = animations[i];
+
 		float dt = 0.0f;
-		for (float ticks = 0.0f; ticks < animation->duration; ticks += animation->ticksPerSecond / 30.0f) {
-			dt += timestep;
+		for (float ticks = 0.0f; ticks < animation->duration; ticks += animation->ticksPerSecond / 30.0f)
+		{
 			Calculate(dt,i);
 
 			vector<XMMATRIX> Ws;
@@ -204,7 +206,10 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 				XMMATRIX W = bones[a]->offset * bones[a]->globalTransform;
 				Ws.push_back(XMMatrixTranspose(W));
 			}
+
 			animation->transforms.push_back(Ws);
+
+			dt += timestep;
 		}
 	}
 
@@ -214,20 +219,18 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 int ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 {
 	for (UINT i = 0; i < scene->mNumAnimations;i++)
-	{
-		aiAnimation * animation = scene->mAnimations[i];
-		animations.push_back(new AnimationClip(animation));
-	}
+		animations.push_back(new AnimationClip(scene->mAnimations[i]));
 
 	for (UINT i = 0; i < animations.size(); i++)
 		animationNameToId[animations[i]->name] = i;
+
 	return animations.size();
 }
 
 void ScratchEngine::Animator::Update(float dt)
 {
 	if (blendFactor < 1)
-		blendFactor += blendFactor * dt;
+		blendFactor += blendSpeed * dt;
 	else
 	{
 		if (!LoopClips)
