@@ -107,7 +107,6 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 			bonesToIndex[found->name] = bones.size()-1;
 		}
 		// TODO may come back if any bone is missing
-
 	}
 
 	LoadAnimations(scene);
@@ -341,10 +340,15 @@ void ScratchEngine::Animator::CalculateBoneToWorldTransform(Bone * child)
 	}
 }
 
-XMMATRIX ScratchEngine::Animator::ToMatrix(aiMatrix4x4 transform)
+__forceinline XMMATRIX ScratchEngine::Animator::ToMatrix(aiMatrix4x4 transform)
 {
-	return XMMatrixSet(transform.a1, transform.a2, transform.a3, transform.a4,
-		transform.b1, transform.b2, transform.b3, transform.b4,
-		transform.c1, transform.c2, transform.c3, transform.c4,
-		transform.d1, transform.d2, transform.d3, transform.d4);
+	XMMATRIX output;
+	memcpy(&output, &transform, sizeof(XMMATRIX));
+
+	return output;
+
+	//return XMMatrixSet(transform.a1, transform.a2, transform.a3, transform.a4,
+	//	transform.b1, transform.b2, transform.b3, transform.b4,
+	//	transform.c1, transform.c2, transform.c3, transform.c4,
+	//	transform.d1, transform.d2, transform.d3, transform.d4);
 }
