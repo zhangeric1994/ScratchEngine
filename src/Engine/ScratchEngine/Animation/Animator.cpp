@@ -138,18 +138,25 @@ float ScratchEngine::Animator::SetAnimationIndex(int animIndex, bool loop)
 	}
 	else if (animIndex != currentAnimationIndex)
 	{
+		LoopClips = loop;
 		previousAnimationIndex = currentAnimationIndex;
 		currentAnimationIndex = animIndex;
-
-		if (previousAnimationIndex != null_index)
-			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(0));
+		if (blendFactor < 1)
+		{
+			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(1 / blendSpeed));
+			blendFactor = 0;
+		}
+		else if (previousAnimationIndex != null_index)
+		{
+			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(1));
+			blendFactor = 0;
+			timePos = 0;
+			duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
+		}
+	}else if (animIndex == currentAnimationIndex && !loop) {
 		LoopClips = loop;
 		timePos = 0;
 		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
-
-		blendFactor = 0;
-	}else if(animIndex == currentAnimationIndex && !loop){
-		timePos = 0;
 	}
 	return duration;
 	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
