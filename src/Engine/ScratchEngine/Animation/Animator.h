@@ -65,7 +65,7 @@ namespace ScratchEngine
 
 		void Update(float dt);
 		bool SetAnimation(string animation);
-		void SetSingleAnimation(int current);
+		void SetSingleAnimationIndex(int current);
 		void SetAnimationIndex(int animIndex);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();

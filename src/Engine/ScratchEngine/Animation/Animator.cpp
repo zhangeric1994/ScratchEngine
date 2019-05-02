@@ -122,7 +122,7 @@ bool ScratchEngine::Animator::SetAnimation(string animation)
 	return false;
 }
 
-void ScratchEngine::Animator::SetSingleAnimation(int current)
+void ScratchEngine::Animator::SetSingleAnimationIndex(int current)
 {
 	if (current >= animations.size()) {
 		return;
