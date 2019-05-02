@@ -473,7 +473,7 @@ void ScratchEngine::Game::Update()
 		} else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
 			 // forward sprint
 			 if (!animationChanged && lastInputTime < totalTime) {
-				 model->anim->SetSingleAnimationIndex(9);
+				 model->anim->SetAnimationIndex(9);
 				 animationChanged = true;
 			 }
 			 Character->Translate(0, 0, speed * deltaTime * 2.0f);
