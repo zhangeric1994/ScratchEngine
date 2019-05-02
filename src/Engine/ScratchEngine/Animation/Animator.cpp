@@ -12,6 +12,8 @@ ScratchEngine::AnimationBlender::AnimationBlender(vector<XMMATRIX> first, vector
 
 vector<XMMATRIX> ScratchEngine::AnimationBlender::operator()(f32 blendFactor)
 {
+	blendFactor = __min(1, blendFactor);
+
 	vector<XMMATRIX> output;
 
 	for (int i = 0; i < firstTranslation.size(); ++i)
@@ -137,10 +139,13 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 		currentAnimationIndex = animIndex;
 
 		if (blendFactor < 1)
-			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(0));
+		{
+			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(1 / blendSpeed));
+			blendFactor = 0;
+		}
 		else if (previousAnimationIndex != null_index)
 		{
-			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(0));
+			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(1));
 			blendFactor = 0;
 		}
 
@@ -154,7 +159,8 @@ void ScratchEngine::Animator::SetAnimationIndex(int animIndex)
 void ScratchEngine::Animator::UpdateTransforms(Bone * node)
 {
 	CalculateBoneToWorldTransform(node);
-	for (UINT a = 0; a < node->children.size(); a++) {
+	for (UINT a = 0; a < node->children.size(); a++)
+	{
 		Bone* child = node->children[a];
 		UpdateTransforms(child);
 	}
