@@ -252,17 +252,16 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
 	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");			// 2
 	model->LoadAnimation("../Assets/Models/Pack/Turn.fbx");							// 3 
-	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4			// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");			// 5
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx");			// 6
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx");			// 7
-	model->LoadAnimation("../Assets/Models/Pack/Standing Run Forward.fbx");			// 8			// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Forward.fbx");			// 8		
 	model->LoadAnimation("../Assets/Models/Pack/Standing Run Back.fbx");			// 9
 	model->LoadAnimation("../Assets/Models/Pack/Standing Run Left.fbx");			// 10
 	model->LoadAnimation("../Assets/Models/Pack/Standing Run Right.fbx");			// 11
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 02.fbx");				// 12
 	model->LoadAnimation("../Assets/Models/Pack/standing idle looking ver. 1.fbx"); // 13
-	
 	model->anim->SetAnimationIndex(1);
 	model->anim->AdjustAnimationSpeedTo(15);
 	model->anim->PlayAnimationForward();
@@ -406,16 +405,14 @@ void ScratchEngine::Game::Update()
 		}
 
 		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			model->anim->SetAnimationIndex(2);
-			model->anim->AdjustAnimationSpeedTo(10);
+			model->anim->SetAnimationIndex(1);
 			lastInputTime = totalTime + 1.35f;
 			animationChanged = true;
 		}
 
 		if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(6);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(5);
 				animationChanged = true;
 			}
 			Character->Translate(speed * deltaTime, 0, 0);
@@ -423,8 +420,7 @@ void ScratchEngine::Game::Update()
 		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
 			// left sprint
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(10);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(9);
 				animationChanged = true;
 			}
 			Character->Translate(speed * deltaTime * 2.0f, 0, 0);
@@ -434,8 +430,7 @@ void ScratchEngine::Game::Update()
 		if (GetAsyncKeyState('D') & 0x8000 &&!GetAsyncKeyState(VK_LSHIFT)) {
 
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(7);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(6);
 				animationChanged = true;
 			}
 			Character->Translate(-speed * deltaTime, 0,	0);
@@ -443,8 +438,7 @@ void ScratchEngine::Game::Update()
 		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
 			// right sprint
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(11);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(10);
 				animationChanged = true;
 			}
 			Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
@@ -453,8 +447,7 @@ void ScratchEngine::Game::Update()
 
 		if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(4);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(3);
 				animationChanged = true;
 			}
 
@@ -463,8 +456,7 @@ void ScratchEngine::Game::Update()
 		}else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
 			// forward sprint
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(8);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(7);
 				animationChanged = true;
 			}
 			Character->Translate(0, 0, -speed * deltaTime * 2.0f);
@@ -477,8 +469,7 @@ void ScratchEngine::Game::Update()
 		 if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 
 			if (!animationChanged && lastInputTime < totalTime) {
-				model->anim->SetAnimationIndex(5);
-				model->anim->AdjustAnimationSpeedTo(20);
+				model->anim->SetAnimationIndex(4);
 				animationChanged = true;
 			}
 			Character->Translate(0, 0, speed * deltaTime);
@@ -486,8 +477,7 @@ void ScratchEngine::Game::Update()
 		} else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
 			 // forward sprint
 			 if (!animationChanged && lastInputTime < totalTime) {
-				 model->anim->SetAnimationIndex(9);
-				 model->anim->AdjustAnimationSpeedTo(20);
+				 model->anim->SetAnimationIndex(8);
 				 animationChanged = true;
 			 }
 			 Character->Translate(0, 0, speed * deltaTime * 2.0f);
@@ -499,18 +489,16 @@ void ScratchEngine::Game::Update()
 
 		if (lastInputTime < totalTime - 5) {
 			model->anim->SetAnimationIndex(12);
-			
-			lastInputTime = totalTime + 5;
+			lastInputTime = totalTime + model->anim->duration;
 		}
 		else if (lastInputTime < totalTime - 0.2f) {
 			model->anim->SetAnimationIndex(1);
-			model->anim->AdjustAnimationSpeedTo(20);
 		}
 
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
-		model->anim->Update(deltaTime*0.3);
+		model->anim->Update(deltaTime);
 
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);
