@@ -139,19 +139,17 @@ void ScratchEngine::Animator::SetSingleAnimation(int current)
 
 bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 {
-	ExtractAnimations(scene);
+	int previous = animations.size();
+	int after = ExtractAnimations(scene);
 
 	const float timestep = 1.0f / 30.0f;
 
-	for (UINT i = 0; i < animations.size(); i++) {
-		SetAnimationIndex(i);
-
+	for (UINT i = previous; i < after; i++) {
 		AnimationClip* animation = animations[i];
-
 		float dt = 0.0f;
-		for (float ticks = 0.0f; ticks < animations[i]->duration; ticks += animations[i]->ticksPerSecond / 30.0f) {
+		for (float ticks = 0.0f; ticks < animation->duration; ticks += animation->ticksPerSecond / 30.0f) {
 			dt += timestep;
-			Calculate(dt);
+			Calculate(dt,i);
 
 			vector<XMMATRIX> Ws;
 			for (UINT a = 0; a < bones.size(); a++)
@@ -159,15 +157,13 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 				XMMATRIX W = bones[a]->offset * bones[a]->globalTransform;
 				Ws.push_back(XMMatrixTranspose(W));
 			}
-			
 			animation->transforms.push_back(Ws);
 		}
 	}
-
 	return true;
 }
 
-void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
+int ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 {
 	for (UINT i = 0; i < scene->mNumAnimations;i++)
 	{
@@ -177,18 +173,15 @@ void ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 
 	for (UINT i = 0; i < animations.size(); i++)
 		animationNameToId[animations[i]->name] = i;
-	
-	currentAnimationIndex = 0;
-	duration = animations[currentAnimationIndex]->duration/animations[currentAnimationIndex]->ticksPerSecond;
+	return animations.size();
 }
 
 void ScratchEngine::Animator::Update(float dt)
 {
 	if (blendFactor < 1)
-		blendFactor += blendSpeed * dt;
+		blendFactor += blendFactor * dt;
 	else
 		blendFactor = 1;
-
 
 	isPlaying = false;
 	if (!LoopClips && timePos + dt < duration) {
@@ -284,12 +277,12 @@ Bone * ScratchEngine::Animator::CreateBoneTree(aiNode * node, Bone *Parent)
 	return internalNode;
 }
 
-void ScratchEngine::Animator::Calculate(float dt)
+void ScratchEngine::Animator::Calculate(float dt , int index)
 {
-	if ((currentAnimationIndex == null_index) | (currentAnimationIndex >= animations.size())) {
+	if ((index == null_index) | (index >= animations.size())) {
 		return;
 	}
-	animations[currentAnimationIndex]->Evaluate(dt, bonesByName);
+	animations[index]->Evaluate(dt, bonesByName);
 	UpdateTransforms(skeleton);
 }
 

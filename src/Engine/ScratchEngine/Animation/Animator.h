@@ -30,9 +30,9 @@ namespace ScratchEngine
 
 		void CalculateBoneToWorldTransform(Bone *child);
 		void UpdateTransforms(Bone * node); 
-		void ExtractAnimations(const aiScene* scene);
+		int ExtractAnimations(const aiScene* scene);
 		
-		void  Calculate(float dt);
+		void  Calculate(float dt, int index);
 		Bone * CreateBoneTree(aiNode * rootNode, Bone *Parent);
 		XMMATRIX ToMatrix(aiMatrix4x4 transform);
 	//private:
