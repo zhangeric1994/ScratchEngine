@@ -6,6 +6,8 @@
 
 #include "GameComponent.h"
 
+using namespace std;
+
 
 namespace ScratchEngine
 {
@@ -16,20 +18,26 @@ namespace ScratchEngine
 		struct Model;
 	}
 
+
 	using namespace ScratchEngine::Rendering;
 
+
 	class Animator;
+	class GameObject;
+	class Transform;
 
 	class __declspec(dllexport) Renderer : public GameComponent
 	{
+		friend class GameObject;
 		friend class Scene;
 
 
 	protected:
 		Material* material;
-		Mesh* mesh; // renderer can draw a single a mesh  or a complicated model with multiple mesh
+		Mesh* mesh;
 		Model* model;
 		Animator* anim;
+
 		i32 renderable;
 
 		Renderer* next;

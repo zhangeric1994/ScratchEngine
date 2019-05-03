@@ -45,9 +45,6 @@
     <ClCompile Include="Physics\BoundingVolume.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Physics\Collider.cpp">
-      <Filter>Source Files\Physics</Filter>
-    </ClCompile>
     <ClCompile Include="Physics\Collision.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
@@ -132,6 +129,9 @@
     <ClCompile Include="Rendering\Model.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\Collider.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -156,9 +156,6 @@
       <Filter>Header Files\Memory</Filter>
     </ClInclude>
     <ClInclude Include="Physics\BoundingVolume.h">
-      <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Collision.h">
@@ -304,6 +301,9 @@
     </ClInclude>
     <ClInclude Include="Animation\Animator.h">
       <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\Collider.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

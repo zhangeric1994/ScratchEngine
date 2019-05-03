@@ -359,16 +359,38 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	//go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	//go10->AddComponent<SphereCollider>();
 
+	GameObject* ground = new GameObject();
+	ground->SetLocalPosition(0, -0.5f, 0);
+	ground->SetLocalScale(100, 1, 100);
+	ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
 	GameObject* go11 = new GameObject();
-	go11->SetLocalPosition(0, -0.5f, 0);
-	go11->SetLocalScale(100, 1, 100);
-	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+	go11->SetLocalPosition(0, 2, 10);
+	go11->SetLocalScale(1, 4, 1);
+	go11->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	go11->AddComponent<BoxCollider>();
+
+	right = new GameObject();
+	right->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	right->AddComponent<SphereCollider>(0.3f);
+	right->SetLocalPosition(-115, 167, 4);
+	right->SetLocalScale(30);
+
+	left = new GameObject();
+	left->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	left->AddComponent<SphereCollider>(0.3f);
+	left->SetLocalPosition(115, 167, 0);
+	left->SetLocalScale(30);
+
+	model->anim->BindToSlot(23, right);
+	model->anim->BindToSlot(42, left);
 
 	Character = new GameObject();
 	Character->SetLocalPosition(0, 0, 0);
 	Character->SetLocalRotation(0, 180, 0);
 	Character->SetLocalScale(0.01f);
 	Character->AddComponent<Renderer>(skeletonMaterial, model);
+
 	camera->SetParent(cameraHolder);
 	cameraHolder->SetParent(Character);
 }
@@ -536,7 +558,7 @@ void ScratchEngine::Game::Update()
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
-		model->anim->Update(deltaTime);
+		model->anim->Update(deltaTime, Character);
 
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);

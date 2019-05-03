@@ -88,6 +88,8 @@ namespace ScratchEngine
 		GameObject* go7;
 		GameObject* go9;
 		GameObject* go10;
+		GameObject* right;
+		GameObject* left;
 
 		Barrier frameBarrier;
 

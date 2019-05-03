@@ -16,6 +16,8 @@ namespace ScratchEngine
 {
 	class __declspec(dllexport) GameObject final : public Transform, public IUpdatable, public ICollisionCallback
 	{
+		friend class Animator;
+		friend class PhysicsEngine;
 		friend class Scene;
 
 
@@ -57,7 +59,7 @@ namespace ScratchEngine
 				bool : 1;
 				bool : 1;
 
-				bool : 1;
+				bool isInSlot : 1;
 				bool : 1;
 				bool : 1;
 				bool : 1;

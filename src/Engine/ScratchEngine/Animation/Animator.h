@@ -1,9 +1,10 @@
 #pragma once
 #include <d3d11.h>
-#include <fstream> 
-#include <vector>
-#include <map>
 #include <DirectXMath.h>
+#include <fstream>
+#include <map>
+#include <tuple>
+#include <vector>
 
 #include "Bone.h"
 #include "../Core/GameComponent.h"
@@ -16,8 +17,12 @@
 using namespace std;
 using namespace ScratchEngine::Animation;
 
+
 namespace ScratchEngine
 {
+	class Renderer;
+
+
 	struct AnimationBlender
 	{
 	private:
@@ -40,6 +45,9 @@ namespace ScratchEngine
 
 	class __declspec(dllexport) Animator : public GameComponent
 	{
+		friend class Scene;
+
+
 	protected:
 		int _i;
 		Bone* skeleton;
@@ -47,7 +55,11 @@ namespace ScratchEngine
 		map<string, int> bonesToIndex;
 		map<string, int> animationNameToId;
 		vector<Bone*> bones;
-		vector<AnimationClip *> animations;
+		vector<AnimationClip*> animations;
+
+		vector<pair<i32, GameObject*>> slots;
+		//GameObject* slot = nullptr;
+		//i32 slotIndex = null_index;
 
 		void CalculateBoneToWorldTransform(Bone* child);
 		void UpdateTransforms(Bone* node); 
@@ -81,15 +93,15 @@ namespace ScratchEngine
 		float blendFactor;
 		float blendSpeed;
 
+		AnimationBlender blender;
+
 		Animator* next;
 		Animator* previous;
 
-		AnimationBlender blender;
-
-		void Update(float dt);
+		void Update(float dt, GameObject* parent);
 		bool SetAnimation(string animation, bool loop);
 		//void SetSingleAnimation(int current);
-		float SetAnimationIndex(int animIndex,bool loop);
+		float SetAnimationIndex(int animIndex, bool loop);
 		void PlayAnimationForward();
 		void PlayAnimationBackward();
 		void AdjustAnimationSpeedBy(float prc);
@@ -98,5 +110,8 @@ namespace ScratchEngine
 		int GetBoneIndex(string name);
 
 		bool LoadAnimations(const aiScene* scene);
+
+		void BindToSlot(i32 boneIndex, GameObject* gameObject);
+		void UnbindFromSlot(GameObject* gameObject);
 	};
 }

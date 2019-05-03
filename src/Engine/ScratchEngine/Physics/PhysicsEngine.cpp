@@ -192,7 +192,10 @@ __forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume
 		if (!collider->boundingVolume)
 			collider->boundingVolume = new BoundingSphere();
 
-		static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
+		if (gameObject->isInSlot)
+			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix().r[3], static_cast<SphereCollider*>(collider)->GetRadius());
+		else
+			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
 
 		if (collider->id == null_index)
 			collider->id = dynamicBVH.Insert(collider, GetEnlargedAABB(static_cast<BoundingSphere*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));

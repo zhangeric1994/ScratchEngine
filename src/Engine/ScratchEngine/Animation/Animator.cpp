@@ -1,4 +1,6 @@
 #include "Animator.h"
+#include "../Core/GameObject.h"
+#include "../Core/Renderer.h"
 
 
 ScratchEngine::AnimationBlender::AnimationBlender()
@@ -17,10 +19,12 @@ vector<XMMATRIX> ScratchEngine::AnimationBlender::operator()(f32 blendFactor)
 	vector<XMMATRIX> output;
 
 	for (int i = 0; i < firstTranslation.size(); ++i)
+	{
 		output.push_back(XMMatrixTranspose(
-			XMMatrixScalingFromVector({1,1,1})
+			XMMatrixScalingFromVector(XMVectorLerp(firstScale[i], secondScale[i], blendFactor))
 			* XMMatrixRotationQuaternion(XMQuaternionSlerp(firstRotation[i], secondRotation[i], blendFactor))
 			* XMMatrixTranslationFromVector(XMVectorLerp(firstTranslation[i], secondTranslation[i], blendFactor))));
+	}
 
 	return output;
 }
@@ -140,6 +144,7 @@ float ScratchEngine::Animator::SetAnimationIndex(int animIndex, bool loop)
 		LoopClips = loop;
 		previousAnimationIndex = currentAnimationIndex;
 		currentAnimationIndex = animIndex;
+
 		if (blendFactor < 1)
 		{
 			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(1 / blendSpeed));
@@ -152,11 +157,14 @@ float ScratchEngine::Animator::SetAnimationIndex(int animIndex, bool loop)
 			timePos = 0;
 			duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 		}
-	}else if (animIndex == currentAnimationIndex && !loop) {
+	}
+	else if (animIndex == currentAnimationIndex && !loop)
+	{
 		LoopClips = loop;
 		timePos = 0;
 		duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 	}
+
 	return duration;
 	//printf("animation speed : %f", animations[currentAnimationIndex]->ticksPerSecond);
 }
@@ -241,7 +249,7 @@ int ScratchEngine::Animator::ExtractAnimations(const aiScene * scene)
 	return animations.size();
 }
 
-void ScratchEngine::Animator::Update(float dt)
+void ScratchEngine::Animator::Update(float dt, GameObject* parent)
 {
 	if (blendFactor < 1)
 		blendFactor += blendSpeed * dt;
@@ -260,6 +268,14 @@ void ScratchEngine::Animator::Update(float dt)
 		else if (LoopClips)
 			timePos += dt;
 	}
+
+	i32 numSlots;
+	if ((numSlots = slots.size()) > 0)
+		for (auto it = slots.begin(); it != slots.end(); ++it)
+		{
+			GameObject* slot = it->second;
+			slot->worldMatrix = XMMatrixScalingFromVector(slot->localScale) * XMMatrixTranslationFromVector(slot->localPosition) * XMMatrixTranspose(GetTransforms()[it->first]) * parent->GetWorldMatrix();
+		}
 }
 
 void ScratchEngine::Animator::PlayAnimationForward()
@@ -357,4 +373,28 @@ __forceinline XMMATRIX ScratchEngine::Animator::ToMatrix(aiMatrix4x4 transform)
 	//	transform.b1, transform.b2, transform.b3, transform.b4,
 	//	transform.c1, transform.c2, transform.c3, transform.c4,
 	//	transform.d1, transform.d2, transform.d3, transform.d4);
+}
+
+void ScratchEngine::Animator::BindToSlot(i32 boneIndex, GameObject* gameObject)
+{
+	if (gameObject->parent)
+		gameObject->parent->__RemoveChild(gameObject);
+
+	gameObject->parent = nullptr;
+	gameObject->index = slots.size();
+	gameObject->isInSlot = true;
+
+	slots.push_back({ boneIndex, gameObject });
+}
+
+void ScratchEngine::Animator::UnbindFromSlot(GameObject* gameObject)
+{
+	for (size_t i = gameObject->index + 1; i < slots.size(); ++i)
+		--slots[i].second->index;
+
+	slots.erase(slots.begin() + gameObject->index);
+
+	gameObject->parent = nullptr;
+	gameObject->index = null_index;
+	gameObject->isInSlot = false;
 }
