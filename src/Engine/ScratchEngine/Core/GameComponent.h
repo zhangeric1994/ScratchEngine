@@ -72,6 +72,9 @@ namespace ScratchEngine
 		bool IsActive();
 		bool IsActiveSelf();
 
+		void SetActive(bool flag);
+
+
 		void SendMessage_(const Message& message);
 		void SendMessageUp(const Message& message, u32 level = UINT_MAX);
 		void SendMessageDown(const Message& message, u32 level = UINT_MAX);
@@ -87,4 +90,9 @@ namespace ScratchEngine
 		virtual void OnOverlapping(GameObject* other) { }
 		virtual void OnEndOverlapping(GameObject* other) { }
 	};
+}
+
+inline void ScratchEngine::GameComponent::SetActive(bool flag)
+{
+	isActive = flag;
 }

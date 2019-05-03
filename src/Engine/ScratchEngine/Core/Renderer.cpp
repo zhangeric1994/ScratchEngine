@@ -51,13 +51,3 @@ ScratchEngine::Renderer::~Renderer()
 {
 	Scene::GetCurrentScene()->RemoveRenderer(this);
 }
-
-void ScratchEngine::Renderer::OnBeginOverlapping(GameObject * other)
-{
-	material = Game::redMaterial;
-}
-
-void ScratchEngine::Renderer::OnEndOverlapping(GameObject * other)
-{
-	material = Game::greenMaterial;
-}

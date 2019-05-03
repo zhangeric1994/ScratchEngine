@@ -197,6 +197,8 @@
     <ClInclude Include="Memory\StackAllocator.hpp" />
     <ClInclude Include="Message\IMessageReceiver.h" />
     <ClInclude Include="Message\Message.h" />
+    <ClInclude Include="Dummy.h" />
+    <ClInclude Include="Mob.h" />
     <ClInclude Include="Multithreading\Barrier.h" />
     <ClInclude Include="Multithreading\WorkerThread.h" />
     <ClInclude Include="Physics\BoundingVolume.h" />
