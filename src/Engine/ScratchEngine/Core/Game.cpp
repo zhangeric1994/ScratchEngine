@@ -400,20 +400,20 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	dummy->AddComponent<Dummy>(redMaterial, greenMaterial);
 
 	GameObject* rightHandObject = new GameObject();
-	rightHand = rightHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	rightHandObject->AddComponent<SphereCollider>(0.15f);
+	rightHandRenderer = rightHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	rightHandCollider = rightHandObject->AddComponent<SphereCollider>(0.15f);
 	rightHandObject->SetLocalPosition(-115, 167, 4);
 	rightHandObject->SetLocalScale(30);
 
-	rightHand->SetActive(false);
+	rightHandRenderer->SetActive(false);
 
 	GameObject* leftHandObject = new GameObject();
-	leftHand = leftHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	leftHandObject->AddComponent<SphereCollider>(0.15f);
+	leftHandRenderer = leftHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	leftHandCollider = leftHandObject->AddComponent<SphereCollider>(0.15f);
 	leftHandObject->SetLocalPosition(115, 167, 0);
 	leftHandObject->SetLocalScale(30);
 
-	leftHand->SetActive(false);
+	leftHandRenderer->SetActive(false);
 
 	model->anim->BindToSlot(23, rightHandObject);
 	model->anim->BindToSlot(42, leftHandObject);
@@ -466,8 +466,8 @@ void ScratchEngine::Game::Update()
 
 		if (Input::IsKeyPressed('1'))
 		{
-			rightHand->SetActive(!rightHand->IsActiveSelf());
-			leftHand->SetActive(!leftHand->IsActiveSelf());
+			rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
+			leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
 		}
 
 		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
@@ -618,6 +618,9 @@ void ScratchEngine::Game::Update()
 				model->anim->SetAnimationIndex(1, true);
 			}
 		}
+
+		rightHandCollider->SetActive(attacking);
+		leftHandCollider->SetActive(attacking);
 
 		if (lastTriggerTime < totalTime - 3) {
 			int idleIndex = rand() % 2 + 2;

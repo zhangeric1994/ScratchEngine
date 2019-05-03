@@ -69,43 +69,15 @@ void ScratchEngine::Physics::PhysicsEngine::RemoveCollider(Collider* collider)
 void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 {
 	for (Collider* collider = colliderList; collider; collider = collider->next)
-		__UpdateBoundingVolume(collider->GetGameObject(), collider);
+		if (collider->isActive)
+			__UpdateBoundingVolume(collider->GetGameObject(), collider);
 }
 
 void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 {
-	for (Collider* colliderA = colliderList; colliderA; colliderA = colliderA->next)
-		dynamicBVH.Query(colliderA->id, this);
-		//for (Collider* colliderB = colliderA->next; colliderB; colliderB = colliderB->next)
-		//{
-		//	auto it = colliderA->contacts.find(colliderB);
-
-		//	GameObject* gameObjectA = colliderA->GetGameObject();
-		//	GameObject* gameObjectB = colliderB->GetGameObject();
-
-		//	if (colliderA->IsOverlappingWith(colliderB))
-		//	{
-		//		if (it == colliderA->contacts.end())
-		//		{
-		//			colliderA->contacts.insert(colliderB);
-		//			static_cast<ICollisionCallback*>(gameObjectA)->OnBeginOverlapping(gameObjectB);
-
-		//			colliderB->contacts.insert(colliderA);
-		//			static_cast<ICollisionCallback*>(gameObjectB)->OnBeginOverlapping(gameObjectA);
-		//		}
-
-		//		static_cast<ICollisionCallback*>(gameObjectA)->OnOverlapping(gameObjectB);
-		//		static_cast<ICollisionCallback*>(gameObjectB)->OnOverlapping(gameObjectA);
-		//	}
-		//	else if (it != colliderA->contacts.end())
-		//	{
-		//		colliderA->contacts.erase(it);
-		//		static_cast<ICollisionCallback*>(gameObjectA)->OnEndOverlapping(gameObjectB);
-
-		//		colliderB->contacts.erase(colliderA);
-		//		static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
-		//	}
-		//}
+	for (Collider* collider = colliderList; collider; collider = collider->next)
+		if (collider->isActive)
+			dynamicBVH.Query(collider->id, this);
 
 	//printf("\n\n");
 }
@@ -131,7 +103,7 @@ bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const 
 	Collider* colliderA = nodeA.data;
 	Collider* colliderB = nodeB.data;
 	
-	if (colliderA->id < colliderB->id)
+	if (colliderA->isActive && colliderB->isActive && colliderA->id < colliderB->id)
 	{
 		//printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
 		auto it = colliderA->contacts.find(colliderB);

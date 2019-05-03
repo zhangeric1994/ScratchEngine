@@ -92,8 +92,10 @@ namespace ScratchEngine
 		GameObject* go9;
 		GameObject* go10;
 
-		Renderer* rightHand;
-		Renderer* leftHand;
+		Renderer* rightHandRenderer;
+		SphereCollider* rightHandCollider;
+		Renderer* leftHandRenderer;
+		SphereCollider* leftHandCollider;
 
 		Barrier frameBarrier;
 
