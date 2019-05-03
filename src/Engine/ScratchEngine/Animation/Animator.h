@@ -84,6 +84,7 @@ namespace ScratchEngine
 		int previousAnimationIndex;
 		int currentAnimationIndex;
 		
+		bool useBlending = false;
 		bool hasSkeleton;
 		bool isPlaying;
 		string animationName;

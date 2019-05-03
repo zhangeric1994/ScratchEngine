@@ -420,9 +420,25 @@ void ScratchEngine::Game::Update()
 		
 		float speed = 1.5f;
 		bool animationChanged = false;
+
+		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
+			//useBlending
+			model->anim->useBlending = false;
+			printf("Blending OFF\n");
+			lastInputTime = totalTime + 0.05f;
+		}
+
+		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
+			//useBlending
+			model->anim->useBlending = true;
+			printf("Blending ON\n");
+			lastInputTime = totalTime + 0.05f;
+		}
+
+
 		if ((GetKeyState('F') & 0x8000) != 0) {
 			//attacking
-			if (!animationChanged&& lastAttackTime < totalTime) {
+			if (!animationChanged && lastAttackTime < totalTime) {
 				float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
 				attacking = true;
 				animationChanged = true;
@@ -715,6 +731,9 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 void ScratchEngine::Game::OnMouseWheel(float wheelDelta, int x, int y)
 {
 	// Add any custom code here...
+	if(camera->GetLocalPosition().m128_f32[2] + wheelDelta < -0.5f &&
+		camera->GetLocalPosition().m128_f32[2] + wheelDelta > -12)
+		camera->Translate(0, 0, wheelDelta * 0.3f);
 }
 #pragma endregion
 

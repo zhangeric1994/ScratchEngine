@@ -65,7 +65,7 @@ ScratchEngine::Animator::Animator()
 	hasSkeleton = false;
 
 	blendFactor = 1;
-	blendSpeed = 10;
+	blendSpeed = 100;
 }
 
 
@@ -78,7 +78,7 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 	currentAnimationIndex = null_index;
 
 	blendFactor = 1;
-	blendSpeed = 10;
+	blendSpeed = 100;
 
 	if (!scene->HasAnimations()) {
 		// no animation
@@ -145,15 +145,15 @@ float ScratchEngine::Animator::SetAnimationIndex(int animIndex, bool loop)
 		previousAnimationIndex = currentAnimationIndex;
 		currentAnimationIndex = animIndex;
 
-		if (blendFactor < 1)
+		if (blendFactor < 1 && useBlending)
 		{
 			blender.SetData(blender(blendFactor), animations[currentAnimationIndex]->GetTransforms(1 / blendSpeed));
 			blendFactor = 0;
 		}
 		else if (previousAnimationIndex != null_index)
 		{
-			blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(1));
-			blendFactor = 0;
+			if (useBlending) blender.SetData(animations[previousAnimationIndex]->GetTransforms(timePos), animations[currentAnimationIndex]->GetTransforms(1));
+			blendFactor = useBlending? 0:1;
 			timePos = 0;
 			duration = animations[currentAnimationIndex]->duration / animations[currentAnimationIndex]->ticksPerSecond;
 		}
@@ -218,6 +218,7 @@ bool ScratchEngine::Animator::LoadAnimations(const aiScene* scene)
 		AnimationClip* animation = animations[i];
 
 		float dt = 0.0f;
+		animation->transforms.clear();
 		for (float ticks = 0.0f; ticks < animation->duration; ticks += animation->ticksPerSecond / 30.0f)
 		{
 			Calculate(dt,i);
