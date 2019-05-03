@@ -299,9 +299,6 @@
     <ClInclude Include="Rendering\Model.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Animation\Animator.h">
-      <Filter>Header Files\Animation</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
@@ -309,6 +306,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mob.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animator.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -58,8 +58,6 @@ namespace ScratchEngine
 		vector<AnimationClip*> animations;
 
 		vector<pair<i32, GameObject*>> slots;
-		//GameObject* slot = nullptr;
-		//i32 slotIndex = null_index;
 
 		void CalculateBoneToWorldTransform(Bone* child);
 		void UpdateTransforms(Bone* node); 
@@ -68,9 +66,7 @@ namespace ScratchEngine
 		void  Calculate(float dt, int index);
 		Bone* CreateBoneTree(aiNode* rootNode, Bone* Parent);
 		XMMATRIX ToMatrix(aiMatrix4x4 transform);
-	//private:
-	//	Animator* next;
-	//	Animator* previous;
+
 
 	public:
 		Animator();

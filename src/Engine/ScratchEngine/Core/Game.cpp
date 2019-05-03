@@ -471,6 +471,9 @@ void ScratchEngine::Game::Update()
 			leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
 		}
 
+		if (Input::IsKeyPressed('2'))
+			model->anim->useBlending = !model->anim->useBlending;
+
 		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
 			//useBlending
 			model->anim->useBlending = false;
