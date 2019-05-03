@@ -167,9 +167,12 @@
     <ClInclude Include="Core\GameObject.h" />
     <ClInclude Include="Core\InputEvent.h" />
     <ClInclude Include="Core\InputManager.h" />
+    <ClInclude Include="Core\NavPathGen.h" />
+    <ClInclude Include="Core\PolyMeshField.h" />
     <ClInclude Include="Core\Scene.h" />
     <ClInclude Include="Core\Space.h" />
     <ClInclude Include="Core\Transform.h" />
+    <ClInclude Include="Core\TriangleMesh.h" />
     <ClInclude Include="header.h" />
     <ClInclude Include="Memory\Allocator.h" />
     <ClInclude Include="Memory\Block.h" />
@@ -212,8 +215,11 @@
     <ClCompile Include="Core\GameObject.cpp" />
     <ClCompile Include="Core\InputEvent.cpp" />
     <ClCompile Include="Core\InputManager.cpp" />
+    <ClCompile Include="Core\NavPathGen.cpp" />
+    <ClCompile Include="Core\PolyMeshField.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
     <ClCompile Include="Core\Transform.cpp" />
+    <ClCompile Include="Core\TriangleMesh.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Memory\DynamicPoolAllocator.hpp" />
     <ClCompile Include="Memory\BlockAllocator.cpp" />
