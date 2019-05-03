@@ -395,11 +395,15 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	rightHandObject->SetLocalPosition(-115, 167, 4);
 	rightHandObject->SetLocalScale(30);
 
+	rightHand->SetActive(false);
+
 	GameObject* leftHandObject = new GameObject();
 	leftHand = leftHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	leftHandObject->AddComponent<SphereCollider>(0.15f);
 	leftHandObject->SetLocalPosition(115, 167, 0);
 	leftHandObject->SetLocalScale(30);
+
+	leftHand->SetActive(false);
 
 	model->anim->BindToSlot(23, rightHandObject);
 	model->anim->BindToSlot(42, leftHandObject);
@@ -453,7 +457,7 @@ void ScratchEngine::Game::Update()
 		if (Input::IsKeyPressed('1'))
 		{
 			rightHand->SetActive(!rightHand->IsActiveSelf());
-			leftHand->SetActive(!rightHand->IsActiveSelf());
+			leftHand->SetActive(!leftHand->IsActiveSelf());
 		}
 
 		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
@@ -664,7 +668,7 @@ void ScratchEngine::Game::Draw()
 
 		context->RSSetViewports(1, &shadowViewport);
 
-		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
