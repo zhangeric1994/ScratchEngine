@@ -162,7 +162,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float3x3 TBN = float3x3(T, B, N);
 
 	float3 normal = normalize(mul(textureNormal, TBN));
-	input.normal = lerp(input.normal, normal, 1);
+	input.normal = lerp(input.normal, normal, hasNormalMap);
 
 	//param for light calculation
 	normal = input.normal;
@@ -171,15 +171,15 @@ float4 main(VertexToPixel input) : SV_TARGET {
 
 	//texture color
     float3 albedo = diffuseMap.Sample(basicSampler, input.uv).rgb;
-    albedo = lerp(float3(1, 1, 1), albedo, 1);
+    albedo = lerp(float3(1, 1, 1), albedo, hasTexture);
 
 	//roughness
 	float roughness = roughnessMap.Sample(basicSampler, input.uv).r;
-	roughness = lerp(0.0f, roughness, 1);
+	roughness = lerp(0.0f, roughness, hasRoughnessMap);
 
 	//metalness map
 	float metalness = metalnessMap.Sample(basicSampler, input.uv).r;
-	metalness = lerp(0.0f, metalness, 0);
+	metalness = lerp(0.0f, metalness, hasMetalnessMap);
 
 	//shadow map
 	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
