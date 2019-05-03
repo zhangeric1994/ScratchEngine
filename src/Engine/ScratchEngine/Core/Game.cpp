@@ -374,14 +374,15 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	//ground->SetLocalPosition(0, -0.5f, 0);
 	//ground->SetLocalScale(20, 1, 20);
 	//ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
-	for (float i = 0; i < 50.0f; i+= 15.05f) {
-		for (float j = 0; j < 50.0f; j+= 15.05f) {
+	for (float i = 0; i < 50; i += 15)
+		for (float j = 0; j < 50; j += 15)
+		{
 			GameObject* ground = new GameObject();
 			ground->SetLocalPosition(-18 + i, -0.5f, -18 + j);
-			ground->SetLocalScale(15, 1, 15);
+			ground->SetLocalScale(15.01f, 1, 15);
 			ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 		}
-	}
+	
 	//GameObject* ground = new GameObject();
 	//ground->SetLocalPosition(0, -0.5f, 0);
 	//ground->SetLocalScale(1, 1, 1);
@@ -622,14 +623,21 @@ void ScratchEngine::Game::Update()
 		rightHandCollider->SetActive(attacking);
 		leftHandCollider->SetActive(attacking);
 
-		if (lastTriggerTime < totalTime - 3) {
+
+		if (mob->GetComponent<Mob>()->hit)
+		{
+			//get hit 
+			mob->GetComponent<Mob>()->hit = false;
+			lastTriggerTime = totalTime + mob->GetComponent<Mob>()->duration;
+		}
+		else if (lastTriggerTime < totalTime - 3)
+		{
 			int idleIndex = rand() % 2 + 2;
 			float duration = mobModel->anim->SetAnimationIndex(idleIndex, true);
 			lastTriggerTime = totalTime + duration;
 		}
-		else if (lastTriggerTime < totalTime - 0.1f) {
+		else if (lastTriggerTime < totalTime - 0.1f)
 			mobModel->anim->SetAnimationIndex(1, true);
-		}
 	
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
