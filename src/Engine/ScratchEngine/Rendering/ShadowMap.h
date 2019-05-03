@@ -11,10 +11,12 @@ namespace ScratchEngine {
 			~ShadowMap();
 
 			void setUp(ID3D11Device* device);
+			void setShader(SimpleVertexShader* _shadowShader);
 
 			ID3D11DepthStencilView*		getShadowDSV();
 			ID3D11RasterizerState*		getRasterizerState();
 			ID3D11ShaderResourceView*	getShadowSRV();
+			SimpleVertexShader*			getShadowShader();
 			ID3D11SamplerState*			getSampler();
 
 		private:
@@ -31,6 +33,8 @@ namespace ScratchEngine {
 			ID3D11Texture2D*					shadowTexture;
 
 			ID3D11SamplerState*					shadowSampler;
+
+			SimpleVertexShader*					shadowShader;
 
 			ID3D11DepthStencilView*				shadowDepthStencilView;
 

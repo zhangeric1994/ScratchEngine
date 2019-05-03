@@ -2,34 +2,22 @@
 #define LIGHT_SOURCE_H
 #pragma once
 
-#include <DirectXMath.h>
-
-#include "../Common/Typedefs.h"
-
-using namespace DirectX;
-
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		enum class LightType
-		{
-			DIRECTIONAL,
-			POINT,
-			SPOT,
-		};
-
-
 		struct LightSource
 		{
-		public:
+			friend class RenderingEngine;
+
+
+		private:
 			XMVECTOR ambientColor;
 			XMVECTOR diffuseColor;
 			LightType type : 32;
 			XMFLOAT3 position;
-			f32 range;
+			float range;
 			XMFLOAT3 direction;
-			//int shadowMapID;
 		};
 	}
 }

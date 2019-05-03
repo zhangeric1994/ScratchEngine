@@ -75,14 +75,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -93,7 +93,6 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,8 +101,7 @@
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
-xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,8 +112,7 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine;..\..\Engine\Externals\include</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -124,8 +121,8 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\bin\*.dll" "$(OutDir)" /y /d
-xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"
+xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -139,7 +136,6 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,8 +146,7 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\*.dll" "$(OutDir)" /y /d
-xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,8 +159,7 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine;..\..\Engine\Externals\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>..\..\Engine\ScratchEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -176,8 +170,8 @@ xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
       <AdditionalDependencies>ScratchEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy "..\..\Engine\Externals\bin\*.dll" "$(OutDir)" /y /d
-xcopy "..\Assets" "$(OutDir)..\Assets" /s /i /y /d</Command>
+      <Command>xcopy /y /d "..\..\Engine\$(IntDir)ScratchEngine.dll" "$(OutDir)"
+xcopy /y /d "..\..\Engine\$(IntDir)*.cso" "$(OutDir)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -1,5 +1,4 @@
-#include "CubeMap.h"
-
+#include "CubeMap.h";
 
 ScratchEngine::Rendering::CubeMap::CubeMap() {
 	//rasterizer desc

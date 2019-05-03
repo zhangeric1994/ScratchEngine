@@ -64,29 +64,6 @@ __inline ScratchEngine::f32 ScratchEngine::Physics::AxisAlignedBoundingBox::GetV
 	return lwh.m128_f32[0] * lwh.m128_f32[1] * lwh.m128_f32[2];
 }
 
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetCenter(f32 x, f32 y, f32 z)
-{
-	SetCenter({ x, y, z });
-}
-
-void ScratchEngine::Physics::AxisAlignedBoundingBox::SetCenter(XMVECTOR center)
-{
-	XMVECTOR halfSize = GetHalfSize();
-
-	min = XMVectorSubtract(center, halfSize);
-	max = XMVectorAdd(center, halfSize);
-}
-
-__inline bool ScratchEngine::Physics::AxisAlignedBoundingBox::DoesContain(const AxisAlignedBoundingBox& other) const
-{
-	return XMVector3GreaterOrEqual(max, other.max) && XMVector3LessOrEqual(min, other.min);
-}
-
-__inline bool ScratchEngine::Physics::AxisAlignedBoundingBox::DoesContain(AxisAlignedBoundingBox* other) const
-{
-	return XMVector3GreaterOrEqual(max, other->max) && XMVector3LessOrEqual(min, other->min);
-}
-
 __inline void* ScratchEngine::Physics::AxisAlignedBoundingBox::operator new(size_t size)
 {
 	return _aligned_malloc(size, 16);
@@ -207,17 +184,4 @@ void ScratchEngine::Physics::BoundingSphere::SetData(XMVECTOR position, f32 radi
 {
 	this->center = position;
 	this->radius = radius;
-}
-
-
-void ScratchEngine::Physics::BoundingFrustum::SetData(XMMATRIX viewProjection)
-{
-	viewProjection = XMMatrixTranspose(viewProjection);
-
-	leftPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[0]);
-	rightPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[0]);
-	bottomPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[1]);
-	topPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[1]);
-	nearPlane = XMVectorAdd(viewProjection.r[3], viewProjection.r[2]);
-	farPlane = XMVectorSubtract(viewProjection.r[3], viewProjection.r[2]);
 }

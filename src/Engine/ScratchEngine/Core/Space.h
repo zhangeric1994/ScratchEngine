@@ -1,11 +1,8 @@
 #pragma once
 
-namespace ScratchEngine
+enum Space
 {
-	enum class __declspec(dllexport) Space
-	{
-		SELF,
-		PARENT,
-		WORLD,
-	};
-}
+	SELF,
+	PARENT,
+	WORLD,
+};

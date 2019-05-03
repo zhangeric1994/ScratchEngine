@@ -168,7 +168,7 @@ bool ISimpleShader::LoadShaderFile(LPCWSTR shaderFile)
 		// Create this constant buffer
 		D3D11_BUFFER_DESC newBuffDesc;
 		newBuffDesc.Usage = D3D11_USAGE_DEFAULT;
-		newBuffDesc.ByteWidth = __max(bufferDesc.Size, 16); // NEW: Must be multiple of 16
+		newBuffDesc.ByteWidth = max(bufferDesc.Size, 16); // NEW: Must be multiple of 16
 		newBuffDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		newBuffDesc.CPUAccessFlags = 0;
 		newBuffDesc.MiscFlags = 0;
@@ -413,14 +413,6 @@ bool ISimpleShader::SetFloat3(std::string name, const float data[3])
 // Sets a FLOAT3 variable by name in the local data buffer
 // --------------------------------------------------------
 bool ISimpleShader::SetFloat3(std::string name, const DirectX::XMFLOAT3 data)
-{
-	return this->SetData(name, &data, sizeof(float) * 3);
-}
-
-// --------------------------------------------------------
-// Sets a FLOAT3 variable by name in the local data buffer
-// --------------------------------------------------------
-bool ISimpleShader::SetFloat3(std::string name, const DirectX::XMVECTOR data)
 {
 	return this->SetData(name, &data, sizeof(float) * 3);
 }
@@ -1668,9 +1660,9 @@ void SimpleComputeShader::DispatchByGroups(unsigned int groupsX, unsigned int gr
 void SimpleComputeShader::DispatchByThreads(unsigned int threadsX, unsigned int threadsY, unsigned int threadsZ)
 {
 	deviceContext->Dispatch(
-		__max((unsigned int)ceil((float)threadsX / this->threadsX), 1),
-		__max((unsigned int)ceil((float)threadsY / this->threadsY), 1),
-		__max((unsigned int)ceil((float)threadsZ / this->threadsZ), 1));
+		max((unsigned int)ceil((float)threadsX / this->threadsX), 1),
+		max((unsigned int)ceil((float)threadsY / this->threadsY), 1),
+		max((unsigned int)ceil((float)threadsZ / this->threadsZ), 1));
 }
 
 // --------------------------------------------------------

@@ -106,8 +106,6 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 		//		static_cast<ICollisionCallback*>(gameObjectB)->OnEndOverlapping(gameObjectA);
 		//	}
 		//}
-
-	//printf("\n\n");
 }
 
 //
@@ -121,11 +119,6 @@ void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 //	return true;
 //}
 
-bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node)
-{
-	return true;
-}
-
 bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& nodeA, const DynamicBVHNode<Collider*>& nodeB)
 {
 	Collider* colliderA = nodeA.data;
@@ -133,7 +126,7 @@ bool ScratchEngine::Physics::PhysicsEngine::DynamicBVHTestOverlapCallback(const 
 	
 	if (colliderA->id < colliderB->id)
 	{
-		//printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
+		printf("%s vs. %s\n", colliderA->GetGameObject()->GetName().c_str(), colliderB->GetGameObject()->GetName().c_str());
 		auto it = colliderA->contacts.find(colliderB);
 
 		GameObject* gameObjectA = colliderA->GetGameObject();
@@ -181,10 +174,7 @@ __forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume
 		static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
 
 		if (collider->id == null_index)
-			collider->id = dynamicBVH.Insert(collider, GetEnlargedAABB(static_cast<OrientedBoundingBox*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
-		else
-			dynamicBVH.Update(collider->id, GetBoundingAABB(static_cast<OrientedBoundingBox*>(collider->boundingVolume)));
-
+			collider->id = dynamicBVH.Insert(collider, GetBoundingAABB(static_cast<OrientedBoundingBox*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
 		break;
 
 
@@ -195,10 +185,7 @@ __forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume
 		static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
 
 		if (collider->id == null_index)
-			collider->id = dynamicBVH.Insert(collider, GetEnlargedAABB(static_cast<BoundingSphere*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
-		else
-			dynamicBVH.Update(collider->id, GetBoundingAABB(static_cast<BoundingSphere*>(collider->boundingVolume)));
-
+			collider->id = dynamicBVH.Insert(collider, GetBoundingAABB(static_cast<BoundingSphere*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
 		break;
 	}
 }

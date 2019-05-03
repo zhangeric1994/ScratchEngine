@@ -51,7 +51,6 @@ namespace ScratchEngine
 		XMVECTOR GetLocalScale();
 		XMVECTOR GetScale();
 		XMMATRIX GetWorldMatrix();
-		XMVECTOR GetForwardVector();
 		Transform* GetParent();
 		Transform* GetChild(size_t index);
 		size_t GetChildCount();
@@ -68,7 +67,6 @@ namespace ScratchEngine
 		void SetRotation(f32 x, f32 y, f32 z);
 		void SetRotation(XMFLOAT4 rotation);
 		void SetRotation(XMVECTOR rotation);
-		void SetLocalScale(f32 size);
 		void SetLocalScale(f32 x, f32 y, f32 z);
 		void SetLocalScale(XMFLOAT3 scale);
 		void SetLocalScale(XMVECTOR scale);
@@ -79,12 +77,12 @@ namespace ScratchEngine
 		void* operator new(size_t size);
 		void operator delete(void* p);
 
-		void Translate(float x, float y, float z, Space space = Space::SELF);
-		void Translate(XMFLOAT3 translation, Space space = Space::SELF);
-		void Translate(XMVECTOR translation, Space space = Space::SELF);
-		void Rotate(float x, float y, float z, Space space = Space::SELF);
-		void Rotate(XMFLOAT4 rotation, Space space = Space::SELF);
-		void Rotate(XMVECTOR rotation, Space space = Space::SELF);
+		void Translate(float x, float y, float z, Space space = SELF);
+		void Translate(XMFLOAT3 translation, Space space = SELF);
+		void Translate(XMVECTOR translation, Space space = SELF);
+		void Rotate(float x, float y, float z, Space space = SELF);
+		void Rotate(XMFLOAT4 rotation, Space space = SELF);
+		void Rotate(XMVECTOR rotation, Space space = SELF);
 		//void Scale(XMFLOAT3 scale);
 		//void Scale(XMVECTOR scale);
 
@@ -107,10 +105,4 @@ namespace ScratchEngine
 
 		void __UpdateWorldMatrix();
 	};
-
-
-	inline XMVECTOR Transform::GetForwardVector()
-	{
-		return XMVector3Normalize(XMVector3Rotate({ 0, 0, 1 }, GetRotation()));
-	}
 }

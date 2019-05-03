@@ -173,11 +173,6 @@ __inline void ScratchEngine::Transform::SetRotation(XMVECTOR rotation)
 	SetLocalRotation(parent ? XMQuaternionMultiply(rotation, XMQuaternionInverse(parent->GetRotation())) : rotation);
 }
 
-__inline void ScratchEngine::Transform::SetLocalScale(f32 size)
-{
-	SetLocalScale(XMVectorSet(size, size, size, 0));
-}
-
 __inline void ScratchEngine::Transform::SetLocalScale(f32 x, f32 y, f32 z)
 {
 	SetLocalScale(XMVectorSet(x, y, z, 0));
@@ -268,17 +263,17 @@ __inline void ScratchEngine::Transform::Translate(XMVECTOR translation, Space sp
 	{
 		switch (space)
 		{
-		case Space::SELF:
+		case SELF:
 			localPosition = XMVectorAdd(localPosition, XMVector3Rotate(translation, localRotation));
 			break;
 
 
-		case Space::PARENT:
+		case PARENT:
 			localPosition = XMVectorAdd(localPosition, translation);
 			break;
 
 
-		case Space::WORLD:
+		case WORLD:
 			localPosition = XMVectorAdd(localPosition, parent ? XMVector3Transform(translation, XMMatrixInverse(nullptr, GetWorldMatrix())) : translation);
 			break;
 		}
@@ -303,17 +298,17 @@ __inline void ScratchEngine::Transform::Rotate(XMVECTOR rotation, Space space)
 	{
 		switch (space)
 		{
-		case Space::SELF:
+		case SELF:
 			localRotation = XMQuaternionMultiply(rotation, localRotation);
 			break;
 
 
-		case Space::PARENT:
+		case PARENT:
 			localRotation = XMQuaternionMultiply(localRotation, rotation);
 			break;
 
 
-		case Space::WORLD:
+		case WORLD:
 			if (parent)
 			{
 				XMVECTOR parentRotation = parent->GetRotation();

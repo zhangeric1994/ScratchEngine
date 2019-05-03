@@ -2,15 +2,8 @@
 #define RENDERABLE_H
 #pragma once
 
-#include <DirectXMath.h>
-
-#include "../Common/Settings.h"
-
 #include "Material.h"
 #include "Mesh.h"
-
-using namespace DirectX;
-
 
 namespace ScratchEngine
 {
@@ -18,10 +11,16 @@ namespace ScratchEngine
 	{
 		struct Renderable
 		{
-			XMMATRIX worldMatrix;
+			friend class RenderingEngine;
+
+
+		private:
 			Mesh* mesh;
 			Material* material;
-			XMMATRIX bones[MAX_NUM_BONES_PER_MODEL];
+
+			XMMATRIX worldMatrix;
+
+			Renderable();
 		};
 	}
 }
