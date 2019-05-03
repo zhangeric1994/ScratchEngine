@@ -108,12 +108,12 @@ SimplePixelShader* ScratchEngine::Rendering::Material::GetPixelShader() {
 
 void ScratchEngine::Rendering::Material::setTexture(ID3D11ShaderResourceView * _texture) {
 	diffuseMap = _texture;
-	hasTexture = 1;
+	if(diffuseMap != 0) hasTexture = 1;
 }
 
 void ScratchEngine::Rendering::Material::setNormalMap(ID3D11ShaderResourceView * _normalMap) {
 	normalMap = _normalMap;
-	hasNormalMap = 1;
+	if (normalMap != 0) hasNormalMap = 1;
 }
 
 void ScratchEngine::Rendering::Material::setShadowMap(ShadowMap* _shadowMap) {
@@ -123,12 +123,12 @@ void ScratchEngine::Rendering::Material::setShadowMap(ShadowMap* _shadowMap) {
 
 void ScratchEngine::Rendering::Material::setMetalnessMap(ID3D11ShaderResourceView * _metalnessMap) {
 	metalnessMap = _metalnessMap;
-	hasMetalnessMap = 1;
+	if (metalnessMap != 0 )hasMetalnessMap = 1;
 }
 
 void ScratchEngine::Rendering::Material::setRoughnessMap(ID3D11ShaderResourceView * _roughnessMap) {
 	roughnessMap = _roughnessMap;
-	hasRoughnessMap = 1;
+	if (roughnessMap != 0) hasRoughnessMap = 1;
 }
 
 const float* ScratchEngine::Rendering::Material::GetTint() const
