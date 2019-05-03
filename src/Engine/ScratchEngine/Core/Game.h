@@ -1,24 +1,27 @@
 #pragma once
 
+#include <DDSTextureLoader.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <Winuser.h>
 
-#include "../Core/GameObject.h"
-#include "../Rendering/Camera.h"
-#include "../Rendering/Light.h"
+#include "../Multithreading/Barrier.h"
+#include "../Rendering/CubeMap.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"
+#include "../Rendering/Model.h"
+#include "../Rendering/ShadowMap.h"
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
-#include "../Multithreading/Barrier.h"
-#include "../Rendering/ShadowMap.h"
-#include <DDSTextureLoader.h>
-#include "../Rendering/CubeMap.h"
 
+#include "Camera.h"
 #include "DXCore.h"
+#include "GameObject.h"
+#include "Light.h"
 
 using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Multithreading;
+
 
 namespace ScratchEngine
 {
@@ -28,7 +31,7 @@ namespace ScratchEngine
 		Game(HINSTANCE hInstance, char* name);
 		~Game();
 
-		void Init();
+		void Initialize();
 		void OnResize();
 		void Update();
 		void Draw();
@@ -46,16 +49,26 @@ namespace ScratchEngine
 
 		POINT prevMousePos;
 
+		f32 camX;
+		f32 camY;
+
 		SimpleVertexShader* vsZPrepass;
 		SimpleVertexShader* vertexShader;
+		SimpleVertexShader* vsSkeleton;
+
 		SimplePixelShader* pixelShader;
+		SimplePixelShader* psPBR;
+		SimplePixelShader* psBlinnPhong;
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
-		Material* simpleMaterial;
+		Material* pbrMaterial;
+		Material* skeletonMaterial;
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
+
+		Model* model;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -65,6 +78,8 @@ namespace ScratchEngine
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
+		GameObject* cameraHolder;
+		GameObject* Character;
 		GameObject* go1;
 		GameObject* go2;
 		GameObject* go4;
@@ -76,6 +91,14 @@ namespace ScratchEngine
 
 		Barrier frameBarrier;
 
+		int comboCounter = 0;
+		int combo[5] ={ 14,14,15,16,17 };
+		bool attacking = false;
+
+		float lastInputTime;
+		float lastAttackTime;
+		bool isMouseDownL;
+		bool isMouseDownR;
 
 		//final shadow map
 		ShadowMap* shadow;

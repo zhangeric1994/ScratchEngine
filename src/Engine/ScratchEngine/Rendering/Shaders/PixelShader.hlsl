@@ -3,9 +3,9 @@ struct VertexToPixel
     float4 svPosition : SV_POSITION;
     float4 position : POSITION;
     float3 normal : NORMAL;
-	float3 tangent : TANGENT;
+    float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
-	float4 shadowPos : SHADOW;
+    float4 shadowPos : SHADOW;
 };
 
 struct LightSource
@@ -50,7 +50,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 {
     float4 albedo = tint;
 
-	float3 N = input.normal;
+    float3 N = normalize(input.normal);
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 

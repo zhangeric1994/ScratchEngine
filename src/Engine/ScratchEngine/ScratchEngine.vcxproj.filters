@@ -16,10 +16,13 @@
     <FxCompile Include="Rendering\Shaders\VertexShader.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\vs_zprepass.hlsl">
+    <FxCompile Include="Rendering\Shaders\VS_DepthOnly.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
-    <FxCompile Include="Rendering\Shaders\shadowVS.hlsl">
+    <FxCompile Include="Rendering\Shaders\VS_Skeleton.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\PS_BlinnPhong.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -48,22 +51,13 @@
     <ClCompile Include="Physics\Collision.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\Camera.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\CubeMap.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Light.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Material.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\Mesh.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\Renderer.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\RenderingEngine.cpp">
@@ -99,15 +93,50 @@
     <ClCompile Include="Physics\RigidBody.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
+
+    <ClCompile Include="Rendering\Texture.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Camera.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Light.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+
     <ClCompile Include="Core\InputEvent.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="Core\InputManager.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+
     <ClCompile Include="Core\AIBehaviors.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+
+    <ClCompile Include="Animation\AnimationChannel.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationClip.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\AnimationEngine.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Bone.cpp">
+      <Filter>Source Files\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation\Animator.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering\Model.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header.h">
@@ -133,9 +162,6 @@
     </ClInclude>
     <ClInclude Include="Physics\BoundingVolume.h">
       <Filter>Header Files\Physics</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\Camera.h">
-      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Physics</Filter>
@@ -164,8 +190,13 @@
     <ClInclude Include="Message\IMessageReceiver.h">
       <Filter>Header Files\Messaging</Filter>
     </ClInclude>
+
     <ClInclude Include="Rendering\Light.h">
       <Filter>Header Files\Rendering</Filter>
+
+    <ClInclude Include="Core\IUpdatable.h">
+      <Filter>Header Files\Core</Filter>
+
     </ClInclude>
     <ClInclude Include="Rendering\LightSource.h">
       <Filter>Header Files\Rendering</Filter>
@@ -191,9 +222,6 @@
     <ClInclude Include="Rendering\Renderable.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\Renderer.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Rendering\RenderingEngine.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
@@ -210,9 +238,6 @@
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\ShadowMap.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Space.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Common\Stack.hpp">
@@ -242,14 +267,57 @@
     <ClInclude Include="Physics\DynamicBVHNode.hpp">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
+
+    <ClInclude Include="Rendering\Texture.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Camera.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Light.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\prerequisites.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Space.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+
     <ClInclude Include="Core\InputEvent.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\InputManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+
     <ClInclude Include="Core\AIBehaviors.h">
       <Filter>Header Files\Core</Filter>
+    </ClInclude>
+
+    <ClInclude Include="Core\IInputEventReceiver.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationChannel.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationClip.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\AnimationEngine.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Bone.h">
+      <Filter>Header Files\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Rendering\Model.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation\Animator.h">
+      <Filter>Header Files\Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -314,6 +382,14 @@
     <Filter Include="Source Files\Rendering">
       <UniqueIdentifier>{7a76a8bb-207a-4251-8450-d16846e6c3a9}</UniqueIdentifier>
     </Filter>
+
+    <Filter Include="Header Files\Animation">
+      <UniqueIdentifier>{b1bf2dc7-749c-42bd-b92b-07aadad3824a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Animation">
+      <UniqueIdentifier>{2d3a9684-7570-4c48-871c-fd0a51b0b7ca}</UniqueIdentifier>
+    </Filter>
+
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ScratchEngine.rc">

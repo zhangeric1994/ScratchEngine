@@ -1,15 +1,16 @@
 ﻿#include <string>
 
-#include "Game.h"
-
-#include "../Core/Global.h"
-#include "../Core/Scene.h"
 #include "../Physics/PhysicsEngine.h"
 #include "../Rendering/RenderingEngine.h"
 #include "../Rendering/Mesh.h"
 
-using namespace DirectX;
-using namespace ScratchEngine;
+#include "Game.h"
+#include "Global.h"
+#include "InputManager.h"
+#include "Renderer.h"
+#include "Scene.h"
+#include "Transform.h"
+
 using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
 
@@ -36,6 +37,11 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	normalMap = 0;
 	metalnessMap = 0;
 	roughnessMap = 0;
+
+	isMouseDownL = false;
+	isMouseDownR = false;
+	lastInputTime = 0.0f;
+
 
 	shadow = new ShadowMap();
 	cubeMap = new CubeMap();
@@ -67,24 +73,37 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 #endif
 }
 
-ScratchEngine::Game::~Game() {
+ScratchEngine::Game::~Game()
+{
 	if (vertexShader)
 		delete vertexShader;
 
-	if (pixelShader)
-		delete pixelShader;
-	
 	if (vsZPrepass)
 		delete vsZPrepass;
 
-	if (simpleMaterial)
-		delete simpleMaterial;
+	if (vsSkeleton)
+		delete vsSkeleton;
+
+	if (pixelShader)
+		delete pixelShader;
+
+	if (psPBR)
+		delete psPBR;
+
+	if (psBlinnPhong)
+		delete psBlinnPhong;
+
+	if (pbrMaterial)
+		delete pbrMaterial;
 
 	if (greenMaterial)
 		delete greenMaterial;
 
 	if (redMaterial)
 		delete redMaterial;
+
+	if (skeletonMaterial)
+		delete skeletonMaterial;
 
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
@@ -118,18 +137,28 @@ ScratchEngine::Game::~Game() {
 	if (metalnessMap)
 		metalnessMap->Release();
 
+	if (shadowShader)
+		delete shadowShader;
 
-	RenderingEngine::Stop();
+
+	RenderingEngine::Terminate();
 }
 
-void ScratchEngine::Game::Init()
+void ScratchEngine::Game::Initialize()
 {
+	InputManager::Initialize();
+	PhysicsEngine::Initialize();
+	RenderingEngine::Initialize(device, context);
+
 	LoadShaders();
 	CreateMatrces();
 	CreateBasicGeometry();
 	CreateAllMaps();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	camX = 0;
+	camY = 0;
 }
 
 void ScratchEngine::Game::LoadShaders()
@@ -141,8 +170,8 @@ void ScratchEngine::Game::LoadShaders()
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 
-	vsZPrepass = new SimpleVertexShader(device, context);
-	vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
+	//vsZPrepass = new SimpleVertexShader(device, context);
+	//vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
 
 	shadowShader = new SimpleVertexShader(device, context);
 	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
@@ -150,8 +179,18 @@ void ScratchEngine::Game::LoadShaders()
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile((wpath + std::wstring(L"/VertexShader.cso")).c_str());
 
+	vsSkeleton = new SimpleVertexShader(device, context);
+	vsSkeleton->LoadShaderFile((wpath + std::wstring(L"/VS_Skeleton.cso")).c_str());
+
 	pixelShader = new SimplePixelShader(device, context);
 	pixelShader->LoadShaderFile((wpath + std::wstring(L"/PixelShader.cso")).c_str());
+
+	psPBR = new SimplePixelShader(device, context);
+	psPBR->LoadShaderFile((wpath + std::wstring(L"/PixelShaderPBR.cso")).c_str());
+
+	psBlinnPhong = new SimplePixelShader(device, context);
+	psBlinnPhong->LoadShaderFile((wpath + std::wstring(L"/PS_BlinnPhong.cso")).c_str());
+
 
 	//cube map shader load
 	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
@@ -166,12 +205,12 @@ void ScratchEngine::Game::LoadShaders()
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
 }
 
-void ScratchEngine::Game::CreateAllMaps() {
+void ScratchEngine::Game::CreateAllMaps()
+{
 	//shadow map setup
 	shadow->setUp(device);
-	shadow->setShader(shadowShader);
-	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
-	renderingEngine->SetShadowMap(shadow);
+
+	RenderingEngine::GetSingleton()->SetShadowMap(shadow);
 	//End of shadow map
 
 	//cube map
@@ -191,31 +230,51 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	HRESULT isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture);
-	if (FAILED(isok)) printf("load albedo texture error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture)))
+		printf("load albedo texture error");
 
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap);
-	if (FAILED(isok)) printf("load normal map error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap)))
+		printf("load normal map error");
 
 	//load roughness map
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap);
-	if (FAILED(isok)) printf("load roughness map error");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap)))
+		printf("load roughness map error");
 
 	//load metalness map
-	isok = CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap);
-	if (FAILED(isok)) printf("load metalness map failed");
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap)))
+		printf("load metalness map failed");
 
 
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
 
-	simpleMaterial = new Material(vertexShader, pixelShader, sampler);
-	simpleMaterial->setTexture(texture);
-	simpleMaterial->setMetalnessMap(metalnessMap);
-	simpleMaterial->setNormalMap(normalMap);
-	simpleMaterial->setRoughnessMap(roughnessMap);
-	//simpleMaterial->setShadowMap(shadow);
+	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
+	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
+	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");			// 2
+	model->LoadAnimation("../Assets/Models/Pack/Turn.fbx");							// 3 
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");			// 5
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Left.fbx");			// 6
+	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Right.fbx");			// 7
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Forward.fbx");			// 8		
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Back.fbx");			// 9
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Left.fbx");			// 10
+	model->LoadAnimation("../Assets/Models/Pack/Standing Run Right.fbx");			// 11
+	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 02.fbx");				// 12
+	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 03.fbx");				// 13
+
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_0.fbx");				// 14
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_1.fbx");				// 15
+	model->LoadAnimation("../Assets/Models/Pack/Boxing_2.fbx");				// 16
+	model->LoadAnimation("../Assets/Models/Pack/Kick_0.fbx");				// 17
+
+	pbrMaterial = new Material(vertexShader, psPBR, sampler);
+	pbrMaterial->setTexture(texture);
+	pbrMaterial->setMetalnessMap(metalnessMap);
+	pbrMaterial->setNormalMap(normalMap);
+	pbrMaterial->setRoughnessMap(roughnessMap);
+	//pbrMaterial->setShadowMap(shadow);
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -223,77 +282,95 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
+	skeletonMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Pack/vampire_a_lusth.fbx");
+
 
 	camera = new GameObject();
+	camera->SetLocalPosition(0, 3, -5.5f);
+	camera->SetLocalRotation(15, 0, 0);
 	camera->AddComponent<Camera>();
+	cameraHolder = new GameObject();
 
 	GameObject* directionalLightObject = new GameObject();
-	//directionalLightObject->SetRotation(90, 0, 0);
+	directionalLightObject->SetLocalRotation(90, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
-	go1 = new GameObject();
-	go1->SetName("1");
-	go1->SetPosition(0, 0, 15);
-	go1->SetLocalRotation(45, 0, 90);
-	go1->SetLocalScale(1, 2, 1);
-	go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go1->AddComponent<BoxCollider>();
+	//go1 = new GameObject();
+	//go1->SetName("1");
+	//go1->SetPosition(0, 0, 15);
+	//go1->SetLocalRotation(45, 0, 90);
+	//go1->SetLocalScale(1, 2, 1);
+	//go1->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go1->AddComponent<BoxCollider>();
 
 
-	go2 = new GameObject();
-	go2->SetName("2");
-	go2->SetParent(go1);
-	go2->SetLocalPosition(0, 4, 0);
-	go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go2->AddComponent<BoxCollider>();
+	//go2 = new GameObject();
+	//go2->SetName("2");
+	//go2->SetParent(go1);
+	//go2->SetLocalPosition(0, 4, 0);
+	//go2->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go2->AddComponent<BoxCollider>();
 
 
-	GameObject* go3 = new GameObject();
-	go3->SetName("3");
-	go3->SetParent(go2);
-	go3->SetLocalPosition(0, 2, 0);
-	go3->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//GameObject* go3 = new GameObject();
+	//go3->SetName("3");
+	//go3->SetParent(go2);
+	//go3->SetLocalPosition(0, 2, 0);
+	//go3->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
-	go4 = new GameObject();
-	go4->SetName("4");
-	go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go4->AddComponent<BoxCollider>();
+	//go4 = new GameObject();
+	//go4->SetName("4");
+	//go4->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go4->AddComponent<BoxCollider>();
 
-	go5 = new GameObject();
-	go5->SetName("5");
-	go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go5->AddComponent<SphereCollider>();
+	//go5 = new GameObject();
+	//go5->SetName("5");
+	//go5->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//go5->AddComponent<SphereCollider>();
 
-	go6 = new GameObject();
-	go6->SetName("6");
-	go6->SetPosition(0, 0, -15);
-	go6->SetLocalRotation(45, 0, 90);
-	go6->SetLocalScale(1, 2, 1);
-	go6->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go6->AddComponent<BoxCollider>();
+	//go6 = new GameObject();
+	//go6->SetName("6");
+	//go6->SetPosition(0, 0, -15);
+	//go6->SetLocalRotation(45, 0, 90);
+	//go6->SetLocalScale(1, 2, 1);
+	//go6->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go6->AddComponent<BoxCollider>();
 
-	go7 = new GameObject();
-	go7->SetName("7");
-	go7->SetParent(go6);
-	go7->SetLocalPosition(0, 4, 0);
-	go7->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go7->AddComponent<BoxCollider>();
+	//go7 = new GameObject();
+	//go7->SetName("7");
+	//go7->SetParent(go6);
+	//go7->SetLocalPosition(0, 4, 0);
+	//go7->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go7->AddComponent<BoxCollider>();
 
-	GameObject* go8 = new GameObject();
-	go8->SetName("8");
-	go8->SetParent(go7);
-	go8->SetLocalPosition(0, 2, 0);
-	go8->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//GameObject* go8 = new GameObject();
+	//go8->SetName("8");
+	//go8->SetParent(go7);
+	//go8->SetLocalPosition(0, 2, 0);
+	//go8->AddComponent<Renderer>(pbrMaterial, sphereMesh);
 
-	go9 = new GameObject();
-	go9->SetName("9");
-	go9->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go9->AddComponent<BoxCollider>();
+	//go9 = new GameObject();
+	//go9->SetName("9");
+	//go9->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	//go9->AddComponent<BoxCollider>();
 
-	go10 = new GameObject();
-	go10->SetName("10");
-	go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	go10->AddComponent<SphereCollider>();
+	//go10 = new GameObject();
+	//go10->SetName("10");
+	//go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	//go10->AddComponent<SphereCollider>();
+
+	GameObject* go11 = new GameObject();
+	go11->SetLocalPosition(0, -0.5f, 0);
+	go11->SetLocalScale(100, 1, 100);
+	go11->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
+	Character = new GameObject();
+	Character->SetLocalPosition(0, 0, 0);
+	Character->SetLocalRotation(0, 180, 0);
+	Character->SetLocalScale(0.01f);
+	Character->AddComponent<Renderer>(skeletonMaterial, model);
+	camera->SetParent(cameraHolder);
+	cameraHolder->SetParent(Character);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -312,38 +389,164 @@ void ScratchEngine::Game::Update()
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
+		InputManager::singleton->Capture();
+
 		frameBarrier.Wait();
 
 		if (GetAsyncKeyState(VK_ESCAPE))
 			Quit();
-			
-		if (GetAsyncKeyState('W') & 0x8000)
-			camera->Translate(0.0f, 0.0f, 10 * deltaTime);
+		
+		float speed = 1.5f;
+		bool animationChanged = false;
+		if ((GetKeyState('F') & 0x8000) != 0) {
+			//attacking
+			if (!animationChanged&& lastAttackTime < totalTime) {
+				float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
+				attacking = true;
+				animationChanged = true;
+				lastInputTime = totalTime + duration;
+				lastAttackTime = totalTime + duration - 0.2f;
+				comboCounter++;
+				if (comboCounter > 4) {
+					lastAttackTime = totalTime + duration + 0.5f;
+				}
+				comboCounter %= 5;
+			}
+		}
 
-		if (GetAsyncKeyState('A') & 0x8000)
-			camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+			if (!animationChanged&& lastAttackTime < totalTime) {
+				float duration = model->anim->SetAnimationIndex(2, false);
+				lastInputTime = totalTime + model->anim->duration;
+				attacking = true;
+				animationChanged = true;
+				lastInputTime = totalTime + duration;
+				lastAttackTime = totalTime + duration - 0.2f;
+			}
+		}
 
-		if (GetAsyncKeyState('S') & 0x8000)
-			camera->Translate(0.0f, 0.0f, -10 * deltaTime);
+		if (attacking && lastInputTime < totalTime) {
+			// the attacking interval is gone
+			comboCounter = 0;
+			attacking = false;
+		}
 
-		if (GetAsyncKeyState('D') & 0x8000)
-			camera->Translate(10 * deltaTime, 0.0f, 0.0f);
+		if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
+			animationChanged = true;
+			// press left and right together will not update animation
+		}
+		if (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000) {
+			animationChanged = true;
+			// same
+		}
 
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-			camera->Translate(0.0f, 10 * deltaTime, 0.0f);
+		if (!attacking) {
+			if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(6, true);
+					animationChanged = true;
+				}
+				Character->Translate(speed * deltaTime, 0, 0);
+				lastInputTime = totalTime;
+			}
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
+				// left sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(10, true);
+					animationChanged = true;
+				}
+				Character->Translate(speed * deltaTime * 2.0f, 0, 0);
+				lastInputTime = totalTime;
+			}
 
-		if (GetAsyncKeyState('X') & 0x8000)
-			camera->Translate(0.0f, -10 * deltaTime, 0.0f);
+			if (GetAsyncKeyState('D') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 
-		go1->Rotate(0, 0, 20 * deltaTime);
-		go2->Rotate(0, 0, -50 * deltaTime);
-		go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
-		go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(7, true);
+					animationChanged = true;
+				}
+				Character->Translate(-speed * deltaTime, 0, 0);
+				lastInputTime = totalTime;
+			}
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
+				// right sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(11, true);
+					animationChanged = true;
+				}
+				Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
+				lastInputTime = totalTime;
+			}
 
-		go6->Rotate(0, 0, 20 * deltaTime);
-		go7->Rotate(0, 0, -50 * deltaTime);
-		go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
-		go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
+			if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(4, true);
+					animationChanged = true;
+				}
+
+				Character->Translate(0, 0, -speed * deltaTime * 1.0f);
+				lastInputTime = totalTime;
+			}
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
+				// forward sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(8, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, -speed * deltaTime * 2.0f);
+				lastInputTime = totalTime;
+			}
+
+
+			//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
+
+			if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(5, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, speed * deltaTime);
+				lastInputTime = totalTime;
+			}
+			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
+				// forward sprint
+				if (!animationChanged && lastInputTime < totalTime) {
+					model->anim->SetAnimationIndex(9, true);
+					animationChanged = true;
+				}
+				Character->Translate(0, 0, speed * deltaTime * 2.0f);
+				lastInputTime = totalTime;
+			}
+
+			//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
+
+
+			if (lastInputTime < totalTime - 5) {
+				int idleIndex = rand() % 2 + 12;
+				model->anim->SetAnimationIndex(idleIndex, false);
+				lastInputTime = totalTime + model->anim->duration;
+			}
+			else if (lastInputTime < totalTime - 0.2f) {
+				model->anim->SetAnimationIndex(1, true);
+			}
+		}
+	
+
+		//if (GetAsyncKeyState('X') & 0x8000)
+			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
+
+		model->anim->Update(deltaTime);
+
+		//go1->Rotate(0, 0, 20 * deltaTime);
+		//go2->Rotate(0, 0, -50 * deltaTime);
+		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
+		//go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
+
+		//go6->Rotate(0, 0, 20 * deltaTime);
+		//go7->Rotate(0, 0, -50 * deltaTime);
+		//go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
+		//go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
 
 		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
 
@@ -359,14 +562,12 @@ void ScratchEngine::Game::Update()
 
 void ScratchEngine::Game::Draw()
 {
-	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	Scene* scene = Scene::GetCurrentScene();
+	RenderingEngine* renderingEngine = Rendering::RenderingEngine::GetSingleton();
 
 	while (isRunning)
 	{
-		renderingEngine->UpdateRenderables();
-		renderingEngine->UpdateViewers();
-		renderingEngine->UpdateLightSources();
-		renderingEngine->SortRenderables();
+		scene->CacheRenderingData();
 
 		frameBarrier.Wait();
 
@@ -379,10 +580,10 @@ void ScratchEngine::Game::Draw()
 
 		shadowViewport.Height = shadowMapSize;
 		shadowViewport.Width = shadowMapSize;
+
 		context->RSSetViewports(1, &shadowViewport);
 
-
-		hasShadowMap = renderingEngine->RenderShadowMap(context);
+		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 		
@@ -392,16 +593,9 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &shadowViewport);
 		context->RSSetState(0);
 
-		//if (hasShadowMap) simpleMaterial->setShadowMap(shadow);
-
-		//context->OMSetDepthStencilState(nullptr, 0);
-		//renderingEngine->PerformZPrepass(vsZPrepass, context); 
-
-		//context->OMSetDepthStencilState(zPrepassDepthStencilState, 0);
-
-		renderingEngine->DrawForward(context);
-
-		renderingEngine->RenderCubeMap(context, cubeMap);
+		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 
 		//turn off all resources bound to shader
 		ID3D11ShaderResourceView* noSRV[16] = {};
@@ -446,6 +640,7 @@ void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 
 	// We don't care about the tracking the cursor outside
 	// the window anymore (we're not dragging if the mouse is up)
+	
 	ReleaseCapture();
 }
 
@@ -456,15 +651,34 @@ void ScratchEngine::Game::OnMouseUp(WPARAM buttonState, int x, int y)
 // --------------------------------------------------------
 void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 {
-	// Add any custom code here...
-	if (buttonState & 0x0001)
+	if (buttonState & 0x0002)
 	{
-		//camera->SetRotationX((y - prevMousePos.y) * 0.001f);
-		//camera->SetRotationY((x - prevMousePos.x) * 0.001f);
+		camX = (y - prevMousePos.y) * 0.05f;
+		camY = (x - prevMousePos.x) * 0.05f;
+		cameraHolder->SetLocalRotation(0, 180, 0);
+		Character->Rotate(0, camY, 0.0f);
+		if (model->anim->currentAnimationIndex == 1 ||
+			model->anim->currentAnimationIndex == 12 ||
+			model->anim->currentAnimationIndex == 13
+			) {
+			model->anim->SetAnimationIndex(3, false);
+			lastInputTime = totalTime + model->anim->duration;
+		}
+	}
+	else if (buttonState & 0x0001) {
+		camX = (y - prevMousePos.y) * 0.05f;
+		camY = (x - prevMousePos.x) * 0.05f;
+		cameraHolder->Rotate(0, camY, 0.0f);
 	}
 
-	if (buttonState & 0x0002)
-		camera->Rotate((y - prevMousePos.y) * 5 / 31.41592653579f , (x - prevMousePos.x) * 5 / 31.41592653579f, 0.0f);
+	// the code for rotating camera, not done yet
+	//else{
+	//	camX = (y - prevMousePos.y) * 0.1f;
+	//	camY = (x - prevMousePos.x) * 0.1f;
+	//	cameraHolder->Rotate(0, camY, 0.0f);
+	//	//SetCursorPos(3440/2, 1440/2);
+	//}
+
 
 	// Save the previous mouse position, so we have it for the future
 	prevMousePos.x = x;

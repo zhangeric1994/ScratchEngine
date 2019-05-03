@@ -8,6 +8,7 @@ namespace ScratchEngine
 		int y;
 	};
 
+
 	class __declspec(dllexport) InputEvent
 	{
 	public:

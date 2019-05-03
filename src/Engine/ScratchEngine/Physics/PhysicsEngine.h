@@ -14,7 +14,7 @@ namespace ScratchEngine
 {
 	namespace Physics
 	{
-		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider *>
+		class PhysicsEngine : private IDynamicBVHQueryCallback<Collider*>
 		{
 			friend class Collider;
 
@@ -45,6 +45,7 @@ namespace ScratchEngine
 
 
 		private:
+			bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node);
 			bool DynamicBVHTestOverlapCallback(const DynamicBVHNode<Collider*>& node1, const DynamicBVHNode<Collider*>& node2);
 
 			void __UpdateBoundingVolume(GameObject* gameObject, Collider* collider);

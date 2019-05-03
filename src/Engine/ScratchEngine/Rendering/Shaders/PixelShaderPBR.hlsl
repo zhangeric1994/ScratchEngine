@@ -25,6 +25,7 @@ struct material {
 	float metalness;
 };
 
+
 cbuffer EnableMaps : register(b0) {
 	int hasTexture;
 	int hasNormalMap;
@@ -41,15 +42,15 @@ cbuffer CameraData : register(b2) {
 	float3 cameraPosition;
 };
 
-Texture2D diffuseTexture : register(t0);
+Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D ShadowMap	: register(t2);
 Texture2D roughnessMap : register(t3);
 Texture2D metalnessMap : register(t4);
 
 SamplerState basicSampler : register(s0);
-
 SamplerComparisonState shadowSampler : register(s1);
+
 
 //returns result of the distribution function
 //distribution function is GGX
@@ -142,7 +143,6 @@ float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness,
 
 	return (diffuseColor * surfaceColor + specColor);
 }
-
 //End of PBR functions
 
 
@@ -170,8 +170,8 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
 
 	//texture color
-	float3 surfaceColor = diffuseTexture.Sample(basicSampler, input.uv);
-	surfaceColor = lerp(float3(1, 1, 1), surfaceColor, hasTexture);
+    float3 albedo = diffuseMap.Sample(basicSampler, input.uv).rgb;
+    albedo = lerp(float3(1, 1, 1), albedo, hasTexture);
 
 	//roughness
 	float roughness = roughnessMap.Sample(basicSampler, input.uv).r;
@@ -190,7 +190,7 @@ float4 main(VertexToPixel input) : SV_TARGET {
 	shadowAmount = lerp(1.0f, shadowAmount, 1);
 
 	//calculate light
-	float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, surfaceColor.rgb, light);
+    float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, albedo, light) * shadowAmount;
 
 	return float4(result, 1.0f);
 }

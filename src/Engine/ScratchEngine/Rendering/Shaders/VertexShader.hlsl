@@ -1,6 +1,6 @@
 struct VertexShaderInput
 {
-    float3 position : POSITION;
+    float4 position : POSITION;
     float3 normal : NORMAL;
     float2 uv : TEXCOORD;
 	float3 tangent : TANGENT;
@@ -21,8 +21,7 @@ cbuffer CameraData : register(b2)
 	matrix view;
 	matrix projection;
     matrix viewProjection;
-	matrix shadowProjection;
-	matrix shadowView;
+    matrix shadowViewProjection;
 };
 
 cbuffer ObjectData : register(b3)
@@ -34,13 +33,13 @@ VertexToPixel main(VertexShaderInput input)
 {
     VertexToPixel output;
 
-	matrix shadowWVP = mul(mul(world, shadowView), shadowProjection);
-	output.shadowPos = mul(float4(input.position, 1.0f), shadowWVP);
+    matrix shadowWVP = mul(world, shadowViewProjection);
+	output.shadowPos = mul(float4(input.position.xyz, 1.0f), shadowWVP);
 
 	matrix WVP = mul(world, viewProjection);
-    output.svPosition = mul(float4(input.position, 1.0f), WVP);
+    output.svPosition = mul(float4(input.position.xyz, 1.0f), WVP);
 
-    output.position = mul(float4(input.position, 1.0f), world);
+    output.position = mul(float4(input.position.xyz, 1.0f), world);
     output.normal = normalize(mul(input.normal, (float3x3)world));
 	output.tangent = normalize(mul(input.tangent, (float3x3)world));
 	output.uv = input.uv;
