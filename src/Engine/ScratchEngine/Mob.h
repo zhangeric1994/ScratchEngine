@@ -13,12 +13,12 @@ namespace ScratchEngine
 	{
 	private:
 		Model* model;
-
+		
 
 	public:
 		Mob(Model* model);
-
-
+		float duration;
+		bool hit = false;
 	private:
 		void OnBeginOverlapping(GameObject* other);
 	};
@@ -32,5 +32,8 @@ inline ScratchEngine::Mob::Mob(Model* model)
 
 inline void ScratchEngine::Mob::OnBeginOverlapping(GameObject* other)
 {
-	model->anim->SetAnimationIndex(rand() % 2 + 4, false);
+	duration = model->anim->SetAnimationIndex(rand() % 2 + 4, false);
+	hit = true;
 }
+
+

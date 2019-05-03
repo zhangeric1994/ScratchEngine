@@ -604,8 +604,11 @@ void ScratchEngine::Game::Update()
 				model->anim->SetAnimationIndex(1, true);
 			}
 		}
-
-		if (lastTriggerTime < totalTime - 3) {
+		if (mob->GetComponent<Mob>()->hit) {
+			//get hit 
+			mob->GetComponent<Mob>()->hit = false;
+			lastTriggerTime = totalTime + mob->GetComponent<Mob>()->duration;
+		}else if (lastTriggerTime < totalTime - 3) {
 			int idleIndex = rand() % 2 + 2;
 			float duration = mobModel->anim->SetAnimationIndex(idleIndex, true);
 			lastTriggerTime = totalTime + duration;
