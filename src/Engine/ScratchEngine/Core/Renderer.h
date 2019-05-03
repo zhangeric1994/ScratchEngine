@@ -51,9 +51,7 @@ namespace ScratchEngine
 		~Renderer();
 
 
-	private:
-		void OnBeginOverlapping(GameObject* other);
-		void OnEndOverlapping(GameObject* other);
+		void SetMaterial(Material* material);
 	};
 
 
@@ -61,4 +59,11 @@ namespace ScratchEngine
 	{
 	};
 }
+
+
+inline void ScratchEngine::Renderer::SetMaterial(Material * material)
+{
+	this->material = material;
+}
+
 #endif

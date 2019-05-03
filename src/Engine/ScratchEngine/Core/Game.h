@@ -70,7 +70,7 @@ namespace ScratchEngine
 		Mesh* cubeMesh;
 
 		Model* model;
-		Model* mob;
+		Model* mobModel;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -81,8 +81,8 @@ namespace ScratchEngine
 		DirectionalLight* directionalLight;
 		GameObject* camera;
 		GameObject* cameraHolder;
-		GameObject* Character;
-		GameObject* Mob;
+		GameObject* player;
+		GameObject* mob;
 		GameObject* go1;
 		GameObject* go2;
 		GameObject* go4;
@@ -91,8 +91,9 @@ namespace ScratchEngine
 		GameObject* go7;
 		GameObject* go9;
 		GameObject* go10;
-		GameObject* right;
-		GameObject* left;
+
+		Renderer* rightHand;
+		Renderer* leftHand;
 
 		Barrier frameBarrier;
 

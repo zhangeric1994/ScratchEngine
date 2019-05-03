@@ -4,6 +4,9 @@
 #include "../Rendering/RenderingEngine.h"
 #include "../Rendering/Mesh.h"
 
+#include "../Dummy.h"
+#include "../Mob.h"
+
 #include "Game.h"
 #include "Global.h"
 #include "InputManager.h"
@@ -248,12 +251,12 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
-	mob = new Model(device, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
-	mob->LoadAnimation("../Assets/Models/Mob/Idle_0.fbx");					// 1
-	mob->LoadAnimation("../Assets/Models/Mob/Idle_1.fbx");					// 2
-	mob->LoadAnimation("../Assets/Models/Mob/Idle_2.fbx");					// 3
-	mob->LoadAnimation("../Assets/Models/Mob/Reaction_0.fbx");				// 4
-	mob->LoadAnimation("../Assets/Models/Mob/Reaction_1.fbx");				// 5
+	mobModel = new Model(device, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
+	mobModel->LoadAnimation("../Assets/Models/Mob/Idle_0.fbx");					// 1
+	mobModel->LoadAnimation("../Assets/Models/Mob/Idle_1.fbx");					// 2
+	mobModel->LoadAnimation("../Assets/Models/Mob/Idle_2.fbx");					// 3
+	mobModel->LoadAnimation("../Assets/Models/Mob/Reaction_0.fbx");				// 4
+	mobModel->LoadAnimation("../Assets/Models/Mob/Reaction_1.fbx");				// 5
 	mobMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
@@ -371,43 +374,46 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	ground->SetLocalScale(100, 1, 100);
 	ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
-	GameObject* go11 = new GameObject();
-	go11->SetLocalPosition(0, 2, 10);
-	go11->SetLocalScale(1, 4, 1);
-	go11->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	go11->AddComponent<BoxCollider>();
+	GameObject* dummy = new GameObject();
+	dummy->SetLocalPosition(0, 2, 10);
+	dummy->SetLocalScale(1, 4, 1);
+	dummy->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	dummy->AddComponent<BoxCollider>();
+	dummy->AddComponent<Dummy>(redMaterial, greenMaterial);
 
-	right = new GameObject();
-	right->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	right->AddComponent<SphereCollider>(0.15f);
-	right->SetLocalPosition(-115, 167, 4);
-	right->SetLocalScale(30);
+	GameObject* rightHandObject = new GameObject();
+	rightHand = rightHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	rightHandObject->AddComponent<SphereCollider>(0.15f);
+	rightHandObject->SetLocalPosition(-115, 167, 4);
+	rightHandObject->SetLocalScale(30);
 
-	left = new GameObject();
-	left->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	left->AddComponent<SphereCollider>(0.15f);
-	left->SetLocalPosition(115, 167, 0);
-	left->SetLocalScale(30);
+	GameObject* leftHandObject = new GameObject();
+	leftHand = leftHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
+	leftHandObject->AddComponent<SphereCollider>(0.15f);
+	leftHandObject->SetLocalPosition(115, 167, 0);
+	leftHandObject->SetLocalScale(30);
 
-	model->anim->BindToSlot(23, right);
-	model->anim->BindToSlot(42, left);
+	model->anim->BindToSlot(23, rightHandObject);
+	model->anim->BindToSlot(42, leftHandObject);
 
-	Character = new GameObject();
-	Character->SetLocalPosition(0, 0, 0);
-	Character->SetLocalRotation(0, 180, 0);
-	Character->SetLocalScale(0.01f);
-	Character->AddComponent<Renderer>(skeletonMaterial, model);
+	mobModel->anim->SetAnimationIndex(1, true);
 
+	player = new GameObject();
+	player->SetLocalPosition(0, 0, 0);
+	player->SetLocalRotation(0, 180, 0);
+	player->SetLocalScale(0.01f);
+	player->AddComponent<Renderer>(skeletonMaterial, model);
 
-	Mob = new GameObject();
-	Mob->SetLocalPosition(4, 0, -5);
-	Mob->SetLocalRotation(0, 180, 0);
-	Mob->SetLocalScale(0.01f);
-	Mob->AddComponent<Renderer>(mobMaterial, mob);
-	mob->anim->SetAnimationIndex(1, true);
+	mob = new GameObject();
+	mob->SetLocalPosition(4, 0, -5);
+	mob->SetLocalRotation(0, 180, 0);
+	mob->SetLocalScale(0.01f);
+	mob->AddComponent<Renderer>(mobMaterial, mobModel);
+	mob->AddComponent<BoxCollider>(100, 400, 100);
+	mob->AddComponent<Mob>(mobModel);
 
 	camera->SetParent(cameraHolder);
-	cameraHolder->SetParent(Character);
+	cameraHolder->SetParent(player);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -435,6 +441,12 @@ void ScratchEngine::Game::Update()
 		
 		float speed = 1.5f;
 		bool animationChanged = false;
+
+		if (Input::IsKeyPressed('1'))
+		{
+			rightHand->SetActive(!rightHand->IsActiveSelf());
+			leftHand->SetActive(!rightHand->IsActiveSelf());
+		}
 
 		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
 			//useBlending
@@ -499,7 +511,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(6, true);
 					animationChanged = true;
 				}
-				Character->Translate(speed * deltaTime, 0, 0);
+				player->Translate(speed * deltaTime, 0, 0);
 				lastInputTime = totalTime;
 			}
 			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
@@ -508,7 +520,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(10, true);
 					animationChanged = true;
 				}
-				Character->Translate(speed * deltaTime * 2.0f, 0, 0);
+				player->Translate(speed * deltaTime * 2.0f, 0, 0);
 				lastInputTime = totalTime;
 			}
 
@@ -518,7 +530,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(7, true);
 					animationChanged = true;
 				}
-				Character->Translate(-speed * deltaTime, 0, 0);
+				player->Translate(-speed * deltaTime, 0, 0);
 				lastInputTime = totalTime;
 			}
 			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
@@ -527,7 +539,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(11, true);
 					animationChanged = true;
 				}
-				Character->Translate(-speed * deltaTime * 2.0f, 0, 0);
+				player->Translate(-speed * deltaTime * 2.0f, 0, 0);
 				lastInputTime = totalTime;
 			}
 
@@ -537,7 +549,7 @@ void ScratchEngine::Game::Update()
 					animationChanged = true;
 				}
 
-				Character->Translate(0, 0, -speed * deltaTime * 1.0f);
+				player->Translate(0, 0, -speed * deltaTime * 1.0f);
 				lastInputTime = totalTime;
 			}
 			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
@@ -546,7 +558,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(8, true);
 					animationChanged = true;
 				}
-				Character->Translate(0, 0, -speed * deltaTime * 2.0f);
+				player->Translate(0, 0, -speed * deltaTime * 2.0f);
 				lastInputTime = totalTime;
 			}
 
@@ -559,7 +571,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(5, true);
 					animationChanged = true;
 				}
-				Character->Translate(0, 0, speed * deltaTime);
+				player->Translate(0, 0, speed * deltaTime);
 				lastInputTime = totalTime;
 			}
 			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
@@ -568,7 +580,7 @@ void ScratchEngine::Game::Update()
 					model->anim->SetAnimationIndex(9, true);
 					animationChanged = true;
 				}
-				Character->Translate(0, 0, speed * deltaTime * 2.0f);
+				player->Translate(0, 0, speed * deltaTime * 2.0f);
 				lastInputTime = totalTime;
 			}
 
@@ -585,22 +597,20 @@ void ScratchEngine::Game::Update()
 			}
 		}
 
-
-
 		if (lastTriggerTime < totalTime - 5) {
 			int idleIndex = rand() % 2 + 1;
-			float duration = mob->anim->SetAnimationIndex(idleIndex, false);
+			float duration = mobModel->anim->SetAnimationIndex(idleIndex, false);
 			lastTriggerTime = totalTime + duration;
 		}
 		else if (lastTriggerTime < totalTime - 0.1f) {
-			mob->anim->SetAnimationIndex(1, true);
+			mobModel->anim->SetAnimationIndex(1, true);
 		}
 	
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
-		model->anim->Update(deltaTime, Character);
-		mob->anim->Update(deltaTime, Mob);
+		model->anim->Update(deltaTime, player);
+		mobModel->anim->Update(deltaTime, mob);
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
@@ -719,7 +729,7 @@ void ScratchEngine::Game::OnMouseMove(WPARAM buttonState, int x, int y)
 		camX = (y - prevMousePos.y) * 0.05f;
 		camY = (x - prevMousePos.x) * 0.05f;
 		cameraHolder->SetLocalRotation(0, 180, 0);
-		Character->Rotate(0, camY, 0.0f);
+		player->Rotate(0, camY, 0.0f);
 		if (model->anim->currentAnimationIndex == 1 ||
 			model->anim->currentAnimationIndex == 12 ||
 			model->anim->currentAnimationIndex == 13

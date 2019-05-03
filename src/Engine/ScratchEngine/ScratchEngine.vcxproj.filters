@@ -305,6 +305,12 @@
     <ClInclude Include="Physics\Collider.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Dummy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mob.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
