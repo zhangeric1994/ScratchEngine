@@ -18,7 +18,7 @@ using namespace ScratchEngine::Rendering;
 Material* ScratchEngine::Game::greenMaterial = nullptr;
 Material* ScratchEngine::Game::redMaterial = nullptr;
 
-ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true), frameBarrier(2)
+ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1600, 900, true), frameBarrier(2)
 {
 	vertexShader = nullptr;
 	pixelShader = nullptr;
@@ -241,17 +241,24 @@ void ScratchEngine::Game::CreateBasicGeometry()
 		printf("load roughness map error");
 
 	//load metalness map
-	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/chipped-paint-metal-metal.png", 0, &metalnessMap)))
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/chipped-paint-metal-metal.pn", 0, &metalnessMap)))
 		printf("load metalness map failed");
 
 
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
+	mob = new Model(device, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_0.fbx");					// 1
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_1.fbx");					// 2
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_2.fbx");					// 3
+	mob->LoadAnimation("../Assets/Models/Mob/Reaction_0.fbx");				// 4
+	mob->LoadAnimation("../Assets/Models/Mob/Reaction_1.fbx");				// 5
+	mobMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");			// 2
+	model->LoadAnimation("../Assets/Models/Pack/Standing Jump.fbx");			// 2
 	model->LoadAnimation("../Assets/Models/Pack/Turn.fbx");							// 3 
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");			// 5
@@ -359,14 +366,27 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	//go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	//go10->AddComponent<SphereCollider>();
 
-	GameObject* ground = new GameObject();
-	ground->SetLocalPosition(0, -0.5f, 0);
-	ground->SetLocalScale(20, 1, 20);
-	ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
-	GameObject* test = new GameObject();
+	//GameObject* ground = new GameObject();
+	//ground->SetLocalPosition(0, -0.5f, 0);
+	//ground->SetLocalScale(20, 1, 20);
+	//ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+	for (float i = 0; i < 50.0f; i+= 15.05f) {
+		for (float j = 0; j < 50.0f; j+= 15.05f) {
+			GameObject* ground = new GameObject();
+			ground->SetLocalPosition(-18 + i, -0.5f, -18 + j);
+			ground->SetLocalScale(15, 1, 15);
+			ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+		}
+	}
+	//GameObject* ground = new GameObject();
+	//ground->SetLocalPosition(0, -0.5f, 0);
+	//ground->SetLocalScale(1, 1, 1);
+	//ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
+	/*GameObject* test = new GameObject();
 	test->SetLocalPosition(0, 1.0f, 1);
-	test->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+	test->AddComponent<Renderer>(pbrMaterial, cubeMesh);*/
 
 	GameObject* go11 = new GameObject();
 	go11->SetLocalPosition(0, 2, 10);
@@ -376,13 +396,13 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	right = new GameObject();
 	right->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	right->AddComponent<SphereCollider>(0.3f);
+	right->AddComponent<SphereCollider>(0.15f);
 	right->SetLocalPosition(-115, 167, 4);
 	right->SetLocalScale(30);
 
 	left = new GameObject();
 	left->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	left->AddComponent<SphereCollider>(0.3f);
+	left->AddComponent<SphereCollider>(0.15f);
 	left->SetLocalPosition(115, 167, 0);
 	left->SetLocalScale(30);
 
@@ -394,6 +414,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	Character->SetLocalRotation(0, 180, 0);
 	Character->SetLocalScale(0.01f);
 	Character->AddComponent<Renderer>(skeletonMaterial, model);
+
+
+	Mob = new GameObject();
+	Mob->SetLocalPosition(4, 0, -5);
+	Mob->SetLocalRotation(0, 180, 0);
+	Mob->SetLocalScale(0.01f);
+	Mob->AddComponent<Renderer>(mobMaterial, mob);
+	mob->anim->SetAnimationIndex(1, true);
 
 	camera->SetParent(cameraHolder);
 	cameraHolder->SetParent(Character);
@@ -429,14 +457,14 @@ void ScratchEngine::Game::Update()
 			//useBlending
 			model->anim->useBlending = false;
 			printf("Blending OFF\n");
-			lastInputTime = totalTime + 0.05f;
+			lastInputTime = totalTime + 0.1f;
 		}
 
 		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
 			//useBlending
 			model->anim->useBlending = true;
 			printf("Blending ON\n");
-			lastInputTime = totalTime + 0.05f;
+			lastInputTime = totalTime + 0.1f;
 		}
 
 
@@ -573,13 +601,23 @@ void ScratchEngine::Game::Update()
 				model->anim->SetAnimationIndex(1, true);
 			}
 		}
-	
 
+
+
+		if (lastTriggerTime < totalTime - 3) {
+			int idleIndex = rand() % 2 + 2;
+			float duration = mob->anim->SetAnimationIndex(idleIndex, true);
+			lastTriggerTime = totalTime + duration;
+		}
+		else if (lastTriggerTime < totalTime - 0.1f) {
+			mob->anim->SetAnimationIndex(1, true);
+		}
+	
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
 		model->anim->Update(deltaTime, Character);
-
+		mob->anim->Update(deltaTime, Mob);
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
