@@ -22,7 +22,7 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	hasZPrepass = false;
 
 	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(XMVectorSet(0, 10, 0, 0), XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0)));
-	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(10, 10, 0.1f, 100));
+	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(20, 20, 0.1f, 100));
 
 	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
 
@@ -190,8 +190,15 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 	}
 }
 
-bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(Renderable* renderables, int numToDraw)
+bool ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(Renderable* renderables, int numToDraw, XMVECTOR center)
 {
+	center.m128_f32[1] += 30;
+
+	XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(center, XMVectorSet(0, -1, 0, 0), XMVectorSet(0, 0, 1, 0)));
+	XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(10, 10, 0.1f, 100));
+
+	XMStoreFloat4x4(&shadowViewProjectionMat, XMMatrixMultiply(shadowProjection, shadowView));
+
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 	deviceContext->OMSetRenderTargets(0, nullptr, shadow->getShadowDSV());
 

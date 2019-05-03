@@ -77,7 +77,7 @@ namespace ScratchEngine
 		public:
 			void PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables);
 			void DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources);
-			bool RenderShadowMap(Renderable* renderables, int numRenderables);
+			bool RenderShadowMap(Renderable* renderables, int numRenderables, XMVECTOR cameraPosition);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
 		};

@@ -1,9 +1,10 @@
 #include <typeinfo>
 
+#include "../Animation/Animator.h"
 #include "GameObject.h"
+#include "Renderer.h"
 #include "Scene.h"
 
-using namespace ScratchEngine;
 
 ScratchEngine::GameObject::GameObject() : Transform(), components(4)
 {
@@ -34,7 +35,13 @@ ScratchEngine::GameObject::~GameObject()
 	isDestroyed = true;
 
 	if (!Scene::GetCurrentScene()->RemoveRootObject(this))
-		parent->__RemoveChild(this);
+		if (!static_cast<GameObject*>(parent)->isDestroyed)
+		{
+			if (isInSlot)
+				static_cast<GameObject*>(parent)->GetComponent<Renderer>()->anim->UnbindFromSlot(this);
+			else
+				parent->__RemoveChild(this);
+		}
 
 	for (auto it = components.begin(); it != components.end(); it++)
 		delete it->second;

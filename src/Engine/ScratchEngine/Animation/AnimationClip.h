@@ -26,6 +26,7 @@ namespace ScratchEngine
 			bool playAnimationForward;
 			float lastTime;
 			float ticksPerSecond;
+			bool loop;
 			std::vector<std::vector<XMMATRIX>> transforms;
 			std::vector<XMFLOAT3> lastPositions;
 			AnimationClip(aiAnimation * anim);

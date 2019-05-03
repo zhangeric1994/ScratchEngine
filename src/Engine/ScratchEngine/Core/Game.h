@@ -3,6 +3,7 @@
 #include <DDSTextureLoader.h>
 #include <DirectXMath.h>
 #include <vector>
+#include <Winuser.h>
 
 #include "../Multithreading/Barrier.h"
 #include "../Rendering/CubeMap.h"
@@ -62,12 +63,14 @@ namespace ScratchEngine
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
 		Material* pbrMaterial;
-		Material* skeletonMaterial;
+		Material* skeletonMaterial; 
+		Material* mobMaterial;
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
 
 		Model* model;
+		Model* mobModel;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -77,6 +80,9 @@ namespace ScratchEngine
 
 		DirectionalLight* directionalLight;
 		GameObject* camera;
+		GameObject* cameraHolder;
+		GameObject* player;
+		GameObject* mob;
 		GameObject* go1;
 		GameObject* go2;
 		GameObject* go4;
@@ -86,8 +92,23 @@ namespace ScratchEngine
 		GameObject* go9;
 		GameObject* go10;
 
+		Renderer* rightHandRenderer;
+		SphereCollider* rightHandCollider;
+		Renderer* leftHandRenderer;
+		SphereCollider* leftHandCollider;
+
 		Barrier frameBarrier;
 
+		int comboCounter = 0;
+		int combo[5] ={ 14,14,15,16,17 };
+		bool attacking = false;
+
+		float lastTriggerTime;
+
+		float lastInputTime;
+		float lastAttackTime;
+		bool isMouseDownL;
+		bool isMouseDownR;
 
 		//final shadow map
 		ShadowMap* shadow;

@@ -11,6 +11,7 @@
 #include "Light.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "Transform.h"
 
 
 ScratchEngine::Scene* ScratchEngine::Scene::currentScene = nullptr;
@@ -100,7 +101,7 @@ bool ScratchEngine::Scene::RemoveRootObject(GameObject* gameObject)
 
 void ScratchEngine::Scene::RemoveRenderer(Renderer* renderer)
 {
-	if (!rendererList)
+	if (isDestroyed || !rendererList)
 		return;
 
 	Renderer* next = renderer->next;
@@ -113,6 +114,8 @@ void ScratchEngine::Scene::RemoveRenderer(Renderer* renderer)
 
 	if (next)
 		next->previous = previous;
+	else
+		rendererList = nullptr;
 }
 
 void ScratchEngine::Scene::RemoveCamera(Camera * camera)
@@ -130,6 +133,8 @@ void ScratchEngine::Scene::RemoveCamera(Camera * camera)
 
 	if (next)
 		next->previous = previous;
+	else
+		cameraList = nullptr;
 }
 
 void ScratchEngine::Scene::RemoveLight(Light* light)
@@ -147,6 +152,8 @@ void ScratchEngine::Scene::RemoveLight(Light* light)
 
 	if (next)
 		next->previous = previous;
+	else
+		lightList = nullptr;
 }
 
 void ScratchEngine::Scene::UpdateRenderables()
@@ -157,21 +164,24 @@ void ScratchEngine::Scene::UpdateRenderables()
 	{
 		if (renderer->IsActive())
 		{
-			Renderable& renderable = renderableAllocator[renderableAllocator.Allocate()];
+			i32 renderableID = renderableAllocator.Allocate();
+			renderer->renderable = renderableID;
+
+			Renderable& renderable = renderableAllocator[renderableID];
 
 			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
 
-			if (renderer->anim != nullptr && renderer->anim->currentAnimationIndex > 0)
+			if (renderer->anim != nullptr && renderer->anim->currentAnimationIndex != null_index)
 			{
 				std::vector<XMMATRIX> temp = renderer->anim->GetTransforms();
 
-				for (UINT i = 0; i < temp.size(); ++i)
+				for (size_t i = 0; i < temp.size(); ++i)
 					renderable.bones[i] = temp[i];
 			}
 			else
-				for (UINT i = 0; i < MAX_NUM_BONES_PER_MODEL; ++i)
+				for (size_t i = 0; i < MAX_NUM_BONES_PER_MODEL; ++i)
 					renderable.bones[i] = { XMMatrixIdentity() };
 		}
 	}

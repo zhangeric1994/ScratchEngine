@@ -12,12 +12,14 @@
 
 using namespace DirectX;
 using namespace ScratchEngine::Rendering;
+using namespace std;
 
 
 namespace ScratchEngine
 {
 	struct __declspec(dllexport) Transform : public IMessageReceiver
 	{
+		friend class Animator;
 		friend class GameObject;
 		friend class RenderingEngine;
 		friend class Scene;
@@ -34,7 +36,7 @@ namespace ScratchEngine
 
 		Transform* parent;
 		size_t index;
-		std::vector<Transform*> children;
+		vector<Transform*> children;
 
 
 	public:

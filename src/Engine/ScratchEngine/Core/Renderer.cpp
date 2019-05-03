@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Renderer.h"
 #include "Scene.h"
+#include "Transform.h"
 
 using namespace ScratchEngine::Rendering;
 
@@ -26,6 +27,9 @@ ScratchEngine::Renderer::Renderer(Material* material, Mesh* mesh)
 	this->anim = nullptr;
 	this->model = nullptr; 
 
+	//this->slotIndex = null_index;
+	//this->slot = nullptr;
+
 	Scene::GetCurrentScene()->AddRenderer(this);
 }
 
@@ -36,7 +40,9 @@ ScratchEngine::Renderer::Renderer(Material* material, Rendering::Model* model)
 	this->material = material;
 	this->renderable = null_index;
 	this->anim = model->anim;
-	//AnimationEngine::GetSingleton()->AddAnimator(this->anim);
+
+	//this->slotIndex = null_index;
+	//this->slot = nullptr;
 
 	Scene::GetCurrentScene()->AddRenderer(this);
 }
@@ -44,14 +50,4 @@ ScratchEngine::Renderer::Renderer(Material* material, Rendering::Model* model)
 ScratchEngine::Renderer::~Renderer()
 {
 	Scene::GetCurrentScene()->RemoveRenderer(this);
-}
-
-void ScratchEngine::Renderer::OnBeginOverlapping(GameObject * other)
-{
-	material = Game::redMaterial;
-}
-
-void ScratchEngine::Renderer::OnEndOverlapping(GameObject * other)
-{
-	material = Game::greenMaterial;
 }

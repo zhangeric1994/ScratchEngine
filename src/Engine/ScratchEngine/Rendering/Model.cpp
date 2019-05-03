@@ -92,7 +92,7 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 		if (mesh->mTextureCoords[0])
 		{
 			vertex.UV.x = (float)mesh->mTextureCoords[0][i].x;
-			vertex.UV.y = 1.0f - (float)mesh->mTextureCoords[0][i].y;
+			vertex.UV.y = (float)mesh->mTextureCoords[0][i].y;
 		}
 
 		vertex.Normal.x = (float)mesh->mNormals[i].x;
@@ -130,12 +130,6 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 					vertex.Weights[j] = 0;
 				}
 			}
-
-			for (int j = 0; j < NUM_BONES_PER_VEREX; j++) {
-				vertex.Weights[j] /= w;
-			}
-			//for (UINT j = 0; j < NUM_BONES_PER_VEREX; j++)
-			//	vertex.Weights[j] /= w;
 		}
 		
 		vertices.push_back(vertex);

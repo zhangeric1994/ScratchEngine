@@ -6,6 +6,8 @@
 
 #include "GameComponent.h"
 
+using namespace std;
+
 
 namespace ScratchEngine
 {
@@ -16,20 +18,26 @@ namespace ScratchEngine
 		struct Model;
 	}
 
+
 	using namespace ScratchEngine::Rendering;
 
+
 	class Animator;
+	class GameObject;
+	class Transform;
 
 	class __declspec(dllexport) Renderer : public GameComponent
 	{
+		friend class GameObject;
 		friend class Scene;
 
 
 	protected:
 		Material* material;
-		Mesh* mesh; // renderer can draw a single a mesh  or a complicated model with multiple mesh
+		Mesh* mesh;
 		Model* model;
 		Animator* anim;
+
 		i32 renderable;
 
 		Renderer* next;
@@ -43,9 +51,7 @@ namespace ScratchEngine
 		~Renderer();
 
 
-	private:
-		void OnBeginOverlapping(GameObject* other);
-		void OnEndOverlapping(GameObject* other);
+		void SetMaterial(Material* material);
 	};
 
 
@@ -53,4 +59,11 @@ namespace ScratchEngine
 	{
 	};
 }
+
+
+inline void ScratchEngine::Renderer::SetMaterial(Material * material)
+{
+	this->material = material;
+}
+
 #endif
