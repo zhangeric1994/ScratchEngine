@@ -77,6 +77,8 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 	previousAnimationIndex = null_index;
 	currentAnimationIndex = null_index;
 
+	animations.clear();
+
 	blendFactor = 1;
 	blendSpeed = 100;
 

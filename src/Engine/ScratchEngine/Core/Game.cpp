@@ -248,6 +248,13 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 	cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 
+	mob = new Model(device, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_0.fbx");					// 1
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_1.fbx");					// 2
+	mob->LoadAnimation("../Assets/Models/Mob/Idle_2.fbx");					// 3
+	mob->LoadAnimation("../Assets/Models/Mob/Reaction_0.fbx");				// 4
+	mob->LoadAnimation("../Assets/Models/Mob/Reaction_1.fbx");				// 5
+	mobMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
@@ -391,6 +398,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	Character->SetLocalScale(0.01f);
 	Character->AddComponent<Renderer>(skeletonMaterial, model);
 
+
+	Mob = new GameObject();
+	Mob->SetLocalPosition(4, 0, -5);
+	Mob->SetLocalRotation(0, 180, 0);
+	Mob->SetLocalScale(0.01f);
+	Mob->AddComponent<Renderer>(mobMaterial, mob);
+	mob->anim->SetAnimationIndex(1, true);
+
 	camera->SetParent(cameraHolder);
 	cameraHolder->SetParent(Character);
 }
@@ -425,14 +440,14 @@ void ScratchEngine::Game::Update()
 			//useBlending
 			model->anim->useBlending = false;
 			printf("Blending OFF\n");
-			lastInputTime = totalTime + 0.05f;
+			lastInputTime = totalTime + 0.1f;
 		}
 
 		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
 			//useBlending
 			model->anim->useBlending = true;
 			printf("Blending ON\n");
-			lastInputTime = totalTime + 0.05f;
+			lastInputTime = totalTime + 0.1f;
 		}
 
 
@@ -569,13 +584,23 @@ void ScratchEngine::Game::Update()
 				model->anim->SetAnimationIndex(1, true);
 			}
 		}
-	
 
+
+
+		if (lastTriggerTime < totalTime - 5) {
+			int idleIndex = rand() % 2 + 1;
+			float duration = mob->anim->SetAnimationIndex(idleIndex, false);
+			lastTriggerTime = totalTime + duration;
+		}
+		else if (lastTriggerTime < totalTime - 0.1f) {
+			mob->anim->SetAnimationIndex(1, true);
+		}
+	
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
 		model->anim->Update(deltaTime, Character);
-
+		mob->anim->Update(deltaTime, Mob);
 		//go1->Rotate(0, 0, 20 * deltaTime);
 		//go2->Rotate(0, 0, -50 * deltaTime);
 		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);

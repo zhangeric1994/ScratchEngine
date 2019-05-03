@@ -63,12 +63,14 @@ namespace ScratchEngine
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
 		Material* pbrMaterial;
-		Material* skeletonMaterial;
+		Material* skeletonMaterial; 
+		Material* mobMaterial;
 
 		Mesh* sphereMesh;
 		Mesh* cubeMesh;
 
 		Model* model;
+		Model* mob;
 
 		ID3D11SamplerState* sampler;
 		D3D11_SAMPLER_DESC samplerDesc;
@@ -80,6 +82,7 @@ namespace ScratchEngine
 		GameObject* camera;
 		GameObject* cameraHolder;
 		GameObject* Character;
+		GameObject* Mob;
 		GameObject* go1;
 		GameObject* go2;
 		GameObject* go4;
@@ -96,6 +99,8 @@ namespace ScratchEngine
 		int comboCounter = 0;
 		int combo[5] ={ 14,14,15,16,17 };
 		bool attacking = false;
+
+		float lastTriggerTime;
 
 		float lastInputTime;
 		float lastAttackTime;
