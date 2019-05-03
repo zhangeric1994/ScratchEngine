@@ -65,7 +65,7 @@ ScratchEngine::Animator::Animator()
 	hasSkeleton = false;
 
 	blendFactor = 1;
-	blendSpeed = 100;
+	blendSpeed = 10;
 }
 
 
@@ -80,7 +80,7 @@ ScratchEngine::Animator::Animator(const aiScene* scene)
 	animations.clear();
 
 	blendFactor = 1;
-	blendSpeed = 100;
+	blendSpeed = 10;
 
 	if (!scene->HasAnimations()) {
 		// no animation

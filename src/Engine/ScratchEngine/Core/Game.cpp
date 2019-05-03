@@ -18,7 +18,7 @@ using namespace ScratchEngine::Rendering;
 Material* ScratchEngine::Game::greenMaterial = nullptr;
 Material* ScratchEngine::Game::redMaterial = nullptr;
 
-ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1280, 720, true), frameBarrier(2)
+ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1600, 900, true), frameBarrier(2)
 {
 	vertexShader = nullptr;
 	pixelShader = nullptr;
@@ -366,10 +366,18 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	//go10->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	//go10->AddComponent<SphereCollider>();
 
-	GameObject* ground = new GameObject();
-	ground->SetLocalPosition(0, -0.5f, 0);
-	ground->SetLocalScale(100, 1, 100);
-	ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+	for (float i = 0; i < 50.0f; i+= 15.05f) {
+		for (float j = 0; j < 50.0f; j+= 15.05f) {
+			GameObject* ground = new GameObject();
+			ground->SetLocalPosition(-18 + i, -0.5f, -18 + j);
+			ground->SetLocalScale(15, 1, 15);
+			ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+		}
+	}
+	//GameObject* ground = new GameObject();
+	//ground->SetLocalPosition(0, -0.5f, 0);
+	//ground->SetLocalScale(1, 1, 1);
+	//ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 	GameObject* go11 = new GameObject();
 	go11->SetLocalPosition(0, 2, 10);
@@ -587,9 +595,9 @@ void ScratchEngine::Game::Update()
 
 
 
-		if (lastTriggerTime < totalTime - 5) {
-			int idleIndex = rand() % 2 + 1;
-			float duration = mob->anim->SetAnimationIndex(idleIndex, false);
+		if (lastTriggerTime < totalTime - 3) {
+			int idleIndex = rand() % 2 + 2;
+			float duration = mob->anim->SetAnimationIndex(idleIndex, true);
 			lastTriggerTime = totalTime + duration;
 		}
 		else if (lastTriggerTime < totalTime - 0.1f) {
