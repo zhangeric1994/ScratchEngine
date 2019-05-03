@@ -379,13 +379,13 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	right = new GameObject();
 	right->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	right->AddComponent<SphereCollider>(0.3f);
+	right->AddComponent<SphereCollider>(0.15f);
 	right->SetLocalPosition(-115, 167, 4);
 	right->SetLocalScale(30);
 
 	left = new GameObject();
 	left->AddComponent<Renderer>(greenMaterial, sphereMesh);
-	left->AddComponent<SphereCollider>(0.3f);
+	left->AddComponent<SphereCollider>(0.15f);
 	left->SetLocalPosition(115, 167, 0);
 	left->SetLocalScale(30);
 
