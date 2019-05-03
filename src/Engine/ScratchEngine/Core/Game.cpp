@@ -258,7 +258,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
-	model->LoadAnimation("../Assets/Pro Melee Axe Pack/standing jump.fbx");			// 2
+	model->LoadAnimation("../Assets/Models/Pack/Standing Jump.fbx");			// 2
 	model->LoadAnimation("../Assets/Models/Pack/Turn.fbx");							// 3 
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Forward.fbx");		// 4
 	model->LoadAnimation("../Assets/Models/Pack/Standing Walk Back.fbx");			// 5
