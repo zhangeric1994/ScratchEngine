@@ -57,9 +57,9 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	shadowViewport.TopLeftY = 0;
 
 	samplerDesc = {};
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
@@ -217,7 +217,7 @@ void ScratchEngine::Game::CreateAllMaps()
 	cubeMap->setUp(device);
 	cubeMap->setMesh(cubeMesh);
 	cubeMap->setSampler(sampler);
-	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox1.dds");
+	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox2.dds");
 	//end of cube map
 }
 
@@ -230,18 +230,18 @@ void ScratchEngine::Game::CreateBasicGeometry()
 {
 	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_albedo.png", 0, &texture)))
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/Mossy_driveway_01_2K_Base_Color.png", 0, &texture)))
 		printf("load albedo texture error");
 
-	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_normals.png", 0, &normalMap)))
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/Mossy_driveway_01_2K_Normal.png", 0, &normalMap)))
 		printf("load normal map error");
 
 	//load roughness map
-	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_roughness.png", 0, &roughnessMap)))
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/Mossy_driveway_01_2K_Roughness.png", 0, &roughnessMap)))
 		printf("load roughness map error");
 
 	//load metalness map
-	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/PBR/scratched_metal.png", 0, &metalnessMap)))
+	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/chipped-paint-metal-metal.png", 0, &metalnessMap)))
 		printf("load metalness map failed");
 
 
@@ -292,7 +292,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cameraHolder = new GameObject();
 
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetLocalRotation(90, 0, 0);
+	directionalLightObject->SetLocalRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
 
 	//go1 = new GameObject();
@@ -361,8 +361,12 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	GameObject* ground = new GameObject();
 	ground->SetLocalPosition(0, -0.5f, 0);
-	ground->SetLocalScale(100, 1, 100);
+	ground->SetLocalScale(20, 1, 20);
 	ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
+
+	GameObject* test = new GameObject();
+	test->SetLocalPosition(0, 1.0f, 1);
+	test->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 
 	GameObject* go11 = new GameObject();
 	go11->SetLocalPosition(0, 2, 10);
