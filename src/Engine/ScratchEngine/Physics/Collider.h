@@ -63,6 +63,7 @@ namespace ScratchEngine
 
 
 	public:
+		BoxCollider(f32 size);
 		BoxCollider(f32 x, f32 y, f32 z);
 		BoxCollider(XMVECTOR size = { 1, 1, 1 }, XMVECTOR offset = { 0, 0, 0 });
 		~BoxCollider();

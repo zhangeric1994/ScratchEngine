@@ -99,6 +99,10 @@ BoundingVolume* ScratchEngine::Collider::GetBoundingVolume()
 }
 
 
+ScratchEngine::BoxCollider::BoxCollider(f32 size) : BoxCollider(XMVectorSet(size, size, size, 0))
+{
+}
+
 ScratchEngine::BoxCollider::BoxCollider(f32 x, f32 y, f32 z) : BoxCollider(XMVectorSet(x, y, z, 0))
 {
 }

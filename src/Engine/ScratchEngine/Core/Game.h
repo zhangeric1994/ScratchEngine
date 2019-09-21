@@ -43,7 +43,7 @@ namespace ScratchEngine
 
 	private:
 		void LoadShaders();
-		void CreateMatrces();
+		void StressTest();
 		void CreateBasicGeometry();
 		void CreateAllMaps();
 

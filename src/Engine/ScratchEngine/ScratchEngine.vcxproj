@@ -154,6 +154,7 @@
       <AdditionalIncludeDirectories>..\Externals\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DNOMINMAX</AdditionalOptions>
       <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -75,10 +75,15 @@ void ScratchEngine::Physics::PhysicsEngine::UpdateBoundingVolumes()
 
 void ScratchEngine::Physics::PhysicsEngine::SolveCollisions()
 {
+	int i = 0;
 	for (Collider* collider = colliderList; collider; collider = collider->next)
+	{
+		if (i++ > 100)
+			return;
+
 		if (collider->isActive)
 			dynamicBVH.Query(collider->id, this);
-
+	}
 	//printf("\n\n");
 }
 

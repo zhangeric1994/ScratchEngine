@@ -24,11 +24,17 @@ Material* ScratchEngine::Game::redMaterial = nullptr;
 ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, name, 1600, 900, true), frameBarrier(2)
 {
 	vertexShader = nullptr;
-	pixelShader = nullptr;
 	vsZPrepass = nullptr;
+	vsSkeleton = nullptr;
+
+	pixelShader = nullptr;
+	psPBR = nullptr;
+	psBlinnPhong = nullptr;
 
 	greenMaterial = nullptr;
 	redMaterial = nullptr;
+	pbrMaterial = nullptr;
+	skeletonMaterial = nullptr;
 
 	zPrepassDepthStencilState = nullptr;
 	
@@ -153,10 +159,10 @@ void ScratchEngine::Game::Initialize()
 	PhysicsEngine::Initialize();
 	RenderingEngine::Initialize(device, context);
 
-	LoadShaders();
-	CreateMatrces();
-	CreateBasicGeometry();
-	CreateAllMaps();
+	//LoadShaders();
+	StressTest();
+	//CreateBasicGeometry();
+	//CreateAllMaps();
 
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -224,9 +230,27 @@ void ScratchEngine::Game::CreateAllMaps()
 	//end of cube map
 }
 
-void ScratchEngine::Game::CreateMatrces()
-{
+#include <random>
 
+void ScratchEngine::Game::StressTest()
+{
+	std::random_device rd;
+
+	for (int i = 0; i < 10000; ++i)
+	{
+		GameObject* go = new GameObject();
+		go->SetName("" + i);
+		go->SetLocalPosition(rd() % 100000, rd() % 100000, rd() % 100000);
+		go->AddComponent<BoxCollider>(rd() % 10);
+	}
+
+	for (int i = 0; i < 10000; ++i)
+	{
+		GameObject* go = new GameObject();
+		go->SetName("" + i);
+		go->SetLocalPosition(1000000 + rd() % 100000, rd() % 100000, rd() % 100000);
+		go->AddComponent<BoxCollider>(rd() % 10);
+	}
 }
 
 void ScratchEngine::Game::CreateBasicGeometry()
@@ -448,6 +472,8 @@ void ScratchEngine::Game::OnResize()
 
 void ScratchEngine::Game::Update()
 {
+	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
+
 	while (isRunning)
 	{
 		UpdateTimer();
@@ -455,213 +481,198 @@ void ScratchEngine::Game::Update()
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
-		InputManager::singleton->Capture();
+		//InputManager::singleton->Capture();
 
 		frameBarrier.Wait();
 
 		if (GetAsyncKeyState(VK_ESCAPE))
 			Quit();
 		
-		float speed = 1.5f;
-		bool animationChanged = false;
+		//float speed = 1.5f;
+		//bool animationChanged = false;
 
-		if (Input::IsKeyPressed('1'))
-		{
-			rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
-			leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
-		}
+		//if (Input::IsKeyPressed('1'))
+		//{
+		//	rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
+		//	leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
+		//}
 
-		if (Input::IsKeyPressed('2'))
-			model->anim->useBlending = !model->anim->useBlending;
+		//if (Input::IsKeyPressed('2'))
+		//	model->anim->useBlending = !model->anim->useBlending;
 
-		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
-			//useBlending
-			model->anim->useBlending = false;
-			printf("Blending OFF\n");
-			lastInputTime = totalTime + 0.1f;
-		}
+		//if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
+		//	//useBlending
+		//	model->anim->useBlending = false;
+		//	printf("Blending OFF\n");
+		//	lastInputTime = totalTime + 0.1f;
+		//}
 
-		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
-			//useBlending
-			model->anim->useBlending = true;
-			printf("Blending ON\n");
-			lastInputTime = totalTime + 0.1f;
-		}
-
-
-		if ((GetKeyState('F') & 0x8000) != 0) {
-			//attacking
-			if (!animationChanged && lastAttackTime < totalTime) {
-				float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
-				attacking = true;
-				animationChanged = true;
-				lastInputTime = totalTime + duration;
-				lastAttackTime = totalTime + duration - 0.2f;
-				comboCounter++;
-				if (comboCounter > 4) {
-					lastAttackTime = totalTime + duration + 0.5f;
-				}
-				comboCounter %= 5;
-			}
-		}
-
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			if (!animationChanged&& lastAttackTime < totalTime) {
-				float duration = model->anim->SetAnimationIndex(2, false);
-				lastInputTime = totalTime + model->anim->duration;
-				attacking = true;
-				animationChanged = true;
-				lastInputTime = totalTime + duration;
-				lastAttackTime = totalTime + duration - 0.2f;
-			}
-		}
-
-		if (attacking && lastInputTime < totalTime) {
-			// the attacking interval is gone
-			comboCounter = 0;
-			attacking = false;
-		}
-
-		if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
-			animationChanged = true;
-			// press left and right together will not update animation
-		}
-		if (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000) {
-			animationChanged = true;
-			// same
-		}
-
-		if (!attacking) {
-			if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(6, true);
-					animationChanged = true;
-				}
-				player->Translate(speed * deltaTime, 0, 0);
-				lastInputTime = totalTime;
-			}
-			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
-				// left sprint
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(10, true);
-					animationChanged = true;
-				}
-				player->Translate(speed * deltaTime * 2.0f, 0, 0);
-				lastInputTime = totalTime;
-			}
-
-			if (GetAsyncKeyState('D') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
-
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(7, true);
-					animationChanged = true;
-				}
-				player->Translate(-speed * deltaTime, 0, 0);
-				lastInputTime = totalTime;
-			}
-			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
-				// right sprint
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(11, true);
-					animationChanged = true;
-				}
-				player->Translate(-speed * deltaTime * 2.0f, 0, 0);
-				lastInputTime = totalTime;
-			}
-
-			if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(4, true);
-					animationChanged = true;
-				}
-
-				player->Translate(0, 0, -speed * deltaTime * 1.0f);
-				lastInputTime = totalTime;
-			}
-			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
-				// forward sprint
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(8, true);
-					animationChanged = true;
-				}
-				player->Translate(0, 0, -speed * deltaTime * 2.0f);
-				lastInputTime = totalTime;
-			}
+		//if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
+		//	//useBlending
+		//	model->anim->useBlending = true;
+		//	printf("Blending ON\n");
+		//	lastInputTime = totalTime + 0.1f;
+		//}
 
 
-			//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
+		//if ((GetKeyState('F') & 0x8000) != 0) {
+		//	//attacking
+		//	if (!animationChanged && lastAttackTime < totalTime) {
+		//		float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
+		//		attacking = true;
+		//		animationChanged = true;
+		//		lastInputTime = totalTime + duration;
+		//		lastAttackTime = totalTime + duration - 0.2f;
+		//		comboCounter++;
+		//		if (comboCounter > 4) {
+		//			lastAttackTime = totalTime + duration + 0.5f;
+		//		}
+		//		comboCounter %= 5;
+		//	}
+		//}
 
-			if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+		//if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
+		//	if (!animationChanged&& lastAttackTime < totalTime) {
+		//		float duration = model->anim->SetAnimationIndex(2, false);
+		//		lastInputTime = totalTime + model->anim->duration;
+		//		attacking = true;
+		//		animationChanged = true;
+		//		lastInputTime = totalTime + duration;
+		//		lastAttackTime = totalTime + duration - 0.2f;
+		//	}
+		//}
 
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(5, true);
-					animationChanged = true;
-				}
-				player->Translate(0, 0, speed * deltaTime);
-				lastInputTime = totalTime;
-			}
-			else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
-				// forward sprint
-				if (!animationChanged && lastInputTime < totalTime) {
-					model->anim->SetAnimationIndex(9, true);
-					animationChanged = true;
-				}
-				player->Translate(0, 0, speed * deltaTime * 2.0f);
-				lastInputTime = totalTime;
-			}
+		//if (attacking && lastInputTime < totalTime) {
+		//	// the attacking interval is gone
+		//	comboCounter = 0;
+		//	attacking = false;
+		//}
 
-			//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
+		//if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
+		//	animationChanged = true;
+		//	// press left and right together will not update animation
+		//}
+		//if (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000) {
+		//	animationChanged = true;
+		//	// same
+		//}
+
+		//if (!attacking) {
+		//	if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(6, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(speed * deltaTime, 0, 0);
+		//		lastInputTime = totalTime;
+		//	}
+		//	else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('A') & 0x8000) {
+		//		// left sprint
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(10, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(speed * deltaTime * 2.0f, 0, 0);
+		//		lastInputTime = totalTime;
+		//	}
+
+		//	if (GetAsyncKeyState('D') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(7, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(-speed * deltaTime, 0, 0);
+		//		lastInputTime = totalTime;
+		//	}
+		//	else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('D') & 0x8000) {
+		//		// right sprint
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(11, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(-speed * deltaTime * 2.0f, 0, 0);
+		//		lastInputTime = totalTime;
+		//	}
+
+		//	if (GetAsyncKeyState('W') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(4, true);
+		//			animationChanged = true;
+		//		}
+
+		//		player->Translate(0, 0, -speed * deltaTime * 1.0f);
+		//		lastInputTime = totalTime;
+		//	}
+		//	else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('W') & 0x8000) {
+		//		// forward sprint
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(8, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(0, 0, -speed * deltaTime * 2.0f);
+		//		lastInputTime = totalTime;
+		//	}
 
 
-			if (lastInputTime < totalTime - 5) {
-				int idleIndex = rand() % 2 + 12;
-				model->anim->SetAnimationIndex(idleIndex, false);
-				lastInputTime = totalTime + model->anim->duration;
-			}
-			else if (lastInputTime < totalTime - 0.2f) {
-				model->anim->SetAnimationIndex(1, true);
-			}
-		}
+		//	//camera->Translate(-10 * deltaTime, 0.0f, 0.0f);
 
-		rightHandCollider->SetActive(attacking);
-		leftHandCollider->SetActive(attacking);
+		//	if (GetAsyncKeyState('S') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
+
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(5, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(0, 0, speed * deltaTime);
+		//		lastInputTime = totalTime;
+		//	}
+		//	else if (GetAsyncKeyState(VK_LSHIFT) && GetAsyncKeyState('S') & 0x8000) {
+		//		// forward sprint
+		//		if (!animationChanged && lastInputTime < totalTime) {
+		//			model->anim->SetAnimationIndex(9, true);
+		//			animationChanged = true;
+		//		}
+		//		player->Translate(0, 0, speed * deltaTime * 2.0f);
+		//		lastInputTime = totalTime;
+		//	}
+
+		//	//camera->Translate(0.0f, 0.0f, -10 * deltaTime);
 
 
-		if (mob->GetComponent<Mob>()->hit)
-		{
-			//get hit 
-			mob->GetComponent<Mob>()->hit = false;
-			lastTriggerTime = totalTime + mob->GetComponent<Mob>()->duration;
-		}
-		else if (lastTriggerTime < totalTime - 3)
-		{
-			int idleIndex = rand() % 2 + 2;
-			float duration = mobModel->anim->SetAnimationIndex(idleIndex, true);
-			lastTriggerTime = totalTime + duration;
-		}
-		else if (lastTriggerTime < totalTime - 0.1f)
-			mobModel->anim->SetAnimationIndex(1, true);
-	
-		//if (GetAsyncKeyState('X') & 0x8000)
-			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
+		//	if (lastInputTime < totalTime - 5) {
+		//		int idleIndex = rand() % 2 + 12;
+		//		model->anim->SetAnimationIndex(idleIndex, false);
+		//		lastInputTime = totalTime + model->anim->duration;
+		//	}
+		//	else if (lastInputTime < totalTime - 0.2f) {
+		//		model->anim->SetAnimationIndex(1, true);
+		//	}
+		//}
 
-		model->anim->Update(deltaTime, player);
-		mobModel->anim->Update(deltaTime, mob);
-		//go1->Rotate(0, 0, 20 * deltaTime);
-		//go2->Rotate(0, 0, -50 * deltaTime);
-		//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
-		//go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
+		//rightHandCollider->SetActive(attacking);
+		//leftHandCollider->SetActive(attacking);
 
-		//go6->Rotate(0, 0, 20 * deltaTime);
-		//go7->Rotate(0, 0, -50 * deltaTime);
-		//go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
-		//go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
 
-		PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
+		//if (mob->GetComponent<Mob>()->hit)
+		//{
+		//	//get hit 
+		//	mob->GetComponent<Mob>()->hit = false;
+		//	lastTriggerTime = totalTime + mob->GetComponent<Mob>()->duration;
+		//}
+		//else if (lastTriggerTime < totalTime - 3)
+		//{
+		//	int idleIndex = rand() % 2 + 2;
+		//	float duration = mobModel->anim->SetAnimationIndex(idleIndex, true);
+		//	lastTriggerTime = totalTime + duration;
+		//}
+		//else if (lastTriggerTime < totalTime - 0.1f)
+		//	mobModel->anim->SetAnimationIndex(1, true);
+
+		//model->anim->Update(deltaTime, player);
+		//mobModel->anim->Update(deltaTime, mob);
 
 		physicsEngine->UpdateBoundingVolumes();
 		physicsEngine->SolveCollisions();
-
 
 		frameBarrier.Wait();
 	}
@@ -676,41 +687,41 @@ void ScratchEngine::Game::Draw()
 
 	while (isRunning)
 	{
-		scene->CacheRenderingData();
+		//scene->CacheRenderingData();
 
 		frameBarrier.Wait();
 
-		const float color[4] = { 0.0f, 0.0f, 0.0f, 0 };
+		//const float color[4] = { 0.0f, 0.0f, 0.0f, 0 };
 
-		context->ClearRenderTargetView(backBufferRTV, color);
-		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		//context->ClearRenderTargetView(backBufferRTV, color);
+		//context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		bool hasShadowMap = false;
+		//bool hasShadowMap = false;
 
-		shadowViewport.Height = shadowMapSize;
-		shadowViewport.Width = shadowMapSize;
+		//shadowViewport.Height = shadowMapSize;
+		//shadowViewport.Width = shadowMapSize;
 
-		context->RSSetViewports(1, &shadowViewport);
+		//context->RSSetViewports(1, &shadowViewport);
 
-		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
+		//hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
 
-		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-		
-		shadowViewport.Width = (float)width;
-		shadowViewport.Height = (float)height;
-		
-		context->RSSetViewports(1, &shadowViewport);
-		context->RSSetState(0);
+		//context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+		//
+		//shadowViewport.Width = (float)width;
+		//shadowViewport.Height = (float)height;
+		//
+		//context->RSSetViewports(1, &shadowViewport);
+		//context->RSSetState(0);
 
-		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
-		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
-		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
+		//renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		//renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+		//renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 
-		//turn off all resources bound to shader
-		ID3D11ShaderResourceView* noSRV[16] = {};
-		context->PSSetShaderResources(0, 16, noSRV);
+		////turn off all resources bound to shader
+		//ID3D11ShaderResourceView* noSRV[16] = {};
+		//context->PSSetShaderResources(0, 16, noSRV);
 
-		swapChain->Present(0, 0);
+		//swapChain->Present(0, 0);
 
 
 		frameBarrier.Wait();
