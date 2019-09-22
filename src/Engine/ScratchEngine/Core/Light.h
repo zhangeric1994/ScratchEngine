@@ -21,41 +21,42 @@ namespace ScratchEngine
 
 
 	protected:
-		XMVECTOR ambientColor;
-		XMVECTOR diffuseColor;
-		RenderTexture* shadowMap;
-
+		XMVECTOR color;
 		LightType type;
+		f32 intensity;
+		RenderTexture* shadowMap;
 
 		Light* next;
 		Light* previous;
 
+
 		Light(LightType type);
-		Light(LightType type, XMVECTOR ambientColor, XMVECTOR diffuseColor);
+		Light(LightType type, XMVECTOR color, f32 intensity = 1);
 		~Light();
 
 
 	public:
-		XMVECTOR GetAmbientColor();
-		XMVECTOR GetDiffuseColor();
+		XMVECTOR GetColor();
 		bool DoCastShadow();
 
-		void SetAmbientColor(f32 r, f32 g, f32 b);
-		void SetDiffuseColor(f32 r, f32 g, f32 b);
+		void SetColor(f32 r, f32 g, f32 b);
+		void SetIntensity(f32 value);
 		virtual void EnableShadowCasting() = 0;
 		virtual void DisableShadowCasting() = 0;
 	};
+
 
 	class __declspec(dllexport) DirectionalLight : public Light
 	{
 	public:
 		DirectionalLight();
-		DirectionalLight(XMVECTOR ambientColor, XMVECTOR diffuseColor);
+		DirectionalLight(XMVECTOR color, f32 intensity = 1);
 
 
 		void EnableShadowCasting();
 		void DisableShadowCasting();
 	};
+
 
 	class __declspec(dllexport) PointLight : public Light
 	{
@@ -65,8 +66,9 @@ namespace ScratchEngine
 
 	public:
 		PointLight();
-		PointLight(XMVECTOR ambientColor, XMVECTOR diffuseColor);
+		PointLight(XMVECTOR color, f32 intensity = 1);
 	};
+
 
 	class __declspec(dllexport) SpotLight : public Light
 	{
@@ -77,28 +79,23 @@ namespace ScratchEngine
 
 	public:
 		SpotLight();
-		SpotLight(XMVECTOR ambientColor, XMVECTOR diffuseColor, f32 angle);
+		SpotLight(XMVECTOR color, f32 angle);
 	};
 
 
-	inline XMVECTOR Light::GetAmbientColor()
+	inline XMVECTOR Light::GetColor()
 	{
-		return ambientColor;
+		return color;
 	}
 
-	inline XMVECTOR Light::GetDiffuseColor()
+	inline void Light::SetColor(f32 r, f32 g, f32 b)
 	{
-		return diffuseColor;
+		color = XMVectorSet(r, g, b, 0.0f);
 	}
 
-	inline void Light::SetAmbientColor(f32 r, f32 g, f32 b)
+	inline void Light::SetIntensity(f32 value)
 	{
-		ambientColor = XMVectorSet(r, g, b, 0.0f);
-	}
-
-	inline void Light::SetDiffuseColor(f32 r, f32 g, f32 b)
-	{
-		diffuseColor = XMVectorSet(r, g, b, 0.0f);
+		intensity = value;
 	}
 
 	inline bool Light::DoCastShadow()
@@ -110,9 +107,7 @@ namespace ScratchEngine
 	inline void DirectionalLight::EnableShadowCasting()
 	{
 		if (!shadowMap)
-		{
 			shadowMap = new RenderTexture(2048);
-		}
 	}
 
 	inline void DirectionalLight::DisableShadowCasting()

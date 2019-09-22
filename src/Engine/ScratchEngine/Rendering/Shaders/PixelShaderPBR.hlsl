@@ -1,6 +1,8 @@
 static const float PI = 3.14159265f;
 
-struct VertexToPixel {
+
+struct VertexToPixel
+{
 	float4 svPosition : SV_POSITION;
 	float4 position : POSITION;
 	float3 normal : NORMAL;
@@ -9,44 +11,52 @@ struct VertexToPixel {
 	float4 shadowPos : SHADOW;
 };
 
-struct LightSource {
-	float4 ambientColor;
-	float4 diffuseColor;
+struct LightSource
+{
+	float4 color;
 	int type;
 	float3 position;
 	float range;
 	float3 direction;
-	//float intensity;
+    float intensity;
+    float fallOff;
+    float2 padding;
 };
 
-struct material {
+struct material
+{
 	float3 albedo;
 	float roughness;
 	float metalness;
 };
 
 
-cbuffer EnableMaps : register(b0) {
-	int hasTexture;
-	int hasNormalMap;
-	int hasShadowMap;
-	int hasMetalnessMap;
-	int hasRoughnessMap;
-}
-
-cbuffer LightSourceData : register(b1) {
+cbuffer LightSourceData : register(b1)
+{
 	LightSource light;
 };
 
-cbuffer CameraData : register(b2) {
+cbuffer CameraData : register(b2)
+{
 	float3 cameraPosition;
 };
+
+cbuffer ObjectData : register(b3)
+{
+    int hasTexture;
+    int hasNormalMap;
+    int hasShadowMap;
+    int hasMetalnessMap;
+    int hasRoughnessMap;
+}
+
 
 Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
 Texture2D ShadowMap	: register(t2);
 Texture2D roughnessMap : register(t3);
 Texture2D metalnessMap : register(t4);
+
 
 SamplerState basicSampler : register(s0);
 SamplerComparisonState shadowSampler : register(s1);

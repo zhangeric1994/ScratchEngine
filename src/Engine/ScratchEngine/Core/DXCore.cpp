@@ -78,7 +78,7 @@ ScratchEngine::DXCore::~DXCore()
 	if (context) { context->ClearState(); }
 
 	if (depthStencilView) { depthStencilView->Release(); }
-	if (backBufferRTV) { backBufferRTV->Release();}
+	if (backBufferRTV) { backBufferRTV->Release(); }
 
 	if (swapChain) { swapChain->Release();}
 	if (context) { context->Release(); }
@@ -235,19 +235,15 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 	// The above function created the back buffer render target
 	// for us, but we need a reference to it
 	ID3D11Texture2D* backBufferTexture;
-	swapChain->GetBuffer(
-		0,
-		__uuidof(ID3D11Texture2D),
-		(void**)&backBufferTexture);
+	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTexture);
 
 	// Now that we have the texture, create a render target view
 	// for the back buffer so we can render into it.  Then release
 	// our local reference to the texture, since we have the view.
-	device->CreateRenderTargetView(
-		backBufferTexture,
-		0,
-		&backBufferRTV);
+	device->CreateRenderTargetView(backBufferTexture, 0, &backBufferRTV);
+	
 	backBufferTexture->Release();
+
 
 	// Set up the description of the texture to use for the depth buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};

@@ -10,7 +10,7 @@ struct VertexToPixel
 
 struct LightSource
 {
-    float4 ambientColor;
+    float4 color;
     float4 diffuseColor;
     int type;
     float3 position;
@@ -61,5 +61,5 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 L = -normalize(light.direction);
     float3 V = normalize(cameraPosition.xyz - input.position.xyz);
 
-    return albedo * Lambert(light.ambientColor, light.diffuseColor, N, L) + BlinnPhong(N, L, V, 16);
+    return albedo * Lambert(light.color, albedo, N, L) + BlinnPhong(N, L, V, 16);
 }

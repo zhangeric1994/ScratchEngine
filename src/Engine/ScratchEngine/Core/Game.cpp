@@ -18,6 +18,45 @@ using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
 
 
+void CreateSRVAndRTV(ID3D11Device* device, ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM)
+{
+	// Set up the texture itself
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	texDesc.Format = format;
+	texDesc.MipLevels = 1;
+	texDesc.Width = 1600;
+	texDesc.Height = 900;
+	texDesc.SampleDesc.Count = 1;
+
+	// Actually create the texture
+	ID3D11Texture2D* texture;
+	device->CreateTexture2D(&texDesc, 0, &texture);
+
+
+	// Create the shader resource view for this texture
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = format;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(texture, &srvDesc, srv);
+	
+
+	// Make a render target view desc and RTV
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = format;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.Texture2D.MipSlice = 0;
+	device->CreateRenderTargetView(texture, &rtvDesc, rtv);
+	
+
+	// Clean up extra texture ref
+	texture->Release();
+}
+
+
 Material* ScratchEngine::Game::greenMaterial = nullptr;
 Material* ScratchEngine::Game::redMaterial = nullptr;
 
@@ -31,6 +70,17 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	redMaterial = nullptr;
 
 	zPrepassDepthStencilState = nullptr;
+
+	GBufferAlbedoSRV = nullptr;
+	GBufferAlbedoRTV = nullptr;
+	GBufferNormalsSRV = nullptr;
+	GBufferNormalsRTV = nullptr;
+	GBufferDepthSRV = nullptr;
+	GBufferDepthRTV = nullptr;
+	GBufferMaterialSRV = nullptr;
+	GBufferMaterialRTV = nullptr;
+	DeferredLightBufferSRV = nullptr;
+	DeferredLightBufferRTV = nullptr;
 	
 	sphereMesh = nullptr;
 	cubeMesh = nullptr;
@@ -67,7 +117,7 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	Global::SetScreenRatio(1280.0f / 720.0f);
+	Global::SetScreenRatio(1600.0f / 900.0f);
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -206,6 +256,13 @@ void ScratchEngine::Game::LoadShaders()
 	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
 	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+
+
+	CreateSRVAndRTV(device, &GBufferAlbedoSRV, &GBufferAlbedoRTV);
+	CreateSRVAndRTV(device, &GBufferNormalsSRV, &GBufferNormalsRTV, DXGI_FORMAT_R16G16B16A16_UNORM);
+	CreateSRVAndRTV(device, &GBufferDepthSRV, &GBufferDepthRTV, DXGI_FORMAT_R32_FLOAT);
+	CreateSRVAndRTV(device, &GBufferMaterialSRV, &GBufferMaterialRTV);
+	CreateSRVAndRTV(device, &DeferredLightBufferSRV, &DeferredLightBufferRTV, DXGI_FORMAT_R16G16B16A16_FLOAT); // Needs to go above 1!!!
 }
 
 void ScratchEngine::Game::CreateAllMaps()
@@ -303,7 +360,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetLocalRotation(45, 0, 0);
-	directionalLight = directionalLightObject->AddComponent<DirectionalLight>();
+	directionalLight = directionalLightObject->AddComponent<DirectionalLight>(XMVectorSet(0.5f, 0.5f, 0.3f, 1.0f), 10.0f);
 
 	//go1 = new GameObject();
 	//go1->SetName("1");
@@ -680,37 +737,73 @@ void ScratchEngine::Game::Draw()
 
 		frameBarrier.Wait();
 
-		const float color[4] = { 0.0f, 0.0f, 0.0f, 0 };
 
-		context->ClearRenderTargetView(backBufferRTV, color);
 		context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-		bool hasShadowMap = false;
-
-		shadowViewport.Height = shadowMapSize;
-		shadowViewport.Width = shadowMapSize;
-
-		context->RSSetViewports(1, &shadowViewport);
-
-		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
-
-		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+		const float color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+		context->ClearRenderTargetView(backBufferRTV, color);
+		context->ClearRenderTargetView(GBufferAlbedoRTV, color);
+		context->ClearRenderTargetView(GBufferNormalsRTV, color);
+		context->ClearRenderTargetView(GBufferDepthRTV, color); // Not an actual depth buffer!
+		context->ClearRenderTargetView(GBufferMaterialRTV, color);
+		context->ClearRenderTargetView(DeferredLightBufferRTV, color);
 		
-		shadowViewport.Width = (float)width;
-		shadowViewport.Height = (float)height;
 		
-		context->RSSetViewports(1, &shadowViewport);
-		context->RSSetState(0);
+		//bool hasShadowMap = false;
+
+		//shadowViewport.Height = shadowMapSize;
+		//shadowViewport.Width = shadowMapSize;
+
+		//context->RSSetViewports(1, &shadowViewport);
+
+		//hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
+
+		//D3D11_VIEWPORT viewport = {};
+		//viewport.TopLeftX = 0;
+		//viewport.TopLeftY = 0;
+		//viewport.Width = (float)width;
+		//viewport.Height = (float)height;
+		//viewport.MinDepth = 0.0f;
+		//viewport.MaxDepth = 1.0f;
+
+		//context->RSSetViewports(1, &viewport);
+		//context->RSSetState(0);
+
 
 		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
-		renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+
+		if (true)
+		{
+			ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+			renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+
+			ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
+			renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, 1, gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
+
+			renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
+		}
+		else
+		{
+			context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+			renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+		}
+
 		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 
-		//turn off all resources bound to shader
-		ID3D11ShaderResourceView* noSRV[16] = {};
-		context->PSSetShaderResources(0, 16, noSRV);
 
+		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+		context->RSSetState(0);
+
+		// Reset depth state
+		context->OMSetDepthStencilState(0, 0);
+
+		
 		swapChain->Present(0, 0);
+		
+
+		ID3D11ShaderResourceView* nullSRVs[16] = {};
+		context->PSSetShaderResources(0, 16, nullSRVs);
 
 
 		frameBarrier.Wait();

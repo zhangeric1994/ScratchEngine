@@ -8,6 +8,17 @@ struct VertexShaderInput
 	float4 boneWeights : BLENDWEIGHT;
 };
 
+struct VertexToPixel
+{
+    float4 svPosition : SV_POSITION;
+    float4 position : POSITION;
+    float3 normal : NORMAL;
+    float3 tangent : TANGENT;
+    float2 uv : TEXCOORD;
+    float4 shadowPos : SHADOW;
+};
+
+
 cbuffer CameraData : register(b2)
 {
 	matrix view;
@@ -19,50 +30,36 @@ cbuffer CameraData : register(b2)
 cbuffer ObjectData : register(b3)
 {
 	matrix world;
+    matrix gBoneTransforms[128];
 };
 
-cbuffer cbSkinned : register(b4)
-{
-	matrix gBoneTransforms[128];
-};
 
-struct VertexToPixel
+VertexToPixel main(VertexShaderInput input)
 {
-    float4 svPosition : SV_POSITION;
-    float4 position : POSITION;
-    float3 normal : NORMAL;
-    float3 tangent : TANGENT;
-    float2 uv : TEXCOORD;
-    float4 shadowPos : SHADOW;
-};
-
-VertexToPixel main(VertexShaderInput vin)
-{
-	VertexToPixel vout;
-
     float4 p = float4(0, 0, 0, 0);
     float4 n = float4(0, 0, 0, 0);
 
     for (int i = 0; i < 4; ++i)
     {
-        float weight = vin.boneWeights[i];
-        float4x4 m = gBoneTransforms[vin.boneIndices[i]];
-        p += weight * mul(float4(vin.position.xyz, 1.0f), m);
-        n += weight * mul(float4(vin.normal, 0.0f), m);
+        float weight = input.boneWeights[i];
+        float4x4 m = gBoneTransforms[input.boneIndices[i]];
+        p += weight * mul(float4(input.position.xyz, 1.0f), m);
+        n += weight * mul(float4(input.normal, 0.0f), m);
     }
 
     p.w = 1;
     n.w = 0;
         
 
-    matrix WVP = mul(world, viewProjection);
-    matrix shadowWVP = mul(world, shadowViewProjection);
+    VertexToPixel output;
 
-    vout.svPosition = mul(p, WVP);
-	vout.position = mul(p, world);
-    vout.normal = normalize(mul(n.xyz, (float3x3)world));
-	vout.uv = vin.uv;
-    vout.shadowPos = mul(p, shadowWVP);
+    output.svPosition = mul(p, mul(world, viewProjection));
+    output.position = mul(p, world);
+    output.normal = normalize(mul(n.xyz, (float3x3) world));
+    output.tangent = input.tangent;
+    output.uv = input.uv;
+    output.shadowPos = mul(p, mul(world, shadowViewProjection));
 
-	return vout;
+
+    return output;
 }

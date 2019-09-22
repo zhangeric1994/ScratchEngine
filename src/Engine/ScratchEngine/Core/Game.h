@@ -62,6 +62,18 @@ namespace ScratchEngine
 
 		ID3D11DepthStencilState* zPrepassDepthStencilState;
 
+		ID3D11ShaderResourceView* GBufferAlbedoSRV;
+		ID3D11RenderTargetView* GBufferAlbedoRTV;
+		ID3D11ShaderResourceView* GBufferNormalsSRV;
+		ID3D11RenderTargetView* GBufferNormalsRTV;
+		ID3D11ShaderResourceView* GBufferDepthSRV;
+		ID3D11RenderTargetView* GBufferDepthRTV;
+		ID3D11ShaderResourceView* GBufferMaterialSRV;
+		ID3D11RenderTargetView* GBufferMaterialRTV;
+		ID3D11ShaderResourceView* DeferredLightBufferSRV;
+		ID3D11RenderTargetView* DeferredLightBufferRTV;
+		
+
 		Material* pbrMaterial;
 		Material* skeletonMaterial; 
 		Material* mobMaterial;

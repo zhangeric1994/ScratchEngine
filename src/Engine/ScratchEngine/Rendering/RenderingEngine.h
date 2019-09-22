@@ -59,7 +59,21 @@ namespace ScratchEngine
 			ID3D11DeviceContext* deviceContext;
 
 			SimpleVertexShader* vsDepthOnly;
+			SimpleVertexShader* vsDirectionalLight;
+			SimpleVertexShader* vsPointLight;
+			SimpleVertexShader* vsViewport;
+			SimplePixelShader* psGBuffer;
+			SimplePixelShader* psDirectionalLight;
+			SimplePixelShader* psPointLight;
+			SimplePixelShader* psDeferred;
+
 			ID3D11DepthStencilState* dssLessEqual;
+			ID3D11DepthStencilState* dsReadGreater;
+			ID3D11DepthStencilState* dsOff;
+			
+			ID3D11BlendState* bsAdditive;
+
+			Mesh* sphereMesh;
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
@@ -77,6 +91,9 @@ namespace ScratchEngine
 		public:
 			void PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables);
 			void DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources);
+			void DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView);
+			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView);
+			void DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView);
 			bool RenderShadowMap(Renderable* renderables, int numRenderables, XMVECTOR cameraPosition);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
@@ -95,6 +112,9 @@ namespace ScratchEngine
 			config.deviceContext = deviceContext;
 
 			singleton = new RenderingEngine(config);
+
+
+			singleton->sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
 		}
 
 		inline void RenderingEngine::Initialize(RenderingEngineConfig config)

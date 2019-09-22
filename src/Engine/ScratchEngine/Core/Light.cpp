@@ -5,15 +5,15 @@
 #include "Scene.h"
 
 
-ScratchEngine::Light::Light(LightType type) : Light(type, XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f), XMVectorSet(0.6f, 0.6f, 0.6f, 1.0f))
+ScratchEngine::Light::Light(LightType type) : Light(type, XMVectorSet(0.1f, 0.1f, 0.1f, 1.0f))
 {
 }
 
-ScratchEngine::Light::Light(LightType type, XMVECTOR ambientColor, XMVECTOR diffuseColor)
+ScratchEngine::Light::Light(LightType type, XMVECTOR color, f32 intensity)
 {
 	this->type = type;
-	this->ambientColor = ambientColor;
-	this->diffuseColor = diffuseColor;
+	this->color = color;
+	this->intensity = 1;
 
 	this->next = nullptr;
 	this->previous = nullptr;
@@ -31,7 +31,7 @@ ScratchEngine::DirectionalLight::DirectionalLight() : Light(LightType::DIRECTION
 {
 }
 
-ScratchEngine::DirectionalLight::DirectionalLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(LightType::DIRECTIONAL, ambientColor, diffuseColor)
+ScratchEngine::DirectionalLight::DirectionalLight(XMVECTOR color, f32 intensity) : Light(LightType::DIRECTIONAL, color, intensity)
 {
 }
 
@@ -40,7 +40,7 @@ ScratchEngine::PointLight::PointLight() : Light(LightType::POINT)
 {
 }
 
-ScratchEngine::PointLight::PointLight(XMVECTOR ambientColor, XMVECTOR diffuseColor) : Light(LightType::POINT, ambientColor, diffuseColor)
+ScratchEngine::PointLight::PointLight(XMVECTOR color, f32 intensity) : Light(LightType::POINT, color, intensity)
 {
 }
 
@@ -50,7 +50,7 @@ ScratchEngine::SpotLight::SpotLight() : Light(LightType::SPOT)
 	this->angle = 30.0f;
 }
 
-ScratchEngine::SpotLight::SpotLight(XMVECTOR ambientColor, XMVECTOR diffuseColor, f32 angle) : Light(LightType::SPOT, ambientColor, diffuseColor)
+ScratchEngine::SpotLight::SpotLight(XMVECTOR color, f32 angle) : Light(LightType::SPOT, color)
 {
 	this->angle = angle;
 }

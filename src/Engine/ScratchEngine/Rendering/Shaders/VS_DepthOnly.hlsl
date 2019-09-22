@@ -25,10 +25,6 @@ cbuffer CameraData : register(b2)
 cbuffer ObjectData : register(b3)
 {
     matrix world;
-};
-
-cbuffer cbSkinned : register(b4)
-{
     matrix gBoneTransforms[128];
 };
 

@@ -222,10 +222,10 @@ void ScratchEngine::Scene::UpdateLightSources()
 		if (light->IsActive())
 		{
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
-			lightSource.ambientColor = light->ambientColor;
-			lightSource.diffuseColor = light->diffuseColor;
+			lightSource.color = light->color;
 			lightSource.type = light->type;
 			lightSource.range = 0;
+			lightSource.intensity = light->intensity;
 
 			XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
 			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
