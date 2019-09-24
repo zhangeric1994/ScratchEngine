@@ -90,6 +90,14 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
 	device->CreateBlendState(&blendDesc, &bsAdditive);
+
+
+	D3D11_RASTERIZER_DESC rsDesc = {};
+	rsDesc.DepthClipEnable = true;
+	rsDesc.CullMode = D3D11_CULL_FRONT;
+	rsDesc.FillMode = D3D11_FILL_SOLID;
+
+	device->CreateRasterizerState(&rsDesc, &rsInsideOut);
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
@@ -179,10 +187,12 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 
 	ID3D11ShaderResourceView* shadowMap = shadow->getShadowSRV();
 
+
 	XMMATRIX viewMatrix = viewer->viewMatrix;
 	XMMATRIX projectionMatrix = viewer->projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
 	XMVECTOR cameraPosition = viewer->position;
+
 
 	i32 j = 0;
 
@@ -192,44 +202,47 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 		SimpleVertexShader* vertexShader = material->GetVertexShader();
 		SimplePixelShader* pixelShader = material->GetPixelShader();
 
-		pixelShader->SetFloat4("tint", material->GetTint());
-		pixelShader->SetData("light", lightSources, numLightSources * sizeof(LightSource));
-		pixelShader->SetFloat3("cameraPosition", cameraPosition);
-
-		if (material->HasTexture()) {
-			pixelShader->SetShaderResourceView("diffuseMap", material->getTexture());
-		}
-
-		pixelShader->SetSamplerState("basicSampler", material->getSampler());
-
-		if (material->HasNormalMap()) {
-			pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
-		}
-
-		//if (material->HasShadowMap()) {
-			pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
-		//}
-		
-		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
-
-		if (material->HasRoughnessMap()) {
-			pixelShader->SetShaderResourceView("roughnessMap", material->getRoughnessMap());
-		}
-
-		if (material->HasMetalnessMap()) {
-			pixelShader->SetShaderResourceView("metalnessMap", material->getMetalnessMap());
-		}
 
 		vertexShader->SetShader();
 
+
+		pixelShader->SetInt("GammaCorrection", 1);
+		pixelShader->CopyBufferData("FrameData");
+
+		pixelShader->SetData("lights", lightSources, 128 * sizeof(LightSource));
+		pixelShader->SetInt("numLights", numLightSources);
+		pixelShader->CopyBufferData("LightSourceData");
+
+		pixelShader->SetFloat3("cameraPosition", cameraPosition);
+		pixelShader->CopyBufferData("CameraData");
+
+		pixelShader->SetFloat4("tint", material->GetTint());
 		pixelShader->SetInt("hasTexture", material->HasTexture());
 		pixelShader->SetInt("hasNormalMap", material->HasNormalMap());
 		pixelShader->SetInt("hasShadowMap", material->HasShadowMap());
 		pixelShader->SetInt("hasRoughnessMap", material->HasRoughnessMap());
 		pixelShader->SetInt("hasMetalnessMap", material->HasMetalnessMap());
+		pixelShader->CopyBufferData("MaterialData");
 
-		pixelShader->CopyAllBufferData();
+		pixelShader->SetSamplerState("basicSampler", material->getSampler());
+		pixelShader->SetSamplerState("shadowSampler", shadow->getSampler());
+
 		pixelShader->SetShader();
+
+		if (material->HasTexture())
+			pixelShader->SetShaderResourceView("diffuseMap", material->getTexture());
+
+		if (material->HasNormalMap())
+			pixelShader->SetShaderResourceView("normalMap", material->getNormalMap());
+
+		pixelShader->SetShaderResourceView("ShadowMap", shadow->getShadowSRV());
+
+		if (material->HasRoughnessMap())
+			pixelShader->SetShaderResourceView("roughnessMap", material->getRoughnessMap());
+
+		if (material->HasMetalnessMap())
+			pixelShader->SetShaderResourceView("metalnessMap", material->getMetalnessMap());
+
 
 		u32 stride = sizeof(Vertex);
 		u32 offset = 0;
@@ -248,15 +261,18 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 
 			vertexShader->CopyAllBufferData();
 
+
 			Mesh* mesh = renderable.mesh;
 
 			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
 
+
 			deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 			deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
 			deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
 
 			indexCount += mesh->GetIndexCount();
 
@@ -377,32 +393,32 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 	XMVECTOR cameraPosition = viewer->position;
 
 
-	vsPointLight->SetMatrix4x4("view", viewMatrix);
-	vsPointLight->SetMatrix4x4("projection", projectionMatrix);
-	vsPointLight->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-	vsPointLight->SetMatrix4x4("InverseViewProjection", inverseViewProjectionMatrix);
-	vsPointLight->SetFloat3("cameraPosition", cameraPosition);
-	vsPointLight->CopyBufferData("CameraData");
-
 	vsDirectionalLight->SetMatrix4x4("view", viewMatrix);
 	vsDirectionalLight->SetMatrix4x4("projection", projectionMatrix);
 	vsDirectionalLight->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-	vsDirectionalLight->SetMatrix4x4("InverseViewProjection", inverseViewProjectionMatrix);
+	vsDirectionalLight->SetMatrix4x4("inverseViewProjection", inverseViewProjectionMatrix);
 	vsDirectionalLight->SetFloat3("cameraPosition", cameraPosition);
 	vsDirectionalLight->CopyBufferData("CameraData");
+
+	vsPointLight->SetMatrix4x4("view", viewMatrix);
+	vsPointLight->SetMatrix4x4("projection", projectionMatrix);
+	vsPointLight->SetMatrix4x4("viewProjection", viewProjectionMatrix);
+	vsPointLight->SetMatrix4x4("inverseViewProjection", inverseViewProjectionMatrix);
+	vsPointLight->SetFloat3("cameraPosition", cameraPosition);
+	vsPointLight->CopyBufferData("CameraData");
 
 
 	psDirectionalLight->SetMatrix4x4("view", viewMatrix);
 	psDirectionalLight->SetMatrix4x4("projection", projectionMatrix);
 	psDirectionalLight->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-	psDirectionalLight->SetMatrix4x4("InverseViewProjection", inverseViewProjectionMatrix);
+	psDirectionalLight->SetMatrix4x4("inverseViewProjection", inverseViewProjectionMatrix);
 	psDirectionalLight->SetFloat3("cameraPosition", cameraPosition);
 	psDirectionalLight->CopyBufferData("CameraData");
 
 	psPointLight->SetMatrix4x4("view", viewMatrix);
 	psPointLight->SetMatrix4x4("projection", projectionMatrix);
 	psPointLight->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-	psPointLight->SetMatrix4x4("InverseViewProjection", inverseViewProjectionMatrix);
+	psPointLight->SetMatrix4x4("inverseViewProjection", inverseViewProjectionMatrix);
 	psPointLight->SetFloat3("cameraPosition", cameraPosition);
 	psPointLight->CopyBufferData("CameraData");
 
@@ -437,7 +453,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 					vsDirectionalLight->SetShader();
 
 
-					psDirectionalLight->SetData("light", &lightSource, numLightSources * sizeof(LightSource));
+					psDirectionalLight->SetData("light", &lightSource, sizeof(LightSource));
 					psDirectionalLight->CopyBufferData("LightData");
 
 					psDirectionalLight->SetShader();
@@ -465,28 +481,34 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 					LightSource lightSource = lightSources[i];
 
 
-					XMMATRIX T = XMMatrixTranslationFromVector(XMLoadFloat3(&lightSource.position));
-					XMMATRIX S = XMMatrixScaling(lightSource.range * 2, lightSource.range * 2, lightSource.range * 2); // This sphere model has a radius of 0.5, so double the scale
+					XMMATRIX T = XMMatrixTranslation(lightSource.position.x, lightSource.position.y, lightSource.position.z);
 
-
+					float s = lightSource.range * 2;
+					XMMATRIX S = XMMatrixScaling(s, s, s); // This sphere model has a radius of 0.5, so double the scale
+					
 					vsPointLight->SetMatrix4x4("world", XMMatrixTranspose(S * T));
-					vsPointLight->CopyBufferData("LightData");
+					vsPointLight->CopyBufferData("ObjectData");
 
 					vsPointLight->SetShader();
 
 
-					psPointLight->SetData("light", &lightSource, numLightSources * sizeof(LightSource));
+					psPointLight->SetData("light", &lightSource, sizeof(LightSource));
 					psPointLight->CopyBufferData("LightData");
 
 					psPointLight->SetShader();
 
+					psPointLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
+					psPointLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
+					psPointLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
+					psPointLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
 
-					deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-					deviceContext->RSSetState(0);
-
-					// Grab the data from the first entity's mesh
+					
 					ID3D11Buffer* vertexBuffer = sphereMesh->GetVertexBuffer();
 					ID3D11Buffer* indexBuffer = sphereMesh->GetIndexBuffer();
+
+
+					deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+					deviceContext->RSSetState(rsInsideOut);
 
 					deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 					deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -519,13 +541,13 @@ void ScratchEngine::Rendering::RenderingEngine::DrawDeferred(ID3D11ShaderResourc
 	vsViewport->SetShader();
 
 	
-	//psDeferred->SetSamplerState("sampler", sampler);
-	psDeferred->SetShaderResourceView("lightBuffer", lightBuffer);
 	psDeferred->SetInt("GammaCorrection", 1);
 	psDeferred->CopyAllBufferData();
 
 	psDeferred->SetShader();
 
+	psDeferred->SetShaderResourceView("lightBuffer", lightBuffer);
+	
 
 	deviceContext->Draw(3, 0);
 }

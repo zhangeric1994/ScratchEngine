@@ -48,6 +48,9 @@ namespace ScratchEngine
 
 	class __declspec(dllexport) DirectionalLight : public Light
 	{
+		friend class Scene;
+
+
 	public:
 		DirectionalLight();
 		DirectionalLight(XMVECTOR color, f32 intensity = 1);
@@ -60,18 +63,28 @@ namespace ScratchEngine
 
 	class __declspec(dllexport) PointLight : public Light
 	{
+		friend class Scene;
+
+
 	private:
 		f32 range;
 
 
 	public:
 		PointLight();
-		PointLight(XMVECTOR color, f32 intensity = 1);
+		PointLight(XMVECTOR color, f32 intensity = 1, f32 range = 1);
+
+
+		void EnableShadowCasting();
+		void DisableShadowCasting();
 	};
 
 
 	class __declspec(dllexport) SpotLight : public Light
 	{
+		friend class Scene;
+
+
 	private:
 		f32 range;
 		f32 angle;
@@ -111,6 +124,19 @@ namespace ScratchEngine
 	}
 
 	inline void DirectionalLight::DisableShadowCasting()
+	{
+		if (shadowMap)
+			delete shadowMap;
+	}
+
+
+	inline void PointLight::EnableShadowCasting()
+	{
+		if (!shadowMap)
+			shadowMap = new RenderTexture(2048);
+	}
+
+	inline void PointLight::DisableShadowCasting()
 	{
 		if (shadowMap)
 			delete shadowMap;

@@ -224,11 +224,21 @@ void ScratchEngine::Scene::UpdateLightSources()
 			LightSource& lightSource = lightSourceAllocator[lightSourceAllocator.Allocate()];
 			lightSource.color = light->color;
 			lightSource.type = light->type;
-			lightSource.range = 0;
 			lightSource.intensity = light->intensity;
 
-			XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
-			XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
+			switch (light->type)
+			{
+				case LightType::DIRECTIONAL:
+					XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
+					break;
+
+
+				case LightType::POINT:
+					lightSource.range = static_cast<PointLight*>(light)->range;
+
+					XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
+					break;
+			}			
 
 			//if (light->DoCastShadow())
 			//	lightSource.shadowMapID = null_index;

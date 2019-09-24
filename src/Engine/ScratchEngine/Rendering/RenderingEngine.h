@@ -73,6 +73,8 @@ namespace ScratchEngine
 			
 			ID3D11BlendState* bsAdditive;
 
+			ID3D11RasterizerState* rsInsideOut;
+
 			Mesh* sphereMesh;
 
 			PoolAllocator<sizeof(Material)> materialAllocator;

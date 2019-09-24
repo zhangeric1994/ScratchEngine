@@ -1,3 +1,6 @@
+#include "Lighting.hlsli"
+
+
 struct VertexToPixel
 {
     float4 svPosition : SV_POSITION;
@@ -8,25 +11,16 @@ struct VertexToPixel
     float4 shadowPos : SHADOW;
 };
 
-struct LightSource
-{
-    float4 color;
-    float4 diffuseColor;
-    int type;
-    float3 position;
-    float range;
-    float3 direction;
-};
 
-
-cbuffer ShaderData : register(b0)
+cbuffer FrameData : register(b0)
 {
-    float4 tint;
+    int GammaCorrection;
 }
 
 cbuffer LightSourceData : register(b1)
 {
-	LightSource light;
+    LightSource lights[128];
+    int numLights;
 };
 
 cbuffer CameraData : register(b2)
@@ -34,12 +28,10 @@ cbuffer CameraData : register(b2)
     float3 cameraPosition;
 };
 
-Texture2D diffuseMap : register(t0);
-Texture2D normalMap : register(t1);
-Texture2D ShadowMap : register(t2);
-
-SamplerState basicSampler : register(s0);
-SamplerComparisonState shadowMapSampler : register(s1);
+cbuffer MaterialData : register(b3)
+{
+    float4 tint;
+}
 
 
 float4 Lambert(float4 ambientColor, float4 diffuseColor, float3 N, float3 L)
@@ -55,11 +47,39 @@ float4 BlinnPhong(float3 N, float3 L, float3 V, float shininess)
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
-    float4 albedo = tint * diffuseMap.Sample(basicSampler, input.uv);
+    // Fix for poor normals: re-normalizing interpolated normals
+    input.normal = normalize(input.normal);
+    input.tangent = normalize(input.tangent);
+    
 
-    float3 N = normalize(input.normal);
-    float3 L = -normalize(light.direction);
-    float3 V = normalize(cameraPosition.xyz - input.position.xyz);
+	// Total color for this pixel
+    float3 totalColor = float3(0, 0, 0);
 
-    return albedo * Lambert(light.color, albedo, N, L) + BlinnPhong(N, L, V, 16);
+	// Loop through all lights this frame
+    for (int i = 0; i < numLights; i++)
+    {
+		// Which kind of light?
+        switch (lights[i].type)
+        {
+            case LIGHT_TYPE_DIRECTIONAL:
+                totalColor += DirLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
+                break;
+
+            case LIGHT_TYPE_POINT:
+                totalColor += PointLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
+                break;
+
+            case LIGHT_TYPE_SPOT:
+                totalColor += SpotLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
+                break;
+        }
+    }
+
+
+	// Tint the surface color by the light
+    totalColor *= tint.rgb;
+
+
+	// Adjust the light color by the light amount
+    return float4(lerp(totalColor, pow(totalColor, 1.0f / 2.2f), GammaCorrection), 1);
 }

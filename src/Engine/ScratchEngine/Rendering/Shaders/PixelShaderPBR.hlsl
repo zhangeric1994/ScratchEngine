@@ -1,4 +1,4 @@
-static const float PI = 3.14159265f;
+#include "Lighting.hlsli"
 
 
 struct VertexToPixel
@@ -11,29 +11,16 @@ struct VertexToPixel
 	float4 shadowPos : SHADOW;
 };
 
-struct LightSource
-{
-	float4 color;
-	int type;
-	float3 position;
-	float range;
-	float3 direction;
-    float intensity;
-    float fallOff;
-    float2 padding;
-};
 
-struct material
+cbuffer FrameData : register(b0)
 {
-	float3 albedo;
-	float roughness;
-	float metalness;
-};
-
+    int GammaCorrection;
+}
 
 cbuffer LightSourceData : register(b1)
 {
-	LightSource light;
+	LightSource lights[128];
+    int numLights;
 };
 
 cbuffer CameraData : register(b2)
@@ -41,8 +28,9 @@ cbuffer CameraData : register(b2)
 	float3 cameraPosition;
 };
 
-cbuffer ObjectData : register(b3)
+cbuffer MaterialData : register(b3)
 {
+    float4 tint;
     int hasTexture;
     int hasNormalMap;
     int hasShadowMap;
@@ -62,145 +50,62 @@ SamplerState basicSampler : register(s0);
 SamplerComparisonState shadowSampler : register(s1);
 
 
-//returns result of the distribution function
-//distribution function is GGX
-float DistributionGGX(float3 n, float3 h, float a) {
-	float a2 = a * a;
-	a2 = a2 * a2;
-	float NdotH = saturate(dot(n, h));
-	float NdotH2 = NdotH * NdotH;
+float4 main(VertexToPixel input) : SV_TARGET
+{	
+    // Fix for poor normals: re-normalizing interpolated normals
+    input.normal = normalize(input.normal);
+    input.tangent = normalize(input.tangent);
 
-	float nom = a2; 
-	float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
-	denom = PI * denom * denom;
-
-	return nom / denom;
-}
-
-//returns result of the geometry function
-float GeometrySchlickGGX(float NdotV, float k) {
-	float nom = NdotV;
-	float denom = NdotV * (1.0f - k) + k;
-
-	return nom / denom;
-}
-
-float GeometrySmith(float3 N, float3 V, float3 L, float k) {
-	float NdotV = saturate(dot(N, V));
-	float NdotL = saturate(dot(N, L));
-
-	float ggx1 = GeometrySchlickGGX(NdotV, k);
-	float ggx2 = GeometrySchlickGGX(NdotL, k);
-
-	return ggx1 * ggx2;
-}
-
-//calculate k parameter in geometry function
-float KIBL(float roughness) {
-	return pow(roughness + 1, 2) / 8.0f;
-}
-
-float3 fresnelSchlick(float cosTheta, float3 f0) {
-	return f0 + (1.0f - f0) * pow(1.0f - cosTheta, 5);
-}
-
-//calculate f0
-float3 calculateF0(float3 surfaceColor, float metalness) {
-	//float3 f0 = float3(0.04f, 0.04f, 0.04f);
-	float3 f0 = lerp(0.04f.rrr, surfaceColor, metalness);
-	return f0;
-}
-
-//Lambert diffuse function
-float diffusePBR(float3 normal, float3 wi) {
-	return saturate(dot(normal, wi));
-}
-
-//Multiple kd in render equation with diffuse
-float3 DiffuseEnergyConserve(float diffuse, float3 spec, float metalness) {
-	return diffuse * ((1 - saturate(spec)) * (1 - metalness));
-}
-
-//Microfacet BRDF calculation
-float3 MicrofacetBRDF(float3 n, float3 wi, float3 wo, float roughness, float metalness, float3 surfaceColor) {
-	//halfway vector
-	float3 h = normalize(wi + wo);
-
-	//normal dot outgoing(view) direction wo
-	float NdotV = saturate(dot(n, wo));
-	
-	//f0
-	float3 f0 = calculateF0(surfaceColor, metalness);
-
-	//k in geometry function
-	float k = KIBL(roughness);
-
-	float D = DistributionGGX(n, h, roughness);
-	float3 F = fresnelSchlick(NdotV, f0);
-	float G = GeometrySmith(n, wo, wi, k);
-
-	return (D * F * G) / (4 * dot(n, wi) * dot(n, wo));
-}
-
-//function to calculate directional light pbr
-float3 directionalLightPBR(float3 normal, float3 wo, float3 wi, float roughness, float metalness, float3 surfaceColor, LightSource light) {
-	//spec color
-	float3 specColor = MicrofacetBRDF(normal, wo, wi, roughness, metalness, surfaceColor);
-
-	//diffuse color
-	float diffuse = diffusePBR(normal, wi);
-	float3 diffuseColor = DiffuseEnergyConserve(diffuse, specColor, metalness);
-
-	return (diffuseColor * surfaceColor + specColor);
-}
-//End of PBR functions
+	// Use normal mapping
+    input.normal = lerp(input.normal, NormalMapping(normalMap, basicSampler, input.uv, input.normal, input.tangent), hasNormalMap);
 
 
-float4 main(VertexToPixel input) : SV_TARGET {	
-	//normalize input normal and tangent
-	input.normal = normalize(input.normal);
-	input.tangent = normalize(input.tangent);
+	// Sample the roughness map
+    float roughness = lerp(0.0f, roughnessMap.Sample(basicSampler, input.uv).r, hasRoughnessMap);
 
-	//normal map
-	//change the normal of each point
-	float3 textureNormal = normalMap.Sample(basicSampler, input.uv).rgb * 2 - 1;
 
-	float3 N = input.normal;
-	float3 T = input.tangent;
-	float3 B = cross(T, N);
+	// Sample the metal map
+    float metal = lerp(0.0f, metalnessMap.Sample(basicSampler, input.uv).r, hasMetalnessMap);
 
-	float3x3 TBN = float3x3(T, B, N);
 
-	float3 normal = normalize(mul(textureNormal, TBN));
-	input.normal = lerp(input.normal, normal, hasNormalMap);
+	// Sample texture
+    float4 surfaceColor = diffuseMap.Sample(basicSampler, input.uv);
+    surfaceColor.rgb = lerp(surfaceColor.rgb, pow(surfaceColor.rgb, 2.2), GammaCorrection);
 
-	//param for light calculation
-	normal = input.normal;
-	float3 wi = normalize(-light.direction);
-	float3 wo = normalize(cameraPosition.xyz - input.position.xyz);
+	// Actually using texture?
+    surfaceColor.rgb = lerp(tint.rgb, surfaceColor.rgb, hasTexture);
 
-	//texture color
-    float3 albedo = diffuseMap.Sample(basicSampler, input.uv).rgb;
-    albedo = lerp(float3(1, 1, 1), albedo, hasTexture);
 
-	//roughness
-	float roughness = roughnessMap.Sample(basicSampler, input.uv).r;
-	roughness = lerp(0.0f, roughness, hasRoughnessMap);
+	// Specular color - Assuming albedo texture is actually holding specular color if metal == 1
+    float3 specColor = lerp(F0_NON_METAL.rrr, surfaceColor.rgb, metal);
 
-	//metalness map
-	float metalness = metalnessMap.Sample(basicSampler, input.uv).r;
-	metalness = lerp(0.0f, metalness, hasMetalnessMap);
 
-	//shadow map
-	float2 shadowUV = input.shadowPos.xy / input.shadowPos.w * 0.5f + 0.5f;
-	shadowUV.y = 1.0f - shadowUV.y;
-	float depthFromLight = input.shadowPos.z / input.shadowPos.w;
-	float shadowAmount = ShadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
+	// Total color for this pixel
+    float3 totalColor = float3(0, 0, 0);
 
-	shadowAmount = lerp(1.0f, shadowAmount, 1);
 
-	//calculate light
-    float3 result = directionalLightPBR(normal, wo, wi, roughness, metalness, albedo, light) * shadowAmount;
+	// Loop through all lights this frame
+    for (int i = 0; i < numLights; i++)
+    {
+		// Which kind of light?
+        switch (lights[i].type)
+        {
+            case LIGHT_TYPE_DIRECTIONAL:
+                totalColor += DirectionalLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                break;
 
-	return float4(result, 1.0f);
+
+            case LIGHT_TYPE_POINT:
+                totalColor += PointLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                break;
+
+
+            case LIGHT_TYPE_SPOT:
+                totalColor += SpotLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                break;
+        }
+    }
+
+
+    return float4(lerp(totalColor, pow(totalColor, 1.0 / 2.2), GammaCorrection), 1);
 }

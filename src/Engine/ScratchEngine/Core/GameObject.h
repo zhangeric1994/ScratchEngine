@@ -90,6 +90,7 @@ namespace ScratchEngine
 		void SetParent(GameObject* other);
 		template<class T, class... argTs> T* AddComponent(argTs... args);
 		template<class T> void RemoveComponent();
+		void SetActive(bool value);
 
 		void SendMessage_(const Message& message);
 		void SendMessageUp(const Message& message, u32 level = UINT_MAX);
@@ -143,5 +144,10 @@ namespace ScratchEngine
 
 		if (it != components.end())
 			components.erase(it);
+	}
+
+	inline void GameObject::SetActive(bool value)
+	{
+		this->isActive = value;
 	}
 }

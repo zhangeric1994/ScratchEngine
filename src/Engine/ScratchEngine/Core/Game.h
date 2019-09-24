@@ -111,6 +111,10 @@ namespace ScratchEngine
 
 		Barrier frameBarrier;
 
+		int renderingMode = 1;
+		int lightCount = 0;
+		GameObject* lights[128];
+
 		int comboCounter = 0;
 		int combo[5] ={ 14,14,15,16,17 };
 		bool attacking = false;

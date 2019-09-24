@@ -40,8 +40,9 @@ ScratchEngine::PointLight::PointLight() : Light(LightType::POINT)
 {
 }
 
-ScratchEngine::PointLight::PointLight(XMVECTOR color, f32 intensity) : Light(LightType::POINT, color, intensity)
+ScratchEngine::PointLight::PointLight(XMVECTOR color, f32 intensity, f32 range) : Light(LightType::POINT, color, intensity)
 {
+	this->range = range;
 }
 
 

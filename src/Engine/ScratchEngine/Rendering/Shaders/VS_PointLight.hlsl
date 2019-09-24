@@ -1,9 +1,9 @@
 // Struct representing a single vertex worth of data
 struct VertexShaderInput
 {
-    float3 position : POSITION;
-    float2 uv : TEXCOORD;
+    float4 position : POSITION;
     float3 normal : NORMAL;
+    float2 uv : TEXCOORD;
     float3 tangent : TANGENT;
 };
 
@@ -24,7 +24,7 @@ cbuffer CameraData : register(b2)
     float3 cameraPosition;
 };
 
-cbuffer LightData : register(b3)
+cbuffer ObjectData : register(b3)
 {
     matrix world;
 };
@@ -36,11 +36,11 @@ VertexToPixel main(VertexShaderInput input)
 	// Set up output
 	VertexToPixel output;
 
-    output.position = mul(float4(input.position, 1.0f), mul(world, viewProjection));
+    output.position = mul(float4(input.position.xyz, 1), mul(mul(world, view), projection));
 
 	// Calculate the view ray from the camera through this vertex
 	// which we need to reconstruct world position from depth in pixel shader
-	output.viewRay = mul(float4(input.position, 1.0f), world).xyz - cameraPosition;
+    output.viewRay = mul(float4(input.position.xyz, 1), world).xyz - cameraPosition;
 
 
 	return output;

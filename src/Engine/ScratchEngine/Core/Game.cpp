@@ -439,6 +439,34 @@ void ScratchEngine::Game::CreateBasicGeometry()
 			ground->SetLocalScale(15.01f, 1, 15);
 			ground->AddComponent<Renderer>(pbrMaterial, cubeMesh);
 		}
+
+	for (int i = 0; i < 128; ++i)
+	{
+		GameObject* light = new GameObject();
+		light->SetLocalPosition(rand() % 61 - 30, 2, rand() % 61 - 30);
+
+		switch (rand() % 3)
+		{
+			case 0:
+				light->AddComponent<PointLight>(XMVectorSet(1.0f, 0.0f, 0.0f, 1.0f), 10, 5);
+				break;
+
+			case 1:
+				light->AddComponent<PointLight>(XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f), 10, 5);
+				break;
+
+			case 2:
+				light->AddComponent<PointLight>(XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f), 10, 5);
+				break;
+		}
+		
+		light->SetActive(false);
+
+
+		lights[i] = light;
+	}
+
+	lightCount = 0;
 	
 	//GameObject* ground = new GameObject();
 	//ground->SetLocalPosition(0, -0.5f, 0);
@@ -512,9 +540,12 @@ void ScratchEngine::Game::Update()
 		if (titleBarStats)
 			UpdateTitleBarStats();
 
+
 		InputManager::singleton->Capture();
 
+
 		frameBarrier.Wait();
+
 
 		if (GetAsyncKeyState(VK_ESCAPE))
 			Quit();
@@ -523,22 +554,29 @@ void ScratchEngine::Game::Update()
 		bool animationChanged = false;
 
 		if (Input::IsKeyPressed('1'))
+			renderingMode = 1;
+		else if (Input::IsKeyPressed('2'))
+			renderingMode = 2;
+		else if (Input::IsKeyPressed('3'))
+			renderingMode = 3;
+		else if (Input::IsKeyPressed('4'))
+			renderingMode = 4;
+		else if (Input::IsKeyPressed('5'))
+			renderingMode = 5;
+		else if (Input::IsKeyPressed('6'))
+			renderingMode = 6;
+
+
+		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime)
 		{
-			rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
-			leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
-		}
-
-		if (Input::IsKeyPressed('2'))
-			model->anim->useBlending = !model->anim->useBlending;
-
-		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime) {
 			//useBlending
 			model->anim->useBlending = false;
 			printf("Blending OFF\n");
 			lastInputTime = totalTime + 0.1f;
 		}
 
-		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime) {
+		if ((GetKeyState('G') & 0x8000) != 0 && lastInputTime < totalTime)
+		{
 			//useBlending
 			model->anim->useBlending = true;
 			printf("Blending ON\n");
@@ -546,9 +584,11 @@ void ScratchEngine::Game::Update()
 		}
 
 
-		if ((GetKeyState('F') & 0x8000) != 0) {
+		if ((GetKeyState('F') & 0x8000) != 0)
+		{
 			//attacking
-			if (!animationChanged && lastAttackTime < totalTime) {
+			if (!animationChanged && lastAttackTime < totalTime)
+			{
 				float duration = model->anim->SetAnimationIndex(combo[comboCounter],false);
 				attacking = true;
 				animationChanged = true;
@@ -562,33 +602,31 @@ void ScratchEngine::Game::Update()
 			}
 		}
 
-		if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
-			if (!animationChanged&& lastAttackTime < totalTime) {
-				float duration = model->anim->SetAnimationIndex(2, false);
-				lastInputTime = totalTime + model->anim->duration;
-				attacking = true;
-				animationChanged = true;
-				lastInputTime = totalTime + duration;
-				lastAttackTime = totalTime + duration - 0.2f;
-			}
+
+		if (GetAsyncKeyState(VK_SPACE) & 0x8000 && !animationChanged&& lastAttackTime < totalTime)
+		{
+			float duration = model->anim->SetAnimationIndex(2, false);
+			lastInputTime = totalTime + model->anim->duration;
+			attacking = true;
+			animationChanged = true;
+			lastInputTime = totalTime + duration;
+			lastAttackTime = totalTime + duration - 0.2f;
 		}
 
-		if (attacking && lastInputTime < totalTime) {
+		if (attacking && lastInputTime < totalTime)
+		{
 			// the attacking interval is gone
 			comboCounter = 0;
 			attacking = false;
 		}
 
-		if (GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) {
-			animationChanged = true;
-			// press left and right together will not update animation
-		}
-		if (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000) {
-			animationChanged = true;
-			// same
-		}
 
-		if (!attacking) {
+		if ((GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) || (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000))
+			animationChanged = true;
+
+
+		if (!attacking)
+		{
 			if (GetAsyncKeyState('A') & 0x8000 && !GetAsyncKeyState(VK_LSHIFT)) {
 				if (!animationChanged && lastInputTime < totalTime) {
 					model->anim->SetAnimationIndex(6, true);
@@ -680,6 +718,7 @@ void ScratchEngine::Game::Update()
 			}
 		}
 
+
 		rightHandCollider->SetActive(attacking);
 		leftHandCollider->SetActive(attacking);
 
@@ -699,6 +738,22 @@ void ScratchEngine::Game::Update()
 		else if (lastTriggerTime < totalTime - 0.1f)
 			mobModel->anim->SetAnimationIndex(1, true);
 	
+
+		// Handle light count changes, clamped appropriately
+		if (Input::IsKeyPressed(VK_UP))
+			++lightCount;
+
+		if (Input::IsKeyPressed(VK_DOWN))
+			--lightCount;
+
+		lightCount = __max(0, __min(128, lightCount));
+
+
+		// Move lights
+		for (int i = 0; i < 128; ++i)
+			lights[i]->SetActive(i < lightCount);
+
+
 		//if (GetAsyncKeyState('X') & 0x8000)
 			//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
 
@@ -731,6 +786,7 @@ void ScratchEngine::Game::Draw()
 	Scene* scene = Scene::GetCurrentScene();
 	RenderingEngine* renderingEngine = Rendering::RenderingEngine::GetSingleton();
 
+
 	while (isRunning)
 	{
 		scene->CacheRenderingData();
@@ -749,43 +805,80 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(DeferredLightBufferRTV, color);
 		
 		
-		//bool hasShadowMap = false;
+		bool hasShadowMap = false;
 
-		//shadowViewport.Height = shadowMapSize;
-		//shadowViewport.Width = shadowMapSize;
+		shadowViewport.Height = shadowMapSize;
+		shadowViewport.Width = shadowMapSize;
 
-		//context->RSSetViewports(1, &shadowViewport);
+		context->RSSetViewports(1, &shadowViewport);
 
-		//hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
+		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
 
-		//D3D11_VIEWPORT viewport = {};
-		//viewport.TopLeftX = 0;
-		//viewport.TopLeftY = 0;
-		//viewport.Width = (float)width;
-		//viewport.Height = (float)height;
-		//viewport.MinDepth = 0.0f;
-		//viewport.MaxDepth = 1.0f;
+		D3D11_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = (float)width;
+		viewport.Height = (float)height;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
 
-		//context->RSSetViewports(1, &viewport);
-		//context->RSSetState(0);
+		context->RSSetViewports(1, &viewport);
+		context->RSSetState(0);
 
 
 		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 
-		if (true)
+		switch (renderingMode)
 		{
-			ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
-			renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+			case 1:
+				context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+				renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated());
+				break;
 
-			ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
-			renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, 1, gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
 
-			renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
-		}
-		else
-		{
-			context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-			renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, 1);
+			case 2:
+				{
+					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+
+					ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
+					renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
+
+					renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
+				}
+				break;
+
+
+			case 3:
+				{
+					ID3D11RenderTargetView* gBufferRTVs[4] = { backBufferRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+				}
+				break;
+
+
+			case 4:
+				{
+					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, backBufferRTV, GBufferDepthRTV, GBufferMaterialRTV };
+					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+				}
+				break;
+
+
+			case 5:
+				{
+					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, backBufferRTV, GBufferMaterialRTV };
+					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+				}
+				break;
+
+
+			case 6:
+				{
+					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, backBufferRTV };
+					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+				}
+				break;
 		}
 
 		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));

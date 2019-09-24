@@ -59,8 +59,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float metalness = metalRoughSpec.r;
 	float roughness = metalRoughSpec.g;
     float3 specularColor = lerp(F0_NON_METAL.rrr, surfaceColor, metalness); // If the surface is metal, we're assuming surfaceColor.rgb is actually the specular color!
-    float3 color = PointLightPBR(light, normal, worldPos, cameraPosition, roughness, metalness, surfaceColor, specularColor);
 
 
-	return float4(color, 1);
+    return float4(PointLightPBR(light, normal, worldPos, cameraPosition, roughness, metalness, surfaceColor, specularColor), 1);
 }
