@@ -225,6 +225,7 @@ void ScratchEngine::Scene::UpdateLightSources()
 			lightSource.color = light->color;
 			lightSource.type = light->type;
 			lightSource.intensity = light->intensity;
+			lightSource.shadow = light->shadow;
 
 			switch (light->type)
 			{
@@ -235,15 +236,9 @@ void ScratchEngine::Scene::UpdateLightSources()
 
 				case LightType::POINT:
 					lightSource.range = static_cast<PointLight*>(light)->range;
-
 					XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
 					break;
-			}			
-
-			//if (light->DoCastShadow())
-			//	lightSource.shadowMapID = null_index;
-			//else
-			//	lightSource.shadowMapID = null_index;
+			}
 		}
 	}
 }

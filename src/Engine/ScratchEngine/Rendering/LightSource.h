@@ -8,10 +8,14 @@
 
 using namespace DirectX;
 
+
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
+		class Shadow;
+
+
 		enum class LightType
 		{
 			DIRECTIONAL,
@@ -30,7 +34,8 @@ namespace ScratchEngine
 			XMFLOAT3 direction;
 			f32 intensity;
 			f32 fallOff;
-			//int shadowMapID;
+			Shadow* shadow;
+			XMMATRIX shadowViewProjection;
 		};
 	}
 }

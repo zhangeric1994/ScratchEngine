@@ -14,9 +14,11 @@ ScratchEngine::Light::Light(LightType type, XMVECTOR color, f32 intensity)
 	this->type = type;
 	this->color = color;
 	this->intensity = 1;
+	this->shadow = nullptr;
 
 	this->next = nullptr;
 	this->previous = nullptr;
+
 
 	Scene::GetCurrentScene()->AddLight(this);
 }

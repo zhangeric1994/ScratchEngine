@@ -40,11 +40,11 @@ ScratchEngine::Rendering::Texture::~Texture()
 }
 
 
-ScratchEngine::Rendering::RenderTexture::RenderTexture(u32 size) : RenderTexture(size, size)
+ScratchEngine::Rendering::Shadow::Shadow(u32 size) : Shadow(size, size)
 {
 }
 
-ScratchEngine::Rendering::RenderTexture::RenderTexture(u32 width, u32 height)
+ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height)
 {
 	this->width = width;
 	this->height = height;
@@ -53,73 +53,56 @@ ScratchEngine::Rendering::RenderTexture::RenderTexture(u32 width, u32 height)
 	ID3D11Device* device = RenderingEngine::GetSingleton()->device;
 
 
-	D3D11_TEXTURE2D_DESC textureDesc = {};
-	textureDesc.Height = height;
-	textureDesc.Width = width;
-	textureDesc.MipLevels = 1;
-	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.CPUAccessFlags = 0;
-	textureDesc.MiscFlags = 0;
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_LESS;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.BorderColor[0] = 1.0f;
+	samplerDesc.BorderColor[1] = 1.0f;
+	samplerDesc.BorderColor[2] = 1.0f;
+	samplerDesc.BorderColor[3] = 1.0f;
+	device->CreateSamplerState(&samplerDesc, &samplerState);
 
-	ID3D11Texture2D* texture;
+
+	ID3D11Texture2D* texture = nullptr;
+
+
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = width;
+	textureDesc.Height = height;
+	textureDesc.ArraySize = 1;
+	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
+	textureDesc.MipLevels = 1;
+	textureDesc.MiscFlags = 0;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 	device->CreateTexture2D(&textureDesc, nullptr, &texture);
 
 
-	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
-	rtvDesc.Format = textureDesc.Format;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-	rtvDesc.Texture2D.MipSlice = 0;
-
-	device->CreateRenderTargetView(texture, &rtvDesc, &renderTargetView);
+	D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Texture2D.MipSlice = 0;
+	device->CreateDepthStencilView(texture, &dsvDesc, &depthStencilView);
 
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = textureDesc.Format;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	srvDesc.Texture2D.MipLevels = 1;
-
+	srvDesc.Texture2D.MostDetailedMip = 0;
 	device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
 
 
 	texture->Release();
-
-
-	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	device->CreateSamplerState(&samplerDesc, &samplerState);
-
-
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
-	depthStencilDesc.Width = width;
-	depthStencilDesc.Height = height;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
-	depthStencilDesc.SampleDesc.Count = 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
-
-	ID3D11Texture2D* depthBufferTexture;
-	device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-
-
-	device->CreateDepthStencilView(depthBufferTexture, 0, &depthStencilView);
-	depthBufferTexture->Release();
 }
 
-ScratchEngine::Rendering::RenderTexture::~RenderTexture()
+ScratchEngine::Rendering::Shadow::~Shadow()
 {
 	renderTargetView->Release();
 	depthStencilView->Release();

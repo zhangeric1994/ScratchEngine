@@ -19,7 +19,6 @@ cbuffer CameraData : register(b2)
     matrix view;
     matrix projection;
     matrix viewProjection;
-    matrix shadowViewProjection;
 };
 
 cbuffer ObjectData : register(b3)
@@ -44,6 +43,7 @@ float4 main(VertexShaderInput input) : SV_POSITION
 
         p.w = 1;
     }
+
 
     return mul(p, mul(world, viewProjection));
 }

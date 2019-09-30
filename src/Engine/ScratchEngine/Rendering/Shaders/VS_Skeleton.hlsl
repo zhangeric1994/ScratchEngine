@@ -11,11 +11,10 @@ struct VertexShaderInput
 struct VertexToPixel
 {
     float4 svPosition : SV_POSITION;
-    float4 position : POSITION;
+    float4 worldPosition : POSITION;
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
-    float4 shadowPos : SHADOW;
 };
 
 
@@ -54,11 +53,10 @@ VertexToPixel main(VertexShaderInput input)
     VertexToPixel output;
 
     output.svPosition = mul(p, mul(world, viewProjection));
-    output.position = mul(p, world);
+    output.worldPosition = mul(p, world);
     output.normal = normalize(mul(n.xyz, (float3x3) world));
     output.tangent = input.tangent;
     output.uv = input.uv;
-    output.shadowPos = mul(p, mul(world, shadowViewProjection));
 
 
     return output;

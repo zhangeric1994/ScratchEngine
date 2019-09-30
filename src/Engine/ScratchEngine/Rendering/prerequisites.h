@@ -34,7 +34,7 @@ namespace ScratchEngine
 
 		// Texture.h
 		class Texture;
-		class RenderTexture;
+		class Shadow;
 
 		// Vertex.h
 		struct Vertex;

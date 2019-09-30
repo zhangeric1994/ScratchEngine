@@ -8,7 +8,7 @@
 
 namespace ScratchEngine
 {
-	class Dummy : public GameComponent
+	class HitReaction : public GameComponent
 	{
 	private:
 		Material* onHitMaterial;
@@ -16,7 +16,7 @@ namespace ScratchEngine
 
 
 	public:
-		Dummy(Material* material1, Material* material2);
+		HitReaction(Material* material1, Material* material2);
 
 
 	private:
@@ -26,18 +26,18 @@ namespace ScratchEngine
 }
 
 
-inline ScratchEngine::Dummy::Dummy(Material* materialA, Material* materialB)
+inline ScratchEngine::HitReaction::HitReaction(Material* materialA, Material* materialB)
 {
 	onHitMaterial = materialA;
 	normalMaterial = materialB;
 }
 
-inline void ScratchEngine::Dummy::OnBeginOverlapping(GameObject* other)
+inline void ScratchEngine::HitReaction::OnBeginOverlapping(GameObject* other)
 {
 	gameObject->GetComponent<Renderer>()->SetMaterial(onHitMaterial);
 }
 
-inline void ScratchEngine::Dummy::OnEndOverlapping(GameObject* other)
+inline void ScratchEngine::HitReaction::OnEndOverlapping(GameObject* other)
 {
 	gameObject->GetComponent<Renderer>()->SetMaterial(normalMaterial);
 }

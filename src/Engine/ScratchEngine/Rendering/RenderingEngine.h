@@ -38,7 +38,7 @@ namespace ScratchEngine
 			friend struct Material;
 			friend struct Mesh;
 
-			friend class RenderTexture;
+			friend class Shadow;
 			friend class Texture;
 
 
@@ -74,6 +74,9 @@ namespace ScratchEngine
 			ID3D11BlendState* bsAdditive;
 
 			ID3D11RasterizerState* rsInsideOut;
+			ID3D11RasterizerState* rsShadow;
+
+			ID3D11SamplerState* shadowSampler;
 
 			Mesh* sphereMesh;
 
@@ -96,7 +99,7 @@ namespace ScratchEngine
 			void DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView);
 			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView);
 			void DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView);
-			bool RenderShadowMap(Renderable* renderables, int numRenderables, XMVECTOR cameraPosition);
+			void RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
 		};

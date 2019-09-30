@@ -4,11 +4,10 @@
 struct VertexToPixel
 {
 	float4 svPosition : SV_POSITION;
-	float4 position : POSITION;
+	float4 worldPosition : POSITION;
 	float3 normal : NORMAL;
 	float3 tangent : TANGENT;
 	float2 uv : TEXCOORD;
-	float4 shadowPos : SHADOW;
 };
 
 
@@ -33,7 +32,6 @@ cbuffer MaterialData : register(b3)
     float4 tint;
     int hasTexture;
     int hasNormalMap;
-    int hasShadowMap;
     int hasMetalnessMap;
     int hasRoughnessMap;
 }
@@ -41,13 +39,13 @@ cbuffer MaterialData : register(b3)
 
 Texture2D diffuseMap : register(t0);
 Texture2D normalMap : register(t1);
-Texture2D ShadowMap	: register(t2);
-Texture2D roughnessMap : register(t3);
-Texture2D metalnessMap : register(t4);
+Texture2D roughnessMap : register(t2);
+Texture2D metalnessMap : register(t3);
+Texture2D shadowMap : register(t10);
 
 
 SamplerState basicSampler : register(s0);
-SamplerComparisonState shadowSampler : register(s1);
+SamplerComparisonState shadowSampler : register(s10);
 
 
 float4 main(VertexToPixel input) : SV_TARGET
@@ -87,21 +85,28 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Loop through all lights this frame
     for (int i = 0; i < numLights; i++)
     {
+        float4 shadowPosition = mul(float4(input.worldPosition.xyz, 1), lights[i].shadowViewProjection);
+        float2 shadowUV = shadowPosition.xy / shadowPosition.w * 0.5f + 0.5f;
+        shadowUV.y = 1.0f - shadowUV.y;
+        float depthFromLight = shadowPosition.z / shadowPosition.w;
+        float shadowAmount = lerp(1.0f, shadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight), 0);
+
+
 		// Which kind of light?
         switch (lights[i].type)
         {
             case LIGHT_TYPE_DIRECTIONAL:
-                totalColor += DirectionalLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                totalColor += DirectionalLightPBR(lights[i], input.normal, input.worldPosition.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor) * shadowAmount;
                 break;
 
 
             case LIGHT_TYPE_POINT:
-                totalColor += PointLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                totalColor += PointLightPBR(lights[i], input.normal, input.worldPosition.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor) * shadowAmount;
                 break;
 
 
             case LIGHT_TYPE_SPOT:
-                totalColor += SpotLightPBR(lights[i], input.normal, input.position.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor);
+                totalColor += SpotLightPBR(lights[i], input.normal, input.worldPosition.xyz, cameraPosition, roughness, metal, surfaceColor.rgb, specColor) * shadowAmount;
                 break;
         }
     }

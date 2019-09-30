@@ -24,7 +24,7 @@ namespace ScratchEngine
 
 	class Animator;
 	class GameObject;
-	class Transform;
+	struct Transform;
 
 	class __declspec(dllexport) Renderer : public GameComponent
 	{

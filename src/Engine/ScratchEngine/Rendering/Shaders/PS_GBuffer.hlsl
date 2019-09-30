@@ -11,7 +11,6 @@ struct VertexToPixel
     float3 normal : NORMAL;
     float3 tangent : TANGENT;
     float2 uv : TEXCOORD;
-    float4 shadowPosition : SHADOW;
 };
 
 
@@ -19,7 +18,7 @@ struct GBuffer
 {
     float4 albedo : SV_TARGET0;
     float4 normal : SV_TARGET1;
-    float depth : SV_TARGET2;
+    float4 depth : SV_TARGET2;
     float4 material : SV_TARGET3;
 };
 
@@ -85,9 +84,9 @@ GBuffer main(VertexToPixel input)
 
 	// Set up the pixel shader output for the g-buffer
 	GBuffer output;
-    output.albedo   = albedo;
-	output.normal   = float4(input.normal * 0.5f + 0.5f, 0); // Pack into 0-1 range
-	output.depth    = length(cameraPosition - input.worldPosition.xyz); // Linear depth
+    output.albedo = albedo;
+	output.normal = float4(input.normal * 0.5f + 0.5f, 0); // Pack into 0-1 range
+    output.depth = float4(input.worldPosition.xyz, 1);  //length(cameraPosition - input.worldPosition.xyz); // Linear depth
     output.material = float4(metalness, roughness, shininess / 1024.0f, 0); // Pack shininess into 0-1 range
 
 

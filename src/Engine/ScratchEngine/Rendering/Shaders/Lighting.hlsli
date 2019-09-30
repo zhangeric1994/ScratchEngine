@@ -16,7 +16,9 @@ struct LightSource
     float3 direction;
 	float intensity;
     float fallOff;
-    float2 padding;
+    float padding;
+    int hasShadow;
+    matrix shadowViewProjection;
 };
 
 

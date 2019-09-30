@@ -260,7 +260,7 @@ void ScratchEngine::Game::LoadShaders()
 
 	CreateSRVAndRTV(device, &GBufferAlbedoSRV, &GBufferAlbedoRTV);
 	CreateSRVAndRTV(device, &GBufferNormalsSRV, &GBufferNormalsRTV, DXGI_FORMAT_R16G16B16A16_UNORM);
-	CreateSRVAndRTV(device, &GBufferDepthSRV, &GBufferDepthRTV, DXGI_FORMAT_R32_FLOAT);
+	CreateSRVAndRTV(device, &GBufferDepthSRV, &GBufferDepthRTV, DXGI_FORMAT_R16G16B16A16_FLOAT);
 	CreateSRVAndRTV(device, &GBufferMaterialSRV, &GBufferMaterialRTV);
 	CreateSRVAndRTV(device, &DeferredLightBufferSRV, &DeferredLightBufferRTV, DXGI_FORMAT_R16G16B16A16_FLOAT); // Needs to go above 1!!!
 }
@@ -314,7 +314,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mobModel->LoadAnimation("../Assets/Models/Mob/Idle_2.fbx");					// 3
 	mobModel->LoadAnimation("../Assets/Models/Mob/Reaction_0.fbx");				// 4
 	mobModel->LoadAnimation("../Assets/Models/Mob/Reaction_1.fbx");				// 5
-	mobMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
+	mobMaterial = new Material(vsSkeleton, psPBR, sampler, "../Assets/Models/Mob/nightshade_j_friedrich.fbx");
 
 	model = new Model(device, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 	model->LoadAnimation("../Assets/Models/Pack/Standing Idle 01.fbx");				// 1
@@ -349,7 +349,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial = new Material(vertexShader, pixelShader, nullptr);
 	redMaterial->SetTint(1, 0, 0);
 
-	skeletonMaterial = new Material(vsSkeleton, psBlinnPhong, sampler, "../Assets/Models/Pack/vampire_a_lusth.fbx");
+	skeletonMaterial = new Material(vsSkeleton, psPBR, sampler, "../Assets/Models/Pack/vampire_a_lusth.fbx");
 
 
 	camera = new GameObject();
@@ -361,6 +361,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetLocalRotation(45, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>(XMVectorSet(0.5f, 0.5f, 0.3f, 1.0f), 10.0f);
+	directionalLight->EnableShadowCasting();
 
 	//go1 = new GameObject();
 	//go1->SetName("1");
@@ -466,7 +467,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 		lights[i] = light;
 	}
 
-	lightCount = 0;
+	lightCount = 50;
 	
 	//GameObject* ground = new GameObject();
 	//ground->SetLocalPosition(0, -0.5f, 0);
@@ -483,7 +484,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	dummy->SetLocalScale(1, 4, 1);
 	dummy->AddComponent<Renderer>(greenMaterial, cubeMesh);
 	dummy->AddComponent<BoxCollider>();
-	dummy->AddComponent<Dummy>(redMaterial, greenMaterial);
+	dummy->AddComponent<HitReaction>(redMaterial, greenMaterial);
 
 	GameObject* rightHandObject = new GameObject();
 	rightHandRenderer = rightHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
@@ -566,6 +567,12 @@ void ScratchEngine::Game::Update()
 		else if (Input::IsKeyPressed('6'))
 			renderingMode = 6;
 
+
+		if (Input::IsKeyPressed('V'))
+		{
+			rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
+			leftHandRenderer->SetActive(!leftHandRenderer->IsActiveSelf());
+		}
 
 		if ((GetKeyState('H') & 0x8000) != 0 && lastInputTime < totalTime)
 		{
@@ -804,15 +811,27 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(GBufferMaterialRTV, color);
 		context->ClearRenderTargetView(DeferredLightBufferRTV, color);
 		
-		
-		bool hasShadowMap = false;
 
-		shadowViewport.Height = shadowMapSize;
-		shadowViewport.Width = shadowMapSize;
+		for (int i = 0; i < scene->lightSourceAllocator.GetNumAllocated(); ++i)
+		{
+			LightSource& lightSource = scene->lightSourceAllocator[i];
 
-		context->RSSetViewports(1, &shadowViewport);
+			if (lightSource.shadow != nullptr)
+			{
+				switch (lightSource.type)
+				{
+					case LightType::DIRECTIONAL:
+						XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(camera->GetLocalPosition(), XMLoadFloat3(&lightSource.direction), XMVectorSet(0, 1, 0, 0)));
+						XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(30, 30, 0.1f, 100));
 
-		hasShadowMap = renderingEngine->RenderShadowMap(scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), player->GetLocalPosition());
+						lightSource.shadowViewProjection = XMMatrixMultiply(shadowProjection, shadowView);
+						break;
+				}
+
+				renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+			}
+		}
+
 
 		D3D11_VIEWPORT viewport = {};
 		viewport.TopLeftX = 0;

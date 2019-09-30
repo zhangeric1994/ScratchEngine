@@ -41,7 +41,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Load pixels from G-buffer (faster than sampling)
     float3 surfaceColor = gBufferAlbedo.Load(pixelIndex).rgb; // Already gamma correct
     float3 normal = gBufferNormal.Load(pixelIndex).rgb;
-    float depth = gBufferDepth.Load(pixelIndex).r;
+    float3 worldPos = gBufferDepth.Load(pixelIndex).xyz;
     float3 metalRoughSpec = gBufferMaterial.Load(pixelIndex).rgb;
 	
 
@@ -50,8 +50,8 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 
 	// Calc world position using depth and view ray
-	input.viewRay = normalize(input.viewRay);
-	float3 worldPos = cameraPosition + input.viewRay * depth;
+	//input.viewRay = normalize(input.viewRay);
+	//float3 worldPos = cameraPosition + input.viewRay * depth;
 
 
 	// Handle lighting calculation (using regular albedo here due to energy conservation calculation inside PointLightPBR(),

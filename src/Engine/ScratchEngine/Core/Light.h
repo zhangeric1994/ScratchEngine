@@ -24,7 +24,8 @@ namespace ScratchEngine
 		XMVECTOR color;
 		LightType type;
 		f32 intensity;
-		RenderTexture* shadowMap;
+
+		Shadow* shadow;
 
 		Light* next;
 		Light* previous;
@@ -113,33 +114,33 @@ namespace ScratchEngine
 
 	inline bool Light::DoCastShadow()
 	{
-		return shadowMap != nullptr;
+		return shadow != nullptr;
 	}
 
 
 	inline void DirectionalLight::EnableShadowCasting()
 	{
-		if (!shadowMap)
-			shadowMap = new RenderTexture(2048);
+		if (!shadow)
+			shadow = new Shadow(2048);
 	}
 
 	inline void DirectionalLight::DisableShadowCasting()
 	{
-		if (shadowMap)
-			delete shadowMap;
+		if (shadow)
+			delete shadow;
 	}
 
 
 	inline void PointLight::EnableShadowCasting()
 	{
-		if (!shadowMap)
-			shadowMap = new RenderTexture(2048);
+		if (!shadow)
+			shadow = new Shadow(2048);
 	}
 
 	inline void PointLight::DisableShadowCasting()
 	{
-		if (shadowMap)
-			delete shadowMap;
+		if (shadow)
+			delete shadow;
 	}
 }
 #endif
