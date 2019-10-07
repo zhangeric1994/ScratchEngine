@@ -91,6 +91,8 @@ namespace ScratchEngine
 		ID3D11ShaderResourceView* normalMap;
 
 		DirectionalLight* directionalLight;
+		PointLight* pointLight;
+
 		GameObject* camera;
 		GameObject* cameraHolder;
 		GameObject* player;

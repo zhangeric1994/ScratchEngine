@@ -32,6 +32,10 @@ Texture2D gBufferAlbedo : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gBufferDepth : register(t2);
 Texture2D gBufferMaterial : register(t3);
+TextureCube shadowMap : register(t10);
+
+
+SamplerComparisonState shadowSampler : register(s10);
 
 
 float4 main(VertexToPixel input) : SV_TARGET
@@ -41,7 +45,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Load pixels from G-buffer (faster than sampling)
     float3 surfaceColor = gBufferAlbedo.Load(pixelIndex).rgb; // Already gamma correct
     float3 normal = gBufferNormal.Load(pixelIndex).rgb;
-    float3 worldPos = gBufferDepth.Load(pixelIndex).xyz;
+    float3 worldPosition = gBufferDepth.Load(pixelIndex).xyz;
     float3 metalRoughSpec = gBufferMaterial.Load(pixelIndex).rgb;
 	
 
@@ -59,7 +63,12 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float metalness = metalRoughSpec.r;
 	float roughness = metalRoughSpec.g;
     float3 specularColor = lerp(F0_NON_METAL.rrr, surfaceColor, metalness); // If the surface is metal, we're assuming surfaceColor.rgb is actually the specular color!
+    float3 color = PointLightPBR(light, normal, worldPosition, cameraPosition, roughness, metalness, surfaceColor, specularColor);
 
 
-    return float4(PointLightPBR(light, normal, worldPos, cameraPosition, roughness, metalness, surfaceColor, specularColor), 1);
+    float3 L = worldPosition - light.position;
+    float shadowAmount = lerp(1.0f, shadowMap.SampleCmpLevelZero(shadowSampler, L, length(L) / light.range), saturate(light.hasShadow));
+
+
+    return float4(color * shadowAmount, 1);
 }

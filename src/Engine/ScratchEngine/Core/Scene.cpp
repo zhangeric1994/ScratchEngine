@@ -231,6 +231,7 @@ void ScratchEngine::Scene::UpdateLightSources()
 			{
 				case LightType::DIRECTIONAL:
 					XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
+					XMStoreFloat3(&lightSource.position, XMVectorZero());
 					break;
 
 

@@ -45,7 +45,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Load pixels from G-buffer (faster than sampling)
     float3 albedo = gBufferAlbedo.Load(pixelIndex).rgb; // Already gamma correct
     float3 normal = gBufferNormal.Load(pixelIndex).rgb;
-    float4 worldPosition = gBufferDepth.Load(pixelIndex);
+    float3 worldPosition = gBufferDepth.Load(pixelIndex).xyz;
     float3 metalRoughSpec = gBufferMaterial.Load(pixelIndex).rgb;
 	
 
@@ -63,10 +63,10 @@ float4 main(VertexToPixel input) : SV_TARGET
 	float metalness = metalRoughSpec.r; 
 	float roughness = metalRoughSpec.g;
     float3 specularColor = lerp(F0_NON_METAL.rrr, albedo.rgb, metalness); // If the surface is metal, we're assuming albedo.rgb is actually the specular color!
-    float3 color = DirectionalLightPBR(light, normal, worldPosition.xyz, cameraPosition, roughness, metalness, albedo, specularColor);
+    float3 color = DirectionalLightPBR(light, normal, worldPosition, cameraPosition, roughness, metalness, albedo, specularColor);
 
 
-    float4 shadowPosition = mul(worldPosition, light.shadowViewProjection);
+    float4 shadowPosition = mul(float4(worldPosition, 1), light.shadowViewProjection);
     float2 shadowUV = shadowPosition.xy / shadowPosition.w * 0.5f + 0.5f;
     shadowUV.y = 1.0f - shadowUV.y;
     float depthFromLight = shadowPosition.z / shadowPosition.w;

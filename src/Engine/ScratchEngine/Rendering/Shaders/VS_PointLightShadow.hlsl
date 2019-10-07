@@ -1,3 +1,6 @@
+#include "Lighting.hlsli"
+
+
 struct VertexShaderInput
 {
     float4 position : POSITION;
@@ -10,10 +13,15 @@ struct VertexShaderInput
 
 struct VertexToPixel
 {
-    float4 svPosition : SV_POSITION;
+    float4 position : SV_POSITION;
     float4 worldPosition : POSITION;
 };
 
+
+cbuffer LightData : register(b1)
+{
+    LightSource light;
+};
 
 cbuffer CameraData : register(b2)
 {
@@ -29,7 +37,7 @@ cbuffer ObjectData : register(b3)
 };
 
 
-float4 main(VertexShaderInput input) : SV_POSITION
+VertexToPixel main(VertexShaderInput input)
 {
     float4 p;
     
@@ -46,5 +54,11 @@ float4 main(VertexShaderInput input) : SV_POSITION
     }
 
 
-    return mul(p, mul(world, viewProjection));
+    VertexToPixel output;
+    
+    output.position = mul(p, mul(world, viewProjection));
+    output.worldPosition = mul(p, world);
+
+
+    return output;
 }

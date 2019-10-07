@@ -61,10 +61,12 @@ namespace ScratchEngine
 			SimpleVertexShader* vsDepthOnly;
 			SimpleVertexShader* vsDirectionalLight;
 			SimpleVertexShader* vsPointLight;
+			SimpleVertexShader* vsPointLightShadow;
 			SimpleVertexShader* vsViewport;
 			SimplePixelShader* psGBuffer;
 			SimplePixelShader* psDirectionalLight;
 			SimplePixelShader* psPointLight;
+			SimplePixelShader* psPointLightShadow;
 			SimplePixelShader* psDeferred;
 
 			ID3D11DepthStencilState* dssLessEqual;

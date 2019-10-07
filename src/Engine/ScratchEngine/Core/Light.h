@@ -121,7 +121,7 @@ namespace ScratchEngine
 	inline void DirectionalLight::EnableShadowCasting()
 	{
 		if (!shadow)
-			shadow = new Shadow(2048);
+			shadow = new Shadow(2048, LightType::DIRECTIONAL);
 	}
 
 	inline void DirectionalLight::DisableShadowCasting()
@@ -134,7 +134,7 @@ namespace ScratchEngine
 	inline void PointLight::EnableShadowCasting()
 	{
 		if (!shadow)
-			shadow = new Shadow(2048);
+			shadow = new Shadow(2048, LightType::POINT);
 	}
 
 	inline void PointLight::DisableShadowCasting()

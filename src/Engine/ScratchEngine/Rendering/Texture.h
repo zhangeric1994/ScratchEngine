@@ -4,6 +4,8 @@
 
 #include <WICTextureLoader.h>
 
+#include "prerequisites.h"
+
 #include "../Common/Typedefs.h"
 
 
@@ -43,14 +45,14 @@ namespace ScratchEngine
 
 
 		private:
-			ID3D11RenderTargetView* renderTargetView;
-			ID3D11DepthStencilView* depthStencilView;
+			LightType type;
+			ID3D11DepthStencilView* depthStencilViews[6];
 			XMMATRIX viewProjection;
 
 
 		public:
-			Shadow(u32 size);
-			Shadow(u32 width, u32 height);
+			Shadow(u32 size, LightType type);
+			Shadow(u32 width, u32 height, LightType type);
 			~Shadow();
 		};
 	}

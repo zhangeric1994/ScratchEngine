@@ -8,6 +8,20 @@
 #include "Viewer.h"
 
 
+constexpr XMVECTOR axes[6] = { {  1,  0,  0 },
+							   { -1,  0,  0 },
+							   {  0,  1,  0 },
+							   {  0, -1,  0 },
+							   {  0,  0,  1 },
+							   {  0,  0, -1 } };
+
+constexpr XMVECTOR axesUp[6] = { {  0, 1, 0 },
+								 {  0, 1, 0 },
+								 { -1, 0, 0 },
+								 {  1, 0, 0 },
+								 {  0, 1, 0 },
+								 {  0, 1, 0 } };
+
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
 
 ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig config) : materialAllocator(config.maxNumMeshes), meshAllocator(config.maxNumMeshes)
@@ -44,6 +58,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	vsPointLight = new SimpleVertexShader(device, deviceContext);
 	vsPointLight->LoadShaderFile((wpath + std::wstring(L"/VS_PointLight.cso")).c_str());
 
+	vsPointLightShadow = new SimpleVertexShader(device, deviceContext);
+	vsPointLightShadow->LoadShaderFile((wpath + std::wstring(L"/VS_PointLightShadow.cso")).c_str());
+
 	vsViewport = new SimpleVertexShader(device, deviceContext);
 	vsViewport->LoadShaderFile((wpath + std::wstring(L"/VS_Viewport.cso")).c_str());
 
@@ -55,6 +72,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	
 	psPointLight = new SimplePixelShader(device, deviceContext);
 	psPointLight->LoadShaderFile((wpath + std::wstring(L"/PS_PointLightPBR.cso")).c_str());
+
+	psPointLightShadow = new SimplePixelShader(device, deviceContext);
+	psPointLightShadow->LoadShaderFile((wpath + std::wstring(L"/PS_PointLightShadow.cso")).c_str());
 
 	psDeferred = new SimplePixelShader(device, deviceContext);
 	psDeferred->LoadShaderFile((wpath + std::wstring(L"/PS_CombinedDeferred.cso")).c_str());
@@ -340,7 +360,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawGBuffers(Viewer* viewer, Ren
 		vertexShader->SetMatrix4x4("view", viewMatrix);
 		vertexShader->SetMatrix4x4("projection", projectionMatrix);
 		vertexShader->SetMatrix4x4("viewProjection", viewProjectionMatrix);
-		vertexShader->SetMatrix4x4("shadowViewProjection", shadowViewProjectionMat);
 		vertexShader->CopyBufferData("CameraData");
 
 		vertexShader->SetShader();
@@ -529,6 +548,11 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 					psPointLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
 					psPointLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
 
+					if (lightSource.shadow)
+						psPointLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
+
+					psPointLight->SetSamplerState("shadowSampler", shadowSampler);
+
 					
 					ID3D11Buffer* vertexBuffer = sphereMesh->GetVertexBuffer();
 					ID3D11Buffer* indexBuffer = sphereMesh->GetIndexBuffer();
@@ -583,60 +607,136 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* lig
 {
 	Shadow* shadow = light->shadow;
 
-
-	D3D11_VIEWPORT viewport = {};
-	viewport.Width = shadow->width;
-	viewport.Height = shadow->height;
-	viewport.MinDepth = 0.f;
-	viewport.MaxDepth = 1.f;
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-
-
-	deviceContext->ClearDepthStencilView(shadow->depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
-
-	deviceContext->RSSetState(rsShadow);
-	deviceContext->RSSetViewports(1, &viewport);
-	deviceContext->PSSetShader(nullptr, nullptr, 0);
-	deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilView);
-	
-
-	vsDepthOnly->SetMatrix4x4("viewProjection", light->shadowViewProjection);
-
-	vsDepthOnly->CopyBufferData("CameraData");
-
-	vsDepthOnly->SetShader();
-
-
-	for (int i = 0; i < numRenderables; ++i)
+	if (shadow)
 	{
-		Renderable& renderable = renderables[i];
+		D3D11_VIEWPORT viewport = {};
+		viewport.Width = shadow->width;
+		viewport.Height = shadow->height;
+		viewport.MinDepth = 0.f;
+		viewport.MaxDepth = 1.f;
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
 
 
-		vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
-		vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
+		switch (light->type)
+		{
+		case LightType::DIRECTIONAL:
+			deviceContext->ClearDepthStencilView(shadow->depthStencilViews[0], D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-		vsDepthOnly->CopyBufferData("ObjectData");
-
-
-		Mesh* mesh = renderable.mesh;
-
-		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
-		ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
-
-
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-		UINT indexCount = 0;
-
-		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
-		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-		deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+			deviceContext->RSSetState(rsShadow);
+			deviceContext->RSSetViewports(1, &viewport);
+			deviceContext->PSSetShader(nullptr, nullptr, 0);
+			deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[0]);
 
 
-		indexCount += mesh->GetIndexCount();
+			vsDepthOnly->SetMatrix4x4("viewProjection", light->shadowViewProjection);
+
+			vsDepthOnly->CopyBufferData("CameraData");
+
+			vsDepthOnly->SetShader();
+
+
+			for (int i = 0; i < numRenderables; ++i)
+			{
+				Renderable& renderable = renderables[i];
+
+
+				vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
+				vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
+
+				vsDepthOnly->CopyBufferData("ObjectData");
+
+
+				Mesh* mesh = renderable.mesh;
+
+				ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+				ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+
+				UINT stride = sizeof(Vertex);
+				UINT offset = 0;
+				UINT indexCount = 0;
+
+				deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+				deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+				deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+				deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+
+				indexCount += mesh->GetIndexCount();
+			}
+
+			break;
+
+
+		case LightType::POINT:
+			deviceContext->RSSetState(rsShadow);
+			deviceContext->RSSetViewports(1, &viewport);
+			//deviceContext->PSSetShader(nullptr, nullptr, 0);
+
+
+			vsPointLightShadow->SetData("light", light, sizeof(LightSource));
+			vsPointLightShadow->CopyBufferData("LightData");
+
+			vsPointLightShadow->SetShader();
+
+
+			psPointLightShadow->SetData("light", light, sizeof(LightSource));
+
+			psPointLightShadow->CopyBufferData("LightData");
+
+			psPointLightShadow->SetShader();
+
+
+			XMVECTOR lightPosition = XMLoadFloat3(&light->position);
+			XMMATRIX P = XMMatrixTranspose(XMMatrixPerspectiveFovLH(g_XMHalfPi.f[0], 1, 0.01f, light->range));
+
+			for (int i = 0; i < 6; ++i)
+			{
+				deviceContext->ClearDepthStencilView(shadow->depthStencilViews[i], D3D11_CLEAR_DEPTH, 1.0f, 0);
+				deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[i]);
+
+
+				vsPointLightShadow->SetMatrix4x4("viewProjection", XMMatrixMultiply(P, XMMatrixTranspose(XMMatrixLookToLH(lightPosition, axes[i], axesUp[i]))));
+				
+				vsPointLightShadow->CopyBufferData("CameraData");
+
+
+				for (int j = 0; j < numRenderables; ++j)
+				{
+					Renderable& renderable = renderables[j];
+
+
+					vsPointLightShadow->SetMatrix4x4("world", renderable.worldMatrix);
+					vsPointLightShadow->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
+
+					vsPointLightShadow->CopyBufferData("ObjectData");
+
+
+					Mesh* mesh = renderable.mesh;
+
+					ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+					ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+
+					UINT stride = sizeof(Vertex);
+					UINT offset = 0;
+					UINT indexCount = 0;
+
+					deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+					deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+					deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+					deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+
+					indexCount += mesh->GetIndexCount();
+				}
+			}
+
+			break;
+		}
 	}
 }
 

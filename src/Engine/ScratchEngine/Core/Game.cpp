@@ -363,6 +363,11 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>(XMVectorSet(0.5f, 0.5f, 0.3f, 1.0f), 10.0f);
 	directionalLight->EnableShadowCasting();
 
+	GameObject* pointLightObject = new GameObject();
+	pointLightObject->SetLocalPosition(3, 2, 10);
+	pointLight = pointLightObject->AddComponent<PointLight>(XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f), 10.0f, 10.0f);
+	pointLight->EnableShadowCasting();
+
 	//go1 = new GameObject();
 	//go1->SetName("1");
 	//go1->SetPosition(0, 0, 15);
@@ -479,19 +484,18 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	test->AddComponent<Renderer>(pbrMaterial, cubeMesh);*/
 
 
-	GameObject* dummy = new GameObject();
-	dummy->SetLocalPosition(0, 2, 10);
-	dummy->SetLocalScale(1, 4, 1);
-	dummy->AddComponent<Renderer>(greenMaterial, cubeMesh);
-	dummy->AddComponent<BoxCollider>();
-	dummy->AddComponent<HitReaction>(redMaterial, greenMaterial);
+	GameObject* trainingPole = new GameObject();
+	trainingPole->SetLocalPosition(0, 2, 10);
+	trainingPole->SetLocalScale(1, 4, 1);
+	trainingPole->AddComponent<Renderer>(greenMaterial, cubeMesh);
+	trainingPole->AddComponent<BoxCollider>();
+	trainingPole->AddComponent<HitReaction>(redMaterial, greenMaterial);
 
 	GameObject* rightHandObject = new GameObject();
 	rightHandRenderer = rightHandObject->AddComponent<Renderer>(greenMaterial, sphereMesh);
 	rightHandCollider = rightHandObject->AddComponent<SphereCollider>(0.15f);
 	rightHandObject->SetLocalPosition(-115, 167, 4);
 	rightHandObject->SetLocalScale(30);
-
 	rightHandRenderer->SetActive(false);
 
 	GameObject* leftHandObject = new GameObject();
@@ -499,13 +503,14 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	leftHandCollider = leftHandObject->AddComponent<SphereCollider>(0.15f);
 	leftHandObject->SetLocalPosition(115, 167, 0);
 	leftHandObject->SetLocalScale(30);
-
 	leftHandRenderer->SetActive(false);
+
 
 	model->anim->BindToSlot(23, rightHandObject);
 	model->anim->BindToSlot(42, leftHandObject);
 
 	mobModel->anim->SetAnimationIndex(1, true);
+
 
 	player = new GameObject();
 	player->SetLocalPosition(0, 0, 0);
@@ -520,6 +525,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mob->AddComponent<Renderer>(mobMaterial, mobModel);
 	mob->AddComponent<BoxCollider>(100, 400, 100);
 	mob->AddComponent<Mob>(mobModel);
+
 
 	camera->SetParent(cameraHolder);
 	cameraHolder->SetParent(player);
