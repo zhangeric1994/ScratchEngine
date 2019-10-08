@@ -15,12 +15,12 @@ constexpr XMVECTOR axes[6] = { {  1,  0,  0 },
 							   {  0,  0,  1 },
 							   {  0,  0, -1 } };
 
-constexpr XMVECTOR axesUp[6] = { {  0, 1, 0 },
-								 {  0, 1, 0 },
-								 { -1, 0, 0 },
-								 {  1, 0, 0 },
-								 {  0, 1, 0 },
-								 {  0, 1, 0 } };
+constexpr XMVECTOR axesUp[6] = { { 0, 1,  0 },
+								 { 0, 1,  0 },
+								 { 0, 0, -1 },
+								 { 0, 0,  1 },
+								 { 0, 1,  0 },
+								 { 0, 1,  0 } };
 
 ScratchEngine::Rendering::RenderingEngine* ScratchEngine::Rendering::RenderingEngine::singleton = nullptr;
 
@@ -75,6 +75,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 
 	psPointLightShadow = new SimplePixelShader(device, deviceContext);
 	psPointLightShadow->LoadShaderFile((wpath + std::wstring(L"/PS_PointLightShadow.cso")).c_str());
+
+	psAmbientLight = new SimplePixelShader(device, deviceContext);
+	psAmbientLight->LoadShaderFile((wpath + std::wstring(L"/PS_AmbientLight.cso")).c_str());
 
 	psDeferred = new SimplePixelShader(device, deviceContext);
 	psDeferred->LoadShaderFile((wpath + std::wstring(L"/PS_CombinedDeferred.cso")).c_str());
@@ -485,94 +488,127 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 
 		switch (lightType)
 		{
-			case LightType::DIRECTIONAL:
-				do
-				{
-					LightSource lightSource = lightSources[i];
+		case LightType::DIRECTIONAL:
+			do
+			{
+				LightSource lightSource = lightSources[i];
 
 
-					vsDirectionalLight->SetShader();
+				vsDirectionalLight->SetShader();
 
 
-					psDirectionalLight->SetData("light", &lightSource, sizeof(LightSource));
-					psDirectionalLight->CopyBufferData("LightData");
+				psDirectionalLight->SetData("light", &lightSource, sizeof(LightSource));
+				psDirectionalLight->CopyBufferData("LightData");
 
-					psDirectionalLight->SetShader();
+				psDirectionalLight->SetShader();
 
-					psDirectionalLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
-					psDirectionalLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
-					psDirectionalLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
-					psDirectionalLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
+				psDirectionalLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
+				psDirectionalLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
+				psDirectionalLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
+				psDirectionalLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
 
-					if (lightSource.shadow)
-						psDirectionalLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
+				if (lightSource.shadow)
+					psDirectionalLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
 
-					psDirectionalLight->SetSamplerState("shadowSampler", shadowSampler);
-
-
-					deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-					deviceContext->RSSetState(0);
-
-					deviceContext->Draw(3, 0);
+				psDirectionalLight->SetSamplerState("shadowSampler", shadowSampler);
 
 
-					++i;
-				} while (i < numLightSources && lightSources[i].type == lightType);
-				break;
+				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+				deviceContext->RSSetState(0);
+
+				deviceContext->Draw(3, 0);
 
 
-			case LightType::POINT:
-				do
-				{
-					LightSource lightSource = lightSources[i];
+				++i;
+			} while (i < numLightSources && lightSources[i].type == lightType);
+
+			break;
 
 
-					XMMATRIX T = XMMatrixTranslation(lightSource.position.x, lightSource.position.y, lightSource.position.z);
+		case LightType::POINT:
+			do
+			{
+				LightSource lightSource = lightSources[i];
 
-					float s = lightSource.range * 2;
-					XMMATRIX S = XMMatrixScaling(s, s, s); // This sphere model has a radius of 0.5, so double the scale
+
+				XMMATRIX T = XMMatrixTranslation(lightSource.position.x, lightSource.position.y, lightSource.position.z);
+
+				float s = lightSource.range * 2;
+				XMMATRIX S = XMMatrixScaling(s, s, s); // This sphere model has a radius of 0.5, so double the scale
 					
-					vsPointLight->SetMatrix4x4("world", XMMatrixTranspose(S * T));
-					vsPointLight->CopyBufferData("ObjectData");
+				vsPointLight->SetMatrix4x4("world", XMMatrixTranspose(S * T));
+				vsPointLight->CopyBufferData("ObjectData");
 
-					vsPointLight->SetShader();
+				vsPointLight->SetShader();
 
 
-					psPointLight->SetData("light", &lightSource, sizeof(LightSource));
-					psPointLight->CopyBufferData("LightData");
+				psPointLight->SetData("light", &lightSource, sizeof(LightSource));
+				psPointLight->CopyBufferData("LightData");
 
-					psPointLight->SetShader();
+				psPointLight->SetShader();
 
-					psPointLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
-					psPointLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
-					psPointLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
-					psPointLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
+				psPointLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
+				psPointLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
+				psPointLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
+				psPointLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
 
-					if (lightSource.shadow)
-						psPointLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
+				if (lightSource.shadow)
+					psPointLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
 
-					psPointLight->SetSamplerState("shadowSampler", shadowSampler);
+				psPointLight->SetSamplerState("shadowSampler", shadowSampler);
 
 					
-					ID3D11Buffer* vertexBuffer = sphereMesh->GetVertexBuffer();
-					ID3D11Buffer* indexBuffer = sphereMesh->GetIndexBuffer();
+				ID3D11Buffer* vertexBuffer = sphereMesh->GetVertexBuffer();
+				ID3D11Buffer* indexBuffer = sphereMesh->GetIndexBuffer();
 
 
-					deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-					deviceContext->RSSetState(rsInsideOut);
+				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+				deviceContext->RSSetState(rsInsideOut);
 
-					deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-					deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+				deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+				deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
-					// Finally do the actual drawing
-					deviceContext->DrawIndexed(sphereMesh->GetIndexCount(), 0, 0);
+				// Finally do the actual drawing
+				deviceContext->DrawIndexed(sphereMesh->GetIndexCount(), 0, 0);
 
 
-					indexCount += sphereMesh->GetIndexCount();
+				indexCount += sphereMesh->GetIndexCount();
 
-					++i;
-				} while (i < numLightSources && lightSources[i].type == lightType);
-				break;
+				++i;
+			} while (i < numLightSources && lightSources[i].type == lightType);
+
+			break;
+
+
+		case LightType::AMBIENT:
+			do
+			{
+				LightSource lightSource = lightSources[i];
+
+
+				vsDirectionalLight->SetShader();
+
+
+				psAmbientLight->SetData("light", &lightSource, sizeof(LightSource));
+				psAmbientLight->CopyBufferData("LightData");
+
+				psAmbientLight->SetShader();
+
+				psAmbientLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
+
+
+				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+				deviceContext->RSSetState(0);
+
+				deviceContext->Draw(3, 0);
+
+
+				indexCount += sphereMesh->GetIndexCount();
+
+				++i;
+			} while (i < numLightSources && lightSources[i].type == lightType);
+
+			break;
 		}
 	}
 }
@@ -673,7 +709,6 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* lig
 		case LightType::POINT:
 			deviceContext->RSSetState(rsShadow);
 			deviceContext->RSSetViewports(1, &viewport);
-			//deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 
 			vsPointLightShadow->SetData("light", light, sizeof(LightSource));

@@ -94,6 +94,25 @@ namespace ScratchEngine
 	public:
 		SpotLight();
 		SpotLight(XMVECTOR color, f32 angle);
+
+
+		void EnableShadowCasting();
+		void DisableShadowCasting();
+	};
+
+
+	class __declspec(dllexport) AmbientLight : public Light
+	{
+		friend class Scene;
+
+
+	public:
+		AmbientLight();
+		AmbientLight(XMVECTOR color);
+
+
+		void EnableShadowCasting();
+		void DisableShadowCasting();
 	};
 
 
@@ -128,6 +147,8 @@ namespace ScratchEngine
 	{
 		if (shadow)
 			delete shadow;
+
+		shadow = nullptr;
 	}
 
 
@@ -141,6 +162,34 @@ namespace ScratchEngine
 	{
 		if (shadow)
 			delete shadow;
+
+		shadow = nullptr;
+	}
+
+
+	inline void SpotLight::EnableShadowCasting()
+	{
+	}
+
+	inline void SpotLight::DisableShadowCasting()
+	{
+		if (shadow)
+			delete shadow;
+
+		shadow = nullptr;
+	}
+
+
+	inline void AmbientLight::EnableShadowCasting()
+	{
+	}
+
+	inline void AmbientLight::DisableShadowCasting()
+	{
+		if (shadow)
+			delete shadow;
+
+		shadow = nullptr;
 	}
 }
 #endif

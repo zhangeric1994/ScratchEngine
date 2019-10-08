@@ -5,6 +5,7 @@
 #define LIGHT_TYPE_DIRECTIONAL	0
 #define LIGHT_TYPE_POINT		1
 #define LIGHT_TYPE_SPOT			2
+#define LIGHT_TYPE_AMBIENT      3
 
 
 struct LightSource
@@ -269,7 +270,7 @@ float3 DirectionalLightPBR(LightSource light, float3 normal, float3 worldPos, fl
 	// (Reflected light doesn't get diffused)
 	float3 balancedDiff = DiffuseEnergyConserve(diff, spec, metalness);
 
-	// Combine amount with 
+	// Combine amount with
     return (balancedDiff * albedo + spec) * light.intensity * light.color.rgb;
 }
 

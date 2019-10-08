@@ -57,3 +57,13 @@ ScratchEngine::SpotLight::SpotLight(XMVECTOR color, f32 angle) : Light(LightType
 {
 	this->angle = angle;
 }
+
+
+ScratchEngine::AmbientLight::AmbientLight() : Light(LightType::AMBIENT)
+{
+}
+
+ScratchEngine::AmbientLight::AmbientLight(XMVECTOR color) : Light(LightType::AMBIENT, color)
+{
+}
+

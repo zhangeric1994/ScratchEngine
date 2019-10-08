@@ -92,6 +92,7 @@ namespace ScratchEngine
 
 		DirectionalLight* directionalLight;
 		PointLight* pointLight;
+		AmbientLight* ambientLight;
 
 		GameObject* camera;
 		GameObject* cameraHolder;

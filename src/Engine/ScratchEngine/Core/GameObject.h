@@ -109,14 +109,14 @@ namespace ScratchEngine
 	};
 
 
-	template<class T> __inline T* GameObject::GetComponent()
+	template<class T> inline T* GameObject::GetComponent()
 	{
 		type_index id = typeid(T);
 
 		return static_cast<T*>(components.find(id) == components.end() ? nullptr : components[id]);
 	}
 
-	template<class T, class ...argTs> __inline T* GameObject::AddComponent(argTs ...args)
+	template<class T, class ...argTs> inline T* GameObject::AddComponent(argTs ...args)
 	{
 		//assert(std::is_base_of<GameComponent, T>::value)
 
@@ -134,7 +134,7 @@ namespace ScratchEngine
 		return component;
 	}
 
-	template<class T> __inline void GameObject::RemoveComponent()
+	template<class T> inline void GameObject::RemoveComponent()
 	{
 		type_index id = typeid(T);
 

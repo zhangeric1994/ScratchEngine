@@ -21,6 +21,7 @@ namespace ScratchEngine
 			DIRECTIONAL,
 			POINT,
 			SPOT,
+			AMBIENT,
 		};
 
 

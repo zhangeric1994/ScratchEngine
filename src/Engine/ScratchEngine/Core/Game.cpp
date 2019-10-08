@@ -368,6 +368,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	pointLight = pointLightObject->AddComponent<PointLight>(XMVectorSet(0.0f, 0.0f, 1.0f, 1.0f), 10.0f, 10.0f);
 	pointLight->EnableShadowCasting();
 
+	GameObject* ambientLightObject = new GameObject();
+	ambientLight = ambientLightObject->AddComponent<AmbientLight>();
+
+
 	//go1 = new GameObject();
 	//go1->SetName("1");
 	//go1->SetPosition(0, 0, 15);
@@ -561,17 +565,47 @@ void ScratchEngine::Game::Update()
 		bool animationChanged = false;
 
 		if (Input::IsKeyPressed('1'))
+		{
 			renderingMode = 1;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 		else if (Input::IsKeyPressed('2'))
+		{
 			renderingMode = 2;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 		else if (Input::IsKeyPressed('3'))
+		{
 			renderingMode = 3;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 		else if (Input::IsKeyPressed('4'))
+		{
 			renderingMode = 4;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 		else if (Input::IsKeyPressed('5'))
+		{
 			renderingMode = 5;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 		else if (Input::IsKeyPressed('6'))
+		{
 			renderingMode = 6;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
+		else if (Input::IsKeyPressed('7'))
+		{
+			renderingMode = 2;
+			directionalLight->SetActive(false);
+			ambientLight->SetActive(false);
+		}
 
 
 		if (Input::IsKeyPressed('V'))

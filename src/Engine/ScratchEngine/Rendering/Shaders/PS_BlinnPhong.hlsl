@@ -65,12 +65,19 @@ float4 main(VertexToPixel input) : SV_TARGET
                 totalColor += DirLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
                 break;
 
+
             case LIGHT_TYPE_POINT:
                 totalColor += PointLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
                 break;
 
+
             case LIGHT_TYPE_SPOT:
                 totalColor += SpotLight(lights[i], input.normal, input.position.xyz, cameraPosition, 16, 0, float3(1, 1, 1));
+                break;
+
+
+            case LIGHT_TYPE_AMBIENT:
+                totalColor += lights[i].color.rgb;
                 break;
         }
     }

@@ -67,6 +67,7 @@ namespace ScratchEngine
 			SimplePixelShader* psDirectionalLight;
 			SimplePixelShader* psPointLight;
 			SimplePixelShader* psPointLightShadow;
+			SimplePixelShader* psAmbientLight;
 			SimplePixelShader* psDeferred;
 
 			ID3D11DepthStencilState* dssLessEqual;

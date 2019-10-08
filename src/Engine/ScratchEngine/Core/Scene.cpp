@@ -229,16 +229,15 @@ void ScratchEngine::Scene::UpdateLightSources()
 
 			switch (light->type)
 			{
-				case LightType::DIRECTIONAL:
-					XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
-					XMStoreFloat3(&lightSource.position, XMVectorZero());
-					break;
+			case LightType::DIRECTIONAL:
+				XMStoreFloat3(&lightSource.direction, static_cast<DirectionalLight*>(light)->GetGameObject()->GetForwardVector());
+				break;
 
 
-				case LightType::POINT:
-					lightSource.range = static_cast<PointLight*>(light)->range;
-					XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
-					break;
+			case LightType::POINT:
+				lightSource.range = static_cast<PointLight*>(light)->range;
+				XMStoreFloat3(&lightSource.position, light->GetGameObject()->GetPosition());
+				break;
 			}
 		}
 	}
