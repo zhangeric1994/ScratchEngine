@@ -18,6 +18,39 @@ using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
 
 
+__forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderingEngine, Scene* scene)
+{
+	for (int i = 0; i < scene->lightSourceAllocator.GetNumAllocated(); ++i)
+	{
+		LightSource& lightSource = scene->lightSourceAllocator[i];
+
+		if (lightSource.shadow)
+		{
+			switch (lightSource.type)
+			{
+			case LightType::DIRECTIONAL:
+				XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(camera->GetLocalPosition(), XMLoadFloat3(&lightSource.direction), XMVectorSet(0, 1, 0, 0)));
+				XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(30, 30, 0.1f, 100));
+
+				lightSource.shadowViewProjection = XMMatrixMultiply(shadowProjection, shadowView);
+
+				break;
+
+
+			case LightType::AMBIENT:
+				lightSource.shadowProjection = scene->viewerAllocator[0].projectionMatrix;
+				
+				renderingEngine->RenderSSAO(&lightSource, depthSRV, GBufferNormalsSRV);
+
+				break;
+			}
+
+			renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+		}
+	}
+}
+
+
 void CreateSRVAndRTV(ID3D11Device* device, ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM)
 {
 	// Set up the texture itself
@@ -370,6 +403,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 	GameObject* ambientLightObject = new GameObject();
 	ambientLight = ambientLightObject->AddComponent<AmbientLight>();
+	ambientLight->EnableShadowCasting();
 
 
 	//go1 = new GameObject();
@@ -605,6 +639,12 @@ void ScratchEngine::Game::Update()
 			renderingMode = 2;
 			directionalLight->SetActive(false);
 			ambientLight->SetActive(false);
+		}
+		else if (Input::IsKeyPressed('8'))
+		{
+			renderingMode = 7;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
 		}
 
 
@@ -850,27 +890,6 @@ void ScratchEngine::Game::Draw()
 		context->ClearRenderTargetView(GBufferDepthRTV, color); // Not an actual depth buffer!
 		context->ClearRenderTargetView(GBufferMaterialRTV, color);
 		context->ClearRenderTargetView(DeferredLightBufferRTV, color);
-		
-
-		for (int i = 0; i < scene->lightSourceAllocator.GetNumAllocated(); ++i)
-		{
-			LightSource& lightSource = scene->lightSourceAllocator[i];
-
-			if (lightSource.shadow != nullptr)
-			{
-				switch (lightSource.type)
-				{
-					case LightType::DIRECTIONAL:
-						XMMATRIX shadowView = XMMatrixTranspose(XMMatrixLookToLH(camera->GetLocalPosition(), XMLoadFloat3(&lightSource.direction), XMVectorSet(0, 1, 0, 0)));
-						XMMATRIX shadowProjection = XMMatrixTranspose(XMMatrixOrthographicLH(30, 30, 0.1f, 100));
-
-						lightSource.shadowViewProjection = XMMatrixMultiply(shadowProjection, shadowView);
-						break;
-				}
-
-				renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
-			}
-		}
 
 
 		D3D11_VIEWPORT viewport = {};
@@ -887,58 +906,83 @@ void ScratchEngine::Game::Draw()
 
 		renderingEngine->PerformZPrepass(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 
+
 		switch (renderingMode)
 		{
-			case 1:
-				context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
-				renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated());
-				break;
+		case 1:
+			context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+			renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated());
+			break;
 
 
-			case 2:
-				{
-					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
-					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
-
-					ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
-					renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
-
-					renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
-				}
-				break;
+		case 2:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
 
 
-			case 3:
-				{
-					ID3D11RenderTargetView* gBufferRTVs[4] = { backBufferRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
-					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
-				}
-				break;
+				__RenderShadows(renderingEngine, scene);
 
 
-			case 4:
-				{
-					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, backBufferRTV, GBufferDepthRTV, GBufferMaterialRTV };
-					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
-				}
-				break;
+				context->RSSetViewports(1, &viewport);
+				context->RSSetState(0);
 
 
-			case 5:
-				{
-					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, backBufferRTV, GBufferMaterialRTV };
-					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
-				}
-				break;
+				ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
+				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
 
 
-			case 6:
-				{
-					ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, backBufferRTV };
-					renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
-				}
-				break;
+				renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
+			}
+			break;
+
+
+		case 3:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { backBufferRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+			}
+			break;
+
+
+		case 4:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, backBufferRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+			}
+			break;
+
+
+		case 5:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, backBufferRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+			}
+			break;
+
+
+		case 6:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, backBufferRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+			}
+			break;
+
+
+		case 7:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+
+
+				renderingEngine->RenderSSAO(backBufferRTV, &scene->viewerAllocator[0].projectionMatrix, depthSRV, GBufferNormalsSRV);
+			}
+			break;
 		}
+
+
+		context->RSSetViewports(1, &viewport);
+		context->RSSetState(0);
 
 		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
 

@@ -36,8 +36,11 @@ ScratchEngine::Rendering::Texture::Texture(wchar_t* _filepath, D3D11_TEXTURE_ADD
 
 ScratchEngine::Rendering::Texture::~Texture()
 {
-	shaderResourceView->Release();
-	samplerState->Release();
+	if (shaderResourceView)
+		shaderResourceView->Release();
+
+	if (samplerState)
+		samplerState->Release();
 }
 
 
@@ -50,6 +53,14 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 	this->width = width;
 	this->height = height;
 
+
+	for (int i = 0; i < 6; ++i)
+	{
+		depthStencilViews[i] = nullptr;
+		renderTargetViews[i] = nullptr;
+	}
+
+
 	ID3D11Device* device = RenderingEngine::GetSingleton()->device;
 
 
@@ -59,8 +70,6 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 
 	ID3D11Texture2D* texture = nullptr;
-
-	int numDSV = 1;
 
 	switch (type)
 	{
@@ -93,8 +102,6 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 			dsvDesc.Texture2D.MipSlice = 0;
 			device->CreateDepthStencilView(texture, &dsvDesc, &depthStencilViews[0]);
-			for (int i = 1; i < 6; ++i)
-				depthStencilViews[i] = nullptr;
 			
 			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 			srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -140,6 +147,36 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 			texture->Release();
 
 			break;
+
+
+		case LightType::AMBIENT:
+			textureDesc.Width = width;
+			textureDesc.Height = height;
+			textureDesc.ArraySize = 6;
+			textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+			textureDesc.CPUAccessFlags = 0;
+			textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			textureDesc.MipLevels = 1;
+			textureDesc.MiscFlags = 0;
+			textureDesc.SampleDesc.Count = 1;
+			textureDesc.SampleDesc.Quality = 0;
+			textureDesc.Usage = D3D11_USAGE_DEFAULT;
+			device->CreateTexture2D(&textureDesc, nullptr, &texture);
+
+			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+			rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+			rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			rtvDesc.Texture2D.MipSlice = 0;
+			device->CreateRenderTargetView(texture, &rtvDesc, &renderTargetViews[0]);
+
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+			srvDesc.TextureCube.MipLevels = -1;
+			srvDesc.TextureCube.MostDetailedMip = 0;
+			device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
+
+			texture->Release();
+			break;
 	}
 }
 
@@ -149,6 +186,14 @@ ScratchEngine::Rendering::Shadow::~Shadow()
 	{
 		if (depthStencilViews[i])
 			depthStencilViews[i]->Release();
+		else
+			break;
+	}
+
+	for (int i = 0; i < 6; ++i)
+	{
+		if (renderTargetViews[i])
+			renderTargetViews[i]->Release();
 		else
 			break;
 	}

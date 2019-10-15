@@ -142,6 +142,13 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	shadowSamplerDesc.BorderColor[2] = 1.0f;
 	shadowSamplerDesc.BorderColor[3] = 1.0f;
 	device->CreateSamplerState(&shadowSamplerDesc, &shadowSampler);
+
+
+	GFSDK_SSAO_CustomHeap CustomHeap;
+	CustomHeap.new_ = ::operator new;
+	CustomHeap.delete_ = ::operator delete;
+
+	assert(GFSDK_SSAO_CreateContext_D3D11(device, &ssaoContext, &CustomHeap) == GFSDK_SSAO_OK); // HBAO+ requires feature level 11_0 or above
 }
 
 ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
@@ -596,6 +603,9 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 
 				psAmbientLight->SetShaderResourceView("gBufferAlbedo", gBuffers[0]);
 
+				if (lightSource.shadow)
+					psAmbientLight->SetShaderResourceView("ssaoBuffer", lightSource.shadow->shaderResourceView);
+
 
 				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
 				deviceContext->RSSetState(0);
@@ -639,8 +649,50 @@ void ScratchEngine::Rendering::RenderingEngine::DrawDeferred(ID3D11ShaderResourc
 	deviceContext->Draw(3, 0);
 }
 
+void ScratchEngine::Rendering::RenderingEngine::RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer)
+{
+	if (light->type != LightType::AMBIENT || !light->shadow)
+		return;
+
+
+	RenderSSAO(light->shadow->renderTargetViews[0], &light->shadowProjection, depthBuffer, normalBuffer);
+}
+
+void ScratchEngine::Rendering::RenderingEngine::RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer)
+{
+	GFSDK_SSAO_Float4x4 P = {};
+
+	memcpy(&P.Array, projectionMatrix, sizeof(P.Array));
+
+
+	GFSDK_SSAO_InputData_D3D11 ssaoInput;
+	ssaoInput.DepthData.DepthTextureType = GFSDK_SSAO_HARDWARE_DEPTHS;
+	ssaoInput.DepthData.pFullResDepthTextureSRV = depthBuffer;
+	ssaoInput.DepthData.ProjectionMatrix.Data = P;
+	ssaoInput.DepthData.ProjectionMatrix.Layout = GFSDK_SSAO_COLUMN_MAJOR_ORDER;
+	ssaoInput.DepthData.MetersToViewSpaceUnits = 1;
+	ssaoInput.NormalData.pFullResNormalTextureSRV = normalBuffer;
+	ssaoInput.NormalData.Enable = false;
+
+
+	GFSDK_SSAO_Parameters_D3D11 ssaoParams;
+	ssaoParams.Radius = 2.0f;
+	ssaoParams.Bias = 0.1f;
+	ssaoParams.PowerExponent = 2.0f;
+	ssaoParams.Blur.Enable = true;
+	ssaoParams.Blur.Radius = GFSDK_SSAO_BLUR_RADIUS_8;
+	ssaoParams.Blur.Sharpness = 4.0f;
+	ssaoParams.Output.BlendMode = GFSDK_SSAO_OVERWRITE_RGB;
+
+	GFSDK_SSAO_Status status = ssaoContext->RenderAO(deviceContext, &ssaoInput, &ssaoParams, ssaoBuffer);
+}
+
 void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables)
 {
+	if (light->type == LightType::AMBIENT)
+		return;
+
+
 	Shadow* shadow = light->shadow;
 
 	if (shadow)

@@ -47,7 +47,12 @@ namespace ScratchEngine
 		private:
 			LightType type;
 			ID3D11DepthStencilView* depthStencilViews[6];
-			XMMATRIX viewProjection;
+			ID3D11RenderTargetView* renderTargetViews[6];
+			union
+			{
+				XMMATRIX viewProjection;
+				XMMATRIX projection;
+			};
 
 
 		public:

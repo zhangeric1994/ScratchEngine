@@ -1,3 +1,5 @@
+#ifndef DXCORE_H
+#define DXCORE_H
 #pragma once
 
 #include <Windows.h>
@@ -12,6 +14,7 @@
 
 using namespace ScratchEngine::Multithreading;
 
+
 namespace ScratchEngine
 {
 	class __declspec(dllexport) DXCore
@@ -25,6 +28,8 @@ namespace ScratchEngine
 			bool debugTitleBarStats);	// Show extra stats (fps) in title bar?
 		~DXCore();
 
+		static DXCore* GetSingleton();
+
 		// Static requirements for OS-level message processing
 		static DXCore* DXCoreInstance;
 		static LRESULT CALLBACK WindowProc(
@@ -33,6 +38,10 @@ namespace ScratchEngine
 			WPARAM wParam,	// Message's first parameter
 			LPARAM lParam	// Message's second parameter
 		);
+
+
+		int GetWindowWidth() const { return this->width; };
+		int GetWindowHeight() const { return this->height; };
 
 		// Internal method for message handling
 		LRESULT ProcessMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -77,6 +86,7 @@ namespace ScratchEngine
 
 		ID3D11RenderTargetView* backBufferRTV;
 		ID3D11DepthStencilView* depthStencilView;
+		ID3D11ShaderResourceView* depthSRV;
 
 		// Helper function for allocating a console window
 		void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns);
@@ -96,5 +106,5 @@ namespace ScratchEngine
 		void UpdateTimer();			// Updates the timer for this frame
 		void UpdateTitleBarStats();	// Puts debug info in the title bar
 	};
-
 }
+#endif

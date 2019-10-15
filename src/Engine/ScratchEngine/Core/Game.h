@@ -25,6 +25,9 @@ using namespace ScratchEngine::Multithreading;
 
 namespace ScratchEngine
 {
+	class Scene;
+
+
 	class __declspec(dllexport) Game final : public DXCore
 	{
 	public:
@@ -72,6 +75,9 @@ namespace ScratchEngine
 		ID3D11RenderTargetView* GBufferMaterialRTV;
 		ID3D11ShaderResourceView* DeferredLightBufferSRV;
 		ID3D11RenderTargetView* DeferredLightBufferRTV;
+
+		ID3D11ShaderResourceView* ssaoBufferSRV;
+		ID3D11RenderTargetView* ssaoBufferRTV;
 		
 
 		Material* pbrMaterial;
@@ -141,6 +147,9 @@ namespace ScratchEngine
 		//PBR textures
 		ID3D11ShaderResourceView* roughnessMap;
 		ID3D11ShaderResourceView* metalnessMap;
+
+
+		void __RenderShadows(RenderingEngine* renderingEngine, Scene* scene);
 
 		
 	public:

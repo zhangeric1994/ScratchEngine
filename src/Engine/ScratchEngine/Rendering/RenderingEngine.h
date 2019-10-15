@@ -11,6 +11,7 @@
 
 #include "prerequisites.h"
 
+#include "GFSDK_SSAO.h"
 #include "Material.h"
 #include "Mesh.h"
 
@@ -81,6 +82,8 @@ namespace ScratchEngine
 
 			ID3D11SamplerState* shadowSampler;
 
+			GFSDK_SSAO_Context_D3D11* ssaoContext;
+
 			Mesh* sphereMesh;
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
@@ -102,6 +105,8 @@ namespace ScratchEngine
 			void DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView);
 			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView);
 			void DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView);
+			void RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
+			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);

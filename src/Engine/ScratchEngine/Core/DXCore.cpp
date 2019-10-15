@@ -8,9 +8,15 @@
 
 using namespace std;
 
+
 // Define the static instance variable so our OS-level 
 // message handling function below can talk to our object
 ScratchEngine::DXCore* ScratchEngine::DXCore::DXCoreInstance = 0;
+
+DXCore* ScratchEngine::DXCore::GetSingleton()
+{
+	return DXCoreInstance;
+}
 
 // --------------------------------------------------------
 // The global callback function for handling windows OS-level messages.
@@ -245,26 +251,46 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 	backBufferTexture->Release();
 
 
+	// Create the depth buffer and its view, then 
+	ID3D11Texture2D* depthBufferTexture;
+	
+
+
 	// Set up the description of the texture to use for the depth buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc = {};
 	depthStencilDesc.Width				= width;
 	depthStencilDesc.Height				= height;
 	depthStencilDesc.MipLevels			= 1;
 	depthStencilDesc.ArraySize			= 1;
-	depthStencilDesc.Format				= DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilDesc.Format				= DXGI_FORMAT_R24G8_TYPELESS;
 	depthStencilDesc.Usage				= D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
+	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
 	depthStencilDesc.SampleDesc.Count	= 1;
 	depthStencilDesc.SampleDesc.Quality = 0;
-
-	// Create the depth buffer and its view, then 
-	// release our reference to the texture
-	ID3D11Texture2D* depthBufferTexture;
 	device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-	device->CreateDepthStencilView(depthBufferTexture, 0, &depthStencilView);
+
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC  dsvDesc;
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Flags = 0;
+	dsvDesc.Texture2D.MipSlice = 0;
+	device->CreateDepthStencilView(depthBufferTexture, &dsvDesc, &depthStencilView);
+
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(depthBufferTexture, &srvDesc, &depthSRV);
+
+
+	// release our reference to the texture
 	depthBufferTexture->Release();
+
 
 	// Bind the views to the pipeline, so rendering properly 
 	// uses their underlying textures

@@ -7,6 +7,7 @@
 #include "../Rendering/LightSource.h"
 #include "../Rendering/Texture.h"
 
+#include "DXCore.h"
 #include "GameComponent.h"
 
 using namespace DirectX;
@@ -182,6 +183,8 @@ namespace ScratchEngine
 
 	inline void AmbientLight::EnableShadowCasting()
 	{
+		if (!shadow)
+			shadow = new Shadow(DXCore::GetSingleton()->GetWindowWidth(), DXCore::GetSingleton()->GetWindowHeight(), LightType::AMBIENT);
 	}
 
 	inline void AmbientLight::DisableShadowCasting()

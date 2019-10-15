@@ -13,7 +13,6 @@ cbuffer FrameData : register(b0)
 {
 	// Runtime options
     int GammaCorrection;
-    int hasSSAO;
 };
 
 // Data that can change per light
@@ -25,7 +24,7 @@ cbuffer LightData : register(b3)
 
 // Textures and such
 Texture2D gBufferAlbedo : register(t0);
-Texture2D gBufferSSAO : register(t1);
+Texture2D ssaoBuffer : register(t1);
 
 
 float4 main(VertexToPixel input) : SV_TARGET
@@ -34,7 +33,13 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 
     float3 albedo = gBufferAlbedo.Load(pixelIndex).rgb;
-    float ssao = lerp(1.0f, gBufferSSAO.Load(pixelIndex).r, hasSSAO);
+
+
+    float3 ssao = ssaoBuffer.Load(pixelIndex).rgb;
+
+    ssao.r = lerp(1.0, ssao.r, saturate(light.hasShadow));
+    ssao.g = lerp(1.0, ssao.g, saturate(light.hasShadow));
+    ssao.b = lerp(1.0, ssao.b, saturate(light.hasShadow));
 
 
     return float4(albedo * light.color.rgb * ssao, 1);

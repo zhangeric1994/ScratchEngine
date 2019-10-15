@@ -55,7 +55,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	// Calc world position using depth and view ray
 	//input.viewRay = normalize(input.viewRay);
-	//float3 worldPos = cameraPosition + input.viewRay * depth;
+	//float3 worldPosition = cameraPosition + input.viewRay * depth;
 
 
 	// Handle lighting calculation (using regular albedo here due to energy conservation calculation inside PointLightPBR(),

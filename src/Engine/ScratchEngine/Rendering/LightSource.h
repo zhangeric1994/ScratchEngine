@@ -36,7 +36,12 @@ namespace ScratchEngine
 			f32 intensity;
 			f32 fallOff;
 			Shadow* shadow;
-			XMMATRIX shadowViewProjection;
+
+			union
+			{
+				XMMATRIX shadowViewProjection;
+				XMMATRIX shadowProjection;
+			};
 		};
 	}
 }
