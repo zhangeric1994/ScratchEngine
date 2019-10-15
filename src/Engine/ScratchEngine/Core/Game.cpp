@@ -38,9 +38,14 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 
 
 			case LightType::AMBIENT:
-				lightSource.shadowProjection = scene->viewerAllocator[0].projectionMatrix;
-				
-				renderingEngine->RenderSSAO(&lightSource, depthSRV, GBufferNormalsSRV);
+				if (renderingMode == 9)
+					lightSource.shadow = nullptr;
+				else
+				{
+					lightSource.shadowProjection = scene->viewerAllocator[0].projectionMatrix;
+
+					renderingEngine->RenderSSAO(&lightSource, depthSRV, GBufferNormalsSRV);
+				}
 
 				break;
 			}
@@ -646,6 +651,12 @@ void ScratchEngine::Game::Update()
 			directionalLight->SetActive(true);
 			ambientLight->SetActive(true);
 		}
+		else if (Input::IsKeyPressed('9'))
+		{
+			renderingMode = 9;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 
 
 		if (Input::IsKeyPressed('V'))
@@ -976,6 +987,28 @@ void ScratchEngine::Game::Draw()
 
 
 				renderingEngine->RenderSSAO(backBufferRTV, &scene->viewerAllocator[0].projectionMatrix, depthSRV, GBufferNormalsSRV);
+			}
+			break;
+
+
+		case 9:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+
+
+				__RenderShadows(renderingEngine, scene);
+
+
+				context->RSSetViewports(1, &viewport);
+				context->RSSetState(0);
+
+
+				ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
+				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
+
+
+				renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
 			}
 			break;
 		}
