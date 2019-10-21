@@ -46,6 +46,8 @@ namespace ScratchEngine
 
 		private:
 			LightType type;
+			i32 numCascades;
+
 			ID3D11DepthStencilView* depthStencilViews[6];
 			ID3D11RenderTargetView* renderTargetViews[6];
 			union
@@ -58,6 +60,8 @@ namespace ScratchEngine
 			Shadow(u32 size, LightType type, int numCascades = 1);
 			Shadow(u32 width, u32 height, LightType type, int numCascades = 1);
 			~Shadow();
+
+			i32 GetNumCascades() const;
 		};
 	}
 }
@@ -74,4 +78,8 @@ inline u32 ScratchEngine::Rendering::Texture::GetHeight() const
 }
 
 
+inline i32 ScratchEngine::Rendering::Shadow::GetNumCascades() const
+{
+	return this->numCascades;
+}
 #endif // !TEXTURE_H

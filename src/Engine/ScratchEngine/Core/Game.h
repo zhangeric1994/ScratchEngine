@@ -149,7 +149,7 @@ namespace ScratchEngine
 		ID3D11ShaderResourceView* metalnessMap;
 
 
-		void __RenderShadows(RenderingEngine* renderingEngine, Scene* scene, Viewer* viewer);
+		void __RenderShadows(RenderingEngine* renderingEngine, Scene* scene, Viewer* viewer, D3D11_VIEWPORT* viewport);
 
 		
 	public:

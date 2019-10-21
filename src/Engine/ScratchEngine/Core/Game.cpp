@@ -18,7 +18,7 @@ using namespace ScratchEngine::Physics;
 using namespace ScratchEngine::Rendering;
 
 
-__forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderingEngine, Scene* scene, Viewer* viewer)
+__forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderingEngine, Scene* scene, Viewer* viewer, D3D11_VIEWPORT* viewport)
 {
 	for (int i = 0; i < scene->lightSourceAllocator.GetNumAllocated(); ++i)
 	{
@@ -36,12 +36,15 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 					lightSource.shadowViewProjection = XMMatrixMultiply(shadowProjection, shadowView);
 
 					CSMConfig config = {};
+					config.light = &lightSource;
 					config.viewer = viewer;
-					config.numCascades = 1;
+					config.viewport = viewport;
+					config.depthStencilView = depthStencilView;
+					config.numCascades = lightSource.shadow->GetNumCascades();
 					config.selectionFactor = 0;
 
 					//renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
-					renderingEngine->RenderCSM(&lightSource, config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+					renderingEngine->RenderCSM(config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 				}
 
 				break;
@@ -409,9 +412,9 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cameraHolder = new GameObject();
 
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetLocalRotation(45, 0, 0);
+	directionalLightObject->SetLocalRotation(80, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>(XMVectorSet(0.5f, 0.5f, 0.3f, 1.0f), 10.0f);
-	directionalLight->EnableShadowCasting();
+	directionalLight->EnableShadowCasting(6);
 
 	GameObject* pointLightObject = new GameObject();
 	pointLightObject->SetLocalPosition(3, 2, 10);
@@ -944,7 +947,7 @@ void ScratchEngine::Game::Draw()
 				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
 
 
-				__RenderShadows(renderingEngine, scene, &(scene->viewerAllocator[0]));
+				__RenderShadows(renderingEngine, scene, &(scene->viewerAllocator[0]), &viewport);
 
 
 				context->RSSetViewports(1, &viewport);
@@ -1009,7 +1012,7 @@ void ScratchEngine::Game::Draw()
 				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
 
 
-				__RenderShadows(renderingEngine, scene, &(scene->viewerAllocator[0]));
+				__RenderShadows(renderingEngine, scene, &(scene->viewerAllocator[0]), &viewport);
 
 
 				context->RSSetViewports(1, &viewport);

@@ -1,9 +1,7 @@
 #pragma once
 
-// SimpleShader.h
-class SimpleVertexShader;
-class SimplePixelShader;
-class SimpleComputeShader;
+#include "SimpleShader.h"
+
 
 namespace ScratchEngine
 {
@@ -45,7 +43,10 @@ namespace ScratchEngine
 
 		struct CSMConfig
 		{
+			LightSource* light;
 			Viewer* viewer;
+			D3D11_VIEWPORT* viewport;
+			ID3D11DepthStencilView* depthStencilView;
 			float nearZ;
 			float farZ;
 			float fov;

@@ -64,6 +64,9 @@
     <FxCompile Include="Rendering\Shaders\PS_AmbientLight.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VS_PositionOnly.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\DynamicPoolAllocator.hpp">

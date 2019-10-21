@@ -50,8 +50,10 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 size, LightType type, int numCascad
 
 ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type, int numCascades)
 {
+	this->type = type;
 	this->width = width;
 	this->height = height;
+	this->numCascades = numCascades;
 
 
 	for (int i = 0; i < 6; ++i)
@@ -98,14 +100,13 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type, 
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
 			device->CreateTexture2D(&textureDesc, nullptr, &texture);
 			
-
+			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+			dsvDesc.Texture2DArray.MipSlice = 0;
+			dsvDesc.Texture2DArray.ArraySize = 1;
 			for (int i = 0; i < numCascades; ++i)
 			{
-				dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-				dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-				dsvDesc.Texture2DArray.ArraySize = 1;
 				dsvDesc.Texture2DArray.FirstArraySlice = i;
-				dsvDesc.Texture2DArray.MipSlice = 0;
 				device->CreateDepthStencilView(texture, &dsvDesc, &depthStencilViews[i]);
 			}
 			

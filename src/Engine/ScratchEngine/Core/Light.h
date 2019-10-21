@@ -59,6 +59,8 @@ namespace ScratchEngine
 
 
 		void EnableShadowCasting();
+		void EnableShadowCasting(int numCascade);
+
 		void DisableShadowCasting();
 	};
 
@@ -138,10 +140,15 @@ namespace ScratchEngine
 	}
 
 
-	inline void DirectionalLight::EnableShadowCasting()
+	inline void DirectionalLight::EnableShadowCasting(int numCascade)
 	{
 		if (!shadow)
-			shadow = new Shadow(2048, LightType::DIRECTIONAL);
+			shadow = new Shadow(2048, LightType::DIRECTIONAL, numCascade);
+	}
+
+	inline void DirectionalLight::EnableShadowCasting()
+	{
+		EnableShadowCasting(1);
 	}
 
 	inline void DirectionalLight::DisableShadowCasting()

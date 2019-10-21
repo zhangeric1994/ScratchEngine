@@ -60,6 +60,7 @@ namespace ScratchEngine
 			ID3D11DeviceContext* deviceContext;
 
 			SimpleVertexShader* vsDepthOnly;
+			SimpleVertexShader* vsPositionOnly;
 			SimpleVertexShader* vsDirectionalLight;
 			SimpleVertexShader* vsPointLight;
 			SimpleVertexShader* vsPointLightShadow;
@@ -74,6 +75,7 @@ namespace ScratchEngine
 			ID3D11DepthStencilState* dssLessEqual;
 			ID3D11DepthStencilState* dsReadGreater;
 			ID3D11DepthStencilState* dsOff;
+			ID3D11DepthStencilState* dssCSM;
 			
 			ID3D11BlendState* bsAdditive;
 
@@ -85,6 +87,7 @@ namespace ScratchEngine
 			GFSDK_SSAO_Context_D3D11* ssaoContext;
 
 			Mesh* sphereMesh;
+			Mesh* cubeMesh;
 
 			PoolAllocator<sizeof(Material)> materialAllocator;
 			PoolAllocator<sizeof(Mesh)> meshAllocator;
@@ -108,7 +111,7 @@ namespace ScratchEngine
 			void RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables);
-			void RenderCSM(LightSource* light, const CSMConfig& config, Renderable* renderables, int numRenderables);
+			void RenderCSM(const CSMConfig& config, Renderable* renderables, int numRenderables);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
 		};
@@ -129,6 +132,7 @@ namespace ScratchEngine
 
 
 			singleton->sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
+			singleton->cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
 		}
 
 		inline void RenderingEngine::Initialize(RenderingEngineConfig config)

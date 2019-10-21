@@ -32,7 +32,7 @@ Texture2D gBufferAlbedo : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gBufferDepth : register(t2);
 Texture2D gBufferMaterial : register(t3);
-Texture2D shadowMap : register(t10);
+Texture2DArray shadowMap : register(t10);
 
 
 SamplerComparisonState shadowSampler : register(s10);
@@ -70,9 +70,9 @@ float4 main(VertexToPixel input) : SV_TARGET
     float2 shadowUV = shadowPosition.xy / shadowPosition.w * 0.5f + 0.5f;
     shadowUV.y = 1.0f - shadowUV.y;
     float depthFromLight = shadowPosition.z / shadowPosition.w;
-    float shadowAmount = shadowMap.SampleCmpLevelZero(shadowSampler, shadowUV, depthFromLight);
-    shadowAmount = lerp(1.0f, shadowAmount, saturate(light.hasShadow));
+    float lightAmount = shadowMap.SampleCmpLevelZero(shadowSampler, float3(shadowUV, 0), depthFromLight).r;
+    lightAmount = lerp(1.0f, lightAmount, saturate(light.hasShadow));
 
 
-    return float4(color * shadowAmount, 1);
+    return float4(color * lightAmount, 1);
 }
