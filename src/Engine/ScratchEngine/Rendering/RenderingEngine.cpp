@@ -1,3 +1,5 @@
+#include <limits>
+
 #include "CubeMap.h"
 #include "LightSource.h"
 #include "Renderable.h"
@@ -6,6 +8,8 @@
 #include "SimpleShader.h"
 #include "Texture.h"
 #include "Viewer.h"
+
+using namespace std;
 
 
 constexpr XMVECTOR axes[6] = { {  1,  0,  0 },
@@ -824,6 +828,175 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* lig
 
 			break;
 		}
+	}
+}
+
+void ScratchEngine::Rendering::RenderingEngine::RenderCSM(LightSource* light, const CSMConfig& config, Renderable* renderables, int numRenderables)
+{
+	Shadow* shadow = light->shadow;
+
+	int N = config.numCascades;
+	//float nz = config.nearZ;
+	//float fz = config.farZ;
+	float t = config.selectionFactor;
+
+	//float dz = fz - nz;
+	//
+
+	//float hfov = config.fov / 2
+	//float tanx = 
+
+	//float zn = nz;
+	//float dzu = dz / N;
+	//float dzl = dz / (pow(2, N) - 1);
+
+	//for (int i = 0; i < N; ++i)
+	//{
+	//	float zf = i == N - 1 ? fz : (nz + (dzu + (dzu - dzl) * t));
+
+	//	float xn = zn * tanx;
+	//	float xf;
+	//	float yn;
+	//	float yf;
+
+
+	//	zn = zf;
+	//	dzl *= 2;
+	//}
+
+	//Z.push_back(fz);
+
+
+	//for (int i = 0; i < N; ++i)
+
+
+	XMMATRIX viewMatrix = XMMatrixTranspose(config.viewer->viewMatrix);
+	XMMATRIX projectionMatrix = XMMatrixTranspose(config.viewer->projectionMatrix);
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(viewMatrix, projectionMatrix);
+	XMMATRIX inverseViewProjectionMatrix = XMMatrixInverse(nullptr, viewProjectionMatrix);
+
+	XMMATRIX lightViewMatrix = XMMatrixLookToLH(XMVectorZero(), XMLoadFloat3(&light->direction), XMVectorSet(0, 1, 0, 0));
+
+
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = shadow->width;
+	viewport.Height = shadow->height;
+	viewport.MinDepth = 0.f;
+	viewport.MaxDepth = 1.f;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+
+	vsDepthOnly->SetShader();
+
+
+	float r = 1 / (pow(2, N) - 1);
+	float zn = 0;
+
+	for (int i = 0; i < N; ++i)
+	{
+		float zf = i == N - 1 ? 1 : (i / N + (1 / N - r) * t);
+
+
+		XMVECTOR min = { numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max() };
+		XMVECTOR max = { numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min() };
+		XMVECTOR V;
+
+		
+		V = XMVector3TransformCoord(XMVector3TransformCoord({ -1, -1, zn, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({  1, -1, zn, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({ -1,  1, zn, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({  1,  1, zn, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({ -1, -1, zf, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({  1, -1, zf, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({ -1,  1, zf, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+
+		V = XMVector3TransformCoord(XMVector3TransformCoord({  1,  1, zf, 1 }, inverseViewProjectionMatrix), lightViewMatrix);
+
+		min = XMVectorMin(min, V);
+		max = XMVectorMax(max, V);
+		
+
+		XMVECTOR D = XMVectorSubtract(max, min);
+
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(XMVectorScale(XMVectorAdd(min, max), -0.5f)) * XMMatrixOrthographicLH(D.m128_f32[0], D.m128_f32[1], -100, D.m128_f32[2] / 2.0f));
+
+		light->shadowViewProjection = shadowViewProjectionMatrix;
+
+
+		deviceContext->ClearDepthStencilView(shadow->depthStencilViews[0], D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+		deviceContext->RSSetState(rsShadow);
+		deviceContext->RSSetViewports(1, &viewport);
+		deviceContext->PSSetShader(nullptr, nullptr, 0);
+		deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[i]);
+
+
+		vsDepthOnly->SetMatrix4x4("viewProjection", shadowViewProjectionMatrix);
+
+		vsDepthOnly->CopyBufferData("CameraData");
+
+		
+		for (int j = 0; j < numRenderables; ++j)
+		{
+			Renderable& renderable = renderables[j];
+
+
+			vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
+			vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
+
+			vsDepthOnly->CopyBufferData("ObjectData");
+
+
+			Mesh* mesh = renderable.mesh;
+
+			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+
+			UINT stride = sizeof(Vertex);
+			UINT offset = 0;
+			UINT indexCount = 0;
+
+			deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+			deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+
+			indexCount += mesh->GetIndexCount();
+		}
+
+
+		r *= 2;
+		zn = zf;
 	}
 }
 

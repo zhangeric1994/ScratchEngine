@@ -108,6 +108,7 @@ namespace ScratchEngine
 			void RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables);
+			void RenderCSM(LightSource* light, const CSMConfig& config, Renderable* renderables, int numRenderables);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
 		};

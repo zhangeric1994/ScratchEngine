@@ -44,11 +44,11 @@ ScratchEngine::Rendering::Texture::~Texture()
 }
 
 
-ScratchEngine::Rendering::Shadow::Shadow(u32 size, LightType type) : Shadow(size, size, type)
+ScratchEngine::Rendering::Shadow::Shadow(u32 size, LightType type, int numCascades) : Shadow(size, size, type, numCascades)
 {
 }
 
-ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
+ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type, int numCascades)
 {
 	this->width = width;
 	this->height = height;
@@ -87,7 +87,7 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 			
 			textureDesc.Width = width;
 			textureDesc.Height = height;
-			textureDesc.ArraySize = 1;
+			textureDesc.ArraySize = numCascades;
 			textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 			textureDesc.CPUAccessFlags = 0;
 			textureDesc.Format = DXGI_FORMAT_R32_TYPELESS;
@@ -98,15 +98,23 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type)
 			textureDesc.Usage = D3D11_USAGE_DEFAULT;
 			device->CreateTexture2D(&textureDesc, nullptr, &texture);
 			
-			dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
-			dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-			dsvDesc.Texture2D.MipSlice = 0;
-			device->CreateDepthStencilView(texture, &dsvDesc, &depthStencilViews[0]);
+
+			for (int i = 0; i < numCascades; ++i)
+			{
+				dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+				dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+				dsvDesc.Texture2DArray.ArraySize = 1;
+				dsvDesc.Texture2DArray.FirstArraySlice = i;
+				dsvDesc.Texture2DArray.MipSlice = 0;
+				device->CreateDepthStencilView(texture, &dsvDesc, &depthStencilViews[i]);
+			}
 			
-			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 			srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-			srvDesc.Texture2D.MipLevels = 1;
-			srvDesc.Texture2D.MostDetailedMip = 0;
+			srvDesc.Texture2DArray.ArraySize = numCascades;
+			srvDesc.Texture2DArray.FirstArraySlice = 0;
+			srvDesc.Texture2DArray.MipLevels = 1;
+			srvDesc.Texture2DArray.MostDetailedMip = 0;
 			device->CreateShaderResourceView(texture, &srvDesc, &shaderResourceView);
 
 			texture->Release();

@@ -51,13 +51,12 @@ namespace ScratchEngine
 			union
 			{
 				XMMATRIX viewProjection;
-				XMMATRIX projection;
 			};
 
 
 		public:
-			Shadow(u32 size, LightType type);
-			Shadow(u32 width, u32 height, LightType type);
+			Shadow(u32 size, LightType type, int numCascades = 1);
+			Shadow(u32 width, u32 height, LightType type, int numCascades = 1);
 			~Shadow();
 		};
 	}

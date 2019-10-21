@@ -41,5 +41,17 @@ namespace ScratchEngine
 
 		// Viewer.h
 		struct Viewer;
+
+
+		struct CSMConfig
+		{
+			Viewer* viewer;
+			float nearZ;
+			float farZ;
+			float fov;
+			float aspectRatio;
+			int numCascades;
+			float selectionFactor;
+		};
 	}
 }

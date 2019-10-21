@@ -23,6 +23,7 @@ namespace ScratchEngine
 		f32 nearZ;
 		f32 farZ;
 		i32 viewer;
+
 		Camera* next;
 		Camera* previous;
 
