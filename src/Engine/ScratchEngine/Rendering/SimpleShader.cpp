@@ -7,7 +7,7 @@
 // --------------------------------------------------------
 // Constructor accepts DirectX device & context
 // --------------------------------------------------------
-ISimpleShader::ISimpleShader(ID3D11Device* device, ID3D11DeviceContext* context)
+ISimpleShader::ISimpleShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 {
 	// Save the device
 	this->device = device;
@@ -604,7 +604,7 @@ const SimpleConstantBuffer * ISimpleShader::GetBufferInfo(unsigned int index)
 // --------------------------------------------------------
 // Constructor just calls the base
 // --------------------------------------------------------
-SimpleVertexShader::SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext* context)
+SimpleVertexShader::SimpleVertexShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 	: ISimpleShader(device, context) 
 { 
 	// Ensure we set to zero to successfully trigger
@@ -620,7 +620,7 @@ SimpleVertexShader::SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext
 // Passing in a valid input layout will stop LoadShader()
 // from creating an input layout from shader reflection
 // --------------------------------------------------------
-SimpleVertexShader::SimpleVertexShader(ID3D11Device * device, ID3D11DeviceContext * context, ID3D11InputLayout * inputLayout, bool perInstanceCompatible)
+SimpleVertexShader::SimpleVertexShader(ID3D11Device2* device, ID3D11DeviceContext2* context, ID3D11InputLayout * inputLayout, bool perInstanceCompatible)
 	: ISimpleShader(device, context)
 {
 	// Save the custom input layout
@@ -852,7 +852,7 @@ bool SimpleVertexShader::SetSamplerState(std::string name, ID3D11SamplerState* s
 // --------------------------------------------------------
 // Constructor just calls the base
 // --------------------------------------------------------
-SimplePixelShader::SimplePixelShader(ID3D11Device* device, ID3D11DeviceContext* context)
+SimplePixelShader::SimplePixelShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 	: ISimpleShader(device, context) 
 { 
 	this->shader = 0;
@@ -980,7 +980,7 @@ bool SimplePixelShader::SetSamplerState(std::string name, ID3D11SamplerState* sa
 // --------------------------------------------------------
 // Constructor just calls the base
 // --------------------------------------------------------
-SimpleDomainShader::SimpleDomainShader(ID3D11Device* device, ID3D11DeviceContext* context)
+SimpleDomainShader::SimpleDomainShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 	: ISimpleShader(device, context) 
 { 
 	this->shader = 0;
@@ -1107,7 +1107,7 @@ bool SimpleDomainShader::SetSamplerState(std::string name, ID3D11SamplerState* s
 // --------------------------------------------------------
 // Constructor just calls the base
 // --------------------------------------------------------
-SimpleHullShader::SimpleHullShader(ID3D11Device* device, ID3D11DeviceContext* context)
+SimpleHullShader::SimpleHullShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 	: ISimpleShader(device, context) 
 { 
 	this->shader = 0;
@@ -1235,7 +1235,7 @@ bool SimpleHullShader::SetSamplerState(std::string name, ID3D11SamplerState* sam
 // --------------------------------------------------------
 // Constructor calls the base and sets up potential stream-out options
 // --------------------------------------------------------
-SimpleGeometryShader::SimpleGeometryShader(ID3D11Device* device, ID3D11DeviceContext* context, bool useStreamOut, bool allowStreamOutRasterization)
+SimpleGeometryShader::SimpleGeometryShader(ID3D11Device2* device, ID3D11DeviceContext2* context, bool useStreamOut, bool allowStreamOutRasterization)
 	: ISimpleShader(device, context) 
 { 
 	this->shader = 0;
@@ -1396,7 +1396,7 @@ bool SimpleGeometryShader::CreateCompatibleStreamOutBuffer(ID3D11Buffer** buffer
 // --------------------------------------------------------
 // Helper method to unbind all stream out buffers from the SO stage
 // --------------------------------------------------------
-void SimpleGeometryShader::UnbindStreamOutStage(ID3D11DeviceContext* deviceContext)
+void SimpleGeometryShader::UnbindStreamOutStage(ID3D11DeviceContext2* deviceContext)
 {
 	unsigned int offset = 0;
 	ID3D11Buffer* unset[1] = { 0 };
@@ -1500,7 +1500,7 @@ unsigned int SimpleGeometryShader::CalcComponentCount(unsigned int mask)
 // --------------------------------------------------------
 // Constructor just calls the base
 // --------------------------------------------------------
-SimpleComputeShader::SimpleComputeShader(ID3D11Device* device, ID3D11DeviceContext* context)
+SimpleComputeShader::SimpleComputeShader(ID3D11Device2* device, ID3D11DeviceContext2* context)
 	: ISimpleShader(device, context) 
 { 
 	this->shader = 0;

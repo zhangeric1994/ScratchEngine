@@ -65,7 +65,7 @@ ScratchEngine::Rendering::ShadowMap::~ShadowMap() {
 	// if (shadowShader) delete shadowShader;
 }
 
-void ScratchEngine::Rendering::ShadowMap::setUp(ID3D11Device* device) {
+void ScratchEngine::Rendering::ShadowMap::setUp(ID3D11Device2* device) {
 	device->CreateTexture2D(&shadowDesc, 0, &shadowTexture);
 	device->CreateDepthStencilView(shadowTexture, &depthStencilViewDesc, &shadowDepthStencilView);
 	device->CreateShaderResourceView(shadowTexture, &shaderResourceViewDesc, &shadowResourceView);

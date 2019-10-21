@@ -1,6 +1,12 @@
 #pragma once
 
+#include <DirectXMath.h>
+
 #include "SimpleShader.h"
+
+#include "../Common/Typedefs.h"
+
+using namespace DirectX;
 
 
 namespace ScratchEngine
@@ -54,5 +60,8 @@ namespace ScratchEngine
 			int numCascades;
 			float selectionFactor;
 		};
+
+
+#define NUM_BONES_PER_VEREX 4
 	}
 }

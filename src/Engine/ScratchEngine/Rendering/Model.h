@@ -1,22 +1,23 @@
 #pragma once
-#include <d3d11.h>
-#include <fstream> 
-#include <vector>
-#include <map>
+#include <d3d11_2.h>
 #include <DirectXMath.h>
-#include "Mesh.h"
+#include <fstream>
+#include <map>
+#include <vector>
 
-#include "../Common/Typedefs.h"
+#include "Mesh.h"
 #include "Vertex.h"
+
 #include "../Animation/Animator.h"
+#include "../Common/Typedefs.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
 using namespace DirectX;
-using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Animation;
+using namespace ScratchEngine::Rendering;
 using namespace std;
 
 
@@ -29,7 +30,7 @@ namespace ScratchEngine
 			friend class RenderingEngine;
 
 		private:
-			ID3D11Device * device;
+			ID3D11Device2* device;
 
 		public:
 			string name;
@@ -42,8 +43,8 @@ namespace ScratchEngine
 			map<UINT, vector<aiVertexWeight*>*> vertToBoneWeight;
 			//std::vector<Model*> childModels;
 			Mesh* mesh;
-			Model(ID3D11Device* device, map<UINT, vector<aiVertexWeight*>*> vertToBone);
-			Model(ID3D11Device* device, const string& filePath);
+			Model(ID3D11Device2* device, map<UINT, vector<aiVertexWeight*>*> vertToBone);
+			Model(ID3D11Device2* device, const string& filePath);
 			~Model();
 			
 			bool LoadAnimation(const string& filePath);

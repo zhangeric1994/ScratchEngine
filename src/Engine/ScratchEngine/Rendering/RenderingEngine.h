@@ -26,8 +26,8 @@ namespace ScratchEngine
 	{
 		struct RenderingEngineConfig
 		{
-			ID3D11Device* device = nullptr;
-			ID3D11DeviceContext* deviceContext = nullptr;
+			ID3D11Device2* device = nullptr;
+			ID3D11DeviceContext2* deviceContext = nullptr;
 
 			i32 maxNumMaterials = DEFAULT_MAX_NUM_MATERIALS;
 			i32 maxNumMeshes = DEFAULT_MAX_NUM_MESHES;
@@ -50,14 +50,14 @@ namespace ScratchEngine
 		public:
 			static RenderingEngine* GetSingleton();
 
-			static void Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext);
+			static void Initialize(ID3D11Device2* device, ID3D11DeviceContext2* deviceContext);
 			static void Initialize(RenderingEngineConfig config);
 			static void Terminate();
 
 
 		private:
-			ID3D11Device* device;
-			ID3D11DeviceContext* deviceContext;
+			ID3D11Device2* device;
+			ID3D11DeviceContext2* deviceContext;
 
 			SimpleVertexShader* vsDepthOnly;
 			SimpleVertexShader* vsPositionOnly;
@@ -125,7 +125,7 @@ namespace ScratchEngine
 			return singleton;
 		}
 
-		inline void RenderingEngine::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext)
+		inline void RenderingEngine::Initialize(ID3D11Device2* device, ID3D11DeviceContext2* deviceContext)
 		{
 			RenderingEngineConfig config;
 			config.device = device;

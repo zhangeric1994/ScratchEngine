@@ -1,9 +1,11 @@
 #pragma once
 
-#include <d3d11.h>
+#include <d3d11_2.h>
 #include <fstream>
 #include <vector>
 #include <DirectXMath.h>
+
+#include "Vertex.h"
 
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
@@ -11,9 +13,8 @@
 
 #include "../Common/Typedefs.h"
 
-#include "Vertex.h"
-
 using namespace DirectX;
+
 
 namespace ScratchEngine
 {
@@ -31,8 +32,8 @@ namespace ScratchEngine
 			void ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber);
 
 		public:
-			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
-			Mesh(ID3D11Device* device, char* filename);
+			Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device2* device);
+			Mesh(ID3D11Device2* device, char* filename);
 			Mesh(const Mesh & mesh);
 			~Mesh();
 
@@ -43,9 +44,9 @@ namespace ScratchEngine
 			ID3D11Buffer* GetIndexBuffer();
 			int GetIndexCount();
 
-			bool loadFile(ID3D11Device* device, const std::string& filename);
+			bool loadFile(ID3D11Device2* device, const std::string& filename);
 
-			void CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device);
+			void CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device2* device);
 		};
 	}
 }

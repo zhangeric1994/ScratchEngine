@@ -1,23 +1,29 @@
 #pragma once
-#include <d3d11.h>
-#include "SimpleShader.h"
-#include "Mesh.h"
-#include "../Common/Typedefs.h"
+#include <d3d11_2.h>
 #include <DDSTextureLoader.h>
 
-namespace ScratchEngine {
-	namespace Rendering {
-		struct __declspec(dllexport) CubeMap {
+#include "Mesh.h"
+#include "SimpleShader.h"
+
+#include "../Common/Typedefs.h"
+
+
+namespace ScratchEngine
+{
+	namespace Rendering
+	{
+		struct __declspec(dllexport) CubeMap
+		{
 		public:
 			CubeMap();
 			~CubeMap();
 
-			bool setUp(ID3D11Device* device);
+			bool setUp(ID3D11Device2* device);
 			void setSampler(ID3D11SamplerState* _sampler);
 			void setMesh(Mesh* _cubeMesh);
-			void setPS(ID3D11Device* device, ID3D11DeviceContext* context, LPCWSTR path);
-			void setVS(ID3D11Device* device, ID3D11DeviceContext* context, LPCWSTR path);
-			void setSRV(ID3D11Device* device, ID3D11DeviceContext* context, const wchar_t* path);
+			void setPS(ID3D11Device2* device, ID3D11DeviceContext2* context, LPCWSTR path);
+			void setVS(ID3D11Device2* device, ID3D11DeviceContext2* context, LPCWSTR path);
+			void setSRV(ID3D11Device2* device, ID3D11DeviceContext2* context, const wchar_t* path);
 
 			ID3D11SamplerState*			getSampler();
 			SimpleVertexShader*			getVS();

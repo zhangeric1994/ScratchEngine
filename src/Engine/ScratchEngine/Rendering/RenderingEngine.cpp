@@ -211,6 +211,9 @@ ScratchEngine::Rendering::RenderingEngine::~RenderingEngine()
 
 void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables)
 {
+	deviceContext->BeginEventInt(L"Z-Prepass", 0);
+
+
 	deviceContext->OMSetDepthStencilState(nullptr, 0);
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
@@ -253,6 +256,9 @@ void ScratchEngine::Rendering::RenderingEngine::PerformZPrepass(Viewer* viewer, 
 
 
 	hasZPrepass = true;
+
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources)
@@ -362,6 +368,9 @@ void ScratchEngine::Rendering::RenderingEngine::DrawForward(Viewer* viewer, Rend
 
 void ScratchEngine::Rendering::RenderingEngine::DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView)
 {
+	deviceContext->BeginEventInt(L"Geometry Buffer", 0);
+
+
 	deviceContext->OMSetRenderTargets(numGBuffers, gBuffers, depthStencilView);
 
 
@@ -460,10 +469,16 @@ void ScratchEngine::Rendering::RenderingEngine::DrawGBuffers(Viewer* viewer, Ren
 			++i;
 		} while (i < numRenderables && renderables[i].material == material);
 	}
+
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV)
 {
+	deviceContext->BeginEventInt(L"Light Buffer", 0);
+
+
 	XMMATRIX viewMatrix = viewer->viewMatrix;
 	XMMATRIX projectionMatrix = viewer->projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
@@ -649,10 +664,16 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 			break;
 		}
 	}
+
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView)
 {
+	deviceContext->BeginEventInt(L"Deferred", 0);
+
+
 	// Reset for final combine rendering
 	deviceContext->OMSetDepthStencilState(dsOff, 0);
 	deviceContext->OMSetRenderTargets(1, &backBuffer, depthStencilView);
@@ -675,6 +696,9 @@ void ScratchEngine::Rendering::RenderingEngine::DrawDeferred(ID3D11ShaderResourc
 	
 
 	deviceContext->Draw(3, 0);
+
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer)
@@ -901,7 +925,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 	XMMATRIX inverseViewProjectionMatrix = XMMatrixInverse(nullptr, viewProjectionMatrix);
 
 	XMVECTOR lightDirection = XMLoadFloat3(&light->direction);
-	XMMATRIX lightViewMatrix = XMMatrixLookToLH(XMVectorZero(), lightDirection, { 0, 1, 0, 0 });
+	XMMATRIX lightViewMatrix = XMMatrixLookToLH(XMVectorZero(), lightDirection, { 0, 1, 0 });
 	XMMATRIX lightInverseViewMatrix = XMMatrixInverse(nullptr, lightViewMatrix);
 
 
@@ -941,6 +965,9 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 	XMVECTOR rightUpFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
 
 
+	deviceContext->BeginEventInt(L"CSM", 0);
+
+
 	deviceContext->PSSetShader(nullptr, nullptr, 0);
 
 
@@ -954,6 +981,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 	for (int i = N - 1; i >= 0; --i)
 	{
+		deviceContext->BeginEventInt(L"Cascade#d", i);
+
 		XMVECTOR min = { numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max() };
 		XMVECTOR max = { numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min() };
 
@@ -1048,18 +1077,21 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		}
 
 
+		deviceContext->SetMarkerInt(L"Shadow Volume", 0);
+
+
 		deviceContext->RSSetState(nullptr);
 		deviceContext->RSSetViewports(1, config.viewport);
 		deviceContext->OMSetRenderTargets(0, nullptr, config.depthStencilView);
 		deviceContext->OMSetDepthStencilState(dssCSM, i);
 
-
-		XMMATRIX RT = XMMatrixLookToLH(center, lightDirection, { 0, 1, 0, 0 });
+		XMMATRIX T = XMMatrixTranslationFromVector(center);
+		XMMATRIX R = XMMatrixLookAtLH(XMVectorZero(), lightDirection, { 0, 1, 0 });
 		XMMATRIX S = XMMatrixScaling(D.m128_f32[0], D.m128_f32[1], 2 * extraDepth + D.m128_f32[2]);
 
 		vsPositionOnly->SetMatrix4x4("view", viewMatrix);
 		vsPositionOnly->SetMatrix4x4("projection", projectionMatrix);
-		vsPositionOnly->SetMatrix4x4("world", XMMatrixTranspose(S * RT));
+		vsPositionOnly->SetMatrix4x4("world", XMMatrixTranspose(S * R * T));
 		vsPositionOnly->CopyAllBufferData();
 
 		vsPositionOnly->SetShader();
@@ -1081,7 +1113,12 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 
 		indexCount += cubeMesh->GetIndexCount();
+
+
+		deviceContext->EndEvent();
 	}
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow)
@@ -1091,6 +1128,9 @@ void ScratchEngine::Rendering::RenderingEngine::SetShadowMap(ShadowMap * _shadow
 
 void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap, Viewer* viewer)
 {
+	deviceContext->BeginEventInt(L"CubeMap", 1);
+
+
 	ID3D11Buffer* cubeVB = cubeMap->getVB();
 	ID3D11Buffer* cubeIB = cubeMap->getIB();
 
@@ -1119,16 +1159,20 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap, 
 	deviceContext->OMSetDepthStencilState(cubeMap->getDSS(), 0);
 
 	deviceContext->DrawIndexed(cubeMap->getIndexCount(), 0, 0);
+
+
+	deviceContext->EndEvent();
 }
 
 void ScratchEngine::Rendering::RenderingEngine::DrawShadowVolume(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV)
 {
+	XMVECTOR cameraPosition = viewer->position;
 	XMMATRIX viewMatrix = viewer->viewMatrix;
 	XMMATRIX projectionMatrix = viewer->projectionMatrix;
 	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(projectionMatrix, viewMatrix);
-	XMMATRIX inverseViewProjectionMatrix = XMMatrixTranspose(XMMatrixInverse(0, viewProjectionMatrix));
-	XMVECTOR cameraPosition = viewer->position;
 
+	XMMATRIX inverseViewProjectionMatrix = XMMatrixInverse(0, XMMatrixTranspose(viewProjectionMatrix));
+	
 
 	vsDirectionalLight->SetMatrix4x4("view", viewMatrix);
 	vsDirectionalLight->SetMatrix4x4("projection", projectionMatrix);

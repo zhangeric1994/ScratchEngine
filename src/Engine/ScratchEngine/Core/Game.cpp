@@ -41,7 +41,7 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 					config.viewport = viewport;
 					config.depthStencilView = depthStencilView;
 					config.numCascades = lightSource.shadow->GetNumCascades();
-					config.selectionFactor = 1;
+					config.selectionFactor = 0;
 
 					//renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 					renderingEngine->RenderCSM(config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
@@ -71,7 +71,7 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 }
 
 
-void CreateSRVAndRTV(ID3D11Device* device, ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM)
+void CreateSRVAndRTV(ID3D11Device2* device, ID3D11ShaderResourceView** srv, ID3D11RenderTargetView** rtv, DXGI_FORMAT format = DXGI_FORMAT_R8G8B8A8_UNORM)
 {
 	// Set up the texture itself
 	D3D11_TEXTURE2D_DESC texDesc = {};

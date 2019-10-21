@@ -14,8 +14,8 @@ ScratchEngine::Rendering::Texture::Texture()
 ScratchEngine::Rendering::Texture::Texture(wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, f32 _maxLOD)
 {
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
-	ID3D11Device* device = renderingEngine->device;
-	ID3D11DeviceContext* deviceContext = renderingEngine->deviceContext;
+	ID3D11Device2* device = renderingEngine->device;
+	ID3D11DeviceContext2* deviceContext = renderingEngine->deviceContext;
 
 
 	ID3D11Resource* texture = nullptr;
@@ -63,7 +63,7 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type, 
 	}
 
 
-	ID3D11Device* device = RenderingEngine::GetSingleton()->device;
+	ID3D11Device2* device = RenderingEngine::GetSingleton()->device;
 
 
 	D3D11_SAMPLER_DESC samplerDesc = {};

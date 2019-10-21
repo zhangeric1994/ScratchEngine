@@ -1,10 +1,6 @@
 #pragma once
 
-#include <DirectXMath.h>
-
-#define NUM_BONES_PER_VEREX 4
-
-using namespace DirectX;
+#include "prerequisites.h"
 
 
 // --------------------------------------------------------

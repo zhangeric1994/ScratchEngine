@@ -2,15 +2,15 @@
 #define DXCORE_H
 #pragma once
 
-#include <Windows.h>
-#include <d3d11.h>
-#include <string>
-
-#include "../Multithreading/Barrier.h"
-
 // We can include the correct library files here
 // instead of in Visual Studio settings if we want
 #pragma comment(lib, "d3d11.lib")
+
+#include <d3d11_2.h>
+#include <string>
+#include <Windows.h>
+
+#include "../Multithreading/Barrier.h"
 
 using namespace ScratchEngine::Multithreading;
 
@@ -81,8 +81,8 @@ namespace ScratchEngine
 		// DirectX related objects and variables
 		D3D_FEATURE_LEVEL		dxFeatureLevel;
 		IDXGISwapChain*			swapChain;
-		ID3D11Device*			device;
-		ID3D11DeviceContext*	context;
+		ID3D11Device2*			device;
+		ID3D11DeviceContext2*	context;
 
 		ID3D11RenderTargetView* backBufferRTV;
 		ID3D11DepthStencilView* depthStencilView;

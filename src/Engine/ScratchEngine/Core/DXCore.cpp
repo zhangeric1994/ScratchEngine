@@ -222,6 +222,10 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 	// Result variable for below function calls
 	HRESULT hr = S_OK;
 
+	ID3D11Device* device0;
+	ID3D11DeviceContext* context0;
+
+
 	// Attempt to initialize DirectX
 	hr = D3D11CreateDeviceAndSwapChain(
 		0,							// Video adapter (physical GPU) to use, or null for default
@@ -233,10 +237,20 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 		D3D11_SDK_VERSION,			// Current version of the SDK
 		&swapDesc,					// Address of swap chain options
 		&swapChain,					// Pointer to our Swap Chain pointer
-		&device,					// Pointer to our Device pointer
+		&device0,					// Pointer to our Device pointer
 		&dxFeatureLevel,			// This will hold the actual feature level the app will use
-		&context);					// Pointer to our Device Context pointer
-	if (FAILED(hr)) return hr;
+		&context0);					// Pointer to our Device Context pointer
+	if (FAILED(hr))
+		return hr;
+
+	hr = device0->QueryInterface<ID3D11Device2>(&device);
+	if (FAILED(hr))
+		return hr;
+
+	hr = context0->QueryInterface<ID3D11DeviceContext2>(&context);
+	if (FAILED(hr))
+		return hr;
+
 
 	// The above function created the back buffer render target
 	// for us, but we need a reference to it

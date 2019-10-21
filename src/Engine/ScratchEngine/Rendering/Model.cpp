@@ -1,12 +1,16 @@
 #include "Model.h"
+
 using namespace ScratchEngine::Rendering;
-ScratchEngine::Rendering::Model::Model(ID3D11Device * device, std::map<UINT, std::vector<aiVertexWeight*> *> vertToBone)
+
+
+ScratchEngine::Rendering::Model::Model(ID3D11Device2* device, std::map<UINT, std::vector<aiVertexWeight*> *> vertToBone)
 {
 	this->device = device;
 	this->vertToBoneWeight = vertToBone;
 	anim = nullptr;
 }
-ScratchEngine::Rendering::Model::Model(ID3D11Device * device, const std::string & filePath)
+
+ScratchEngine::Rendering::Model::Model(ID3D11Device2* device, const std::string & filePath)
 {
 	this->device = device;
 	this->anim = nullptr;

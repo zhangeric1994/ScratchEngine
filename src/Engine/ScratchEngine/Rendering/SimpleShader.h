@@ -2,13 +2,14 @@
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 
-#include <d3d11.h>
+#include <d3d11_2.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
+
 
 // --------------------------------------------------------
 // Used by simple shaders to store information about
@@ -61,7 +62,7 @@ struct SimpleSampler
 class __declspec(dllexport) ISimpleShader
 {
 public:
-	ISimpleShader(ID3D11Device* device, ID3D11DeviceContext* context);
+	ISimpleShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
 	virtual ~ISimpleShader();
 
 	// Initialization method (since we can't invoke derived class
@@ -122,8 +123,8 @@ protected:
 	
 	bool shaderValid;
 	ID3DBlob* shaderBlob;
-	ID3D11Device* device;
-	ID3D11DeviceContext* deviceContext;
+	ID3D11Device2* device;
+	ID3D11DeviceContext2* deviceContext;
 
 	// Resource counts
 	unsigned int constantBufferCount;
@@ -154,8 +155,8 @@ protected:
 class __declspec(dllexport) SimpleVertexShader : public ISimpleShader
 {
 public:
-	SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext* context);
-	SimpleVertexShader(ID3D11Device* device, ID3D11DeviceContext* context, ID3D11InputLayout* inputLayout, bool perInstanceCompatible);
+	SimpleVertexShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
+	SimpleVertexShader(ID3D11Device2* device, ID3D11DeviceContext2* context, ID3D11InputLayout* inputLayout, bool perInstanceCompatible);
 	~SimpleVertexShader();
 	ID3D11VertexShader* GetDirectXShader() { return shader; }
 	ID3D11InputLayout* GetInputLayout() { return inputLayout; }
@@ -180,7 +181,7 @@ protected:
 class __declspec(dllexport) SimplePixelShader : public ISimpleShader
 {
 public:
-	SimplePixelShader(ID3D11Device* device, ID3D11DeviceContext* context);
+	SimplePixelShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
 	~SimplePixelShader();
 	ID3D11PixelShader* GetDirectXShader() { return shader; }
 
@@ -200,7 +201,7 @@ protected:
 class SimpleDomainShader : public ISimpleShader
 {
 public:
-	SimpleDomainShader(ID3D11Device* device, ID3D11DeviceContext* context);
+	SimpleDomainShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
 	~SimpleDomainShader();
 	ID3D11DomainShader* GetDirectXShader() { return shader; }
 
@@ -220,7 +221,7 @@ protected:
 class SimpleHullShader : public ISimpleShader
 {
 public:
-	SimpleHullShader(ID3D11Device* device, ID3D11DeviceContext* context);
+	SimpleHullShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
 	~SimpleHullShader();
 	ID3D11HullShader* GetDirectXShader() { return shader; }
 
@@ -240,7 +241,7 @@ protected:
 class SimpleGeometryShader : public ISimpleShader
 {
 public:
-	SimpleGeometryShader(ID3D11Device* device, ID3D11DeviceContext* context, bool useStreamOut = 0, bool allowStreamOutRasterization = 0);
+	SimpleGeometryShader(ID3D11Device2* device, ID3D11DeviceContext2* context, bool useStreamOut = 0, bool allowStreamOutRasterization = 0);
 	~SimpleGeometryShader();
 	ID3D11GeometryShader* GetDirectXShader() { return shader; }
 
@@ -249,7 +250,7 @@ public:
 
 	bool CreateCompatibleStreamOutBuffer(ID3D11Buffer** buffer, int vertexCount);
 
-	static void UnbindStreamOutStage(ID3D11DeviceContext* deviceContext);
+	static void UnbindStreamOutStage(ID3D11DeviceContext2* deviceContext);
 
 protected:
 	// Shader itself
@@ -276,7 +277,7 @@ protected:
 class SimpleComputeShader : public ISimpleShader
 {
 public:
-	SimpleComputeShader(ID3D11Device* device, ID3D11DeviceContext* context);
+	SimpleComputeShader(ID3D11Device2* device, ID3D11DeviceContext2* context);
 	~SimpleComputeShader();
 	ID3D11ComputeShader* GetDirectXShader() { return shader; }
 

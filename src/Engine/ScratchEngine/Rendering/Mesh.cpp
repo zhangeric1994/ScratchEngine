@@ -1,12 +1,12 @@
 #include "Mesh.h"
 #include "RenderingEngine.h"
 
-ScratchEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
+ScratchEngine::Rendering::Mesh::Mesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device2* device)
 {
 	CreateMesh(vertices, verticesNumber, indices, indicesNumber, device);
 }
 
-ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device* device, char* filename)
+ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device2* device, char* filename)
 {
 	// File input object
 	std::ifstream obj(filename);
@@ -219,7 +219,7 @@ int ScratchEngine::Rendering::Mesh::GetIndexCount()
 }
 
 //use assimp lib to load obj & mtl files
-bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device * device, const std::string & filename) {
+bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device2* device, const std::string & filename) {
 	Assimp::Importer import;
 	const aiScene *scene = import.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
 
@@ -253,7 +253,7 @@ bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device * device, const std::
 	return false;
 }
 
-void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device* device)
+void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device2* device)
 {
 	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
 

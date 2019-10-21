@@ -1,14 +1,15 @@
 #pragma once
-#include <d3d11.h>
+#include <d3d11_2.h>
 #include <DirectXMath.h>
 #include <fstream>
 #include <map>
 #include <tuple>
 #include <vector>
 
-#include "Bone.h"
-#include "../Core/GameComponent.h"
 #include "AnimationClip.h"
+#include "Bone.h"
+
+#include "../Core/GameComponent.h"
 
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"

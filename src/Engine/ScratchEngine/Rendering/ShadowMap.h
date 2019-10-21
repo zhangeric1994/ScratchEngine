@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d11.h>
+#include <d3d11_2.h>
 #include "SimpleShader.h"
 
 namespace ScratchEngine {
@@ -10,7 +10,7 @@ namespace ScratchEngine {
 			ShadowMap();
 			~ShadowMap();
 
-			void setUp(ID3D11Device* device);
+			void setUp(ID3D11Device2* device);
 
 			ID3D11DepthStencilView*		getShadowDSV();
 			ID3D11RasterizerState*		getRasterizerState();

@@ -41,7 +41,7 @@ ScratchEngine::Rendering::CubeMap::~CubeMap() {
 	if (cubeSRV) cubeSRV->Release();
 }
 
-bool ScratchEngine::Rendering::CubeMap::setUp(ID3D11Device * device) {
+bool ScratchEngine::Rendering::CubeMap::setUp(ID3D11Device2* device) {
 	bool isOk = false;
 
 	isOk = device->CreateRasterizerState(&cubeRD, &cubeRS);
@@ -50,7 +50,7 @@ bool ScratchEngine::Rendering::CubeMap::setUp(ID3D11Device * device) {
 	return isOk;
 }
 
-void ScratchEngine::Rendering::CubeMap::setSampler(ID3D11SamplerState * _sampler) {
+void ScratchEngine::Rendering::CubeMap::setSampler(ID3D11SamplerState* _sampler) {
 	sampler = _sampler;
 }
 
@@ -60,17 +60,17 @@ void ScratchEngine::Rendering::CubeMap::setMesh(Mesh * _cubeMesh) {
 	indicesNum = _cubeMesh->GetIndexCount();
 }
 
-void ScratchEngine::Rendering::CubeMap::setVS(ID3D11Device * device, ID3D11DeviceContext * context, LPCWSTR path) {
+void ScratchEngine::Rendering::CubeMap::setVS(ID3D11Device2* device, ID3D11DeviceContext2* context, LPCWSTR path) {
 	cubeVS = new SimpleVertexShader(device, context);
 	cubeVS->LoadShaderFile(path);
 }
 
-void ScratchEngine::Rendering::CubeMap::setPS(ID3D11Device * device, ID3D11DeviceContext * context, LPCWSTR path) {
+void ScratchEngine::Rendering::CubeMap::setPS(ID3D11Device2* device, ID3D11DeviceContext2* context, LPCWSTR path) {
 	cubePS = new SimplePixelShader(device, context);
 	cubePS->LoadShaderFile(path);
 }
 
-void ScratchEngine::Rendering::CubeMap::setSRV(ID3D11Device * device, ID3D11DeviceContext * context, const wchar_t* path) {
+void ScratchEngine::Rendering::CubeMap::setSRV(ID3D11Device2* device, ID3D11DeviceContext2* context, const wchar_t* path) {
 	CreateDDSTextureFromFile(device, context, path, 0, &cubeSRV);
 	bool i = true;
 }
