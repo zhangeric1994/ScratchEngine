@@ -41,7 +41,7 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 					config.viewport = viewport;
 					config.depthStencilView = depthStencilView;
 					config.numCascades = lightSource.shadow->GetNumCascades();
-					config.selectionFactor = 0;
+					config.selectionFactor = 1;
 
 					//renderingEngine->RenderShadowMap(&lightSource, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
 					renderingEngine->RenderCSM(config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
@@ -672,6 +672,12 @@ void ScratchEngine::Game::Update()
 			directionalLight->SetActive(true);
 			ambientLight->SetActive(true);
 		}
+		else if (Input::IsKeyPressed('0'))
+		{
+			renderingMode = 0;
+			directionalLight->SetActive(true);
+			ambientLight->SetActive(true);
+		}
 
 
 		if (Input::IsKeyPressed('V'))
@@ -935,6 +941,28 @@ void ScratchEngine::Game::Draw()
 
 		switch (renderingMode)
 		{
+		case 0:
+			{
+				ID3D11RenderTargetView* gBufferRTVs[4] = { GBufferAlbedoRTV, GBufferNormalsRTV, GBufferDepthRTV, GBufferMaterialRTV };
+				renderingEngine->DrawGBuffers(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), gBufferRTVs, 4, depthStencilView);
+
+
+				__RenderShadows(renderingEngine, scene, &(scene->viewerAllocator[0]), &viewport);
+
+
+				context->RSSetViewports(1, &viewport);
+				context->RSSetState(0);
+
+
+				ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
+				renderingEngine->DrawShadowVolume(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView, depthSRV);
+
+
+				renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
+			}
+			break;
+
+
 		case 1:
 			context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
 			renderingEngine->DrawForward(&(scene->viewerAllocator[0]), scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated());
@@ -955,7 +983,7 @@ void ScratchEngine::Game::Draw()
 
 
 				ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
-				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
+				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView, depthSRV);
 
 
 				renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);
@@ -1020,7 +1048,7 @@ void ScratchEngine::Game::Draw()
 
 
 				ID3D11ShaderResourceView* gBufferSRVs[4] = { GBufferAlbedoSRV, GBufferNormalsSRV, GBufferDepthSRV, GBufferMaterialSRV };
-				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView);
+				renderingEngine->DrawLightBuffer(&(scene->viewerAllocator[0]), scene->lightSourceAllocator, scene->lightSourceAllocator.GetNumAllocated(), gBufferSRVs, DeferredLightBufferRTV, depthStencilView, depthSRV);
 
 
 				renderingEngine->DrawDeferred(DeferredLightBufferSRV, backBufferRTV, depthStencilView);

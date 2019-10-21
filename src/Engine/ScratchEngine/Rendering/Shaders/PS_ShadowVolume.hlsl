@@ -41,14 +41,27 @@ SamplerComparisonState shadowSampler : register(s10);
 
 float4 main(VertexToPixel input) : SV_TARGET
 {
+    float3 colors[6] =
+    {
+        float3(1, 0, 0),
+        float3(1, 1, 0),
+        float3(0, 1, 0),
+        float3(0, 1, 1),
+        float3(0, 0, 1),
+        float3(1, 0, 1),
+    };
+
+
     float3 pixelIndex = float3(input.position.xy, 0);
 
+    int csmIndex = depthStencil.Load(pixelIndex).g;
+
 	// Load pixels from G-buffer (faster than sampling)
-    float3 albedo = gBufferAlbedo.Load(pixelIndex).rgb; // Already gamma correct
+    float3 albedo = colors[csmIndex];
     float3 normal = gBufferNormal.Load(pixelIndex).rgb;
     float3 worldPosition = gBufferDepth.Load(pixelIndex).xyz;
     float3 metalRoughSpec = gBufferMaterial.Load(pixelIndex).rgb;
-    int csmIndex = depthStencil.Load(pixelIndex).g;
+    
 	
 
 	// Unpack normal

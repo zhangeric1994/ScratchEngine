@@ -71,6 +71,7 @@ namespace ScratchEngine
 			SimplePixelShader* psPointLightShadow;
 			SimplePixelShader* psAmbientLight;
 			SimplePixelShader* psDeferred;
+			SimplePixelShader* psShadowVolume;
 
 			ID3D11DepthStencilState* dssLessEqual;
 			ID3D11DepthStencilState* dsReadGreater;
@@ -106,7 +107,7 @@ namespace ScratchEngine
 			void PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables);
 			void DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources);
 			void DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView);
-			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView);
+			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV);
 			void DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView);
 			void RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
@@ -114,6 +115,8 @@ namespace ScratchEngine
 			void RenderCSM(const CSMConfig& config, Renderable* renderables, int numRenderables);
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
+
+			void DrawShadowVolume(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV);
 		};
 
 

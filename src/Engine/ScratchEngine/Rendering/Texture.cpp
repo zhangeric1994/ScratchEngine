@@ -81,10 +81,10 @@ ScratchEngine::Rendering::Shadow::Shadow(u32 width, u32 height, LightType type, 
 			samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 			samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 			samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-			samplerDesc.BorderColor[0] = 1.0f;
-			samplerDesc.BorderColor[1] = 1.0f;
-			samplerDesc.BorderColor[2] = 1.0f;
-			samplerDesc.BorderColor[3] = 1.0f;
+			samplerDesc.BorderColor[0] = 10;
+			samplerDesc.BorderColor[1] = 10;
+			samplerDesc.BorderColor[2] = 10;
+			samplerDesc.BorderColor[3] = 10;
 			device->CreateSamplerState(&samplerDesc, &samplerState);
 			
 			textureDesc.Width = width;
