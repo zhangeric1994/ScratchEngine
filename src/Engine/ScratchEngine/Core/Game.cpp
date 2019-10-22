@@ -41,7 +41,7 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 					config.viewport = viewport;
 					config.depthStencilView = depthStencilView;
 					config.numCascades = lightSource.shadow->GetNumCascades();
-					config.selectionFactor = 0.5f;
+					config.selectionFactor = 0.8f;
 					config.powerExponent = 2.0f;
 
 
@@ -413,7 +413,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	cameraHolder = new GameObject();
 
 	GameObject* directionalLightObject = new GameObject();
-	directionalLightObject->SetLocalRotation(80, 0, 0);
+	directionalLightObject->SetLocalRotation(55, 0, 0);
 	directionalLight = directionalLightObject->AddComponent<DirectionalLight>(XMVectorSet(0.5f, 0.5f, 0.3f, 1.0f), 10.0f);
 	directionalLight->EnableShadowCasting(6);
 

@@ -939,6 +939,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 	XMMATRIX lightViewMatrix = XMMatrixLookToLH(XMVectorZero(), lightDirection, { 0, 1, 0 });
 	XMMATRIX lightInverseViewMatrix = XMMatrixInverse(nullptr, lightViewMatrix);
 
+	XMMATRIX R = XMMatrixRotationAxis(XMVector3Cross({ 0, 0, 1 }, lightDirection), XMVector3AngleBetweenNormals({ 0, 0, 1 }, lightDirection).m128_f32[0]);
+
 
 	D3D11_VIEWPORT shadowViewport = {};
 	shadowViewport.Width = shadow->width;
@@ -1037,19 +1039,18 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		max = XMVectorMax(max, rightUp);
 
 
-		XMVECTOR D = XMVectorSubtract(max, min);
+		XMVECTOR size = XMVectorSubtract(max, min);
 		XMVECTOR center = XMVectorScale(XMVectorAdd(min, max), 0.5f);
 
-		float extraDepth = __max(10.0f, D.m128_f32[2]) - min.m128_f32[2];
+		float extraDepth = __max(10.0f, size.m128_f32[2]) - min.m128_f32[2];
 
 		XMVECTOR shadowTranslation = -center;
 		shadowTranslation.m128_f32[2] = extraDepth;
 
-		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(D.m128_f32[0], D.m128_f32[1], 0, abs(extraDepth) + D.m128_f32[2]));
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], 0.1f, abs(extraDepth) + size.m128_f32[2]));
 
 		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
-		XMMATRIX R = XMMatrixRotationAxis(XMVector3Cross(lightDirection, { 0, 0, 1 }), -XMVector3AngleBetweenVectors({ 0, 0, 1 }, lightDirection).m128_f32[0]);
-		XMMATRIX S = XMMatrixScaling(D.m128_f32[0], D.m128_f32[1], D.m128_f32[2]);
+		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], size.m128_f32[2]);
 		
 
 		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
