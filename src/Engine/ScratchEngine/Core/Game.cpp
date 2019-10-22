@@ -44,8 +44,8 @@ __forceinline void ScratchEngine::Game::__RenderShadows(RenderingEngine* renderi
 					config.selectionFactor = 0.8f;
 					config.powerExponent = 2.0f;
 
-
 					renderingEngine->RenderCSM(config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated());
+					//renderingEngine->RenderCSMDebug(config, scene->renderableAllocator, scene->renderableAllocator.GetNumAllocated(), GBufferAlbedoRTV);
 				}
 
 				break;

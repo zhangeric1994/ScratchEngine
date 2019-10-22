@@ -1042,15 +1042,15 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		XMVECTOR size = XMVectorSubtract(max, min);
 		XMVECTOR center = XMVectorScale(XMVectorAdd(min, max), 0.5f);
 
-		float extraDepth = __max(10.0f, size.m128_f32[2]) - min.m128_f32[2];
+		float extraDepth = __max(10.0f, size.m128_f32[2]);
 
 		XMVECTOR shadowTranslation = -center;
-		shadowTranslation.m128_f32[2] = extraDepth;
+		shadowTranslation.m128_f32[2] = extraDepth - min.m128_f32[2];
 
-		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], 0.1f, abs(extraDepth) + size.m128_f32[2]));
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], 0, 2 * extraDepth + size.m128_f32[2]));
 
 		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
-		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], size.m128_f32[2]);
+		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 2 * extraDepth + size.m128_f32[2]);
 		
 
 		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
@@ -1261,7 +1261,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSMDebug(const CSMConfig& 
 		deviceContext->BeginEventInt(L"Cascade#d", i);
 
 		XMVECTOR min = { numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max() };
-		XMVECTOR max = { numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min(), numeric_limits<float>::min() };
+		XMVECTOR max = { numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest() };
 
 		min = XMVectorMin(min, leftBottom);
 		min = XMVectorMin(min, rightBottom);
