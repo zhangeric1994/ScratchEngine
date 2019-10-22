@@ -39,7 +39,7 @@ namespace ScratchEngine
 
 			union
 			{
-				XMMATRIX shadowViewProjection;
+				XMMATRIX shadowViewProjection[6];
 				XMMATRIX shadowProjection;
 			};
 		};

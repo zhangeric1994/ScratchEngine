@@ -286,12 +286,19 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 	device->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
 
 
-	D3D11_DEPTH_STENCIL_VIEW_DESC  dsvDesc;
+	D3D11_DEPTH_STENCIL_VIEW_DESC  dsvDesc = {};
 	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	dsvDesc.Flags = 0;
 	dsvDesc.Texture2D.MipSlice = 0;
 	device->CreateDepthStencilView(depthBufferTexture, &dsvDesc, &depthStencilView);
+
+	dsvDesc = {};
+	dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	dsvDesc.Flags = D3D11_DSV_READ_ONLY_DEPTH | D3D11_DSV_READ_ONLY_STENCIL;
+	dsvDesc.Texture2D.MipSlice = 0;
+	device->CreateDepthStencilView(depthBufferTexture, &dsvDesc, &dsvReadOnly);
 
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -300,6 +307,13 @@ HRESULT ScratchEngine::DXCore::InitDirectX()
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	device->CreateShaderResourceView(depthBufferTexture, &srvDesc, &depthSRV);
+
+	srvDesc = {};
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Format = DXGI_FORMAT_X24_TYPELESS_G8_UINT;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	device->CreateShaderResourceView(depthBufferTexture, &srvDesc, &stencilSRV);
 
 
 	// release our reference to the texture

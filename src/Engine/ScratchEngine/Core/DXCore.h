@@ -86,7 +86,9 @@ namespace ScratchEngine
 
 		ID3D11RenderTargetView* backBufferRTV;
 		ID3D11DepthStencilView* depthStencilView;
+		ID3D11DepthStencilView* dsvReadOnly;
 		ID3D11ShaderResourceView* depthSRV;
+		ID3D11ShaderResourceView* stencilSRV;
 
 		// Helper function for allocating a console window
 		void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns);

@@ -85,7 +85,7 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Loop through all lights this frame
     for (int i = 0; i < numLights; i++)
     {
-        float4 shadowPosition = mul(float4(input.worldPosition.xyz, 1), lights[i].shadowViewProjection);
+        float4 shadowPosition = mul(float4(input.worldPosition.xyz, 1), lights[i].shadowViewProjection[0]);
         float2 shadowUV = shadowPosition.xy / shadowPosition.w * 0.5f + 0.5f;
         shadowUV.y = 1.0f - shadowUV.y;
         float depthFromLight = shadowPosition.z / shadowPosition.w;

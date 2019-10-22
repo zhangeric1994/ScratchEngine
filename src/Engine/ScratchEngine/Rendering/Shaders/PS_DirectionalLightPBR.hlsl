@@ -32,7 +32,7 @@ Texture2D gBufferAlbedo : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gBufferDepth : register(t2);
 Texture2D gBufferMaterial : register(t3);
-Texture2D depthStencil : register(t9);
+Texture2D<uint4> stencilBuffer : register(t9);
 Texture2DArray shadowMap : register(t10);
 
 
@@ -48,7 +48,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 normal = gBufferNormal.Load(pixelIndex).rgb;
     float3 worldPosition = gBufferDepth.Load(pixelIndex).xyz;
     float3 metalRoughSpec = gBufferMaterial.Load(pixelIndex).rgb;
-    int csmIndex = depthStencil.Load(pixelIndex).g;
+    uint csmIndex = stencilBuffer.Load(pixelIndex).g;
 	
 
 	// Unpack normal
@@ -68,7 +68,7 @@ float4 main(VertexToPixel input) : SV_TARGET
     float3 color = DirectionalLightPBR(light, normal, worldPosition, cameraPosition, roughness, metalness, albedo, specularColor);
 
 
-    float4 shadowPosition = mul(float4(worldPosition, 1), light.shadowViewProjection);
+    float4 shadowPosition = mul(float4(worldPosition, 1), light.shadowViewProjection[csmIndex]);
     float2 shadowUV = shadowPosition.xy / shadowPosition.w * 0.5f + 0.5f;
     shadowUV.y = 1.0f - shadowUV.y;
     float depthFromLight = shadowPosition.z / shadowPosition.w;

@@ -59,12 +59,15 @@ namespace ScratchEngine
 			ID3D11Device2* device;
 			ID3D11DeviceContext2* deviceContext;
 
+			GFSDK_SSAO_Context_D3D11* ssaoContext;
+
 			SimpleVertexShader* vsDepthOnly;
 			SimpleVertexShader* vsPositionOnly;
 			SimpleVertexShader* vsDirectionalLight;
 			SimpleVertexShader* vsPointLight;
 			SimpleVertexShader* vsPointLightShadow;
 			SimpleVertexShader* vsViewport;
+			SimplePixelShader* psSolidColor;
 			SimplePixelShader* psGBuffer;
 			SimplePixelShader* psDirectionalLight;
 			SimplePixelShader* psPointLight;
@@ -73,6 +76,10 @@ namespace ScratchEngine
 			SimplePixelShader* psDeferred;
 			SimplePixelShader* psShadowVolume;
 
+			ID3D11RasterizerState* rsInsideOut;
+			ID3D11RasterizerState* rsShadow;
+			ID3D11RasterizerState* rsWireframe;
+
 			ID3D11DepthStencilState* dssLessEqual;
 			ID3D11DepthStencilState* dsReadGreater;
 			ID3D11DepthStencilState* dsOff;
@@ -80,12 +87,7 @@ namespace ScratchEngine
 			
 			ID3D11BlendState* bsAdditive;
 
-			ID3D11RasterizerState* rsInsideOut;
-			ID3D11RasterizerState* rsShadow;
-
 			ID3D11SamplerState* shadowSampler;
-
-			GFSDK_SSAO_Context_D3D11* ssaoContext;
 
 			Mesh* sphereMesh;
 			Mesh* cubeMesh;
@@ -107,7 +109,7 @@ namespace ScratchEngine
 			void PerformZPrepass(Viewer* viewer, Renderable* renderables, int numRenderables);
 			void DrawForward(Viewer* viewer, Renderable* renderables, int numRenderables, LightSource* lightSources, int numLightSources);
 			void DrawGBuffers(Viewer* viewer, Renderable* renderables, int numRenderables, ID3D11RenderTargetView*const* gBuffers, int numGBuffers, ID3D11DepthStencilView* depthStencilView);
-			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV);
+			void DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* stencilSRV);
 			void DrawDeferred(ID3D11ShaderResourceView* lightBuffer, ID3D11RenderTargetView* backBuffer, ID3D11DepthStencilView* depthStencilView);
 			void RenderSSAO(LightSource* light, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
@@ -116,7 +118,8 @@ namespace ScratchEngine
 			void SetShadowMap(ShadowMap* _shadow);
 			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
 
-			void DrawShadowVolume(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV);
+			void RenderCSMDebug(const CSMConfig& config, Renderable* renderables, int numRenderables, ID3D11RenderTargetView* debugView);
+			void DrawCSMIndices(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* stencilSRV);
 		};
 
 

@@ -6,7 +6,7 @@
 
 ScratchEngine::Camera::Camera()
 {
-	fov = 0.25f * 3.1415926535f;
+	fov = 3.1415926535f / 4;
 	nearZ = 0.1f;
 	farZ = 100;
 

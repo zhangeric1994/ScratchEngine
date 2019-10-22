@@ -16,6 +16,7 @@ struct VertexToPixel
 	float4 shadowPos : SHADOW;
 };
 
+
 cbuffer CameraData : register(b2)
 {
 	matrix view;
@@ -28,6 +29,7 @@ cbuffer ObjectData : register(b3)
 {
     matrix world;
 };
+
 
 VertexToPixel main(VertexShaderInput input)
 {

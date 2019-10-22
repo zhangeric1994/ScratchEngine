@@ -59,6 +59,7 @@ namespace ScratchEngine
 			float aspectRatio;
 			int numCascades;
 			float selectionFactor;
+			float powerExponent;
 		};
 
 

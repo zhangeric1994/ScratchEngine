@@ -71,6 +71,10 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	vsViewport = new SimpleVertexShader(device, deviceContext);
 	vsViewport->LoadShaderFile((wpath + std::wstring(L"/VS_Viewport.cso")).c_str());
 
+
+	psSolidColor = new SimplePixelShader(device, deviceContext);
+	psSolidColor->LoadShaderFile((wpath + std::wstring(L"/PS_SolidColor.cso")).c_str());
+
 	psGBuffer = new SimplePixelShader(device, deviceContext);
 	psGBuffer->LoadShaderFile((wpath + std::wstring(L"/PS_GBuffer.cso")).c_str());
 
@@ -115,8 +119,8 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	dsDesc.DepthFunc = D3D11_COMPARISON_GREATER;
 	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
 	dsDesc.StencilEnable = true;
-	dsDesc.StencilReadMask = 0x7;
-	dsDesc.StencilWriteMask = 0x7;
+	dsDesc.StencilReadMask = 0xFF;
+	dsDesc.StencilWriteMask = 0xFF;
 	dsDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
 	dsDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
 	dsDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_REPLACE;
@@ -143,9 +147,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 
 
 	D3D11_RASTERIZER_DESC rsDesc = {};
-	rsDesc.DepthClipEnable = true;
 	rsDesc.CullMode = D3D11_CULL_FRONT;
 	rsDesc.FillMode = D3D11_FILL_SOLID;
+	rsDesc.DepthClipEnable = true;
 	device->CreateRasterizerState(&rsDesc, &rsInsideOut);
 
 	rsDesc = {};
@@ -157,6 +161,12 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	rsDesc.SlopeScaledDepthBias = 1.0f;
 	device->CreateRasterizerState(&rsDesc, &rsShadow);
 
+	rsDesc = {};
+	rsDesc.CullMode = D3D11_CULL_FRONT;
+	rsDesc.FillMode = D3D11_FILL_WIREFRAME;
+	rsDesc.DepthClipEnable = true;
+	device->CreateRasterizerState(&rsDesc, &rsWireframe);
+	
 
 	D3D11_SAMPLER_DESC shadowSamplerDesc = {};
 	shadowSamplerDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
@@ -164,10 +174,10 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.BorderColor[0] = 2.0f;
-	shadowSamplerDesc.BorderColor[1] = 2.0f;
-	shadowSamplerDesc.BorderColor[2] = 2.0f;
-	shadowSamplerDesc.BorderColor[3] = 2.0f;
+	shadowSamplerDesc.BorderColor[0] = 1.0f;
+	shadowSamplerDesc.BorderColor[1] = 1.0f;
+	shadowSamplerDesc.BorderColor[2] = 1.0f;
+	shadowSamplerDesc.BorderColor[3] = 1.0f;
 	device->CreateSamplerState(&shadowSamplerDesc, &shadowSampler);
 
 
@@ -474,7 +484,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawGBuffers(Viewer* viewer, Ren
 	deviceContext->EndEvent();
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV)
+void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* stencilSRV)
 {
 	deviceContext->BeginEventInt(L"Light Buffer", 0);
 
@@ -516,8 +526,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 	psPointLight->CopyBufferData("CameraData");
 
 
-	deviceContext->OMSetRenderTargets(1, &lightBuffer, depthStencilView);
-
 	// Set up basic render states:
 	//  - Additive blending so lights add together
 	//  - Depth off, so all pixels in the silhouette rasterize (this can be optimized!!!)
@@ -538,6 +546,10 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 		switch (lightType)
 		{
 		case LightType::DIRECTIONAL:
+			deviceContext->OMSetRenderTargets(1, &lightBuffer, nullptr);
+			deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+			deviceContext->RSSetState(0);
+
 			do
 			{
 				LightSource lightSource = lightSources[i];
@@ -555,16 +567,13 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 				psDirectionalLight->SetShaderResourceView("gBufferNormal", gBuffers[1]);
 				psDirectionalLight->SetShaderResourceView("gBufferDepth", gBuffers[2]);
 				psDirectionalLight->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
-				psDirectionalLight->SetShaderResourceView("depthStencil", depthSRV);
+				psDirectionalLight->SetShaderResourceView("stencilBuffer", stencilSRV);
 
 				if (lightSource.shadow)
 					psDirectionalLight->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
 
 				psDirectionalLight->SetSamplerState("shadowSampler", shadowSampler);
 
-
-				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-				deviceContext->RSSetState(0);
 
 				deviceContext->Draw(3, 0);
 
@@ -576,6 +585,10 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 
 
 		case LightType::POINT:
+			deviceContext->OMSetRenderTargets(1, &lightBuffer, depthStencilView);
+			deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+			deviceContext->RSSetState(rsInsideOut);
+
 			do
 			{
 				LightSource lightSource = lightSources[i];
@@ -612,9 +625,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 				ID3D11Buffer* indexBuffer = sphereMesh->GetIndexBuffer();
 
 
-				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-				deviceContext->RSSetState(rsInsideOut);
-
 				deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 				deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 
@@ -631,6 +641,10 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 
 
 		case LightType::AMBIENT:
+			deviceContext->OMSetRenderTargets(1, &lightBuffer, nullptr);
+			deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+			deviceContext->RSSetState(0);
+
 			do
 			{
 				LightSource lightSource = lightSources[i];
@@ -648,10 +662,6 @@ void ScratchEngine::Rendering::RenderingEngine::DrawLightBuffer(Viewer* viewer, 
 
 				if (lightSource.shadow)
 					psAmbientLight->SetShaderResourceView("ssaoBuffer", lightSource.shadow->shaderResourceView);
-
-
-				deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-				deviceContext->RSSetState(0);
 
 				deviceContext->Draw(3, 0);
 
@@ -733,7 +743,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderSSAO(ID3D11RenderTargetVie
 	ssaoParams.PowerExponent = 2.0f;
 	ssaoParams.Blur.Enable = true;
 	ssaoParams.Blur.Radius = GFSDK_SSAO_BLUR_RADIUS_8;
-	ssaoParams.Blur.Sharpness = 4.0f;
+	ssaoParams.Blur.Sharpness = 2.0f;
 	ssaoParams.Output.BlendMode = GFSDK_SSAO_OVERWRITE_RGB;
 
 	GFSDK_SSAO_Status status = ssaoContext->RenderAO(deviceContext, &ssaoInput, &ssaoParams, ssaoBuffer);
@@ -752,8 +762,8 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* lig
 		D3D11_VIEWPORT viewport = {};
 		viewport.Width = shadow->width;
 		viewport.Height = shadow->height;
-		viewport.MinDepth = 0.f;
-		viewport.MaxDepth = 1.f;
+		viewport.MinDepth = 0.0f;
+		viewport.MaxDepth = 1.0f;
 		viewport.TopLeftX = 0;
 		viewport.TopLeftY = 0;
 
@@ -769,7 +779,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderShadowMap(LightSource* lig
 			deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[0]);
 
 
-			vsDepthOnly->SetMatrix4x4("viewProjection", light->shadowViewProjection);
+			vsDepthOnly->SetMatrix4x4("viewProjection", light->shadowViewProjection[0]);
 
 			vsDepthOnly->CopyBufferData("CameraData");
 
@@ -888,6 +898,272 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 	//float nz = config.nearZ;
 	//float fz = config.farZ;
 	float f = config.selectionFactor;
+	float q = config.powerExponent;
+
+	//float dz = fz - nz;
+	//
+
+	//float hfov = config.fov / 2
+	//float tanx = 
+
+	//float zn = nz;
+	//float dzu = dz / N;
+	//float dzl = dz / (pow(2, N) - 1);
+
+	//for (int i = 0; i < N; ++i)
+	//{
+	//	float zf = i == N - 1 ? fz : (nz + (dzu + (dzu - dzl) * t));
+
+	//	float xn = zn * tanx;
+	//	float xf;
+	//	float yn;
+	//	float yf;
+
+
+	//	zn = zf;
+	//	dzl *= 2;
+	//}
+
+	//Z.push_back(fz);
+
+
+	//for (int i = 0; i < N; ++i)
+
+
+	XMMATRIX viewMatrix = config.viewer->viewMatrix;
+	XMMATRIX projectionMatrix = config.viewer->projectionMatrix;
+	XMMATRIX viewProjectionMatrix = XMMatrixMultiply(XMMatrixTranspose(viewMatrix), XMMatrixTranspose(projectionMatrix));
+	XMMATRIX inverseViewProjectionMatrix = XMMatrixInverse(nullptr, viewProjectionMatrix);
+
+	XMVECTOR lightDirection = XMLoadFloat3(&light->direction);
+	XMMATRIX lightViewMatrix = XMMatrixLookToLH(XMVectorZero(), lightDirection, { 0, 1, 0 });
+	XMMATRIX lightInverseViewMatrix = XMMatrixInverse(nullptr, lightViewMatrix);
+
+
+	D3D11_VIEWPORT shadowViewport = {};
+	shadowViewport.Width = shadow->width;
+	shadowViewport.Height = shadow->height;
+	shadowViewport.MinDepth = 0.f;
+	shadowViewport.MaxDepth = 1.f;
+	shadowViewport.TopLeftX = 0;
+	shadowViewport.TopLeftY = 0;
+
+
+	XMVECTOR V;
+
+	V = XMVector4Transform({ -1, -1, -1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
+	XMVECTOR lbn = V;
+	XMVECTOR leftBottomNear = XMVector3TransformCoord(V, lightViewMatrix);
+	
+	V = XMVector4Transform({ 1, -1, -1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
+	XMVECTOR rightBottomNear = XMVector3TransformCoord(V, lightViewMatrix);
+
+	V = XMVector4Transform({ -1, 1, -1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
+	XMVECTOR leftUpNear = XMVector3TransformCoord(V, lightViewMatrix);
+
+	V = XMVector4Transform({ 1, 1, -1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
+	XMVECTOR rightUpNear = XMVector3TransformCoord(V, lightViewMatrix);
+
+	V = XMVector4Transform({ -1, -1, 1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
+	XMVECTOR lbf = V;
+	XMVECTOR leftBottomFar = XMVector3TransformCoord(V, lightViewMatrix);
+
+	V = XMVector4Transform({ 1, -1, 1, 1 }, inverseViewProjectionMatrix);
+	XMVECTOR rightBottomFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
+
+	V = XMVector4Transform({ -1, 1, 1, 1 }, inverseViewProjectionMatrix);
+	XMVECTOR leftUpFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
+
+	V = XMVector4Transform({ 1, 1, 1, 1 }, inverseViewProjectionMatrix);
+	XMVECTOR rightUpFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
+
+
+	deviceContext->BeginEventInt(L"CSM", 0);
+
+
+	deviceContext->PSSetShader(nullptr, nullptr, 0);
+
+
+	float dz = 1 / (float)N;
+	float p = (1 - pow(q, N)) / (1 - q);
+
+	XMVECTOR leftBottom = leftBottomFar;
+	XMVECTOR rightBottom = rightBottomFar;
+	XMVECTOR leftUp = leftUpFar;
+	XMVECTOR rightUp = rightUpFar;
+
+	for (int i = N - 1; i >= 0; --i)
+	{
+		deviceContext->BeginEventInt(L"Cascade#d", i);
+
+		XMVECTOR min = { numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max() };
+		XMVECTOR max = { numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest() };
+
+		min = XMVectorMin(min, leftBottom);
+		min = XMVectorMin(min, rightBottom);
+		min = XMVectorMin(min, leftUp);
+		min = XMVectorMin(min, rightUp);
+		max = XMVectorMax(max, leftBottom);
+		max = XMVectorMax(max, rightBottom);
+		max = XMVectorMax(max, leftUp);
+		max = XMVectorMax(max, rightUp);
+
+
+		float t = i * dz;
+		t = i == 0 ? 0 : (1 - f) * t + f * (1 - pow(q, i)) / (1 - q) / p;
+
+		leftBottom = XMVectorLerp(leftBottomNear, leftBottomFar, t);
+		rightBottom = XMVectorLerp(rightBottomNear, rightBottomFar, t);
+		leftUp = XMVectorLerp(leftUpNear, leftUpFar, t);
+		rightUp = XMVectorLerp(rightUpNear, rightUpFar, t);
+
+
+		XMVECTOR VVVV = XMVector3TransformCoord(leftBottom, lightInverseViewMatrix);
+		XMVECTOR AAAA = XMVectorLerp(lbn, lbf, t);
+
+
+		min = XMVectorMin(min, leftBottom);
+		min = XMVectorMin(min, rightBottom);
+		min = XMVectorMin(min, leftUp);
+		min = XMVectorMin(min, rightUp);
+		max = XMVectorMax(max, leftBottom);
+		max = XMVectorMax(max, rightBottom);
+		max = XMVectorMax(max, leftUp);
+		max = XMVectorMax(max, rightUp);
+
+
+		XMVECTOR D = XMVectorSubtract(max, min);
+		XMVECTOR center = XMVectorScale(XMVectorAdd(min, max), 0.5f);
+
+		float extraDepth = __max(10.0f, D.m128_f32[2]) - min.m128_f32[2];
+
+		XMVECTOR shadowTranslation = -center;
+		shadowTranslation.m128_f32[2] = extraDepth;
+
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(D.m128_f32[0], D.m128_f32[1], 0, abs(extraDepth) + D.m128_f32[2]));
+
+		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
+		XMMATRIX R = XMMatrixRotationAxis(XMVector3Cross(lightDirection, { 0, 0, 1 }), -XMVector3AngleBetweenVectors({ 0, 0, 1 }, lightDirection).m128_f32[0]);
+		XMMATRIX S = XMMatrixScaling(D.m128_f32[0], D.m128_f32[1], D.m128_f32[2]);
+		
+
+		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
+
+
+		deviceContext->ClearDepthStencilView(shadow->depthStencilViews[i], D3D11_CLEAR_DEPTH, 1.0f, 0);
+		
+		deviceContext->RSSetState(rsShadow);
+		deviceContext->RSSetViewports(1, &shadowViewport);
+		deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[i]);
+		deviceContext->OMSetDepthStencilState(nullptr, 0);
+
+
+		vsDepthOnly->SetShader();
+
+		vsDepthOnly->SetMatrix4x4("viewProjection", shadowViewProjectionMatrix);
+
+		vsDepthOnly->CopyBufferData("CameraData");
+
+
+		UINT stride = sizeof(Vertex);
+		UINT offset = 0;
+		UINT indexCount = 0;
+
+		for (int j = 0; j < numRenderables; ++j)
+		{
+			Renderable& renderable = renderables[j];
+
+
+			vsDepthOnly->SetMatrix4x4("world", renderable.worldMatrix);
+			vsDepthOnly->SetData("gBoneTransforms", renderable.bones, sizeof(XMMATRIX) * MAX_NUM_BONES_PER_MODEL);
+
+			vsDepthOnly->CopyBufferData("ObjectData");
+
+
+			Mesh* mesh = renderable.mesh;
+
+			ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+			ID3D11Buffer* indexBuffer = mesh->GetIndexBuffer();
+
+
+			deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+			deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+			deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+			deviceContext->DrawIndexed(mesh->GetIndexCount(), 0, 0);
+
+
+			indexCount += mesh->GetIndexCount();
+		}
+
+
+		deviceContext->SetMarkerInt(L"Shadow Volume", 0);
+
+
+		deviceContext->RSSetState(rsInsideOut);
+		deviceContext->RSSetViewports(1, config.viewport);
+		deviceContext->OMSetRenderTargets(0, nullptr, config.depthStencilView);
+		deviceContext->OMSetDepthStencilState(dssCSM, i);
+
+
+		vsPositionOnly->SetMatrix4x4("view", viewMatrix);
+		vsPositionOnly->SetMatrix4x4("projection", projectionMatrix);
+		vsPositionOnly->SetMatrix4x4("world", XMMatrixTranspose(S * R * T));
+		vsPositionOnly->CopyAllBufferData();
+
+		vsPositionOnly->SetShader();
+
+
+		ID3D11Buffer* vertexBuffer = cubeMesh->GetVertexBuffer();
+		ID3D11Buffer* indexBuffer = cubeMesh->GetIndexBuffer();
+
+
+		offset = 0;
+		indexCount = 0;
+
+
+		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		deviceContext->DrawIndexed(cubeMesh->GetIndexCount(), 0, 0);
+
+
+		indexCount += cubeMesh->GetIndexCount();
+
+
+		deviceContext->EndEvent();
+	}
+
+	deviceContext->EndEvent();
+}
+
+void ScratchEngine::Rendering::RenderingEngine::RenderCSMDebug(const CSMConfig& config, Renderable* renderables, int numRenderables, ID3D11RenderTargetView* debugView)
+{
+	XMVECTOR colors[6] =
+	{
+		{ 1, 0, 0 },
+		{ 1, 1, 0 },
+		{ 0, 1, 0 },
+		{ 0, 1, 1 },
+		{ 0, 0, 1 },
+		{ 1, 0, 1 },
+	};
+
+
+	LightSource* light = config.light;
+	Shadow* shadow = light->shadow;
+
+	int N = config.numCascades;
+	//float nz = config.nearZ;
+	//float fz = config.farZ;
+	float f = config.selectionFactor;
+	float q = config.powerExponent;
 
 	//float dz = fz - nz;
 	//
@@ -972,7 +1248,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 
 	float dz = 1 / (float)N;
-	float p = pow(2, N) - 1;
+	float p = (1 - pow(q, N)) / (1 - q);
 
 	XMVECTOR leftBottom = leftBottomFar;
 	XMVECTOR rightBottom = rightBottomFar;
@@ -997,7 +1273,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 
 		float t = i * dz;
-		t = i == 0 ? 0 : (t + (pow(2, i) / p - t) * f);
+		t = i == 0 ? 0 : (1 - f) * t + f * (1 - pow(q, i)) / (1 - q) / p;
 
 		leftBottom = XMVectorLerp(leftBottomNear, leftBottomFar, t);
 		rightBottom = XMVectorLerp(rightBottomNear, rightBottomFar, t);
@@ -1016,22 +1292,25 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 
 		XMVECTOR D = XMVectorSubtract(max, min);
-		XMVECTOR center = XMVectorAdd(min, max);
+		XMVECTOR center = XMVectorScale(XMVectorAdd(min, max), 0.5f);
 
 		float extraDepth = __max(10.0f, D.m128_f32[2]);
 
-		XMVECTOR shadowTranslation = XMVectorScale(center, -0.5f);
+		XMVECTOR shadowTranslation = -center;
 		shadowTranslation.m128_f32[2] = extraDepth - min.m128_f32[2];
 
 		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(D.m128_f32[0], D.m128_f32[1], 0, 2 * extraDepth + D.m128_f32[2]));
-		
 
-		if (i == 0)
-			light->shadowViewProjection = shadowViewProjectionMatrix;
+		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
+		XMMATRIX R = XMMatrixRotationAxis(XMVector3Cross(lightDirection, { 0, 0, 1 }), -XMVector3AngleBetweenVectors({ 0, 0, 1 }, lightDirection).m128_f32[0]);
+		XMMATRIX S = XMMatrixScaling(D.m128_f32[0], D.m128_f32[1], 2 * extraDepth + D.m128_f32[2]);
+
+
+		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
 
 
 		deviceContext->ClearDepthStencilView(shadow->depthStencilViews[i], D3D11_CLEAR_DEPTH, 1.0f, 0);
-		
+
 		deviceContext->RSSetState(rsShadow);
 		deviceContext->RSSetViewports(1, &shadowViewport);
 		deviceContext->OMSetRenderTargets(0, nullptr, shadow->depthStencilViews[i]);
@@ -1080,14 +1359,11 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		deviceContext->SetMarkerInt(L"Shadow Volume", 0);
 
 
-		deviceContext->RSSetState(nullptr);
+		deviceContext->RSSetState(rsInsideOut);
 		deviceContext->RSSetViewports(1, config.viewport);
 		deviceContext->OMSetRenderTargets(0, nullptr, config.depthStencilView);
 		deviceContext->OMSetDepthStencilState(dssCSM, i);
 
-		XMMATRIX T = XMMatrixTranslationFromVector(center);
-		XMMATRIX R = XMMatrixLookAtLH(XMVectorZero(), lightDirection, { 0, 1, 0 });
-		XMMATRIX S = XMMatrixScaling(D.m128_f32[0], D.m128_f32[1], 2 * extraDepth + D.m128_f32[2]);
 
 		vsPositionOnly->SetMatrix4x4("view", viewMatrix);
 		vsPositionOnly->SetMatrix4x4("projection", projectionMatrix);
@@ -1114,6 +1390,34 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 		indexCount += cubeMesh->GetIndexCount();
 
+
+		deviceContext->SetMarkerInt(L"Debug Shadow Volume", 0);
+
+
+		deviceContext->RSSetState(rsWireframe);
+		deviceContext->OMSetRenderTargets(1, &debugView, config.depthStencilView);
+		deviceContext->OMSetDepthStencilState(dssCSM, i);
+
+
+		psSolidColor->SetFloat4("tint", colors[i]);
+		psSolidColor->CopyAllBufferData();
+
+		psSolidColor->SetShader();
+
+
+		offset = 0;
+		indexCount = 0;
+
+
+		deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+		deviceContext->IASetIndexBuffer(indexBuffer, DXGI_FORMAT_R32_UINT, 0);
+		deviceContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		deviceContext->DrawIndexed(cubeMesh->GetIndexCount(), 0, 0);
+
+
+		indexCount += cubeMesh->GetIndexCount();
+		
 
 		deviceContext->EndEvent();
 	}
@@ -1164,7 +1468,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCubeMap(CubeMap* cubeMap, 
 	deviceContext->EndEvent();
 }
 
-void ScratchEngine::Rendering::RenderingEngine::DrawShadowVolume(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* depthSRV)
+void ScratchEngine::Rendering::RenderingEngine::DrawCSMIndices(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* stencilSRV)
 {
 	XMVECTOR cameraPosition = viewer->position;
 	XMMATRIX viewMatrix = viewer->viewMatrix;
@@ -1189,8 +1493,10 @@ void ScratchEngine::Rendering::RenderingEngine::DrawShadowVolume(Viewer* viewer,
 	psShadowVolume->CopyBufferData("CameraData");
 
 
+	deviceContext->OMSetRenderTargets(1, &lightBuffer, nullptr);
+	deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+	deviceContext->RSSetState(0);
 
-	deviceContext->OMSetRenderTargets(1, &lightBuffer, depthStencilView);
 
 	// Set up basic render states:
 	//  - Additive blending so lights add together
@@ -1224,16 +1530,13 @@ void ScratchEngine::Rendering::RenderingEngine::DrawShadowVolume(Viewer* viewer,
 			psShadowVolume->SetShaderResourceView("gBufferNormal", gBuffers[1]);
 			psShadowVolume->SetShaderResourceView("gBufferDepth", gBuffers[2]);
 			psShadowVolume->SetShaderResourceView("gBufferMaterial", gBuffers[3]);
-			psShadowVolume->SetShaderResourceView("depthStencil", depthSRV);
+			psShadowVolume->SetShaderResourceView("depthStencil", stencilSRV);
 
 			if (lightSource.shadow)
 				psShadowVolume->SetShaderResourceView("shadowMap", lightSource.shadow->shaderResourceView);
 
 			psShadowVolume->SetSamplerState("shadowSampler", shadowSampler);
 
-
-			deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
-			deviceContext->RSSetState(0);
 
 			deviceContext->Draw(3, 0);
 

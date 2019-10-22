@@ -24,7 +24,7 @@ ScratchEngine::Scene* ScratchEngine::Scene::GetCurrentScene()
 	return currentScene;
 }
 
-ScratchEngine::Scene::Scene() : roots(8), renderableAllocator(128), viewerAllocator(2), lightSourceAllocator(8)
+ScratchEngine::Scene::Scene() : roots(8), renderableAllocator(128), viewerAllocator(2), lightSourceAllocator(128)
 {
 	flag = FLAG_ACTIVE;
 
