@@ -71,6 +71,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	vsViewport = new SimpleVertexShader(device, deviceContext);
 	vsViewport->LoadShaderFile((wpath + std::wstring(L"/VS_Viewport.cso")).c_str());
 
+	vsCube = new SimpleVertexShader(device, deviceContext);
+	vsCube->LoadShaderFile((wpath + std::wstring(L"/VS_Sky.cso")).c_str());
+
 
 	psSolidColor = new SimplePixelShader(device, deviceContext);
 	psSolidColor->LoadShaderFile((wpath + std::wstring(L"/PS_SolidColor.cso")).c_str());
@@ -156,7 +159,7 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	rsDesc.CullMode = D3D11_CULL_BACK;
 	rsDesc.FillMode = D3D11_FILL_SOLID;
 	rsDesc.DepthClipEnable = true;
-	rsDesc.DepthBias = 1000;
+	rsDesc.DepthBias = 1000.0f;
 	rsDesc.DepthBiasClamp = 0.0f;
 	rsDesc.SlopeScaledDepthBias = 1.0f;
 	device->CreateRasterizerState(&rsDesc, &rsShadow);
@@ -1045,13 +1048,13 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		float extraDepth = __max(10.0f, size.m128_f32[2]);
 
 		XMVECTOR shadowTranslation = -center;
-		shadowTranslation.m128_f32[2] = extraDepth - min.m128_f32[2];
+		// shadowTranslation.m128_f32[2] = extraDepth - min.m128_f32[2];
 
-		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], 0, 2 * extraDepth + size.m128_f32[2]));
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], -100, 100));
 
 		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
-		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 2 * extraDepth + size.m128_f32[2]);
-		
+		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 200);
+
 
 		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
 
@@ -1519,7 +1522,7 @@ void ScratchEngine::Rendering::RenderingEngine::DrawCSMIndices(Viewer* viewer, L
 			LightSource lightSource = lightSources[i];
 
 
-			vsDirectionalLight->SetShader();
+			//vsDirectionalLight->SetShader();
 
 
 			psShadowVolume->SetData("light", &lightSource, sizeof(LightSource));
@@ -1539,7 +1542,32 @@ void ScratchEngine::Rendering::RenderingEngine::DrawCSMIndices(Viewer* viewer, L
 			psShadowVolume->SetSamplerState("shadowSampler", shadowSampler);
 
 
-			deviceContext->Draw(3, 0);
+			vsCube->SetMatrix4x4("view", viewMatrix);
+			vsCube->SetMatrix4x4("projection", projectionMatrix);
+			vsCube->CopyAllBufferData();
+
+			vsCube->SetShader();
+
+
+			ID3D11Buffer* cubeVB = cubeMesh->GetVertexBuffer();
+			ID3D11Buffer* cubeIB = cubeMesh->GetIndexBuffer();
+
+
+			deviceContext->RSSetState(rsInsideOut);
+			deviceContext->OMSetDepthStencilState(dsReadGreater, 0);
+
+
+			u32 stride = sizeof(Vertex);
+			u32 offset = 0;
+
+			deviceContext->IASetVertexBuffers(0, 1, &cubeVB, &stride, &offset);
+			deviceContext->IASetIndexBuffer(cubeIB, DXGI_FORMAT_R32_UINT, 0);
+
+
+			deviceContext->DrawIndexed(cubeMesh->GetIndexCount(), 0, 0);
+
+
+			//deviceContext->Draw(3, 0);
 
 
 			return;

@@ -32,7 +32,7 @@ Texture2D gBufferAlbedo : register(t0);
 Texture2D gBufferNormal : register(t1);
 Texture2D gBufferDepth : register(t2);
 Texture2D gBufferMaterial : register(t3);
-Texture2D<uint4> stencilBuffer : register(t9);
+Texture2D<uint2> stencilBuffer : register(t9);
 Texture2DArray shadowMap : register(t10);
 
 

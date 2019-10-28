@@ -67,6 +67,7 @@ namespace ScratchEngine
 			SimpleVertexShader* vsPointLight;
 			SimpleVertexShader* vsPointLightShadow;
 			SimpleVertexShader* vsViewport;
+			SimpleVertexShader* vsCube;
 			SimplePixelShader* psSolidColor;
 			SimplePixelShader* psGBuffer;
 			SimplePixelShader* psDirectionalLight;
