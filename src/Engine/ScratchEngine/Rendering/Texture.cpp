@@ -1,17 +1,21 @@
+#include <DDSTextureLoader.h>
+#include <WICTextureLoader.h>
+
+#include "Texture.h"
+
 #include "LightSource.h"
 #include "RenderingEngine.h"
-#include "Texture.h"
 
 using namespace DirectX;
 
 
-ScratchEngine::Rendering::Texture::Texture()
+ScratchEngine::Rendering::Texture::Texture(ID3D11ShaderResourceView* shaderResourceView, ID3D11SamplerState* samplerState)
 {
-	shaderResourceView = nullptr;
-	samplerState = nullptr;
+	this->shaderResourceView = shaderResourceView;
+	this->samplerState = samplerState;
 }
 
-ScratchEngine::Rendering::Texture::Texture(wchar_t* _filepath, D3D11_TEXTURE_ADDRESS_MODE _addressMode, D3D11_FILTER _filterMode, f32 _maxLOD)
+ScratchEngine::Rendering::Texture::Texture(const wchar_t* filePath, D3D11_TEXTURE_ADDRESS_MODE addressMode, D3D11_FILTER filterMode, f32 maxLOD) : Texture()
 {
 	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
 	ID3D11Device2* device = renderingEngine->device;
@@ -19,19 +23,20 @@ ScratchEngine::Rendering::Texture::Texture(wchar_t* _filepath, D3D11_TEXTURE_ADD
 
 
 	ID3D11Resource* texture = nullptr;
-	CreateWICTextureFromFile(device, deviceContext, _filepath, &texture, &shaderResourceView);
+	CreateWICTextureFromFile(device, deviceContext, filePath, &texture, &shaderResourceView);
 
 
 	D3D11_SAMPLER_DESC samplerDesc = {};
-	samplerDesc.AddressU = _addressMode;
-	samplerDesc.AddressV = _addressMode;
-	samplerDesc.AddressW = _addressMode;
-	samplerDesc.Filter = _filterMode;
-	samplerDesc.MaxLOD = _maxLOD;
+	samplerDesc.AddressU = addressMode;
+	samplerDesc.AddressV = addressMode;
+	samplerDesc.AddressW = addressMode;
+	samplerDesc.Filter = filterMode;
+	samplerDesc.MaxLOD = maxLOD;
 	device->CreateSamplerState(&samplerDesc, &samplerState);
 
 
-	texture->Release();
+	if (texture)
+		texture->Release();
 }
 
 ScratchEngine::Rendering::Texture::~Texture()
@@ -41,6 +46,25 @@ ScratchEngine::Rendering::Texture::~Texture()
 
 	if (samplerState)
 		samplerState->Release();
+}
+
+
+ScratchEngine::Rendering::TextureCube::TextureCube(const wchar_t* filePath, const D3D11_SAMPLER_DESC* samplerDesc) : Texture()
+{
+	RenderingEngine* renderingEngine = RenderingEngine::GetSingleton();
+	ID3D11Device2* device = renderingEngine->device;
+	ID3D11DeviceContext2* deviceContext = renderingEngine->deviceContext;
+
+
+	ID3D11Resource* texture = nullptr;
+	assert(SUCCEEDED(CreateDDSTextureFromFile(device, deviceContext, filePath, &texture, &shaderResourceView)));
+
+
+	device->CreateSamplerState(samplerDesc, &samplerState);
+
+
+	if (texture)
+		texture->Release();
 }
 
 

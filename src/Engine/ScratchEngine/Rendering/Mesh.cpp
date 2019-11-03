@@ -79,19 +79,19 @@ ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device2* device, char* filename)
 			// - OBJ File indices are 1-based, so
 			//    they need to be adusted
 			Vertex v1;
-			v1.Position = positions[i[0] - 1];
-			v1.UV = uvs[i[1] - 1];
-			v1.Normal = normals[i[2] - 1];
+			v1.position = positions[i[0] - 1];
+			v1.uv = uvs[i[1] - 1];
+			v1.normal = normals[i[2] - 1];
 
 			Vertex v2;
-			v2.Position = positions[i[3] - 1];
-			v2.UV = uvs[i[4] - 1];
-			v2.Normal = normals[i[5] - 1];
+			v2.position = positions[i[3] - 1];
+			v2.uv = uvs[i[4] - 1];
+			v2.normal = normals[i[5] - 1];
 
 			Vertex v3;
-			v3.Position = positions[i[6] - 1];
-			v3.UV = uvs[i[7] - 1];
-			v3.Normal = normals[i[8] - 1];
+			v3.position = positions[i[6] - 1];
+			v3.uv = uvs[i[7] - 1];
+			v3.normal = normals[i[8] - 1];
 
 			// The model is most likely in a right-handed space,
 			// especially if it came from Maya.  We want to convert
@@ -105,19 +105,19 @@ ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device2* device, char* filename)
 			// 3D modeling packages use the bottom left as (0,0)
 
 			// Flip the UV's since they're probably "upside down"
-			v1.UV.y = 1.0f - v1.UV.y;
-			v2.UV.y = 1.0f - v2.UV.y;
-			v3.UV.y = 1.0f - v3.UV.y;
+			v1.uv.y = 1.0f - v1.uv.y;
+			v2.uv.y = 1.0f - v2.uv.y;
+			v3.uv.y = 1.0f - v3.uv.y;
 
 			// Flip Z (LH vs. RH)
-			v1.Position.z *= -1.0f;
-			v2.Position.z *= -1.0f;
-			v3.Position.z *= -1.0f;
+			v1.position.z *= -1.0f;
+			v2.position.z *= -1.0f;
+			v3.position.z *= -1.0f;
 
 			// Flip normal Z
-			v1.Normal.z *= -1.0f;
-			v2.Normal.z *= -1.0f;
-			v3.Normal.z *= -1.0f;
+			v1.normal.z *= -1.0f;
+			v2.normal.z *= -1.0f;
+			v3.normal.z *= -1.0f;
 
 			// Add the verts to the vector (flipping the winding order)
 			verts.push_back(v1);
@@ -133,14 +133,14 @@ ScratchEngine::Rendering::Mesh::Mesh(ID3D11Device2* device, char* filename)
 			if (facesRead == 12){
 				// Make the last vertex
 				Vertex v4;
-				v4.Position = positions[i[9] - 1];
-				v4.UV = uvs[i[10] - 1];
-				v4.Normal = normals[i[11] - 1];
+				v4.position = positions[i[9] - 1];
+				v4.uv = uvs[i[10] - 1];
+				v4.normal = normals[i[11] - 1];
 
 				// Flip the UV, Z pos and normal
-				v4.UV.y = 1.0f - v4.UV.y;
-				v4.Position.z *= -1.0f;
-				v4.Normal.z *= -1.0f;
+				v4.uv.y = 1.0f - v4.uv.y;
+				v4.position.z *= -1.0f;
+				v4.normal.z *= -1.0f;
 
 				// Add a whole triangle (flipping the winding order)
 				verts.push_back(v1);
@@ -300,26 +300,26 @@ void ScratchEngine::Rendering::Mesh::ComputeTangent(Vertex* vertices, int vertic
 		Vertex v1 = vertices[indices[i + 1]];
 		Vertex v2 = vertices[indices[i + 2]];
 
-		float positionX0 = v0.Position.x;
-		float positionY0 = v0.Position.y;
-		float positionZ0 = v0.Position.z;
+		float positionX0 = v0.position.x;
+		float positionY0 = v0.position.y;
+		float positionZ0 = v0.position.z;
 
-		float positionX1 = v1.Position.x;
-		float positionY1 = v1.Position.y;
-		float positionZ1 = v1.Position.z;
+		float positionX1 = v1.position.x;
+		float positionY1 = v1.position.y;
+		float positionZ1 = v1.position.z;
 
-		float positionX2 = v2.Position.x;
-		float positionY2 = v2.Position.y;
-		float positionZ2 = v2.Position.z;
+		float positionX2 = v2.position.x;
+		float positionY2 = v2.position.y;
+		float positionZ2 = v2.position.z;
 
-		float U0 = v0.UV.x;
-		float V0 = v0.UV.y;
+		float U0 = v0.uv.x;
+		float V0 = v0.uv.y;
 
-		float U1 = v1.UV.x;
-		float V1 = v1.UV.y;
+		float U1 = v1.uv.x;
+		float V1 = v1.uv.y;
 
-		float U2 = v2.UV.x;
-		float V2 = v2.UV.y;
+		float U2 = v2.uv.x;
+		float V2 = v2.uv.y;
 
 		float deltaPosX1 = positionX1 - positionX0;
 		float deltaPosY1 = positionY1 - positionY0;

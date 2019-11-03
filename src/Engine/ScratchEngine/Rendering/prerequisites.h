@@ -1,21 +1,21 @@
 #pragma once
 
+#include <d3d11_2.h>
 #include <DirectXMath.h>
-
-#include "SimpleShader.h"
 
 #include "../Common/Typedefs.h"
 
+#include "SimpleShader.h"
+#include "GFSDK_SSAO.h"
+
 using namespace DirectX;
+using namespace ScratchEngine;
 
 
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		// CubeMap.h
-		struct CubeMap;
-
 		// LightSource.h
 		enum class LightType;
 		struct LightSource;
@@ -38,6 +38,8 @@ namespace ScratchEngine
 
 		// Texture.h
 		class Texture;
+		class Texture2D;
+		class TextureCube;
 		class Shadow;
 
 		// Vertex.h
@@ -64,5 +66,11 @@ namespace ScratchEngine
 
 
 #define NUM_BONES_PER_VEREX 4
+#define MAX_NUM_BONES_PER_MODEL 128
+#define DEFAULT_MAX_NUM_MATERIALS 512
+#define DEFAULT_MAX_NUM_MESHES 8192
 	}
 }
+
+
+using namespace ScratchEngine::Rendering;

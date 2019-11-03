@@ -2,12 +2,7 @@
 #define RENDERABLE_H
 #pragma once
 
-#include <DirectXMath.h>
-
-#include "../Common/Settings.h"
-
-#include "Material.h"
-#include "Mesh.h"
+#include "prerequisites.h"
 
 using namespace DirectX;
 
@@ -25,4 +20,5 @@ namespace ScratchEngine
 		};
 	}
 }
+
 #endif

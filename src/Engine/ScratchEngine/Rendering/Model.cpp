@@ -87,21 +87,21 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 	{
 		Vertex vertex;
 
-		vertex.Position.x = mesh->mVertices[i].x;
-		vertex.Position.y = mesh->mVertices[i].y;
-		vertex.Position.z = mesh->mVertices[i].z;
+		vertex.position.x = mesh->mVertices[i].x;
+		vertex.position.y = mesh->mVertices[i].y;
+		vertex.position.z = mesh->mVertices[i].z;
 
-		vertex.hasBones = mesh->HasBones() ? 1.0f : 0.0f;
+		vertex.hasBones = mesh->HasBones();
 
 		if (mesh->mTextureCoords[0])
 		{
-			vertex.UV.x = (float)mesh->mTextureCoords[0][i].x;
-			vertex.UV.y = (float)mesh->mTextureCoords[0][i].y;
+			vertex.uv.x = (float)mesh->mTextureCoords[0][i].x;
+			vertex.uv.y = (float)mesh->mTextureCoords[0][i].y;
 		}
 
-		vertex.Normal.x = (float)mesh->mNormals[i].x;
-		vertex.Normal.y = (float)mesh->mNormals[i].y;
-		vertex.Normal.z = (float)mesh->mNormals[i].z;
+		vertex.normal.x = (float)mesh->mNormals[i].x;
+		vertex.normal.y = (float)mesh->mNormals[i].y;
+		vertex.normal.z = (float)mesh->mNormals[i].z;
 
 		if (anim && anim->hasSkeleton)
 		{
@@ -114,24 +114,24 @@ void ScratchEngine::Rendering::Model::ProcessMesh(aiMesh* mesh, const aiScene* s
 			{
 				if (j < numBones)
 				{
-					vertex.IDs[j] = vertexWeight->at(j)->mVertexId;
+					vertex.boneIDs[j] = vertexWeight->at(j)->mVertexId;
 					//if (vertexWeight->at(j)->mWeight + w > 1) {
 					//	/*printf("size : %f \n", numBones);
 					//	printf("previous weight : %f \n",w);
 					//	printf("BONE WEIGHT ERROR!!  weight : %f \n", vertexWeight->at(j)->mWeight);*/
-					//	vertex.Weights[j] = 1;
+					//	vertex.BoneWeights[j] = 1;
 					//	
 					//}else {
-					//	vertex.Weights[j] = vertexWeight->at(j)->mWeight;
-					//	w += vertex.Weights[j];
+					//	vertex.BoneWeights[j] = vertexWeight->at(j)->mWeight;
+					//	w += vertex.BoneWeights[j];
 					//}
-					vertex.Weights[j] = vertexWeight->at(j)->mWeight;
-					w += vertex.Weights[j];
+					vertex.boneWeights[j] = vertexWeight->at(j)->mWeight;
+					w += vertex.boneWeights[j];
 				}
 				else
 				{
-					vertex.IDs[j] = 0;
-					vertex.Weights[j] = 0;
+					vertex.boneIDs[j] = 0;
+					vertex.boneWeights[j] = 0;
 				}
 			}
 		}

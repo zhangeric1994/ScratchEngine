@@ -73,6 +73,12 @@
     <FxCompile Include="Rendering\Shaders\PS_SolidColor.hlsl">
       <Filter>Shader Files</Filter>
     </FxCompile>
+    <FxCompile Include="Rendering\Shaders\PS_Skybox.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
+    <FxCompile Include="Rendering\Shaders\VS_Skybox.hlsl">
+      <Filter>Shader Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\DynamicPoolAllocator.hpp">
@@ -96,9 +102,6 @@
     <ClCompile Include="Physics\Collision.cpp">
       <Filter>Source Files\Physics</Filter>
     </ClCompile>
-    <ClCompile Include="Rendering\CubeMap.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Rendering\Material.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
@@ -106,9 +109,6 @@
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\RenderingEngine.cpp">
-      <Filter>Source Files\Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="Rendering\ShadowMap.cpp">
       <Filter>Source Files\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Rendering\SimpleShader.cpp">
@@ -209,9 +209,6 @@
     <ClInclude Include="Physics\Collision.h">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
-    <ClInclude Include="Rendering\CubeMap.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
     <ClInclude Include="Core\DXCore.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
@@ -273,9 +270,6 @@
       <Filter>Header Files\Common</Filter>
     </ClInclude>
     <ClInclude Include="Rendering\SimpleShader.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="Rendering\ShadowMap.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Common\Stack.hpp">
@@ -359,11 +353,23 @@
     <ClInclude Include="Animation\Animator.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Common\LockFreeQueue.hpp">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Rendering\Shaders\Lighting.hlsli">
       <Filter>Shader Files</Filter>
+    </None>
+    <None Include="Rendering\RenderingEngine.inl">
+      <Filter>Source Files\Rendering</Filter>
+    </None>
+    <None Include="Rendering\Material.inl">
+      <Filter>Source Files\Rendering</Filter>
+    </None>
+    <None Include="Rendering\Texture.inl">
+      <Filter>Source Files\Rendering</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

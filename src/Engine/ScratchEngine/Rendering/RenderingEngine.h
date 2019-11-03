@@ -2,21 +2,16 @@
 #define RENDERING_ENGINE_H
 #pragma once
 
-#include <DirectXMath.h>
 #include <string>
 
-#include "../Common/Settings.h"
-#include "../Common/Typedefs.h"
 #include "../Memory/PoolAllocator.hpp"
 
 #include "prerequisites.h"
 
-#include "GFSDK_SSAO.h"
 #include "Material.h"
 #include "Mesh.h"
 
 using namespace DirectX;
-using namespace ScratchEngine;
 using namespace ScratchEngine::Memory;
 
 
@@ -41,6 +36,7 @@ namespace ScratchEngine
 
 			friend class Shadow;
 			friend class Texture;
+			friend class TextureCube;
 
 
 		private:
@@ -61,12 +57,17 @@ namespace ScratchEngine
 
 			GFSDK_SSAO_Context_D3D11* ssaoContext;
 
+			PoolAllocator<sizeof(Material)> materialAllocator;
+			PoolAllocator<sizeof(Mesh)> meshAllocator;
+
 			SimpleVertexShader* vsDepthOnly;
 			SimpleVertexShader* vsPositionOnly;
 			SimpleVertexShader* vsDirectionalLight;
 			SimpleVertexShader* vsPointLight;
 			SimpleVertexShader* vsPointLightShadow;
 			SimpleVertexShader* vsViewport;
+			SimpleVertexShader* vsSkybox;
+
 			SimplePixelShader* psSolidColor;
 			SimplePixelShader* psGBuffer;
 			SimplePixelShader* psDirectionalLight;
@@ -75,16 +76,18 @@ namespace ScratchEngine
 			SimplePixelShader* psAmbientLight;
 			SimplePixelShader* psDeferred;
 			SimplePixelShader* psShadowVolume;
+			SimplePixelShader* psSkybox;
 
 			ID3D11RasterizerState* rsInsideOut;
 			ID3D11RasterizerState* rsShadow;
 			ID3D11RasterizerState* rsWireframe;
 
 			ID3D11DepthStencilState* dssLessEqual;
-			ID3D11DepthStencilState* dsReadGreater;
-			ID3D11DepthStencilState* dsOff;
+			ID3D11DepthStencilState* dssReadLessEqual;
+			ID3D11DepthStencilState* dssReadGreater;
+			ID3D11DepthStencilState* dssOff;
 			ID3D11DepthStencilState* dssCSM;
-			
+
 			ID3D11BlendState* bsAdditive;
 
 			ID3D11SamplerState* shadowSampler;
@@ -92,13 +95,7 @@ namespace ScratchEngine
 			Mesh* sphereMesh;
 			Mesh* cubeMesh;
 
-			PoolAllocator<sizeof(Material)> materialAllocator;
-			PoolAllocator<sizeof(Mesh)> meshAllocator;
-
-			ShadowMap* shadow;
 			bool hasZPrepass;
-
-			XMFLOAT4X4 shadowViewProjectionMat;
 
 
 			RenderingEngine(RenderingEngineConfig config);
@@ -115,43 +112,15 @@ namespace ScratchEngine
 			void RenderSSAO(ID3D11RenderTargetView* ssaoBuffer, XMMATRIX* projectionMatrix, ID3D11ShaderResourceView* depthBuffer, ID3D11ShaderResourceView* normalBuffer);
 			void RenderShadowMap(LightSource* light, Renderable* renderables, int numRenderables);
 			void RenderCSM(const CSMConfig& config, Renderable* renderables, int numRenderables);
-			void SetShadowMap(ShadowMap* _shadow);
-			void RenderCubeMap(CubeMap* cubeMap, Viewer* viewer);
+			void RenderSkybox(const TextureCube* texture, const Viewer* viewer);
 
 			void RenderCSMDebug(const CSMConfig& config, Renderable* renderables, int numRenderables, ID3D11RenderTargetView* debugView);
 			void DrawCSMIndices(Viewer* viewer, LightSource* lightSources, int numLightSources, ID3D11ShaderResourceView** gBuffers, ID3D11RenderTargetView* lightBuffer, ID3D11DepthStencilView* depthStencilView, ID3D11ShaderResourceView* stencilSRV);
 		};
-
-
-		inline RenderingEngine* RenderingEngine::GetSingleton()
-		{
-			return singleton;
-		}
-
-		inline void RenderingEngine::Initialize(ID3D11Device2* device, ID3D11DeviceContext2* deviceContext)
-		{
-			RenderingEngineConfig config;
-			config.device = device;
-			config.deviceContext = deviceContext;
-
-			singleton = new RenderingEngine(config);
-
-
-			singleton->sphereMesh = new Mesh(device, (char*)"../Assets/Models/sphere.obj");
-			singleton->cubeMesh = new Mesh(device, (char*)"../Assets/Models/cube.obj");
-		}
-
-		inline void RenderingEngine::Initialize(RenderingEngineConfig config)
-		{
-			if (!singleton)
-				singleton = new RenderingEngine(config);
-		}
-
-		inline void RenderingEngine::Terminate()
-		{
-			if (singleton)
-				delete singleton;
-		}
 	}
 }
+
+
+#include "RenderingEngine.inl"
+
 #endif

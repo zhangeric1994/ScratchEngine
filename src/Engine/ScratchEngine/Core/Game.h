@@ -6,13 +6,12 @@
 #include <Winuser.h>
 
 #include "../Multithreading/Barrier.h"
-#include "../Rendering/CubeMap.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"
 #include "../Rendering/Model.h"
-#include "../Rendering/ShadowMap.h"
 #include "../Rendering/SimpleShader.h"
 #include "../Rendering/Vertex.h"
+#include "../Rendering/Viewer.h"
 
 #include "Camera.h"
 #include "DXCore.h"
@@ -52,6 +51,13 @@ namespace ScratchEngine
 
 		POINT prevMousePos;
 
+		//cube map
+		TextureCube* sky;
+
+		//PBR textures
+		ID3D11ShaderResourceView* roughnessMap;
+		ID3D11ShaderResourceView* metalnessMap;
+
 		f32 camX;
 		f32 camY;
 
@@ -79,7 +85,6 @@ namespace ScratchEngine
 		ID3D11ShaderResourceView* ssaoBufferSRV;
 		ID3D11RenderTargetView* ssaoBufferRTV;
 		
-
 		Material* pbrMaterial;
 		Material* skeletonMaterial; 
 		Material* mobMaterial;
@@ -91,7 +96,6 @@ namespace ScratchEngine
 		Model* mobModel;
 
 		ID3D11SamplerState* sampler;
-		D3D11_SAMPLER_DESC samplerDesc;
 
 		ID3D11ShaderResourceView* texture;
 		ID3D11ShaderResourceView* normalMap;
@@ -115,14 +119,16 @@ namespace ScratchEngine
 
 		Renderer* rightHandRenderer;
 		SphereCollider* rightHandCollider;
+
 		Renderer* leftHandRenderer;
 		SphereCollider* leftHandCollider;
+
+		int lightCount = 0;
+		GameObject* lights[128];
 
 		Barrier frameBarrier;
 
 		int renderingMode = 1;
-		int lightCount = 0;
-		GameObject* lights[128];
 
 		int comboCounter = 0;
 		int combo[5] ={ 14,14,15,16,17 };
@@ -134,19 +140,6 @@ namespace ScratchEngine
 		float lastAttackTime;
 		bool isMouseDownL;
 		bool isMouseDownR;
-
-		//final shadow map
-		ShadowMap* shadow;
-		D3D11_VIEWPORT shadowViewport;
-		float shadowMapSize;
-		SimpleVertexShader* shadowShader;
-
-		//cube map
-		CubeMap* cubeMap;
-
-		//PBR textures
-		ID3D11ShaderResourceView* roughnessMap;
-		ID3D11ShaderResourceView* metalnessMap;
 
 
 		void __RenderShadows(RenderingEngine* renderingEngine, Scene* scene, Viewer* viewer, D3D11_VIEWPORT* viewport);

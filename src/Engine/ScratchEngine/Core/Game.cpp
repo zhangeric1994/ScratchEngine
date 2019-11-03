@@ -1,4 +1,5 @@
 ﻿#include <string>
+#include <WICTextureLoader.h>
 
 #include "../Physics/PhysicsEngine.h"
 #include "../Rendering/RenderingEngine.h"
@@ -150,28 +151,8 @@ ScratchEngine::Game::Game(HINSTANCE hInstance, char* name) : DXCore(hInstance, n
 	lastInputTime = 0.0f;
 
 
-	shadow = new ShadowMap();
-	cubeMap = new CubeMap();
-
-	shadowMapSize = 1024;
-
-	shadowViewport = {};
-	shadowViewport.Height = shadowMapSize;
-	shadowViewport.Width = shadowMapSize;
-	shadowViewport.MinDepth = 0.f;
-	shadowViewport.MaxDepth = 1.f;
-	shadowViewport.TopLeftX = 0;
-	shadowViewport.TopLeftY = 0;
-
-	samplerDesc = {};
-	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
-	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	samplerDesc.MaxAnisotropy = 16;
-	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
 	Global::SetScreenRatio(1600.0f / 900.0f);
+
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -215,7 +196,6 @@ ScratchEngine::Game::~Game()
 	if (zPrepassDepthStencilState)
 		zPrepassDepthStencilState->Release();
 
-	delete Scene::GetCurrentScene();
 
 	if (cubeMesh)
 		delete cubeMesh;
@@ -232,23 +212,16 @@ ScratchEngine::Game::~Game()
 	if (normalMap)
 		normalMap->Release();
 
-	if (shadow)
-		delete shadow;
-
-	if (cubeMap)
-		delete cubeMap;
-
 	if (roughnessMap)
 		roughnessMap->Release();
 
 	if (metalnessMap)
 		metalnessMap->Release();
 
-	if (shadowShader)
-		delete shadowShader;
-
 
 	RenderingEngine::Terminate();
+
+	delete Scene::GetCurrentScene();
 }
 
 void ScratchEngine::Game::Initialize()
@@ -277,12 +250,6 @@ void ScratchEngine::Game::LoadShaders()
 	std::string spath = std::string(buffer).substr(0, pos).c_str();
 	std::wstring wpath = std::wstring(spath.begin(), spath.end());
 
-	//vsZPrepass = new SimpleVertexShader(device, context);
-	//vsZPrepass->LoadShaderFile((wpath + std::wstring(L"/vs_zprepass.cso")).c_str());
-
-	shadowShader = new SimpleVertexShader(device, context);
-	shadowShader->LoadShaderFile((wpath + std::wstring(L"/shadowVS.cso")).c_str());
-	
 	vertexShader = new SimpleVertexShader(device, context);
 	vertexShader->LoadShaderFile((wpath + std::wstring(L"/VertexShader.cso")).c_str());
 
@@ -299,17 +266,21 @@ void ScratchEngine::Game::LoadShaders()
 	psBlinnPhong->LoadShaderFile((wpath + std::wstring(L"/PS_BlinnPhong.cso")).c_str());
 
 
-	//cube map shader load
-	cubeMap->setPS(device, context, (wpath + std::wstring(L"/cubePS.cso")).c_str());
-	cubeMap->setVS(device, context, (wpath + std::wstring(L"/cubeVS.cso")).c_str());
-	//end of cube map shader
+	D3D11_SAMPLER_DESC samplerDesc = {};
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.MaxAnisotropy = 16;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&samplerDesc, &sampler);
 
-	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
-	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 
-	device->CreateDepthStencilState(&depthStencilDesc, &zPrepassDepthStencilState);
+	D3D11_DEPTH_STENCIL_DESC dssDesc = {};
+	dssDesc.DepthEnable = true;
+	dssDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	dssDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+	device->CreateDepthStencilState(&dssDesc, &zPrepassDepthStencilState);
 
 
 	CreateSRVAndRTV(device, &GBufferAlbedoSRV, &GBufferAlbedoRTV);
@@ -317,33 +288,21 @@ void ScratchEngine::Game::LoadShaders()
 	CreateSRVAndRTV(device, &GBufferDepthSRV, &GBufferDepthRTV, DXGI_FORMAT_R16G16B16A16_FLOAT);
 	CreateSRVAndRTV(device, &GBufferMaterialSRV, &GBufferMaterialRTV);
 	CreateSRVAndRTV(device, &DeferredLightBufferSRV, &DeferredLightBufferRTV, DXGI_FORMAT_R16G16B16A16_FLOAT); // Needs to go above 1!!!
+
+
+	sky = new TextureCube(L"../Assets/Textures/CubeMaps/Skybox2.dds", &samplerDesc);
 }
 
 void ScratchEngine::Game::CreateAllMaps()
 {
-	//shadow map setup
-	shadow->setUp(device);
-
-	RenderingEngine::GetSingleton()->SetShadowMap(shadow);
-	//End of shadow map
-
-	//cube map
-	cubeMap->setUp(device);
-	cubeMap->setMesh(cubeMesh);
-	cubeMap->setSampler(sampler);
-	cubeMap->setSRV(device, context, L"../Assets/Textures/CubeMaps/Skybox2.dds");
-	//end of cube map
 }
 
 void ScratchEngine::Game::CreateMatrces()
 {
-
 }
 
 void ScratchEngine::Game::CreateBasicGeometry()
 {
-	device->CreateSamplerState(&samplerDesc, &sampler);
-
 	if (FAILED(CreateWICTextureFromFile(device, context, L"../Assets/Textures/chipped-paint-metal/Mossy_driveway_01_2K_Base_Color.png", 0, &texture)))
 		printf("load albedo texture error");
 
@@ -391,11 +350,10 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	model->LoadAnimation("../Assets/Models/Pack/Kick_0.fbx");				// 17
 
 	pbrMaterial = new Material(vertexShader, psPBR, sampler);
-	pbrMaterial->setTexture(texture);
-	pbrMaterial->setMetalnessMap(metalnessMap);
-	pbrMaterial->setNormalMap(normalMap);
-	pbrMaterial->setRoughnessMap(roughnessMap);
-	//pbrMaterial->setShadowMap(shadow);
+	pbrMaterial->SetTexture(texture);
+	pbrMaterial->SetMetalnessMap(metalnessMap);
+	pbrMaterial->SetNormalMap(normalMap);
+	pbrMaterial->SetRoughnessMap(roughnessMap);
 
 	greenMaterial = new Material(vertexShader, pixelShader, nullptr);
 	greenMaterial->SetTint(0, 1, 0);
@@ -404,13 +362,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	redMaterial->SetTint(1, 0, 0);
 
 	skeletonMaterial = new Material(vsSkeleton, psPBR, sampler, "../Assets/Models/Pack/vampire_a_lusth.fbx");
-
-
-	camera = new GameObject();
-	camera->SetLocalPosition(0, 3, -5.5f);
-	camera->SetLocalRotation(15, 0, 0);
-	camera->AddComponent<Camera>();
-	cameraHolder = new GameObject();
+	
 
 	GameObject* directionalLightObject = new GameObject();
 	directionalLightObject->SetLocalRotation(55, 0, 0);
@@ -572,10 +524,22 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 
 	player = new GameObject();
-	player->SetLocalPosition(0, 0, 0);
+	player->SetLocalPosition(0, 0, -100);
 	player->SetLocalRotation(0, 180, 0);
 	player->SetLocalScale(0.01f);
 	player->AddComponent<Renderer>(skeletonMaterial, model);
+
+
+	cameraHolder = new GameObject();
+	cameraHolder->SetParent(player);
+	cameraHolder->SetLocalPosition(0, 0, 0);
+
+	camera = new GameObject();
+	camera->SetParent(cameraHolder);
+	camera->SetLocalPosition(0, 3, -5.5f);
+	camera->SetLocalRotation(15, 0, 0);
+	camera->AddComponent<Camera>();
+
 
 	mob = new GameObject();
 	mob->SetLocalPosition(4, 0, -5);
@@ -584,10 +548,6 @@ void ScratchEngine::Game::CreateBasicGeometry()
 	mob->AddComponent<Renderer>(mobMaterial, mobModel);
 	mob->AddComponent<BoxCollider>(100, 400, 100);
 	mob->AddComponent<Mob>(mobModel);
-
-
-	camera->SetParent(cameraHolder);
-	cameraHolder->SetParent(player);
 }
 
 void ScratchEngine::Game::OnResize()
@@ -1062,7 +1022,7 @@ void ScratchEngine::Game::Draw()
 		context->RSSetViewports(1, &viewport);
 		context->RSSetState(0);
 
-		renderingEngine->RenderCubeMap(cubeMap, &(scene->viewerAllocator[0]));
+		renderingEngine->RenderSkybox(sky, &(scene->viewerAllocator[0]));
 
 
 		context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
