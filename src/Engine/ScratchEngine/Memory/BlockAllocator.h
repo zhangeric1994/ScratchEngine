@@ -1,18 +1,17 @@
 #pragma once
 
-#include <stdlib.h>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
 
 #include "Block.h"
 
-using namespace std;
 
 namespace ScratchEngine
 {
 	namespace Memory
 	{
-		class __declspec(dllexport) BlockAllocator : StaticAllocator
+		class __declspec(dllexport) BlockAllocator : Allocator
 		{
 			friend class PoolTest;
 

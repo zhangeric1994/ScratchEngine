@@ -6,9 +6,7 @@
 // instead of in Visual Studio settings if we want
 #pragma comment(lib, "d3d11.lib")
 
-#include <d3d11_2.h>
-#include <string>
-#include <Windows.h>
+#include "../header.h"
 
 #include "../Multithreading/Barrier.h"
 

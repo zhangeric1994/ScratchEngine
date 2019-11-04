@@ -2,13 +2,11 @@
 #define RIGIDBODY_H
 #pragma once
 
-
-#include <DirectXMath.h>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
 #include "../Core/GameComponent.h"
 
-using namespace DirectX;
 
 namespace ScratchEngine
 {

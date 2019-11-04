@@ -5,6 +5,7 @@
 #include "DXCore.h"
 #include "Game.h"
 #include "InputManager.h"
+#include "JobSystem.h"
 
 using namespace std;
 
@@ -426,8 +427,16 @@ HRESULT ScratchEngine::DXCore::Run()
 	// Give subclass a chance to initialize
 	Initialize();
 
-	thread updatingThread(&Game::Update, static_cast<Game*>(this));
-	thread renderingThread(&Game::Draw, static_cast<Game*>(this));
+
+	//thread updatingThread(&Game::Update, static_cast<Game*>(this));
+	//thread renderingThread(&Game::Draw, static_cast<Game*>(this));
+
+	JobSystem jobSystem;
+
+	jobSystem.ActivateThreads(2);
+	jobSystem.Execute([this]() { this->Update(); }, 0);
+	jobSystem.Execute([this]() { this->Draw(); }, 1);
+
 
 	// Our overall game and message loop
 	MSG msg = {};
@@ -443,12 +452,17 @@ HRESULT ScratchEngine::DXCore::Run()
 		}
 	}
 
+
 	isRunning = false;
 
 	allThreadBarrier.Wait();
 
-	renderingThread.detach();
-	updatingThread.detach();
+
+	//renderingThread.detach();
+	//updatingThread.detach();
+
+	jobSystem.DeactivateAllThreads();
+
 
 	// We'll end up here once we get a WM_QUIT message,
 	// which usually comes from the user closing the window

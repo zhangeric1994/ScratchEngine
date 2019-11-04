@@ -11,6 +11,7 @@ namespace ScratchEngine
 {
 	class GameObject;
 
+
 	class __declspec(dllexport) GameComponent : public IMessageReceiver, private IUpdatable, private ICollisionCallback
 	{
 		friend class Scene;
@@ -92,7 +93,5 @@ namespace ScratchEngine
 	};
 }
 
-inline void ScratchEngine::GameComponent::SetActive(bool flag)
-{
-	isActive = flag;
-}
+
+#include "GameComponent.inl"

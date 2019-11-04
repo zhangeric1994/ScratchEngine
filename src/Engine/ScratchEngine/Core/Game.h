@@ -1,10 +1,8 @@
 #pragma once
 
-#include <DDSTextureLoader.h>
-#include <DirectXMath.h>
-#include <vector>
-#include <Winuser.h>
+#include "../header.h"
 
+#include "../Common/LockFreeQueue.hpp"
 #include "../Multithreading/Barrier.h"
 #include "../Rendering/Material.h"
 #include "../Rendering/Mesh.h"

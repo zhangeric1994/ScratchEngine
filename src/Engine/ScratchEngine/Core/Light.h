@@ -2,7 +2,7 @@
 #define LIGHT_H
 #pragma once
 
-#include <DirectXMath.h>
+#include "../header.h"
 
 #include "../Rendering/LightSource.h"
 #include "../Rendering/Texture.h"

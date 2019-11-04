@@ -2,20 +2,13 @@
 #define LIGHT_SOURCE_H
 #pragma once
 
-#include <DirectXMath.h>
-
-#include "../Common/Typedefs.h"
-
-using namespace DirectX;
+#include "prerequisites.h"
 
 
 namespace ScratchEngine
 {
 	namespace Rendering
 	{
-		class Shadow;
-
-
 		enum class LightType
 		{
 			DIRECTIONAL,

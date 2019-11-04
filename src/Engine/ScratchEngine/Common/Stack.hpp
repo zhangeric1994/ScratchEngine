@@ -1,8 +1,9 @@
 #pragma once
 
-#include <malloc.h>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
+
 
 namespace ScratchEngine
 {

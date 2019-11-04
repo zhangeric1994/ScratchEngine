@@ -1,7 +1,6 @@
 //#include "Animator.h"
 //
 //using namespace ScratchEngine;
-//using namespace std;
 //
 //namespace ScratchEngine
 //{

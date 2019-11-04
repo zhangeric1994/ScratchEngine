@@ -4,6 +4,7 @@
 
 #include "../Common/Typedefs.h"
 
+
 namespace ScratchEngine
 {
 	struct __declspec(dllexport) Global

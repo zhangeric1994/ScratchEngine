@@ -1,0 +1,220 @@
+#ifndef JOB_SYSTEM_H
+#define JOB_SYSTEM_H
+#pragma once
+
+#include "../header.h"
+
+#include "../Common/LockFreeQueue.hpp"
+#include "../Common/Typedefs.h"
+#include "../Memory/PoolAllocator.hpp"
+
+using namespace ScratchEngine::Multithreading;
+
+
+namespace ScratchEngine
+{
+	struct Job
+	{
+		friend class JobSystem;
+		friend class WorkerThread;
+
+
+	private:
+		u32 id;
+		atomic<u32> dependency;
+		function<void()>& f;
+		Job* next;
+	};
+
+
+	class WorkerThread
+	{
+	private:
+		LockFreeQueue<Job*> jobQueue;
+		thread* runningThread;
+		atomic<bool> isActive;
+
+
+	public:
+		WorkerThread(u32 capacity);
+
+		bool IsRunning() const;
+		bool IsActive() const;
+
+		bool AddJob(Job* const job);
+
+		void Activate();
+		void Deactivate();
+
+	private:
+		void Do();
+	};
+
+
+	class JobSystem
+	{
+	private:
+		PoolAllocator<sizeof(Job)> jobAllocator;
+		WorkerThread* workerThreads;
+		u32 maxNumWorkerThreads;
+		u32 numActivatedWorkerThreads;
+		atomic<u32> nextJobID;
+
+
+		Job const* __Execute(const function<void()>& f, u32 threadID);
+
+
+	public:
+		JobSystem();
+		JobSystem(u32 maxNumWorkerThreads);
+
+		void ActivateThreads(u32 numWorkerThreads);
+		void ActivateAllThreads();
+		void DeactivateThreads(u32 numWorkerThreads);
+		void DeactivateAllThreads();
+
+		Job const* Execute(const function<void()>& f);
+		Job const* Execute(const function<void()>& f, u32 threadID);
+		Job const* Execute(const function<void()>& f, u32 threadLowerBound, u32 threadUpperBound);
+	};
+}
+
+
+inline bool ScratchEngine::WorkerThread::IsRunning() const
+{
+	return runningThread != nullptr;
+}
+
+inline bool ScratchEngine::WorkerThread::IsActive() const
+{
+	return isActive;
+}
+
+inline bool ScratchEngine::WorkerThread::AddJob(Job* const job)
+{
+	return jobQueue.Push(job);
+}
+
+inline void ScratchEngine::WorkerThread::Activate()
+{
+	isActive = true;
+
+	if (!runningThread)
+		runningThread = new thread(&WorkerThread::Do, static_cast<WorkerThread*>(this));
+}
+
+inline void ScratchEngine::WorkerThread::Deactivate()
+{
+	isActive = false;
+}
+
+
+inline Job const * ScratchEngine::JobSystem::__Execute(const function<void()>& f, u32 threadID)
+{
+	if (numActivatedWorkerThreads == 0)
+	{
+		f();
+
+		return nullptr;
+	}
+
+
+	Job* job = reinterpret_cast<Job*>(jobAllocator.Allocate());
+
+	job->id = nextJobID++;
+	job->next = nullptr;
+	job->dependency = 0;
+	job->f = f;
+
+
+	workerThreads[threadID].AddJob(job);
+
+
+	return job;
+}
+
+inline void ScratchEngine::JobSystem::ActivateThreads(u32 numWorkerThreads)
+{
+	u32 N = maxNumWorkerThreads - numActivatedWorkerThreads;
+
+	if (N > 0)
+	{
+		N = __min(N, numWorkerThreads);
+
+		for (u32 i = 0; i < N; ++i)
+			workerThreads[numActivatedWorkerThreads + i].Activate();
+
+
+		numActivatedWorkerThreads += N;
+	}
+}
+
+inline void ScratchEngine::JobSystem::ActivateAllThreads()
+{
+	u32 N = maxNumWorkerThreads - numActivatedWorkerThreads;
+
+	if (N > 0)
+	{
+		for (u32 i = 0; i < N; ++i)
+			workerThreads[numActivatedWorkerThreads + i].Activate();
+
+
+		numActivatedWorkerThreads = maxNumWorkerThreads;
+	}
+}
+
+inline void ScratchEngine::JobSystem::DeactivateThreads(u32 numWorkerThreads)
+{
+	u32 N = __min(numActivatedWorkerThreads, numWorkerThreads);
+
+	for (u32 i = 0; i < N; ++i)
+		workerThreads[numActivatedWorkerThreads - 1 - i].Deactivate();
+
+
+	numActivatedWorkerThreads -= N;
+}
+
+inline void ScratchEngine::JobSystem::DeactivateAllThreads()
+{
+	for (u32 i = 0; i < numActivatedWorkerThreads; ++i)
+		workerThreads[i].Deactivate();
+
+
+	numActivatedWorkerThreads = 0;
+}
+
+inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f)
+{
+	srand(time(0));
+
+	return __Execute(f, rand() % numActivatedWorkerThreads);
+}
+
+inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f, u32 threadID)
+{
+	_ASSERT(threadID < numActivatedWorkerThreads);
+
+	return __Execute(f, threadID);
+}
+
+inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f, u32 threadLowerBound, u32 threadUpperBound)
+{
+	_ASSERT(threadLowerBound <= threadUpperBound);
+
+
+	if (threadLowerBound == threadUpperBound)
+		Execute(f, threadLowerBound);
+
+
+	_ASSERT(threadLowerBound < numActivatedWorkerThreads);
+
+
+	int N = __min(numActivatedWorkerThreads - 1, threadUpperBound) - threadLowerBound;
+
+
+	srand(time(0));
+
+	return __Execute(f, threadLowerBound + rand() % (N + 1));
+}
+
+#endif // !JOB_SYSTEM_H

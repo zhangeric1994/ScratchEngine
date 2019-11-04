@@ -1,13 +1,13 @@
 #pragma once
 
-#include <cstring>
-#include <malloc.h>
+#include "../header.h"
 
 #include "../Common/Settings.h"
 #include "../Common/Typedefs.h"
 
 #include "Allocator.h"
 #include "Block.h"
+
 
 namespace ScratchEngine
 {

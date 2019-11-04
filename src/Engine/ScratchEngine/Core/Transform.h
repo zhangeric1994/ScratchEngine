@@ -1,7 +1,6 @@
 #pragma once
 
-#include <DirectXMath.h>
-#include <vector>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
 #include "../Message/IMessageReceiver.h"
@@ -10,9 +9,7 @@
 
 #include "Space.h"
 
-using namespace DirectX;
 using namespace ScratchEngine::Rendering;
-using namespace std;
 
 
 namespace ScratchEngine
@@ -116,3 +113,6 @@ namespace ScratchEngine
 		return XMVector3Normalize(XMVector3Rotate({ 0, 0, 1 }, GetRotation()));
 	}
 }
+
+
+#include "Transform.inl"

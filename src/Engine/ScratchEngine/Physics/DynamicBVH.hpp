@@ -1,13 +1,14 @@
 #ifndef DYNAMIC_BVH_HPP
 #define DYNAMIC_BVH_HPP
 
-#include <stack>
+#include "../header.h"
 
 #include "../Memory/DynamicPoolAllocator.hpp"
 
 #include "DynamicBVHNode.hpp"
 
 using namespace ScratchEngine::Memory;
+
 
 namespace ScratchEngine
 {
@@ -391,4 +392,5 @@ namespace ScratchEngine
 		}
 	}
 }
+
 #endif

@@ -2,9 +2,8 @@
 #define BARRIER_H
 #pragma once
 
-#include <mutex>
+#include "../header.h"
 
-using namespace std;
 
 namespace ScratchEngine
 {

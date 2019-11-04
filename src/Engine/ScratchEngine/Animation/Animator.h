@@ -1,10 +1,6 @@
 #pragma once
-#include <d3d11_2.h>
-#include <DirectXMath.h>
-#include <fstream>
-#include <map>
-#include <tuple>
-#include <vector>
+
+#include "../header.h"
 
 #include "AnimationClip.h"
 #include "Bone.h"
@@ -15,7 +11,6 @@
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
 
-using namespace std;
 using namespace ScratchEngine::Animation;
 
 

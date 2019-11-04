@@ -2,11 +2,12 @@
 #define STACK_ALLOCATOR_HPP
 #pragma once
 
-#include <algorithm>
+#include "../header.h"
 
 #include "../Common/Settings.h"
 
 #include "Allocator.h"
+
 
 namespace ScratchEngine
 {

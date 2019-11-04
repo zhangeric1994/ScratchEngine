@@ -1,14 +1,10 @@
 #ifndef COLLIDER_H
 #define COLLIDER_H
 
-#include <DirectXMath.h>
-#include <unordered_set>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
 #include "../Core/GameComponent.h"
-
-using namespace DirectX;
-using namespace std;
 
 
 namespace ScratchEngine

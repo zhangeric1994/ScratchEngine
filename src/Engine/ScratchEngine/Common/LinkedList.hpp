@@ -6,6 +6,7 @@
 
 using namespace ScratchEngine::Memory;
 
+
 namespace ScratchEngine
 {
 	template<class T> struct LinkedListNode
@@ -14,6 +15,7 @@ namespace ScratchEngine
 		i32 next;
 		i32 previous;
 	};
+
 
 	template<class T> struct LinkedList
 	{

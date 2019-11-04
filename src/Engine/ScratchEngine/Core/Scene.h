@@ -2,7 +2,7 @@
 #define SCENE_H
 #pragma once
 
-#include <vector>
+#include "../header.h"
 
 #include "../Common/LinkedList.hpp"
 #include "../Common/Stack.hpp"

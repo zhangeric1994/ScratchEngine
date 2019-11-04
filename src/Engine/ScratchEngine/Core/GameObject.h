@@ -1,9 +1,6 @@
 #pragma once
 
-//#include <type_traits>
-#include <typeindex>
-#include <unordered_map>
-#include <vector>
+#include "../header.h"
 
 #include "../Physics/Collider.h"
 #include "../Physics/ICollisionCallback.h"
@@ -116,7 +113,7 @@ namespace ScratchEngine
 		return static_cast<T*>(components.find(id) == components.end() ? nullptr : components[id]);
 	}
 
-	template<class T, class ...argTs> inline T* GameObject::AddComponent(argTs ...args)
+	template<class T, class ...argTs> inline T* GameObject::AddComponent(argTs... args)
 	{
 		//assert(std::is_base_of<GameComponent, T>::value)
 

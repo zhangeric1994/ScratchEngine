@@ -1,11 +1,7 @@
 #pragma once
 
-#include <d3d11_2.h>
-#include <DirectXMath.h>
-#include <fstream> 
-#include <vector>
+#include "../header.h"
 
-using namespace DirectX;
 
 namespace ScratchEngine
 {

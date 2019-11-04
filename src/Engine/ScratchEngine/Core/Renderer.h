@@ -6,8 +6,6 @@
 
 #include "GameComponent.h"
 
-using namespace std;
-
 
 namespace ScratchEngine
 {

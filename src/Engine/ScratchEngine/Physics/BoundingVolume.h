@@ -1,12 +1,10 @@
 #ifndef BOUNDING_VOLUME_H
 #define BOUNDING_VOLUME_H
 
-#include <cmath>
-#include <DirectXMath.h>
+#include "../header.h"
 
 #include "../Common/Typedefs.h"
 
-using namespace DirectX;
 using namespace ScratchEngine;
 
 

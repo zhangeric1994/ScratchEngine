@@ -1,11 +1,8 @@
 #pragma once
 
-#include <map>
-#include <queue>
+#include "../header.h"
 
 #include "InputEvent.h"
-
-using namespace std;
 
 
 namespace ScratchEngine 

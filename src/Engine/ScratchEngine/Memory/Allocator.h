@@ -11,7 +11,7 @@ namespace ScratchEngine
 		};
 
 
-		class StaticAllocator
+		class Allocator
 		{
 		public:
 			virtual void* Allocate(size_t size) = 0;

@@ -120,9 +120,6 @@
     <ClCompile Include="Core\Game.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Core\GameComponent.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Core\GameObject.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
@@ -179,6 +176,12 @@
     </ClCompile>
     <ClCompile Include="Physics\Collider.cpp">
       <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GameComponent.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\JobSystem.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -290,9 +293,6 @@
     <ClInclude Include="Rendering\Viewer.h">
       <Filter>Header Files\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="Multithreading\WorkerThread.h">
-      <Filter>Header Files\Multithreading</Filter>
-    </ClInclude>
     <ClInclude Include="Physics\DynamicBVH.hpp">
       <Filter>Header Files\Physics</Filter>
     </ClInclude>
@@ -354,7 +354,10 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="Common\LockFreeQueue.hpp">
-      <Filter>Header Files\Common</Filter>
+      <Filter>Header Files\Multithreading</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\JobSystem.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -370,6 +373,18 @@
     </None>
     <None Include="Rendering\Texture.inl">
       <Filter>Source Files\Rendering</Filter>
+    </None>
+    <None Include="Memory\PoolAllocator.inl">
+      <Filter>Source Files\Memory</Filter>
+    </None>
+    <None Include="Common\LockFreeQueue.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="Core\Transform.inl">
+      <Filter>Source Files\Core</Filter>
+    </None>
+    <None Include="Core\GameComponent.inl">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

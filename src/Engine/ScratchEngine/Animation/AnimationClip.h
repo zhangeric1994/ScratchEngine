@@ -1,10 +1,6 @@
 #pragma once
 
-#include <d3d11_2.h>
-#include <DirectXMath.h>
-#include <fstream> 
-#include <map>
-#include <vector>
+#include "../header.h"
 
 #include "AnimationChannel.h"
 #include "Bone.h"
@@ -12,8 +8,6 @@
 #include "assimp/Importer.hpp"
 #include "assimp/postprocess.h"
 #include "assimp/scene.h"
-
-using namespace DirectX;
 
 
 namespace ScratchEngine

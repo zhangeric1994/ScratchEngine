@@ -9,6 +9,7 @@
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 #define NOMINMAX
+
 // Windows Header Files
 #include <windows.h>
 
@@ -18,6 +19,7 @@
 #include <memory.h>
 #include <tchar.h>
 
+#define _HAS_STD_BYTE 0
 
 // reference additional headers your program requires here
 #include "Core/Game.h"

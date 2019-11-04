@@ -92,6 +92,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/DNOMINMAX</AdditionalOptions>
       <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -111,6 +112,7 @@
       <AdditionalIncludeDirectories>../Externals/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DNOMINMAX</AdditionalOptions>
       <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,6 +133,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalOptions>/DNOMINMAX</AdditionalOptions>
       <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,6 +157,7 @@
       <AdditionalIncludeDirectories>..\Externals\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/DNOMINMAX</AdditionalOptions>
       <DisableSpecificWarnings>4251;</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -185,6 +189,7 @@
     <ClInclude Include="Core\InputEvent.h" />
     <ClInclude Include="Core\InputManager.h" />
     <ClInclude Include="Core\IUpdatable.h" />
+    <ClInclude Include="Core\JobSystem.h" />
     <ClInclude Include="Core\Light.h" />
     <ClInclude Include="Core\Renderer.h" />
     <ClInclude Include="Core\Scene.h" />
@@ -201,7 +206,6 @@
     <ClInclude Include="Dummy.h" />
     <ClInclude Include="Mob.h" />
     <ClInclude Include="Multithreading\Barrier.h" />
-    <ClInclude Include="Multithreading\WorkerThread.h" />
     <ClInclude Include="Physics\BoundingVolume.h" />
     <ClInclude Include="Physics\Collision.h" />
     <ClInclude Include="Physics\Collider.h" />
@@ -230,14 +234,21 @@
     <ClCompile Include="Animation\AnimationEngine.cpp" />
     <ClCompile Include="Animation\Animator.cpp" />
     <ClCompile Include="Animation\Bone.cpp" />
+    <None Include="Common\LockFreeQueue.inl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\DXCore.cpp" />
     <ClCompile Include="Core\Game.cpp" />
+    <None Include="Core\GameComponent.inl">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="Core\GameComponent.cpp" />
     <ClCompile Include="Core\GameObject.cpp" />
     <ClCompile Include="Core\Global.cpp" />
     <ClCompile Include="Core\InputEvent.cpp" />
     <ClCompile Include="Core\InputManager.cpp" />
+    <ClCompile Include="Core\JobSystem.cpp" />
     <ClCompile Include="Core\Light.cpp" />
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Core\Scene.cpp" />
@@ -525,6 +536,8 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Core\Transform.inl" />
+    <None Include="Memory\PoolAllocator.inl" />
     <None Include="packages.config" />
     <None Include="Rendering\Material.inl" />
     <None Include="Rendering\RenderingEngine.inl" />
