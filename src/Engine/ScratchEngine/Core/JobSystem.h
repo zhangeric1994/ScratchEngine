@@ -13,6 +13,14 @@ using namespace ScratchEngine::Multithreading;
 
 namespace ScratchEngine
 {
+	enum class JobStatus : u32
+	{
+		Done = 0,
+		Scheduled = 1,
+		InProgress = 2,
+	};
+
+
 	struct Job
 	{
 		friend class JobSystem;
@@ -21,14 +29,15 @@ namespace ScratchEngine
 
 	private:
 		function<void()> const f;
-		u32 dependency;
-		atomic<u32> d;
-		Job const* const next;
+		JobStatus status;
+		mutex m;
+		condition_variable cv;
 
 
 	public:
 		Job(function<void()> f);
-		Job(function<void()> f, Job* next);
+
+		void Wait();
 	};
 
 
@@ -47,7 +56,7 @@ namespace ScratchEngine
 		bool IsRunning() const;
 		bool IsActive() const;
 
-		bool AddJob(Job* const job);
+		bool Schedule(Job* const job);
 
 		void Activate();
 		void Deactivate();
@@ -65,8 +74,8 @@ namespace ScratchEngine
 		u32 maxNumWorkerThreads;
 		u32 numActivatedWorkerThreads;
 
-
-		Job const* __Execute(function<void()> const& f, u32 threadID);
+		void __Schedule(Job* job, u32 threadID);
+		Job* __Execute(function<void()> const& f, u32 threadID);
 
 
 	public:
@@ -83,12 +92,26 @@ namespace ScratchEngine
 		void DeactivateThreads(u32 numWorkerThreads);
 		void DeactivateAllThreads();
 
-		Job const* Execute(function<void()> const& f);
-		Job const* Execute(function<void()> const& f, u32 threadID);
-		Job const* Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound);
+		void Schedule(Job* job);
+		void Schedule(Job* job, u32 threadID);
+		void Schedule(Job* job, u32 threadLowerBound, u32 threadUpperBound);
+
+		Job* Execute(function<void()> const& f);
+		Job* Execute(function<void()> const& f, u32 threadID);
+		Job* Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound);
 	};
 }
 
+
+inline void ScratchEngine::Job::Wait()
+{
+	if (status == JobStatus::Done)
+		return;
+	
+
+	unique_lock<std::mutex> lock { m };
+	cv.wait(lock);
+}
 
 inline bool ScratchEngine::WorkerThread::IsRunning() const
 {
@@ -100,11 +123,14 @@ inline bool ScratchEngine::WorkerThread::IsActive() const
 	return isActive;
 }
 
-inline bool ScratchEngine::WorkerThread::AddJob(Job* const job)
+inline bool ScratchEngine::WorkerThread::Schedule(Job* const job)
 {
-	job->d = job->dependency;
+	bool result = jobQueue.Push(job);
 
-	return jobQueue.Push(job);
+	if (result)
+		job->status = JobStatus::Scheduled;
+
+	return result;
 }
 
 inline void ScratchEngine::WorkerThread::Activate()
@@ -121,7 +147,12 @@ inline void ScratchEngine::WorkerThread::Deactivate()
 }
 
 
-inline Job const* ScratchEngine::JobSystem::__Execute(function<void()> const& f, u32 threadID)
+inline void ScratchEngine::JobSystem::__Schedule(Job* job, u32 threadID)
+{
+	workerThreads[threadID].Schedule(job);
+}
+
+inline Job* ScratchEngine::JobSystem::__Execute(function<void()> const& f, u32 threadID)
 {
 	if (numActivatedWorkerThreads == 0)
 	{
@@ -136,7 +167,7 @@ inline Job const* ScratchEngine::JobSystem::__Execute(function<void()> const& f,
 	new (job) Job(f);
 
 
-	workerThreads[threadID].AddJob(job);
+	__Schedule(job, threadID);
 
 
 	return job;
@@ -202,30 +233,68 @@ inline void ScratchEngine::JobSystem::DeactivateAllThreads()
 	numActivatedWorkerThreads = 0;
 }
 
-inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f)
+inline void ScratchEngine::JobSystem::Schedule(Job* job)
+{
+	_ASSERT(job->status == JobStatus::Done);
+
+
+	srand(time(0));
+
+	__Schedule(job, rand() % numActivatedWorkerThreads);
+}
+
+inline void ScratchEngine::JobSystem::Schedule(Job* job, u32 threadID)
+{
+	_ASSERT(job->status == JobStatus::Done);
+	_ASSERT(threadID < numActivatedWorkerThreads);
+
+
+	__Schedule(job, rand() % numActivatedWorkerThreads);
+}
+
+inline void ScratchEngine::JobSystem::Schedule(Job* job, u32 threadLowerBound, u32 threadUpperBound)
+{
+	_ASSERT(job->status == JobStatus::Done);
+	_ASSERT(threadLowerBound <= threadUpperBound);
+	_ASSERT(threadLowerBound < numActivatedWorkerThreads);
+
+
+	if (threadLowerBound == threadUpperBound)
+		__Schedule(job, threadLowerBound);
+	else
+	{
+		int N = __min(numActivatedWorkerThreads - 1, threadUpperBound) - threadLowerBound;
+
+
+		srand(time(0));
+
+		__Schedule(job, threadLowerBound + rand() % (N + 1));
+	}
+}
+
+inline Job* ScratchEngine::JobSystem::Execute(function<void()> const& f)
 {
 	srand(time(0));
 
 	return __Execute(f, rand() % numActivatedWorkerThreads);
 }
 
-inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadID)
+inline Job* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadID)
 {
 	_ASSERT(threadID < numActivatedWorkerThreads);
+
 
 	return __Execute(f, threadID);
 }
 
-inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound)
+inline Job* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound)
 {
 	_ASSERT(threadLowerBound <= threadUpperBound);
+	_ASSERT(threadLowerBound < numActivatedWorkerThreads);
 
 
 	if (threadLowerBound == threadUpperBound)
-		Execute(f, threadLowerBound);
-
-
-	_ASSERT(threadLowerBound < numActivatedWorkerThreads);
+		return __Execute(f, threadLowerBound);
 
 
 	int N = __min(numActivatedWorkerThreads - 1, threadUpperBound) - threadLowerBound;

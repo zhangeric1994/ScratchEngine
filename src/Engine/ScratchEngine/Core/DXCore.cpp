@@ -428,14 +428,8 @@ HRESULT ScratchEngine::DXCore::Run()
 	Initialize();
 
 
-	//thread updatingThread(&Game::Update, static_cast<Game*>(this));
-	//thread renderingThread(&Game::Draw, static_cast<Game*>(this));
-
-	JobSystem jobSystem;
-
-	jobSystem.ActivateThreads(2);
-	jobSystem.Execute([this]() { this->Update(); }, 0);
-	jobSystem.Execute([this]() { this->Draw(); }, 1);
+	thread updatingThread(&Game::Update, static_cast<Game*>(this));
+	thread renderingThread(&Game::Draw, static_cast<Game*>(this));
 
 
 	// Our overall game and message loop
@@ -455,13 +449,15 @@ HRESULT ScratchEngine::DXCore::Run()
 
 	isRunning = false;
 
+	
+	renderingThread.detach();
+	updatingThread.detach();
+
+
 	allThreadBarrier.Wait();
 
 
-	//renderingThread.detach();
-	//updatingThread.detach();
-
-	jobSystem.DeactivateAllThreads();
+	Stop();
 
 
 	// We'll end up here once we get a WM_QUIT message,

@@ -1,13 +1,8 @@
 #include "JobSystem.h"
 
 
-ScratchEngine::Job::Job(function<void()> f) : f(f), dependency(0), d(0), next(nullptr)
+ScratchEngine::Job::Job(function<void()> f) : f(f), status(JobStatus::Done)
 {
-}
-
-ScratchEngine::Job::Job(function<void()> f, Job* next) : f(f), dependency(0), d(0), next(next)
-{
-	++next->dependency;
 }
 
 
@@ -19,9 +14,13 @@ void ScratchEngine::WorkerThread::Work()
 {
 	while (isActive)
 	{
-		if (jobQueue.GetCount() > 0 && (**jobQueue.GetFront()).d == 0)
+		if (jobQueue.GetCount() > 0)
 		{
-			jobQueue.Pop()->f();
+			Job* job = jobQueue.Pop();
+
+			job->f();
+			job->status = JobStatus::Done;
+			job->cv.notify_all();
 		}
 	}
 
@@ -37,7 +36,7 @@ ScratchEngine::JobSystem::JobSystem() : JobSystem(__max(0, thread::hardware_conc
 ScratchEngine::JobSystem::JobSystem(u32 maxNumWorkerThreads) : jobAllocator(maxNumWorkerThreads * 16), workerThreads(reinterpret_cast<WorkerThread*>(malloc(maxNumWorkerThreads * sizeof(WorkerThread)))), maxNumWorkerThreads(maxNumWorkerThreads), numActivatedWorkerThreads(0)
 {
 	for (u32 i = 0; i < maxNumWorkerThreads; ++i)
-		new (&workerThreads[i]) WorkerThread(2 * 16);
+		new (&workerThreads[i]) WorkerThread(2 * 16 - 1);
 }
 
 ScratchEngine::JobSystem::~JobSystem()

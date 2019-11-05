@@ -17,7 +17,7 @@ namespace ScratchEngine
 		template<size_t BLOCKSIZE> struct PoolArena;
 
 
-		struct PoolBlock				// 16 bytes
+		struct PoolBlock
 		{
 			template<size_t S> friend class PoolAllocator;
 
@@ -25,8 +25,8 @@ namespace ScratchEngine
 
 
 		private:
-			PoolBlock* next;			// 8 bytes
-			PoolBlock* previous;		// 8 bytes
+			PoolBlock* next;
+			PoolBlock* previous;
 		};
 
 

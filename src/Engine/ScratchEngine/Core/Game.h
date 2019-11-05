@@ -15,6 +15,7 @@
 #include "DXCore.h"
 #include "GameObject.h"
 #include "Light.h"
+#include "JobSystem.h"
 
 using namespace ScratchEngine::Rendering;
 using namespace ScratchEngine::Multithreading;
@@ -32,20 +33,36 @@ namespace ScratchEngine
 		~Game();
 
 		void Initialize();
-		void OnResize();
 		void Update();
 		void Draw();
+		void Stop();
+
+		void OnResize();
 
 		void OnMouseDown(WPARAM buttonState, int x, int y);
 		void OnMouseUp(WPARAM buttonState, int x, int y);
 		void OnMouseMove(WPARAM buttonState, int x, int y);
 		void OnMouseWheel(float wheelDelta, int x, int y);
 
+		void UpdateRenderables();
+		void UpdateLightSources();
+		void UpdateViewers();
+
+		void UpdateScene();
+		void DrawFrame();
+
+
 	private:
 		void LoadShaders();
 		void CreateMatrces();
 		void CreateBasicGeometry();
 		void CreateAllMaps();
+
+
+		Scene* scene;
+
+		JobSystem jobSystem;
+		
 
 		POINT prevMousePos;
 

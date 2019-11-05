@@ -24,7 +24,7 @@ template<class T> inline T* ScratchEngine::Multithreading::LockFreeQueue<T>::Get
 		return nullptr;
 
 
-	return data[currentReadIndex];
+	return data + currentReadIndex;
 }
 
 template<class T> inline u32 ScratchEngine::Multithreading::LockFreeQueue<T>::GetCapacity() const

@@ -10,6 +10,8 @@
 
 #include "../Multithreading/Barrier.h"
 
+#include "JobSystem.h"
+
 using namespace ScratchEngine::Multithreading;
 
 
@@ -55,6 +57,7 @@ namespace ScratchEngine
 		virtual void Initialize() = 0;
 		virtual void Update() = 0;
 		virtual void Draw() = 0;
+		virtual void Stop() = 0;
 
 		// Convenience methods for handling mouse input, since we
 		// can easily grab mouse input from OS-level messages
