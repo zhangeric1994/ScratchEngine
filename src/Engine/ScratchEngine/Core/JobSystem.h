@@ -20,10 +20,15 @@ namespace ScratchEngine
 
 
 	private:
-		u32 id;
-		atomic<u32> dependency;
-		function<void()>& f;
-		Job* next;
+		function<void()> const f;
+		u32 dependency;
+		atomic<u32> d;
+		Job const* const next;
+
+
+	public:
+		Job(function<void()> f);
+		Job(function<void()> f, Job* next);
 	};
 
 
@@ -38,6 +43,7 @@ namespace ScratchEngine
 	public:
 		WorkerThread(u32 capacity);
 
+
 		bool IsRunning() const;
 		bool IsActive() const;
 
@@ -47,7 +53,7 @@ namespace ScratchEngine
 		void Deactivate();
 
 	private:
-		void Do();
+		void Work();
 	};
 
 
@@ -58,24 +64,28 @@ namespace ScratchEngine
 		WorkerThread* workerThreads;
 		u32 maxNumWorkerThreads;
 		u32 numActivatedWorkerThreads;
-		atomic<u32> nextJobID;
 
 
-		Job const* __Execute(const function<void()>& f, u32 threadID);
+		Job const* __Execute(function<void()> const& f, u32 threadID);
 
 
 	public:
 		JobSystem();
 		JobSystem(u32 maxNumWorkerThreads);
+		~JobSystem();
+
+
+		u32 GetMaxNumWorkerThreads() const;
+		u32 GetNumActivatedWorkerThreads() const;
 
 		void ActivateThreads(u32 numWorkerThreads);
 		void ActivateAllThreads();
 		void DeactivateThreads(u32 numWorkerThreads);
 		void DeactivateAllThreads();
 
-		Job const* Execute(const function<void()>& f);
-		Job const* Execute(const function<void()>& f, u32 threadID);
-		Job const* Execute(const function<void()>& f, u32 threadLowerBound, u32 threadUpperBound);
+		Job const* Execute(function<void()> const& f);
+		Job const* Execute(function<void()> const& f, u32 threadID);
+		Job const* Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound);
 	};
 }
 
@@ -92,6 +102,8 @@ inline bool ScratchEngine::WorkerThread::IsActive() const
 
 inline bool ScratchEngine::WorkerThread::AddJob(Job* const job)
 {
+	job->d = job->dependency;
+
 	return jobQueue.Push(job);
 }
 
@@ -100,7 +112,7 @@ inline void ScratchEngine::WorkerThread::Activate()
 	isActive = true;
 
 	if (!runningThread)
-		runningThread = new thread(&WorkerThread::Do, static_cast<WorkerThread*>(this));
+		runningThread = new thread(&WorkerThread::Work, static_cast<WorkerThread*>(this));
 }
 
 inline void ScratchEngine::WorkerThread::Deactivate()
@@ -109,7 +121,7 @@ inline void ScratchEngine::WorkerThread::Deactivate()
 }
 
 
-inline Job const * ScratchEngine::JobSystem::__Execute(const function<void()>& f, u32 threadID)
+inline Job const* ScratchEngine::JobSystem::__Execute(function<void()> const& f, u32 threadID)
 {
 	if (numActivatedWorkerThreads == 0)
 	{
@@ -121,16 +133,23 @@ inline Job const * ScratchEngine::JobSystem::__Execute(const function<void()>& f
 
 	Job* job = reinterpret_cast<Job*>(jobAllocator.Allocate());
 
-	job->id = nextJobID++;
-	job->next = nullptr;
-	job->dependency = 0;
-	job->f = f;
+	new (job) Job(f);
 
 
 	workerThreads[threadID].AddJob(job);
 
 
 	return job;
+}
+
+inline u32 ScratchEngine::JobSystem::GetMaxNumWorkerThreads() const
+{
+	return maxNumWorkerThreads;
+}
+
+inline u32 ScratchEngine::JobSystem::GetNumActivatedWorkerThreads() const
+{
+	return numActivatedWorkerThreads;
 }
 
 inline void ScratchEngine::JobSystem::ActivateThreads(u32 numWorkerThreads)
@@ -183,21 +202,21 @@ inline void ScratchEngine::JobSystem::DeactivateAllThreads()
 	numActivatedWorkerThreads = 0;
 }
 
-inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f)
+inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f)
 {
 	srand(time(0));
 
 	return __Execute(f, rand() % numActivatedWorkerThreads);
 }
 
-inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f, u32 threadID)
+inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadID)
 {
 	_ASSERT(threadID < numActivatedWorkerThreads);
 
 	return __Execute(f, threadID);
 }
 
-inline Job const * ScratchEngine::JobSystem::Execute(const function<void()>& f, u32 threadLowerBound, u32 threadUpperBound)
+inline Job const* ScratchEngine::JobSystem::Execute(function<void()> const& f, u32 threadLowerBound, u32 threadUpperBound)
 {
 	_ASSERT(threadLowerBound <= threadUpperBound);
 
