@@ -449,15 +449,12 @@ HRESULT ScratchEngine::DXCore::Run()
 
 	isRunning = false;
 
-	
-	renderingThread.detach();
-	updatingThread.detach();
-
-
-	allThreadBarrier.Wait();
-
 
 	Stop();
+
+
+	renderingThread.detach();
+	updatingThread.detach();
 
 
 	// We'll end up here once we get a WM_QUIT message,
