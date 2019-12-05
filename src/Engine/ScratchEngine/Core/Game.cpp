@@ -530,7 +530,7 @@ void ScratchEngine::Game::CreateBasicGeometry()
 
 
 	player = new GameObject();
-	player->SetLocalPosition(0, 0, -100);
+	player->SetLocalPosition(0, 0, 0);
 	player->SetLocalRotation(0, 180, 0);
 	player->SetLocalScale(0.01f);
 	player->AddComponent<Renderer>(skeletonMaterial, model);
@@ -1082,6 +1082,8 @@ void ScratchEngine::Game::Draw()
 void ScratchEngine::Game::Stop()
 {
 	jobSystem.DeactivateAllThreads();
+
+	allThreadBarrier.Wait();
 }
 
 #pragma region Mouse Input

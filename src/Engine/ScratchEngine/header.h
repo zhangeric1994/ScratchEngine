@@ -21,6 +21,7 @@
 #include <atomic>
 #include <cmath>
 #include <fstream>
+#include <functional>
 #include <limits.h>
 #include <malloc.h>
 #include <map>

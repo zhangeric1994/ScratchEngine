@@ -166,9 +166,9 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	rsDesc.CullMode = D3D11_CULL_BACK;
 	rsDesc.FillMode = D3D11_FILL_SOLID;
 	rsDesc.DepthClipEnable = true;
-	rsDesc.DepthBias = 100;
-	rsDesc.DepthBiasClamp = 0.0f;
-	rsDesc.SlopeScaledDepthBias = 1.0f;
+	rsDesc.DepthBias = 1000;
+	rsDesc.DepthBiasClamp = 0;
+	rsDesc.SlopeScaledDepthBias = 100;
 	device->CreateRasterizerState(&rsDesc, &rsShadow);
 
 	rsDesc = {};
@@ -184,10 +184,10 @@ ScratchEngine::Rendering::RenderingEngine::RenderingEngine(RenderingEngineConfig
 	shadowSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
 	shadowSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
-	shadowSamplerDesc.BorderColor[0] = 1.0f;
-	shadowSamplerDesc.BorderColor[1] = 1.0f;
-	shadowSamplerDesc.BorderColor[2] = 1.0f;
-	shadowSamplerDesc.BorderColor[3] = 1.0f;
+	shadowSamplerDesc.BorderColor[0] = 2.0f;
+	shadowSamplerDesc.BorderColor[1] = 2.0f;
+	shadowSamplerDesc.BorderColor[2] = 2.0f;
+	shadowSamplerDesc.BorderColor[3] = 2.0f;
 	device->CreateSamplerState(&shadowSamplerDesc, &shadowSampler);
 
 
@@ -1021,10 +1021,6 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		rightUp = XMVectorLerp(rightUpNear, rightUpFar, t);
 
 
-		XMVECTOR VVVV = XMVector3TransformCoord(leftBottom, lightInverseViewMatrix);
-		XMVECTOR AAAA = XMVectorLerp(lbn, lbf, t);
-
-
 		min = XMVectorMin(min, leftBottom);
 		min = XMVectorMin(min, rightBottom);
 		min = XMVectorMin(min, leftUp);
@@ -1041,12 +1037,10 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		float extraDepth = __max(10.0f, size.m128_f32[2]);
 
 		XMVECTOR shadowTranslation = -center;
-		shadowTranslation.m128_f32[2] = extraDepth - min.m128_f32[2];
-
-		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], 0, 2 * extraDepth + size.m128_f32[2]));
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], -200, 200));
 
 		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
-		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 2 * extraDepth + size.m128_f32[2]);
+		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 400);
 		
 
 		light->shadowViewProjection[i] = shadowViewProjectionMatrix;
