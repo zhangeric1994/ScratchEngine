@@ -218,6 +218,11 @@ int ScratchEngine::Rendering::Mesh::GetIndexCount()
 	return indicesNum;
 }
 
+f32 ScratchEngine::Rendering::Mesh::GetMaxSize()
+{
+	return maxSize;
+}
+
 //use assimp lib to load obj & mtl files
 bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device2* device, const std::string & filename) {
 	Assimp::Importer import;
@@ -256,6 +261,20 @@ bool ScratchEngine::Rendering::Mesh::loadFile(ID3D11Device2* device, const std::
 void ScratchEngine::Rendering::Mesh::CreateMesh(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber, ID3D11Device2* device)
 {
 	ComputeTangent(vertices, verticesNumber, indices, indicesNumber);
+
+
+	maxSize = 0;
+	
+	for (i32 i = 0; i < verticesNumber; ++i)
+	{
+		f32 d = vertices[i].x * vertices[i].x + vertices[i].y * vertices[i].y + vertices[i].z * vertices[i].z;
+
+		if (d > maxSize)
+			maxSize = d;
+	}
+
+	maxSize = sqrtf(maxSize);
+
 
 	//initialize vertex buffer
 	D3D11_BUFFER_DESC vbd;

@@ -277,8 +277,10 @@ void ScratchEngine::Animator::Update(float dt, GameObject* parent)
 	if ((numSlots = slots.size()) > 0)
 		for (auto it = slots.begin(); it != slots.end(); ++it)
 		{
-			GameObject* slot = it->second;
-			slot->worldMatrix = XMMatrixScalingFromVector(slot->localScale) * XMMatrixTranslationFromVector(slot->localPosition) * XMMatrixTranspose(GetTransforms()[it->first]) * parent->GetWorldMatrix();
+			GameObject* gameObject = it->second;
+
+			gameObject->frameData.worldMatrix = XMMatrixScalingFromVector(gameObject->localScale) * XMMatrixTranslationFromVector(gameObject->localPosition) * XMMatrixTranspose(GetTransforms()[it->first]) * parent->GetWorldMatrix();
+			gameObject->frameData.isDirty = true;
 		}
 }
 

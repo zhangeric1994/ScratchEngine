@@ -3,6 +3,9 @@
 #pragma once
 
 #include "../Common/Typedefs.h"
+#include "../Rendering/Mesh.h"
+#include "../Rendering/Model.h"
+#include "../Physics/DynamicBVH.hpp"
 
 #include "GameComponent.h"
 
@@ -12,8 +15,6 @@ namespace ScratchEngine
 	namespace Rendering
 	{
 		struct Material;
-		struct Mesh;
-		struct Model;
 	}
 
 
@@ -36,6 +37,7 @@ namespace ScratchEngine
 		Model* model;
 		Animator* anim;
 
+		i32 bvhNode;
 		i32 renderable;
 
 		Renderer* next;
@@ -50,16 +52,15 @@ namespace ScratchEngine
 
 
 		void SetMaterial(Material* material);
-	};
 
 
-	class __declspec(dllexport) ForwardRenderer final : public Renderer
-	{
+	private:
+		AxisAlignedBoundingBox GetEnlargedAABB(f32 enlargement);
 	};
 }
 
 
-inline void ScratchEngine::Renderer::SetMaterial(Material * material)
+inline void ScratchEngine::Renderer::SetMaterial(Material* material)
 {
 	this->material = material;
 }

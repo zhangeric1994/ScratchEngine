@@ -22,14 +22,113 @@ namespace ScratchEngine
 		friend class Scene;
 		
 
-	private: // 120 bytes
+	protected:
 		XMMATRIX worldMatrix;
-
 		XMVECTOR localPosition;
 		XMVECTOR localRotation;
 		XMVECTOR localScale;
 
-		bool isDirty;
+		struct
+		{
+			XMMATRIX worldMatrix;
+			XMVECTOR localPosition;
+			XMVECTOR localRotation;
+			XMVECTOR localScale;
+
+			union
+			{
+				i32 flag;
+				struct
+				{
+					bool isDirty : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+
+					bool : 1;
+					bool : 1;
+					bool : 1;
+					bool : 1;
+				};
+			};
+		} frameData;
+
+		union
+		{
+			i32 flag;
+			struct
+			{
+				bool isDirty : 1;
+				bool isFrameDirty : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+
+				bool : 1;
+				bool : 1;
+				bool : 1;
+				bool : 1;
+			};
+		};
 
 		Transform* parent;
 		size_t index;
@@ -97,6 +196,8 @@ namespace ScratchEngine
 
 
 	private:
+		void UpdateFrameData();
+
 		virtual void HandleMessage(const Message& message) { }
 
 		void __MarkDirty();

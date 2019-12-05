@@ -583,11 +583,7 @@ void ScratchEngine::Game::UpdateScene()
 {
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
-
-	float speed = 1.5f;
-	bool animationChanged = false;
-
-	if (Input::IsKeyPressed('1'))
+	else if (Input::IsKeyPressed('1'))
 	{
 		renderingMode = 1;
 		directionalLight->SetActive(true);
@@ -649,6 +645,21 @@ void ScratchEngine::Game::UpdateScene()
 	}
 
 
+	// Handle light count changes, clamped appropriately
+	if (Input::IsKeyPressed(VK_UP))
+		++lightCount;
+	else if (Input::IsKeyPressed(VK_DOWN))
+		--lightCount;
+
+	lightCount = __max(0, __min(128, lightCount));
+
+	for (int i = 0; i < 128; ++i)
+		lights[i]->SetActive(i < lightCount);
+
+
+	float speed = 1.5f;
+	bool animationChanged = false;
+
 	if (Input::IsKeyPressed('V'))
 	{
 		rightHandRenderer->SetActive(!rightHandRenderer->IsActiveSelf());
@@ -690,7 +701,6 @@ void ScratchEngine::Game::UpdateScene()
 		}
 	}
 
-
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000 && !animationChanged&& lastAttackTime < totalTime)
 	{
 		float duration = model->anim->SetAnimationIndex(2, false);
@@ -708,10 +718,8 @@ void ScratchEngine::Game::UpdateScene()
 		attacking = false;
 	}
 
-
 	if ((GetAsyncKeyState('A') & 0x8000 && GetAsyncKeyState('D') & 0x8000) || (GetAsyncKeyState('W') & 0x8000 && GetAsyncKeyState('S') & 0x8000))
 		animationChanged = true;
-
 
 	if (!attacking)
 	{
@@ -806,7 +814,6 @@ void ScratchEngine::Game::UpdateScene()
 		}
 	}
 
-
 	rightHandCollider->SetActive(attacking);
 	leftHandCollider->SetActive(attacking);
 
@@ -827,40 +834,8 @@ void ScratchEngine::Game::UpdateScene()
 		mobModel->anim->SetAnimationIndex(1, true);
 
 
-	// Handle light count changes, clamped appropriately
-	if (Input::IsKeyPressed(VK_UP))
-		++lightCount;
-
-	if (Input::IsKeyPressed(VK_DOWN))
-		--lightCount;
-
-	lightCount = __max(0, __min(128, lightCount));
-
-
-	// Move lights
-	for (int i = 0; i < 128; ++i)
-		lights[i]->SetActive(i < lightCount);
-
-
-	//if (GetAsyncKeyState('X') & 0x8000)
-		//camera->Translate(0.0f, -10 * deltaTime, 0.0f);
-
 	model->anim->Update(deltaTime, player);
 	mobModel->anim->Update(deltaTime, mob);
-	//go1->Rotate(0, 0, 20 * deltaTime);
-	//go2->Rotate(0, 0, -50 * deltaTime);
-	//go4->SetLocalPosition(0, 5 * sin(totalTime), 15);
-	//go5->SetLocalPosition(5 * cos(totalTime), 0, 15);
-
-	//go6->Rotate(0, 0, 20 * deltaTime);
-	//go7->Rotate(0, 0, -50 * deltaTime);
-	//go9->SetLocalPosition(0, 5 * sin(totalTime), -15);
-	//go10->SetLocalPosition(5 * cos(totalTime), 0, -15);
-
-	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
-
-	physicsEngine->UpdateBoundingVolumes();
-	physicsEngine->SolveCollisions();
 }
 
 void ScratchEngine::Game::DrawFrame()
@@ -1039,6 +1014,9 @@ void ScratchEngine::Game::DrawFrame()
 
 void ScratchEngine::Game::Update()
 {
+	PhysicsEngine* physicsEngine = PhysicsEngine::GetSingleton();
+
+
 	while (isRunning)
 	{
 		UpdateTimer();
@@ -1054,6 +1032,12 @@ void ScratchEngine::Game::Update()
 
 
 		UpdateScene();
+		scene->Update(deltaTime, totalTime);
+		scene->LateUpdate(deltaTime, totalTime);
+
+
+		physicsEngine->UpdateBoundingVolumes();
+		physicsEngine->SolveCollisions();
 
 
 		frameBarrier.Wait();
@@ -1067,16 +1051,22 @@ void ScratchEngine::Game::Draw()
 {
 	while (isRunning)
 	{
+		scene->UpdateFrameData();
+
+
+		frameBarrier.Wait();
+
+
 		Job* job_updateRenderables = jobSystem.Execute([&]() { this->UpdateRenderables(); }, 0);
 		Job* job_updateLightSources = jobSystem.Execute([&]() { this->UpdateLightSources(); }, 1);
 
+		//UpdateRenderables();
+		//UpdateLightSources();
 		UpdateViewers();
 
 
 		job_updateRenderables->Wait();
 		job_updateLightSources->Wait();
-
-		frameBarrier.Wait();
 
 
 		DrawFrame();

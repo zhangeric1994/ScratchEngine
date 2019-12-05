@@ -150,7 +150,7 @@ __forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume
 		if (!collider->boundingVolume)
 			collider->boundingVolume = new OrientedBoundingBox();
 
-		static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix(), static_cast<BoxCollider*>(collider)->GetSize());
+		static_cast<OrientedBoundingBox*>(collider->boundingVolume)->SetData(gameObject->frameData.worldMatrix, static_cast<BoxCollider*>(collider)->GetSize());
 
 		if (collider->id == null_index)
 			collider->id = dynamicBVH.Insert(collider, GetEnlargedAABB(static_cast<OrientedBoundingBox*>(collider->boundingVolume), DEFAULT_BOUNDING_VOLUME_ENLARGEMENT));
@@ -165,7 +165,7 @@ __forceinline void ScratchEngine::Physics::PhysicsEngine::__UpdateBoundingVolume
 			collider->boundingVolume = new BoundingSphere();
 
 		if (gameObject->isInSlot)
-			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetWorldMatrix().r[3], static_cast<SphereCollider*>(collider)->GetRadius());
+			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->frameData.worldMatrix.r[3], static_cast<SphereCollider*>(collider)->GetRadius());
 		else
 			static_cast<BoundingSphere*>(collider->boundingVolume)->SetData(gameObject->GetPosition(), static_cast<SphereCollider*>(collider)->GetRadius());
 

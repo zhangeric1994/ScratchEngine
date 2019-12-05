@@ -234,6 +234,7 @@ inline void ScratchEngine::Transform::__MarkDirty()
 	if (!isDirty)
 	{
 		isDirty = true;
+		isFrameDirty = true;
 
 		for (auto it = children.begin(); it != children.end(); it++)
 			(*it)->__MarkDirty();

@@ -11,7 +11,8 @@ ScratchEngine::Transform::Transform()
 
 	parent = nullptr;
 
-	__MarkDirty();
+	isDirty = true;
+	isFrameDirty = true;
 }
 
 ScratchEngine::Transform::Transform(float x, float y, float z)
@@ -22,7 +23,8 @@ ScratchEngine::Transform::Transform(float x, float y, float z)
 
 	parent = nullptr;
 
-	__MarkDirty();
+	isDirty = true;
+	isFrameDirty = true;
 }
 
 ScratchEngine::Transform::Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOAT3 scale)
@@ -33,7 +35,8 @@ ScratchEngine::Transform::Transform(XMFLOAT3 position, XMFLOAT4 rotation, XMFLOA
 
 	parent = nullptr;
 
-	__MarkDirty();
+	isDirty = true;
+	isFrameDirty = true;
 }
 
 ScratchEngine::Transform::Transform(XMVECTOR position, XMVECTOR rotation, XMVECTOR scale)
@@ -44,7 +47,8 @@ ScratchEngine::Transform::Transform(XMVECTOR position, XMVECTOR rotation, XMVECT
 
 	parent = nullptr;
 
-	__MarkDirty();
+	isDirty = true;
+	isFrameDirty = true;
 }
 
 ScratchEngine::Transform::~Transform()
@@ -91,6 +95,22 @@ void ScratchEngine::Transform::SetParent(Transform* parent)
 		SetLocalPosition(rotation);
 		SetLocalPosition(scale);
 	}
+}
+
+void ScratchEngine::Transform::UpdateFrameData()
+{
+	if (isFrameDirty)
+	{
+		frameData.worldMatrix = GetWorldMatrix();
+		frameData.localPosition = localPosition;
+		frameData.localRotation = localRotation;
+		frameData.localScale = localScale;
+		frameData.isDirty = true;
+
+		isFrameDirty = false;
+	}
+	else
+		frameData.isDirty = false;
 }
 
 void* ScratchEngine::Transform::operator new(size_t size)

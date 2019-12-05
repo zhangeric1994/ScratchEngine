@@ -24,10 +24,12 @@ namespace ScratchEngine
 		{
 			friend class RenderingEngine;
 
+
 		private:
 			ID3D11Buffer* vertexBuffer;
 			ID3D11Buffer* indexBuffer;
 			i32 indicesNum;
+			f32 maxSize;
 
 			void ComputeTangent(Vertex* vertices, int verticesNumber, unsigned int* indices, int indicesNumber);
 
@@ -43,6 +45,7 @@ namespace ScratchEngine
 			ID3D11Buffer* GetVertexBuffer();
 			ID3D11Buffer* GetIndexBuffer();
 			int GetIndexCount();
+			f32 GetMaxSize();
 
 			bool loadFile(ID3D11Device2* device, const std::string& filename);
 

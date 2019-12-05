@@ -24,7 +24,7 @@ ScratchEngine::Scene* ScratchEngine::Scene::GetCurrentScene()
 	return currentScene;
 }
 
-ScratchEngine::Scene::Scene() : roots(8), renderableAllocator(128), viewerAllocator(2), lightSourceAllocator(128)
+ScratchEngine::Scene::Scene() : roots(), renderableAllocator(128), viewerAllocator(2), lightSourceAllocator(128)
 {
 	flag = FLAG_ACTIVE;
 
@@ -118,7 +118,7 @@ void ScratchEngine::Scene::RemoveRenderer(Renderer* renderer)
 		rendererList = nullptr;
 }
 
-void ScratchEngine::Scene::RemoveCamera(Camera * camera)
+void ScratchEngine::Scene::RemoveCamera(Camera* camera)
 {
 	if (!rendererList)
 		return;
@@ -164,12 +164,20 @@ void ScratchEngine::Scene::UpdateRenderables()
 	{
 		if (renderer->IsActive())
 		{
+			if (renderer->gameObject->frameData.isDirty)
+			{
+				if (renderer->bvhNode == null_index)
+					renderer->bvhNode = rendererBVH.Insert(renderer, renderer->GetEnlargedAABB(5));
+				else
+					rendererBVH.Update(renderer->bvhNode, renderer->GetEnlargedAABB(0));
+			}
+
 			i32 renderableID = renderableAllocator.Allocate();
 			renderer->renderable = renderableID;
 
 			Renderable& renderable = renderableAllocator[renderableID];
 
-			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->GetWorldMatrix());
+			renderable.worldMatrix = XMMatrixTranspose(renderer->GetGameObject()->frameData.worldMatrix);
 			renderable.material = renderer->material;
 			renderable.mesh = renderer->mesh;
 
@@ -248,15 +256,6 @@ void ScratchEngine::Scene::DestroyViewer(i32 id)
 	viewerAllocator.Free(id);
 }
 
-void ScratchEngine::Scene::CacheRenderingData()
-{
-	UpdateRenderables();
-	UpdateLightSources();
-	UpdateViewers();
-
-	SortRenderables();
-}
-
 void ScratchEngine::Scene::SortRenderables()
 {
 	renderableAllocator.Sort([](Renderable a, Renderable b)
@@ -266,6 +265,34 @@ void ScratchEngine::Scene::SortRenderables()
 
 		return ma < mb;
 	});
+}
+
+void ScratchEngine::Scene::CacheRenderingData()
+{
+	UpdateRenderables();
+	UpdateLightSources();
+	UpdateViewers();
+
+	SortRenderables();
+}
+
+void ScratchEngine::Scene::UpdateFrameData()
+{
+	Stack<GameObject*> s;
+
+	for (auto it = roots.begin(); it != roots.end(); it++)
+		s.Push(*it);
+
+	while (s.GetSize())
+	{
+		GameObject* gameObject = s.Pop();
+
+		gameObject->UpdateFrameData();
+
+		for (auto it = gameObject->children.begin(); it != gameObject->children.end(); it++)
+			if (static_cast<GameObject*>(*it)->IsActiveSelf())
+				s.Push(static_cast<GameObject*>(*it));
+	}
 }
 
 void ScratchEngine::Scene::Update(f32 deltaTime, f32 currentTime)

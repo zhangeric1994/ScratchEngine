@@ -8,6 +8,7 @@
 #include "../Common/Stack.hpp"
 #include "../Memory/DynamicPoolAllocator.hpp"
 #include "../Memory/StackAllocator.hpp"
+#include "../Physics/DynamicBVH.hpp"
 #include "../Rendering/LightSource.h"
 #include "../Rendering/Renderable.h"
 #include "../Rendering/Viewer.h"
@@ -95,6 +96,8 @@ namespace ScratchEngine
 		DynamicPoolAllocator<Viewer> viewerAllocator;
 		DynamicStackAllocator<LightSource> lightSourceAllocator;
 
+		DynamicBVH<Renderer*> rendererBVH;
+
 		Camera* cameraList;
 		Light* lightList;
 		Renderer* rendererList;
@@ -121,7 +124,8 @@ namespace ScratchEngine
 		void DestroyViewer(i32 id);
 
 		void CacheRenderingData();
-	
+		void UpdateFrameData();
+
 
 		void Update(f32 deltaTime, f32 currentTime);
 		void LateUpdate(f32 deltaTime, f32 currentTime);

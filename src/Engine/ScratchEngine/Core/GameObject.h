@@ -145,6 +145,12 @@ namespace ScratchEngine
 
 	inline void GameObject::SetActive(bool value)
 	{
-		this->isActive = value;
+		if (value != isActive)
+		{
+			if (!value)
+				frameData.isDirty = false;
+
+			isActive = value;
+		}
 	}
 }
