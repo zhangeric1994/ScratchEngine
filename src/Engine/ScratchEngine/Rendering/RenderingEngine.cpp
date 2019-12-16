@@ -1037,7 +1037,10 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		float extraDepth = __max(10.0f, size.m128_f32[2]);
 
 		XMVECTOR shadowTranslation = -center;
-		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], -200, 200));
+		shadowTranslation.m128_f32[2] = 0;
+		shadowTranslation.m128_f32[3] = 1;
+
+		XMMATRIX shadowViewProjectionMatrix = XMMatrixTranspose(lightViewMatrix * XMMatrixTranslationFromVector(shadowTranslation) * XMMatrixOrthographicLH(size.m128_f32[0], size.m128_f32[1], center.m128_f32[2] - 100, center.m128_f32[2] + 100));
 
 		XMMATRIX T = XMMatrixTranslationFromVector(XMVector3TransformCoord(center, lightInverseViewMatrix));
 		XMMATRIX S = XMMatrixScaling(size.m128_f32[0], size.m128_f32[1], 400);

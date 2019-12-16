@@ -192,17 +192,21 @@ namespace ScratchEngine
 
 
 		private:
-			XMVECTOR surfacePlanes[6];
-
-			struct
+			union
 			{
-				XMVECTOR leftPlane;
-				XMVECTOR rightPlane;
-				XMVECTOR bottomPlane;
-				XMVECTOR topPlane;
-				XMVECTOR nearPlane;
-				XMVECTOR farPlane;
+				XMVECTOR surfacePlanes[6];
+
+				struct
+				{
+					XMVECTOR leftPlane;
+					XMVECTOR rightPlane;
+					XMVECTOR bottomPlane;
+					XMVECTOR topPlane;
+					XMVECTOR nearPlane;
+					XMVECTOR farPlane;
+				};
 			};
+
 
 
 		public:

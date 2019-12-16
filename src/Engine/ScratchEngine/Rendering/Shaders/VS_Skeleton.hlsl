@@ -38,12 +38,18 @@ VertexToPixel main(VertexShaderInput input)
     float4 p = float4(0, 0, 0, 0);
     float4 n = float4(0, 0, 0, 0);
 
-    for (int i = 0; i < 4; ++i)
+    
+    if (input.position.w == 0)
+        p = float4(input.position.xyz, 1.0f);
+    else
     {
-        float weight = input.boneWeights[i];
-        float4x4 m = gBoneTransforms[input.boneIndices[i]];
-        p += weight * mul(float4(input.position.xyz, 1.0f), m);
-        n += weight * mul(float4(input.normal, 0.0f), m);
+        for (int i = 0; i < 4; ++i)
+        {
+            float weight = input.boneWeights[i];
+            float4x4 m = gBoneTransforms[input.boneIndices[i]];
+            p += weight * mul(float4(input.position.xyz, 1.0f), m);
+            n += weight * mul(float4(input.normal, 0.0f), m);
+        }
     }
 
     p.w = 1;
