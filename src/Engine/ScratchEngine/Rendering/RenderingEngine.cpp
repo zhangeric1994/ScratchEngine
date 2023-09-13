@@ -951,7 +951,6 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 	V = XMVector4Transform({ -1, -1, -1, 1 }, inverseViewProjectionMatrix);
 	V = XMVectorScale(V, 1 / V.m128_f32[3]);
-	XMVECTOR lbn = V;
 	XMVECTOR leftBottomNear = XMVector3TransformCoord(V, lightViewMatrix);
 	
 	V = XMVector4Transform({ 1, -1, -1, 1 }, inverseViewProjectionMatrix);
@@ -968,16 +967,18 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 	V = XMVector4Transform({ -1, -1, 1, 1 }, inverseViewProjectionMatrix);
 	V = XMVectorScale(V, 1 / V.m128_f32[3]);
-	XMVECTOR lbf = V;
 	XMVECTOR leftBottomFar = XMVector3TransformCoord(V, lightViewMatrix);
 
 	V = XMVector4Transform({ 1, -1, 1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
 	XMVECTOR rightBottomFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
 
 	V = XMVector4Transform({ -1, 1, 1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
 	XMVECTOR leftUpFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
 
 	V = XMVector4Transform({ 1, 1, 1, 1 }, inverseViewProjectionMatrix);
+	V = XMVectorScale(V, 1 / V.m128_f32[3]);
 	XMVECTOR rightUpFar = XMVector3TransformCoord(XMVectorScale(V, 1 / V.m128_f32[3]), lightViewMatrix);
 
 
@@ -997,7 +998,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 	for (int i = N - 1; i >= 0; --i)
 	{
-		deviceContext->BeginEventInt(L"Cascade#d", i);
+		deviceContext->BeginEventInt(L"Shadow Cascade #d", i);
 
 		XMVECTOR min = { numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max(), numeric_limits<float>::max() };
 		XMVECTOR max = { numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest(), numeric_limits<float>::lowest() };
@@ -1096,7 +1097,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 		}
 
 
-		deviceContext->SetMarkerInt(L"Shadow Volume", 0);
+		deviceContext->SetMarkerInt(L"Shadow Volume #d", i);
 
 
 		deviceContext->RSSetState(rsInsideOut);
