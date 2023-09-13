@@ -121,8 +121,8 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 			}
 			if (diffTime > 0) {
 				float factor = (float)((time - key.mTime) / diffTime);
-				XMVECTOR rot1 = XMLoadFloat4(&TOXMFLOAT4(key.mValue));
-				XMVECTOR rot2= XMLoadFloat4(&TOXMFLOAT4(nextKey.mValue));
+				XMVECTOR rot1 = { key.mValue.x, key.mValue.y, key.mValue.z, key.mValue.w };
+				XMVECTOR rot2 = { nextKey.mValue.x, nextKey.mValue.y, nextKey.mValue.z, nextKey.mValue.w };
 				XMStoreFloat4(&pRot,XMQuaternionSlerp(rot1, rot2, factor));
 			}
 			else {
@@ -132,7 +132,7 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 
 		}
 		// interpolate scale keyframes
-		XMFLOAT3 pscale = { 1, 1, 1};
+		XMFLOAT3 pscale = { 1, 1, 1 };
 		if (channel->scalingKeys.size() > 0) {
 			int frame = (time >= lastTime) ? (int)lastPositions[i].z : 0;
 			while (frame < channel->scalingKeys.size() - 1) {
@@ -160,11 +160,10 @@ void ScratchEngine::Animation::AnimationClip::Evaluate(float dt, std::map<std::s
 
 XMFLOAT3 ScratchEngine::Animation::AnimationClip::TOXMFLOAT3(aiVector3D val)
 {
-	return XMFLOAT3{val.x,val.y,val.z};
+	return XMFLOAT3{ val.x, val.y, val.z };
 }
-
 
 XMFLOAT4 ScratchEngine::Animation::AnimationClip::TOXMFLOAT4(aiQuaternion val)
 {
-	return XMFLOAT4{ val.x,val.y,val.z,val.w };
+	return XMFLOAT4{ val.x, val.y, val.z, val.w };
 }

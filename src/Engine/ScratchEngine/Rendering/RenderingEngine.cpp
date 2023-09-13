@@ -1013,7 +1013,7 @@ void ScratchEngine::Rendering::RenderingEngine::RenderCSM(const CSMConfig& confi
 
 
 		float t = i * dz;
-		t = i == 0 ? 0 : (1 - f) * t + f * (1 - pow(q, i)) / (1 - q) / p;
+		t = i == 0 ? 0 : (1 - f) * t + f * (1 - pow(q, i)) / ((1 - q) * p);
 
 		leftBottom = XMVectorLerp(leftBottomNear, leftBottomFar, t);
 		rightBottom = XMVectorLerp(rightBottomNear, rightBottomFar, t);

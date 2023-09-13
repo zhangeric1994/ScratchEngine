@@ -15,6 +15,8 @@ template<size_t BLOCKSIZE> inline ScratchEngine::Memory::PoolArena<BLOCKSIZE>::P
 
 	PoolBlock* previousBlock = reinterpret_cast<PoolBlock*>(data);
 
+	_ASSERT(previousBlock);
+
 	previousBlock->previous = nullptr;
 
 	for (i32 i = 1; i < capacity; ++i)
